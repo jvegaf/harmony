@@ -1,9 +1,9 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { useViewportSize } from '@mantine/hooks';
 import React, { useEffect, useState } from 'react';
-import data from '../MOCK_DATA.json';
+import { useViewportSize } from '@mantine/hooks';
 import AppHeader from '../components/AppHeader';
 import TrackList from '../components/TrackList';
+import data from '../MOCK_DATA.json';
 
 const MainView = () => {
   const { height, width } = useViewportSize();

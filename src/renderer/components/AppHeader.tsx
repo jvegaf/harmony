@@ -1,5 +1,6 @@
-import React from 'react';
-import { Button, Container, createStyles, Header } from '@mantine/core';
+import React, { useContext } from 'react';
+import { Button, createStyles, Header } from '@mantine/core';
+import { GlobalContext } from '../context/App/GlobalContext';
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -25,9 +26,15 @@ const useStyles = createStyles((theme) => ({
 const AppHeader: React.FC = () => {
   const { classes } = useStyles();
 
+  const { openFolder } = useContext(GlobalContext);
+
+  const openHandler = () => openFolder();
+
   return (
     <Header height={70} className={classes.header}>
-      <Button variant="default">Open Folder</Button>
+      <Button onClick={openHandler} variant="default">
+        Open Folder
+      </Button>
     </Header>
   );
 };
