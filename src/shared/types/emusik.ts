@@ -2,18 +2,12 @@
  * App models
  */
 export interface Track {
-  album: string;
-  artist: string;
-  bpm: number;
-  duration: number;
-  genre: string;
-  key: string;
-  loweredMetas: {
-    artist: string;
-    album: string;
-    title: string;
-    genre: string;
-  };
+  id: string;
+  album: string | null;
+  artist: string | null;
+  bpm: number | null;
+  genre: string | null;
+  key: string | null;
   path: string;
   title: string;
   year: number | null;

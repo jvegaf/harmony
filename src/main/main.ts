@@ -14,7 +14,8 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { GetFilesFrom } from './services/filehandler';
+import { GetFilesFrom } from './services/fileManager';
+import { GetTracks } from './services/trackManager';
 
 export default class AppUpdater {
   constructor() {
@@ -138,17 +139,26 @@ ipcMain.on('ipc-example', async (event, arg) => {
 });
 
 ipcMain.on('open-folder', async () => {
-  console.log('dentro de main');
-  dialog
+  const newTracks = await dialog
     .showOpenDialog(mainWindow, {
       properties: ['openDirectory'],
     })
-    .then(async (result) => {
-      if (result.canceled) return;
-      const files = await GetFilesFrom(result.filePaths[0]);
-      console.log(`total files: ${files.length}`);
+    .then((result) => {
+      const files = GetFilesFrom(result.filePaths[0]);
+      return files;
+    })
+    .then((files) => {
+      console.log(`files: ${files.length}`);
+      const tracks = GetTracks(files);
+      return tracks;
+    })
+    .then((tracks) => {
+      console.log(`total tracks: ${tracks.length}`);
+      return tracks;
     })
     .catch((err) => {
       console.log(err);
     });
+
+  mainWindow?.webContents.send('add-tracks', newTracks);
 });
