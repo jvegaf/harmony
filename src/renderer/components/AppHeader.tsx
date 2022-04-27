@@ -1,7 +1,8 @@
-import React, { useContext } from 'react';
 import { Button, createStyles, Header } from '@mantine/core';
-import { GlobalContext } from '../context/App/GlobalContext';
+import React from 'react';
+import useAppState from 'renderer/hooks/useAppState';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = createStyles((theme) => ({
   header: {
     backgroundColor: '#222222',
@@ -26,7 +27,7 @@ const useStyles = createStyles((theme) => ({
 const AppHeader: React.FC = () => {
   const { classes } = useStyles();
 
-  const { openFolder } = useContext(GlobalContext);
+  const { openFolder } = useAppState();
 
   const openHandler = () => openFolder();
 

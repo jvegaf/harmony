@@ -7,15 +7,15 @@ import { readFileSync } from 'fs';
 import { Sanitize } from '../../shared/utils';
 import { Track } from '../../shared/types/emusik';
 
-const getFilename = (filepath) => {
+const getFilename = (filepath: string) => {
   return Path.basename(filepath, '.mp3');
 };
 
-const sanitizeFilename = (filename) => {
+const sanitizeFilename = (filename: string) => {
   return Sanitize(filename).split('_').join(' ').trim();
 };
 
-const trackTitle = (title, filepath) => {
+const trackTitle = (title: string | undefined, filepath: string) => {
   if (title && title.length) {
     return title;
   }
@@ -23,9 +23,9 @@ const trackTitle = (title, filepath) => {
   return sanitizeFilename(filename);
 };
 
-const CreateTrack = async (file): Track => {
+const CreateTrack = async (file: string): Promise<Track> => {
   const filebuffer = readFileSync(file);
-  const tags: Tags = NodeId3.read(filebuffer);
+  const tags: NodeId3.Tags = NodeId3.read(filebuffer);
 
   const track: Track = {
     id: uuid(),
@@ -41,7 +41,7 @@ const CreateTrack = async (file): Track => {
   return track;
 };
 
-export const GetTracks = async (files) => {
+export const GetTracks = async (files: string[]) => {
   const tracks = [];
   // eslint-disable-next-line no-restricted-syntax
   for (const file of files) {

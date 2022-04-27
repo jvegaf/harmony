@@ -140,7 +140,7 @@ ipcMain.on('ipc-example', async (event, arg) => {
 
 ipcMain.on('open-folder', async () => {
   const newTracks = await dialog
-    .showOpenDialog(mainWindow, {
+    .showOpenDialog(mainWindow as BrowserWindow, {
       properties: ['openDirectory'],
     })
     .then((result) => {

@@ -22,8 +22,7 @@ export const parseDuration = (duration: number | null): string => {
   return '00:00';
 };
 
-export const Sanitize = (str: string | undefined): string | undefined => {
-  if (!str) return undefined;
+export const Sanitize = (str: string): string => {
   const accents =
     'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËèéêëðÇçÐÌÍÎÏìíîïÙÚÛÜùúûüÑñŠšŸÿýŽž';
   const fixes =

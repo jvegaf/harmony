@@ -3,14 +3,14 @@
  */
 export interface Track {
   id: string;
-  album: string | null;
-  artist: string | null;
-  bpm: number | null;
-  genre: string | null;
-  key: string | null;
+  album: string | undefined;
+  artist: string | undefined;
+  bpm: string | undefined;
+  genre: string | undefined;
+  key: string | undefined;
   path: string;
   title: string;
-  year: number | null;
+  year: string | undefined;
 }
 
 export interface Playlist {

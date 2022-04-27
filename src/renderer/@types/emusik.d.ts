@@ -1,6 +1,6 @@
 import { Track } from '../../shared/types/emusik';
 
-export type GlobalContextType = {
+export type AppContextType = {
   tracks: Track[];
-  openFolder: () => void;
+  addTracks: (tracks: Track[]) => void;
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { createStyles, Table, ScrollArea } from '@mantine/core';
+import { Track } from 'shared/types/emusik';
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -29,14 +30,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 interface TrackListProps {
-  data: {
-    title: string;
-    artist: string;
-    duration: string;
-    bpm: number;
-    year: number;
-    album: string;
-  }[];
+  data: Track[];
   tlheight: number;
   tlwidth: number;
 }
@@ -47,13 +41,12 @@ const TrackList: React.FC<TrackListProps> = (props) => {
   const [scrolled, setScrolled] = useState(false);
 
   // eslint-disable-next-line no-console
-  const onAction = (name) => console.log(`clicked: ${name}`);
+  const onAction = (title: string) => console.log(`clicked: ${title}`);
 
   const rows = data.map((row) => (
-    <tr key={row.name} onClick={() => onAction(row.title)}>
+    <tr key={row.id} onClick={() => onAction(row.title)}>
       <td>{row.title}</td>
       <td>{row.artist}</td>
-      <td>{row.duration}</td>
       <td>{row.bpm}</td>
       <td>{row.year}</td>
       <td>{row.album}</td>
@@ -75,7 +68,6 @@ const TrackList: React.FC<TrackListProps> = (props) => {
           <tr>
             <th>Title</th>
             <th>Artist</th>
-            <th>Time</th>
             <th>BPM</th>
             <th>Year</th>
             <th>Album</th>
