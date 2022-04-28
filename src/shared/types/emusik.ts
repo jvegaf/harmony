@@ -8,6 +8,8 @@ export interface Track {
   bpm: string | undefined;
   genre: string | undefined;
   key: string | undefined;
+  duration: number;
+  time: string;
   path: string;
   title: string;
   year: string | undefined;

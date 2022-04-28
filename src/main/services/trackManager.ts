@@ -4,11 +4,16 @@ import * as Path from 'path';
 import { v4 as uuid } from 'uuid';
 import * as NodeId3 from 'node-id3';
 import { readFileSync } from 'fs';
-import { Sanitize } from '../../shared/utils';
+import musicDuration from 'music-duration';
+import { Sanitize, parseDuration } from '../../shared/utils';
 import { Track } from '../../shared/types/emusik';
 
 const getFilename = (filepath: string) => {
   return Path.basename(filepath, '.mp3');
+};
+
+const getDuration = async (buffer) => {
+  return musicDuration(buffer);
 };
 
 const sanitizeFilename = (filename: string) => {
@@ -27,6 +32,9 @@ const CreateTrack = async (file: string): Promise<Track> => {
   const filebuffer = readFileSync(file);
   const tags: NodeId3.Tags = NodeId3.read(filebuffer);
 
+  const trackDuration = await getDuration(filebuffer);
+  const trackTime = parseDuration(trackDuration);
+
   const track: Track = {
     id: uuid(),
     album: tags.album,
@@ -34,6 +42,8 @@ const CreateTrack = async (file: string): Promise<Track> => {
     bpm: tags.bpm,
     genre: tags.genre,
     key: tags.initialKey,
+    duration: trackDuration,
+    time: trackTime,
     path: file,
     title: trackTitle(tags.title, file),
     year: tags.year,

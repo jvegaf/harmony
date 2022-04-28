@@ -47,6 +47,7 @@ const TrackList: React.FC<TrackListProps> = (props) => {
     <tr key={row.id} onClick={() => onAction(row.title)}>
       <td>{row.title}</td>
       <td>{row.artist}</td>
+      <td>{row.time}</td>
       <td>{row.bpm}</td>
       <td>{row.year}</td>
       <td>{row.album}</td>
@@ -68,6 +69,7 @@ const TrackList: React.FC<TrackListProps> = (props) => {
           <tr>
             <th>Title</th>
             <th>Artist</th>
+            <th>Time</th>
             <th>BPM</th>
             <th>Year</th>
             <th>Album</th>
