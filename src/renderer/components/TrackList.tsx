@@ -27,6 +27,14 @@ const useStyles = createStyles((theme) => ({
   scrolled: {
     boxShadow: theme.shadows.sm,
   },
+
+  timeCol: {
+    width: 40,
+  },
+
+  titleCol: {
+    paddingLeft: 40,
+  },
 }));
 
 interface TrackListProps {
@@ -45,12 +53,12 @@ const TrackList: React.FC<TrackListProps> = (props) => {
 
   const rows = data.map((row) => (
     <tr key={row.id} onClick={() => onAction(row.title)}>
-      <td>{row.title}</td>
-      <td>{row.artist}</td>
-      <td>{row.time}</td>
-      <td>{row.bpm}</td>
-      <td>{row.year}</td>
-      <td>{row.album}</td>
+      <td className={classes.titleCol}>{row.title}</td>
+      <td className={classes.titleCol}>{row.artist}</td>
+      <td className={classes.timeCol}>{row.time}</td>
+      <td className={classes.timeCol}>{row.bpm}</td>
+      <td className={classes.timeCol}>{row.year}</td>
+      <td className={classes.titleCol}>{row.album}</td>
     </tr>
   ));
 
