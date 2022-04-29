@@ -15,6 +15,18 @@ export interface Track {
   year: string | undefined;
 }
 
+export interface TagResult {
+  id: number;
+  album: string | undefined;
+  artists: string | undefined;
+  bpm: number | undefined;
+  genre: string | undefined;
+  key: string | undefined;
+  duration: number;
+  title: string;
+  year: string | undefined;
+}
+
 export interface Playlist {
   name: string;
   tracks: string[];
