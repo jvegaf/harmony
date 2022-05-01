@@ -16,7 +16,7 @@ export interface Track {
 }
 
 export interface TagResult {
-  id: number;
+  id: string;
   album: string | undefined;
   artists: string | undefined;
   bpm: number | undefined;

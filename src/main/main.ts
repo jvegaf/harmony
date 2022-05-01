@@ -16,6 +16,7 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { GetFilesFrom } from './services/fileManager';
 import { GetTracks } from './services/trackManager';
+import SearchYtTags from './services/tagger/youtube';
 
 export default class AppUpdater {
   constructor() {
@@ -133,6 +134,9 @@ app
   .catch(console.log);
 
 ipcMain.on('ipc-example', async (event, arg) => {
+  const response = await SearchYtTags('Stop The Beat', 'Angel Heredia');
+  console.log(response);
+
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));

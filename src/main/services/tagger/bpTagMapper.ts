@@ -7,7 +7,7 @@ const CreateTagResult = (result: any) => {
     : result.name;
 
   return {
-    id: Number(result.id),
+    id: result.id,
     title: tagTrackTitle,
     key: `${result.key.camelot_number}${result.key.camelot_letter}`,
     artists: result.artists.map((artist: any) => artist.name).join(', '),
