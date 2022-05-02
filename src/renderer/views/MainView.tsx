@@ -23,7 +23,7 @@ const MainView = () => {
     setTlheight(newHeight);
   }, [height]);
 
-  const tlprops = { data: tracks, tlheight, tlwidth: width };
+  const tlprops = { tracks, tlheight, tlwidth: width };
   return (
     <div className="main">
       <AppHeader />

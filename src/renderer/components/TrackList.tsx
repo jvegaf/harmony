@@ -38,21 +38,21 @@ const useStyles = createStyles((theme) => ({
 }));
 
 interface TrackListProps {
-  data: Track[];
+  tracks: Track[];
   tlheight: number;
   tlwidth: number;
 }
 
 const TrackList: React.FC<TrackListProps> = (props) => {
-  const { data, tlheight, tlwidth } = props;
+  const { tracks, tlheight, tlwidth } = props;
   const { classes, cx } = useStyles();
   const [scrolled, setScrolled] = useState(false);
 
   // eslint-disable-next-line no-console
-  const onAction = (title: string) => console.log(`clicked: ${title}`);
+  const onDetailAction = (title: string) => console.log(`clicked: ${title}`);
 
-  const rows = data.map((row) => (
-    <tr key={row.id} onClick={() => onAction(row.title)}>
+  const rows = tracks.map((row) => (
+    <tr key={row.id} onDoubleClick={() => onDetailAction(row.title)}>
       <td className={classes.titleCol}>{row.title}</td>
       <td className={classes.titleCol}>{row.artist}</td>
       <td className={classes.timeCol}>{row.time}</td>
