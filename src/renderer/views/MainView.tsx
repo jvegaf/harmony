@@ -5,16 +5,17 @@ import useAppState from 'renderer/hooks/useAppState';
 import { Track } from 'shared/types/emusik';
 import AppHeader from '../components/AppHeader';
 import TrackList from '../components/TrackList';
+import TrackDetail from '../components/TrackDetail';
 
 const MainView = () => {
   const { height, width } = useViewportSize();
   const [tlheight, setTlheight] = useState(0);
   const { tracks, addTracks } = useAppState();
+  const [showDetail, setShowDetail] = useState(false);
+  const [selected, setSelected] = useState({});
 
   // calling IPC exposed from preload script
   window.electron.ipcRenderer.on('add-tracks', (newTracks: Track[]) => {
-    // eslint-disable-next-line no-console
-    console.log(`renderer: ${newTracks.length} tracks added`);
     addTracks(newTracks);
   });
 
@@ -23,11 +24,26 @@ const MainView = () => {
     setTlheight(newHeight);
   }, [height]);
 
-  const tlprops = { tracks, tlheight, tlwidth: width };
+  const onShowDetail = (selTrack: Track) => {
+    setSelected(selTrack);
+    setShowDetail(true);
+  };
+
+  const onEndShowDetail = () => {
+    setShowDetail(false);
+    setSelected({});
+  };
+
+  const tlprops = { tracks, tlheight, tlwidth: width, onShowDetail };
+
   return (
     <div className="main">
       <AppHeader />
-      <TrackList {...tlprops} />
+      {showDetail ? (
+        <TrackDetail track={selected} endCB={onEndShowDetail} />
+      ) : (
+        <TrackList {...tlprops} />
+      )}
     </div>
   );
 };

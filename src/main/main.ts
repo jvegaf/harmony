@@ -134,8 +134,8 @@ app
   .catch(console.log);
 
 ipcMain.on('ipc-example', async (event, arg) => {
-  const response = await SearchYtTags('Stop The Beat', 'Angel Heredia');
-  console.log(response);
+  // const response = await SearchYtTags('Stop The Beat', 'Angel Heredia');
+  // console.log(response);
 
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
@@ -148,21 +148,16 @@ ipcMain.on('open-folder', async () => {
       properties: ['openDirectory'],
     })
     .then((result) => {
-      const files = GetFilesFrom(result.filePaths[0]);
-      return files;
+      if (result.canceled) {
+        return null;
+      }
+      // eslint-disable-next-line promise/no-nesting
+      return GetFilesFrom(result.filePaths[0]).then((files) =>
+        GetTracks(files)
+      );
     })
-    .then((files) => {
-      console.log(`files: ${files.length}`);
-      const tracks = GetTracks(files);
-      return tracks;
-    })
-    .then((tracks) => {
-      console.log(`total tracks: ${tracks.length}`);
-      return tracks;
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-
-  mainWindow?.webContents.send('add-tracks', newTracks);
+    .catch((err) => console.log(err));
+  if (newTracks !== null) {
+    mainWindow?.webContents.send('add-tracks', newTracks);
+  }
 });

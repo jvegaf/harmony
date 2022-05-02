@@ -1,5 +1,5 @@
+import { createStyles, ScrollArea, Table } from '@mantine/core';
 import React, { useState } from 'react';
-import { createStyles, Table, ScrollArea } from '@mantine/core';
 import { Track } from 'shared/types/emusik';
 
 const useStyles = createStyles((theme) => ({
@@ -41,24 +41,25 @@ interface TrackListProps {
   tracks: Track[];
   tlheight: number;
   tlwidth: number;
+  onShowDetail: (selTrack: Track) => void;
 }
 
 const TrackList: React.FC<TrackListProps> = (props) => {
-  const { tracks, tlheight, tlwidth } = props;
+  const { tracks, tlheight, tlwidth, onShowDetail } = props;
   const { classes, cx } = useStyles();
   const [scrolled, setScrolled] = useState(false);
 
   // eslint-disable-next-line no-console
-  const onDetailAction = (title: string) => console.log(`clicked: ${title}`);
+  const onDetailAction = (t: Track) => onShowDetail(t);
 
-  const rows = tracks.map((row) => (
-    <tr key={row.id} onDoubleClick={() => onDetailAction(row.title)}>
-      <td className={classes.titleCol}>{row.title}</td>
-      <td className={classes.titleCol}>{row.artist}</td>
-      <td className={classes.timeCol}>{row.time}</td>
-      <td className={classes.timeCol}>{row.bpm}</td>
-      <td className={classes.timeCol}>{row.year}</td>
-      <td className={classes.titleCol}>{row.album}</td>
+  const rows = tracks.map((track) => (
+    <tr key={track.id} onDoubleClick={() => onDetailAction(track)}>
+      <td className={classes.titleCol}>{track.title}</td>
+      <td className={classes.titleCol}>{track.artist}</td>
+      <td className={classes.timeCol}>{track.time}</td>
+      <td className={classes.timeCol}>{track.bpm}</td>
+      <td className={classes.timeCol}>{track.year}</td>
+      <td className={classes.titleCol}>{track.album}</td>
     </tr>
   ));
 
