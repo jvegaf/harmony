@@ -58,9 +58,11 @@ const TrackDetail: React.FC<TrackDetailProps> = (props) => {
 
   const onCancel = () => endCB();
 
+  const onSave = (values) => console.log(values);
+
   return (
     <Container size="sm" style={{ marginTop: 50 }}>
-      <form onSubmit={form.onSubmit((values) => console.log(values))}>
+      <form onSubmit={form.onSubmit((values) => onSave(values))}>
         <Stack spacing="xl">
           <TextInput size="md" label="Title" {...form.getInputProps('title')} />
           <TextInput
