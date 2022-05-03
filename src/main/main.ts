@@ -53,6 +53,15 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
+const getDevTracks = async (musicPath: string) => {
+  const newTracks = await GetFilesFrom(musicPath).then((files) =>
+    // eslint-disable-next-line promise/no-nesting
+    GetTracks(files).catch((err) => console.log(err))
+  );
+
+  mainWindow?.webContents.send('add-tracks', newTracks);
+};
+
 const createWindow = async () => {
   if (isDevelopment) {
     await installExtensions();
@@ -87,6 +96,7 @@ const createWindow = async () => {
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {
+      mainWindow.maximize();
       mainWindow.show();
     }
   });
@@ -136,7 +146,7 @@ app
 ipcMain.on('ipc-example', async (event, arg) => {
   // const response = await SearchYtTags('Stop The Beat', 'Angel Heredia');
   // console.log(response);
-
+  getDevTracks('/home/samsepi0l/Documents/colocadas');
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
