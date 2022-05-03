@@ -30,10 +30,12 @@ const useStyles = createStyles((theme) => ({
 
   timeCol: {
     width: 40,
+    userSelect: 'none',
   },
 
   titleCol: {
     paddingLeft: 40,
+    userSelect: 'none',
   },
 }));
 

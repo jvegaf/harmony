@@ -2,12 +2,28 @@
 import { useEffect, useState } from 'react';
 import { useViewportSize } from '@mantine/hooks';
 import useAppState from 'renderer/hooks/useAppState';
+import { createStyles } from '@mantine/core';
 import { Track } from 'shared/types/emusik';
 import AppHeader from '../components/AppHeader';
 import TrackList from '../components/TrackList';
 import TrackDetail from '../components/TrackDetail';
 
+const useStyles = createStyles((theme) => ({
+  main: {
+    width: '100%',
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor:
+      theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+  },
+  content: {
+    flexGrow: 1,
+  },
+}));
+
 const MainView = () => {
+  const { classes } = useStyles();
   const { height, width } = useViewportSize();
   const [tlheight, setTlheight] = useState(0);
   const { tracks, addTracks } = useAppState();
@@ -37,13 +53,15 @@ const MainView = () => {
   const tlprops = { tracks, tlheight, tlwidth: width, onShowDetail };
 
   return (
-    <div className="main">
+    <div className={classes.main}>
       <AppHeader />
-      {showDetail ? (
-        <TrackDetail track={selected} endCB={onEndShowDetail} />
-      ) : (
-        <TrackList {...tlprops} />
-      )}
+      <div className={classes.content}>
+        {showDetail ? (
+          <TrackDetail track={selected} endCB={onEndShowDetail} />
+        ) : (
+          <TrackList {...tlprops} />
+        )}
+      </div>
     </div>
   );
 };

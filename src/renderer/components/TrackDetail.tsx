@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+/* eslint-disable no-console */
+/* eslint-disable react/jsx-props-no-spreading */
 import {
   Button,
+  Center,
   Container,
   createStyles,
+  Grid,
   Group,
-  SimpleGrid,
+  Image,
+  Space,
+  Stack,
   TextInput,
 } from '@mantine/core';
+import { useForm } from '@mantine/hooks';
+import React from 'react';
+import Placeholder from '../../../assets/placeholder.png';
 import { Track } from '../../shared/types/emusik';
 
 interface TrackDetailProps {
@@ -25,10 +33,6 @@ const useStyles = createStyles((theme) => ({
     backgroundColor:
       theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
   },
-  detailRow: {
-    margin: 10,
-    width: '100%',
-  },
   actionButton: {
     marginRight: 30,
     paddingLeft: 20,
@@ -38,59 +42,87 @@ const useStyles = createStyles((theme) => ({
 
 const TrackDetail: React.FC<TrackDetailProps> = (props) => {
   const { track, endCB } = props;
-  const [trackTitle, setTrackTitle] = useState(track.title);
-  const [trackArtist, setTrackArtist] = useState(track.artist);
-  const [trackBpm, setTrackBpm] = useState(track.bpm);
-  const [trackKey, setTrackKey] = useState(track.key);
+  const form = useForm({
+    initialValues: {
+      title: track.title,
+      artist: track.artist,
+      album: track.album,
+      genre: track.genre,
+      bpm: track.bpm,
+      key: track.key,
+      year: track.year,
+    },
+  });
+
   const { classes } = useStyles();
 
   const onCancel = () => endCB();
 
   return (
-    <Container className={classes.detail}>
-      <TextInput
-        className={classes.detailRow}
-        value={trackTitle}
-        label="Title"
-        onChange={(event) => setTrackTitle(event.currentTarget.value)}
-      />
-      <TextInput
-        className={classes.detailRow}
-        value={trackArtist}
-        label="Artist"
-        onChange={(event) => setTrackArtist(event.currentTarget.value)}
-      />
-      <SimpleGrid className={classes.detailRow} cols={3}>
-        <div>
-          <TextInput value={track.time} label="Time" readOnly />
-        </div>
-        <div>
+    <Container size="sm" style={{ marginTop: 50 }}>
+      <form onSubmit={form.onSubmit((values) => console.log(values))}>
+        <Stack spacing="xl">
+          <TextInput size="md" label="Title" {...form.getInputProps('title')} />
           <TextInput
-            value={trackBpm}
-            label="BPM"
-            onChange={(event) => setTrackBpm(event.currentTarget.value)}
+            size="md"
+            label="Artist"
+            {...form.getInputProps('artist')}
           />
-        </div>
-        <div>
-          <TextInput
-            value={trackKey}
-            label="Key"
-            onChange={(event) => setTrackKey(event.currentTarget.value)}
-          />
-        </div>
-      </SimpleGrid>
-      <Group className={classes.detailRow} position="right">
-        <Button className={classes.actionButton} variant="default">
-          Save
-        </Button>
-        <Button
-          className={classes.actionButton}
-          variant="default"
-          onClick={onCancel}
-        >
-          Cancel
-        </Button>
-      </Group>
+          <TextInput size="md" label="Album" {...form.getInputProps('album')} />
+          <Grid columns={24} gutter="lg">
+            <Grid.Col span={12}>
+              <Center>
+                <Image src={Placeholder} radius="md" width={250} height={250} />
+              </Center>
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <TextInput
+                size="md"
+                label="Genre"
+                {...form.getInputProps('genre')}
+              />
+              <Space h="md" />
+              <Group grow>
+                <TextInput value={track.time} size="md" label="Time" readOnly />
+                <TextInput
+                  size="md"
+                  label="BPM"
+                  {...form.getInputProps('bpm')}
+                />
+              </Group>
+              <Space h="md" />
+              <Group grow>
+                <TextInput
+                  size="md"
+                  label="Year"
+                  {...form.getInputProps('year')}
+                />
+                <TextInput
+                  size="md"
+                  label="Key"
+                  {...form.getInputProps('key')}
+                />
+              </Group>
+            </Grid.Col>
+          </Grid>
+          <Group position="right" mt="md">
+            <Button
+              className={classes.actionButton}
+              type="submit"
+              variant="default"
+            >
+              Save
+            </Button>
+            <Button
+              className={classes.actionButton}
+              variant="default"
+              onClick={onCancel}
+            >
+              Cancel
+            </Button>
+          </Group>
+        </Stack>
+      </form>
     </Container>
   );
 };
