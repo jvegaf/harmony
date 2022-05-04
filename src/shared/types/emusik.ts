@@ -1,6 +1,14 @@
 /**
  * App models
  */
+
+export interface Artwork {
+  mime: string;
+  type: { id: number; name: string };
+  description: string;
+  imageBuffer: Buffer;
+}
+
 export interface Track {
   id: string;
   album: string | undefined;
@@ -13,6 +21,7 @@ export interface Track {
   path: string;
   title: string;
   year: string | undefined;
+  artwork: Artwork | undefined;
 }
 
 export interface TagResult {

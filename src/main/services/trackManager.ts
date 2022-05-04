@@ -6,7 +6,7 @@ import * as NodeId3 from 'node-id3';
 import { readFileSync } from 'fs';
 import musicDuration from 'music-duration';
 import { Sanitize, parseDuration } from '../../shared/utils';
-import { Track } from '../../shared/types/emusik';
+import { Artwork, Track } from '../../shared/types/emusik';
 
 const getFilename = (filepath: string) => {
   return Path.basename(filepath, '.mp3');
@@ -28,6 +28,13 @@ const trackTitle = (title: string | undefined, filepath: string) => {
   return sanitizeFilename(filename);
 };
 
+const getArtwork = (tags: NodeId3.Tags): Artwork | undefined => {
+  if (tags.image === undefined) {
+    return undefined;
+  }
+  return tags.image as Artwork;
+};
+
 const CreateTrack = async (file: string): Promise<Track> => {
   const filebuffer = readFileSync(file);
   const tags: NodeId3.Tags = NodeId3.read(filebuffer);
@@ -47,6 +54,7 @@ const CreateTrack = async (file: string): Promise<Track> => {
     path: file,
     title: trackTitle(tags.title, file),
     year: tags.year,
+    artwork: getArtwork(tags),
   };
   return track;
 };

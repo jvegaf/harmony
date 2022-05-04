@@ -51,10 +51,20 @@ const TrackDetail: React.FC<TrackDetailProps> = (props) => {
       bpm: track.bpm,
       key: track.key,
       year: track.year,
+      artwork: track.artwork,
     },
   });
 
   const { classes } = useStyles();
+
+  const getArtData = (artwork) => {
+    console.log(artwork);
+
+    const blob = new Blob([artwork.imageBuffer], {
+      type: artwork.mime,
+    });
+    return URL.createObjectURL(blob);
+  };
 
   const onCancel = () => endCB();
 
@@ -74,7 +84,22 @@ const TrackDetail: React.FC<TrackDetailProps> = (props) => {
           <Grid columns={24} gutter="lg">
             <Grid.Col span={12}>
               <Center>
-                <Image src={Placeholder} radius="md" width={250} height={250} />
+                {track.artwork === undefined && (
+                  <Image
+                    src={Placeholder}
+                    radius="md"
+                    width={250}
+                    height={250}
+                  />
+                )}
+                {track.artwork !== undefined && (
+                  <Image
+                    src={getArtData(track.artwork)}
+                    radius="md"
+                    width={250}
+                    height={250}
+                  />
+                )}
               </Center>
             </Grid.Col>
             <Grid.Col span={12}>
