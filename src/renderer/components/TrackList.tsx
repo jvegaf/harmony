@@ -1,5 +1,6 @@
-import { createStyles, ScrollArea, Table } from '@mantine/core';
 import React, { useState } from 'react';
+import electron from 'electron';
+import { createStyles, ScrollArea, Table } from '@mantine/core';
 import { Track } from 'shared/types/emusik';
 
 const useStyles = createStyles((theme) => ({
@@ -46,16 +47,44 @@ interface TrackListProps {
   onShowDetail: (selTrack: Track) => void;
 }
 
+const { remote } = electron;
+const { Menu } = remote;
+
 const TrackList: React.FC<TrackListProps> = (props) => {
   const { tracks, tlheight, tlwidth, onShowDetail } = props;
   const { classes, cx } = useStyles();
   const [scrolled, setScrolled] = useState(false);
 
+  /**
+   *  Context Menu
+   */
+
+  const handleContextMenu = (e: React.MouseEvent<HTMLTableRowElement>) => {
+    e.preventDefault();
+    const menu = Menu.buildFromTemplate([
+      {
+        label: 'Play',
+        click: () => {
+          // eslint-disable-next-line no-console
+          console.log('play');
+        },
+      },
+    ]);
+    menu.popup({ window: remote.getCurrentWindow() });
+  };
+
   // eslint-disable-next-line no-console
   const onDetailAction = (t: Track) => onShowDetail(t);
 
+  const clickAction = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) =>
+    handleContextMenu(e);
+
   const rows = tracks.map((track) => (
-    <tr key={track.id} onDoubleClick={() => onDetailAction(track)}>
+    <tr
+      key={track.id}
+      onAuxClick={(e) => clickAction(e)}
+      onDoubleClick={() => onDetailAction(track)}
+    >
       <td className={classes.titleCol}>{track.title}</td>
       <td className={classes.titleCol}>{track.artist}</td>
       <td className={classes.timeCol}>{track.time}</td>

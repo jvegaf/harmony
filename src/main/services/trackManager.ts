@@ -12,7 +12,7 @@ const getFilename = (filepath: string) => {
   return Path.basename(filepath, '.mp3');
 };
 
-const getDuration = async (buffer) => {
+const getDuration = async (buffer: Buffer) => {
   return musicDuration(buffer);
 };
 
