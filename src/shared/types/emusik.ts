@@ -18,7 +18,7 @@ export interface Track {
   key: string | undefined;
   duration: number;
   time: string;
-  path: string;
+  filepath: string;
   title: string;
   year: string | undefined;
   artwork: Artwork | undefined;

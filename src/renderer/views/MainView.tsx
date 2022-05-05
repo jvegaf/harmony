@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable react/jsx-props-no-spreading */
 import { useEffect, useState } from 'react';
 import { useViewportSize } from '@mantine/hooks';
@@ -26,7 +27,7 @@ const MainView = () => {
   const { classes } = useStyles();
   const { height, width } = useViewportSize();
   const [tlheight, setTlheight] = useState(0);
-  const { tracks, addTracks } = useAppState();
+  const { tracks, addTracks, showCtxMenu } = useAppState();
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState({});
 
@@ -34,6 +35,10 @@ const MainView = () => {
   window.electron.ipcRenderer.on('add-tracks', (newTracks: Track[]) => {
     addTracks(newTracks);
   });
+
+  // window.electron.ipcRenderer.on('context-menu-command', e, (command) => {
+  //   console.log(command);
+  // });
 
   useEffect(() => {
     const newHeight = height - 100;
@@ -50,7 +55,15 @@ const MainView = () => {
     setSelected({});
   };
 
-  const tlprops = { tracks, tlheight, tlwidth: width, onShowDetail };
+  const onShowCtxMenu = () => showCtxMenu();
+
+  const tlprops = {
+    tracks,
+    tlheight,
+    tlwidth: width,
+    onShowDetail,
+    onShowCtxMenu,
+  };
 
   return (
     <div className={classes.main}>

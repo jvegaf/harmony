@@ -51,7 +51,7 @@ const CreateTrack = async (file: string): Promise<Track> => {
     key: tags.initialKey,
     duration: trackDuration,
     time: trackTime,
-    path: file,
+    filepath: file,
     title: trackTitle(tags.title, file),
     year: tags.year,
     artwork: getArtwork(tags),

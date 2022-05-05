@@ -1,6 +1,7 @@
 import React from 'react';
-import { createStyles, Slider } from '@mantine/core';
-import { useAudioPosition } from 'react-use-audio-player';
+import { createStyles, Slider, Text } from '@mantine/core';
+import { useAudioPlayer, useAudioPosition } from 'react-use-audio-player';
+import { Track } from '../../shared/types/emusik';
 
 const useStyles = createStyles((theme) => ({
   player: {
@@ -15,10 +16,21 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const Player: React.FC = () => {
+interface PlayerProps {
+  track: Track;
+}
+
+const Player: React.FC<PlayerProps> = ({ track }) => {
+  const { title, artist, filepath } = track;
   const { classes } = useStyles();
   const { percentComplete, duration, seek } = useAudioPosition({
     highRefreshRate: true,
+  });
+
+  const { togglePlayPause, ready, loading, playing } = useAudioPlayer({
+    src: filepath,
+    format: 'mp3',
+    autoplay: false,
   });
 
   const goToPosition = React.useCallback(
@@ -28,8 +40,18 @@ const Player: React.FC = () => {
     [duration, seek]
   );
 
+  if (!ready && !loading) return <div>No audio to play</div>;
+
+  if (loading) return <div>Loading audio</div>;
+
   return (
     <div className={classes.player}>
+      <Text size="lg" align="center">
+        {title}
+      </Text>
+      <Text size="md" align="center">
+        {artist}
+      </Text>
       <Slider
         value={percentComplete}
         min={0}

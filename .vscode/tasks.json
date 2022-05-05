@@ -20,6 +20,13 @@
           "endsPattern": "(Compiled successfully|Failed to compile)\\.$"
         }
       }
+    },
+    {
+      "type": "npm",
+      "script": "start",
+      "problemMatcher": [],
+      "label": "npm: start",
+      "detail": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer"
     }
   ]
 }

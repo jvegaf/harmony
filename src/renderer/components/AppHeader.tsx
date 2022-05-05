@@ -34,19 +34,10 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-// interface HeaderSearchProps {
-//   links: {
-//     link: string;
-//     label: string;
-//     links: { link: string; label: string }[];
-//   }[];
-// }
-
-// const AppHeader = ({ links }: HeaderSearchProps) => {
 const AppHeader: React.FC = () => {
   const { classes } = useStyles();
 
-  const { openFolder } = useAppState();
+  const { openFolder, trackPlaying } = useAppState();
 
   const openHandler = () => openFolder();
 
@@ -56,7 +47,7 @@ const AppHeader: React.FC = () => {
         <Button variant="default">Dummy</Button>
       </div>
       <div className={classes.playerContainer}>
-        <Player />
+        {trackPlaying !== null && <Player track={trackPlaying} />}
       </div>
       <div className={classes.rightContainer}>
         <Button onClick={openHandler} variant="default">

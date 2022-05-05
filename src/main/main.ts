@@ -8,15 +8,13 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
-import { autoUpdater } from 'electron-updater';
+import { app, BrowserWindow, dialog, ipcMain, Menu, shell } from 'electron';
 import log from 'electron-log';
-import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import { autoUpdater } from 'electron-updater';
+import path from 'path';
 import { GetFilesFrom } from './services/fileManager';
 import { GetTracks } from './services/trackManager';
-import SearchYtTags from './services/tagger/youtube';
+import { resolveHtmlPath } from './util';
 
 export default class AppUpdater {
   constructor() {
@@ -146,8 +144,8 @@ app
 ipcMain.on('ipc-example', async (event, arg) => {
   // const response = await SearchYtTags('Stop The Beat', 'Angel Heredia');
   // console.log(response);
-  // getDevTracks('/home/samsepi0l/Documents/colocadas');
-  getDevTracks('/Users/jose.vega/Music/Sundays');
+  getDevTracks('/home/samsepi0l/Documents/colocadas');
+  // getDevTracks('/Users/jose.vega/Music/Sundays');
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
@@ -171,4 +169,27 @@ ipcMain.on('open-folder', async () => {
   if (newTracks !== null) {
     mainWindow?.webContents.send('add-tracks', newTracks);
   }
+});
+
+ipcMain.on('show-context-menu', (event) => {
+  // console.log(trackId);
+  const template = [
+    {
+      label: 'Play Track',
+      click: () => {
+        console.log('play-track');
+        event.sender.send('context-menu-command', 'play-track');
+      },
+    },
+    { type: 'separator' },
+    {
+      label: 'Fix Tags',
+      click: () => {
+        // event.sender.send('context-menu-command', 'menu-item-1');
+        console.log('fixing tags');
+      },
+    },
+  ];
+  const menu = Menu.buildFromTemplate(template);
+  menu.popup(BrowserWindow.fromWebContents(event.sender));
 });
