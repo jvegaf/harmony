@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { handleResponse, handleError } from '../response';
 import BeatportToken from './BeaportToken';
-import { BuildQuery } from './querybuilder';
+import { BuildBeatportQuery } from './querybuilder';
 import GetTagResults from './bpTagMapper';
 
 const URI_BASE = 'https://api.beatport.com/v4/catalog/search/?q=';
@@ -37,7 +37,7 @@ const SearchTags = async (
 ) => {
   const token = await getToken();
 
-  const query = BuildQuery(title, artist);
+  const query = BuildBeatportQuery(title, artist);
   // console.log(`query: ${query}`);
 
   const uri = `${URI_BASE}${query}`;

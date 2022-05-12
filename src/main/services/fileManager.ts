@@ -10,15 +10,20 @@ export const GetFilesFrom = async (filePath: string) => {
   });
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const ExtractToFile = (jsonObj: any, filePath: string) => {
-  const jsonContent = JSON.stringify(jsonObj);
-  Fs.writeFile(filePath, jsonContent, 'utf8', (err) => {
+
+export const ExtractToFile = (jsonObj: any, filename: string) => {
+  const jsonContent = JSON.stringify(jsonObj, null, 2);
+
+  const fname = `./${new Date().toISOString()}-${filename}.json`;
+
+
+
+  Fs.writeFile(fname, jsonContent, 'utf8', (err) => {
     if (err) {
-      console.log('An error occured while writing JSON Object to File.');
-      return console.log(err);
+      console.error('An error occured while writing JSON Object to File.');
+      return console.error(err);
     }
 
-    return console.log('JSON file has been saved.');
+    return;
   });
 };
