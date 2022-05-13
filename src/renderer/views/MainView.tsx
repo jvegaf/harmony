@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useViewportSize } from '@mantine/hooks';
 import useAppState from 'renderer/hooks/useAppState';
 import { createStyles } from '@mantine/core';
-import { Track } from 'shared/types/emusik';
+import { MenuCommand, Track } from 'shared/types/emusik';
 import AppHeader from '../components/AppHeader';
 import TrackList from '../components/TrackList';
 import TrackDetail from '../components/TrackDetail';
@@ -31,14 +31,7 @@ const MainView = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState({});
 
-  // calling IPC exposed from preload script
-  window.electron.ipcRenderer.on('add-tracks', (newTracks: Track[]) => {
-    addTracks(newTracks);
-  });
 
-  // window.electron.ipcRenderer.on('context-menu-command', e, (command) => {
-  //   console.log(command);
-  // });
 
   useEffect(() => {
     const newHeight = height - 100;

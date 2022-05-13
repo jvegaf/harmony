@@ -15,6 +15,7 @@ import path from 'path';
 import { GetFilesFrom } from './services/fileManager';
 import { GetTracks } from './services/trackManager';
 import { resolveHtmlPath } from './util';
+import { MenuCommand } from '../shared/types/emusik';
 
 export default class AppUpdater {
   constructor() {
@@ -178,7 +179,7 @@ ipcMain.on('show-context-menu', (event) => {
       label: 'Play Track',
       click: () => {
         console.log('play-track');
-        event.sender.send('context-menu-command', 'play-track');
+        mainWindow?.webContents.send('context-menu-command', MenuCommand.PLAY_TRACK);
       },
     },
     { type: 'separator' },
@@ -187,6 +188,7 @@ ipcMain.on('show-context-menu', (event) => {
       click: () => {
         // event.sender.send('context-menu-command', 'menu-item-1');
         console.log('fixing tags');
+        mainWindow?.webContents.send('context-menu-command', MenuCommand.FIX_TAGS);
       },
     },
   ];

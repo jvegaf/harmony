@@ -40,3 +40,8 @@ export interface Playlist {
   name: string;
   tracks: string[];
 }
+
+export enum MenuCommand {
+  PLAY_TRACK,
+  FIX_TAGS,
+}
