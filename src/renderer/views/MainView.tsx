@@ -28,8 +28,7 @@ const MainView = () => {
   const { height, width } = useViewportSize();
   const [tlheight, setTlheight] = useState(0);
   const { tracks, addTracks, showCtxMenu } = useAppState();
-  const [showDetail, setShowDetail] = useState(false);
-  const [selected, setSelected] = useState({});
+  const [trackDetail, setTrackDetail] = useState<Track>(undefined);
 
 
 
@@ -39,16 +38,14 @@ const MainView = () => {
   }, [height]);
 
   const onShowDetail = (selTrack: Track) => {
-    setSelected(selTrack);
-    setShowDetail(true);
+    setTrackDetail(selTrack);
   };
 
   const onEndShowDetail = () => {
-    setShowDetail(false);
-    setSelected({});
+    setTrackDetail(undefined);
   };
 
-  const onShowCtxMenu = () => showCtxMenu();
+  const onShowCtxMenu = (t: Track) => showCtxMenu(t);
 
   const tlprops = {
     tracks,
@@ -62,8 +59,8 @@ const MainView = () => {
     <div className={classes.main}>
       <AppHeader />
       <div className={classes.content}>
-        {showDetail ? (
-          <TrackDetail track={selected} endCB={onEndShowDetail} />
+        {trackDetail ? (
+          <TrackDetail track={trackDetail} endCB={onEndShowDetail} />
         ) : (
           <TrackList {...tlprops} />
         )}

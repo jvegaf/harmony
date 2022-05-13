@@ -27,18 +27,21 @@ const Player: React.FC<PlayerProps> = ({ track }) => {
     highRefreshRate: true,
   });
 
-  const { togglePlayPause, ready, loading, playing } = useAudioPlayer({
-    src: filepath,
-    format: 'mp3',
-    autoplay: false,
-  });
-
   const goToPosition = React.useCallback(
     (percentage) => {
       seek(duration * percentage);
     },
     [duration, seek]
   );
+
+  const { ready, loading, error } = useAudioPlayer({
+    src: filepath,
+    // forcing html5 is required for some features like streaming audio
+    html5: true,
+    // format must be specified when streaming audio
+    format: ['mp3'],
+    autoPlay: true
+  });
 
   if (!ready && !loading) return <div>No audio to play</div>;
 

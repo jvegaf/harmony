@@ -54,14 +54,14 @@ const TrackList: React.FC<TrackListProps> = (props) => {
 
   const onDetailAction = (t: Track) => onShowDetail(t);
 
-  const clickAction = () => {
-    onShowCtxMenu();
+  const clickAction = (t: Track) => {
+    onShowCtxMenu(t);
   };
 
   const rows = tracks.map((track) => (
     <tr
       key={track.id}
-      onAuxClick={() => clickAction()}
+      onAuxClick={() => clickAction(track)}
       onDoubleClick={() => onDetailAction(track)}
     >
       <td className={classes.titleCol}>{track.title}</td>

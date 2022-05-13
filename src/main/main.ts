@@ -173,7 +173,7 @@ ipcMain.on('open-folder', async () => {
 });
 
 ipcMain.on('show-context-menu', (event) => {
-  // console.log(trackId);
+  console.log({event});
   const template = [
     {
       label: 'Play Track',

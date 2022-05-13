@@ -1,11 +1,19 @@
 module.exports = {
-  extends: 'erb',
+  extends: [
+    'erb',
+    'plugin:react:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'prettier/@typescript-eslint',
+    'plugin:prettier/recommended'
+  ],
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
     'import/no-extraneous-dependencies': 'off',
     'import/no-unresolved': 'error',
     // Since React 17 and typescript 4.1 you can safely disable the rule
     'react/react-in-jsx-scope': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,
@@ -15,6 +23,9 @@ module.exports = {
     createDefaultProgram: true,
   },
   settings: {
+    react: {
+      version: 'detect'
+    }
     'import/resolver': {
       // See https://github.com/benmosher/eslint-plugin-import/issues/1396#issuecomment-575727774 for line below
       node: {},

@@ -1,20 +1,24 @@
 import React from 'react';
 import AppContext from 'renderer/context/AppContext';
-import { MenuCommand } from 'shared/types/emusik';
+import { MenuCommand, Track } from 'shared/types/emusik';
 
 
 
 export default function useAppState() {
-  const { tracks, addTracks, trackPlaying, setTrackPlaying, selectedTrack, setSelectedTrack } =
+  const [selected, setSelected] = React.useState<Track>(undefined);
+  const { tracks, setTracks, trackPlaying, setTrackPlaying } =
     React.useContext(AppContext);
 
   const openFolder = () => window.electron.ipcRenderer.openFolder();
 
   const playTrack = (t: Track) => setTrackPlaying(t);
 
-  const stopPlayer = () => setTrackPlaying(null);
+  const stopPlayer = () => setTrackPlaying(undefined);
 
-  const showCtxMenu = () => {
+  const addTracks = (newTracks: React.SetStateAction<Track[]>) => setTracks(newTracks);
+
+  const showCtxMenu = (t: Track) => {
+    setSelected(t);
     window.electron.ipcRenderer.showContextMenu();
   };
 
@@ -27,10 +31,10 @@ window.electron.ipcRenderer.on('context-menu-command', (command: MenuCommand) =>
 
   switch (command) {
     case MenuCommand.PLAY_TRACK:
-      console.log('want play track');
+      setTrackPlaying(selected);
       break;
     case MenuCommand.FIX_TAGS:
-      console.log('want fix-tags');
+      console.log('FIX_TAGS');
       break;
 
     default:
@@ -41,7 +45,7 @@ window.electron.ipcRenderer.on('context-menu-command', (command: MenuCommand) =>
   return {
     tracks,
     trackPlaying,
-    selectedTrack,
+    selected,
     openFolder,
     addTracks,
     playTrack,

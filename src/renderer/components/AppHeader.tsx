@@ -47,7 +47,7 @@ const AppHeader: React.FC = () => {
         <Button variant="default">Dummy</Button>
       </div>
       <div className={classes.playerContainer}>
-        {trackPlaying !== null && <Player track={trackPlaying} />}
+        {trackPlaying  && <Player track={trackPlaying} />}
       </div>
       <div className={classes.rightContainer}>
         <Button onClick={openHandler} variant="default">
