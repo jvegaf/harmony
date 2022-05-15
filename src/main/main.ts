@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
 /**
@@ -80,6 +81,7 @@ const createWindow = async () => {
     height: 900,
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      webSecurity: false,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
@@ -103,9 +105,6 @@ const createWindow = async () => {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-
-  // const menuBuilder = new MenuBuilder(mainWindow);
-  // menuBuilder.buildMenu();
 
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
@@ -145,8 +144,8 @@ app
 ipcMain.on('ipc-example', async (event, arg) => {
   // const response = await SearchYtTags('Stop The Beat', 'Angel Heredia');
   // console.log(response);
-  getDevTracks('/home/samsepi0l/Documents/colocadas');
-  // getDevTracks('/Users/jose.vega/Music/Sundays');
+  // getDevTracks('/home/samsepi0l/Documents/colocadas');
+  getDevTracks('C:\\Users\\josev\\Documents\\nuevas_mayo');
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
@@ -172,14 +171,18 @@ ipcMain.on('open-folder', async () => {
   }
 });
 
-ipcMain.on('show-context-menu', (event) => {
-  console.log({event});
+ipcMain.on('show-context-menu', (event, trackId) => {
+  console.log(`track id: ${trackId}`);
   const template = [
     {
       label: 'Play Track',
       click: () => {
         console.log('play-track');
-        mainWindow?.webContents.send('context-menu-command', MenuCommand.PLAY_TRACK);
+        mainWindow?.webContents.send(
+          'context-menu-command',
+          MenuCommand.PLAY_TRACK,
+          trackId
+        );
       },
     },
     { type: 'separator' },
@@ -188,7 +191,10 @@ ipcMain.on('show-context-menu', (event) => {
       click: () => {
         // event.sender.send('context-menu-command', 'menu-item-1');
         console.log('fixing tags');
-        mainWindow?.webContents.send('context-menu-command', MenuCommand.FIX_TAGS);
+        mainWindow?.webContents.send(
+          'context-menu-command',
+          MenuCommand.FIX_TAGS
+        );
       },
     },
   ];

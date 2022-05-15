@@ -8,8 +8,8 @@ contextBridge.exposeInMainWorld('electron', {
     openFolder() {
       ipcRenderer.send('open-folder');
     },
-    showContextMenu(event) {
-      ipcRenderer.send('show-context-menu', event);
+    showContextMenu(trackId: string) {
+      ipcRenderer.send('show-context-menu', trackId);
     },
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

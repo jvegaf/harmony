@@ -1,11 +1,5 @@
 module.exports = {
-  extends: [
-    'erb',
-    'plugin:react:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'prettier/@typescript-eslint',
-    'plugin:prettier/recommended'
-  ],
+  extends: ['erb', 'plugin:@typescript-eslint/recommended', 'prettier'],
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
     'import/no-extraneous-dependencies': 'off',
@@ -14,6 +8,7 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
+    'click-events-have-key-events': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,
@@ -23,9 +18,6 @@ module.exports = {
     createDefaultProgram: true,
   },
   settings: {
-    react: {
-      version: 'detect'
-    }
     'import/resolver': {
       // See https://github.com/benmosher/eslint-plugin-import/issues/1396#issuecomment-575727774 for line below
       node: {},
@@ -33,6 +25,9 @@ module.exports = {
         config: require.resolve('./.erb/configs/webpack.config.eslint.ts'),
       },
       typescript: {},
+      react: {
+        version: 'detect',
+      },
     },
     'import/parsers': {
       '@typescript-eslint/parser': ['.ts', '.tsx'],
