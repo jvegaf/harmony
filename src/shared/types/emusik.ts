@@ -34,6 +34,7 @@ export interface TagResult {
   duration: number;
   title: string;
   year: string | undefined;
+  artworkUrl: string | undefined;
 }
 
 export interface Playlist {

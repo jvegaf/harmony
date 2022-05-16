@@ -17,7 +17,7 @@ const getDuration = async (buffer: Buffer) => {
 };
 
 const sanitizeFilename = (filename: string) => {
-  return Sanitize(filename).split('_').join(' ').trim();
+  return Sanitize(filename).replaceAll('-', ' ').split('_').join(' ').trim();
 };
 
 const trackTitle = (title: string | undefined, filepath: string) => {

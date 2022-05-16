@@ -16,6 +16,7 @@ const CreateTagResult = (result: any) => {
     genre: result.genre.name,
     bpm: result.bpm,
     duration: Number((result.length_ms / 1000).toFixed(0)),
+    artworkUrl: result.release.image.uri,
   } as TagResult;
 };
 

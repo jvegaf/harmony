@@ -12,7 +12,7 @@ export default function useAppState() {
     setTracks(newTracks);
 
   const showCtxMenu = (t: Track) => {
-    window.electron.ipcRenderer.showContextMenu(t.id);
+    window.electron.ipcRenderer.showContextMenu(t);
   };
 
   // calling IPC exposed from preload script
@@ -22,13 +22,10 @@ export default function useAppState() {
 
   window.electron.ipcRenderer.on(
     'context-menu-command',
-    (command: MenuCommand, trackId: string) => {
+    (command: MenuCommand, track: Track) => {
       switch (command) {
         case MenuCommand.PLAY_TRACK:
-          setTrackPlaying(tracks.find((t) => t.id === trackId));
-          break;
-        case MenuCommand.FIX_TAGS:
-          console.log('FIX_TAGS');
+          setTrackPlaying(track);
           break;
 
         default:

@@ -17,6 +17,7 @@ import { GetFilesFrom } from './services/fileManager';
 import { GetTracks } from './services/trackManager';
 import { resolveHtmlPath } from './util';
 import { MenuCommand } from '../shared/types/emusik';
+import FixTags from './services/tagger/Tagger';
 
 export default class AppUpdater {
   constructor() {
@@ -171,8 +172,8 @@ ipcMain.on('open-folder', async () => {
   }
 });
 
-ipcMain.on('show-context-menu', (event, trackId) => {
-  console.log(`track id: ${trackId}`);
+ipcMain.on('show-context-menu', (event, track) => {
+  console.log(`track id: ${track.id}`);
   const template = [
     {
       label: 'Play Track',
@@ -181,7 +182,7 @@ ipcMain.on('show-context-menu', (event, trackId) => {
         mainWindow?.webContents.send(
           'context-menu-command',
           MenuCommand.PLAY_TRACK,
-          trackId
+          track
         );
       },
     },
@@ -190,11 +191,13 @@ ipcMain.on('show-context-menu', (event, trackId) => {
       label: 'Fix Tags',
       click: () => {
         // event.sender.send('context-menu-command', 'menu-item-1');
-        console.log('fixing tags');
-        mainWindow?.webContents.send(
-          'context-menu-command',
-          MenuCommand.FIX_TAGS
-        );
+        console.log(`fixing: ${track.title} duration: ${track.duration}`);
+        FixTags(track);
+        // mainWindow?.webContents.send(
+        //   'context-menu-command',
+        //   MenuCommand.FIX_TAGS,
+        //   track
+        // );
       },
     },
   ];
