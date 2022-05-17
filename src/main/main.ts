@@ -14,7 +14,7 @@ import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import path from 'path';
 import { GetFilesFrom } from './services/fileManager';
-import { GetTracks } from './services/trackManager';
+import { GetTracks } from './services/track/trackManager';
 import { resolveHtmlPath } from './util';
 import { MenuCommand } from '../shared/types/emusik';
 import FixTags from './services/tagger/Tagger';
@@ -176,9 +176,18 @@ ipcMain.on('show-context-menu', (event, track) => {
   console.log(`track id: ${track.id}`);
   const template = [
     {
+      label: 'Details',
+      click: () => {
+        mainWindow?.webContents.send(
+          'context-menu-command',
+          MenuCommand.VIEW_DETAIL,
+          track
+        );
+      },
+    },
+    {
       label: 'Play Track',
       click: () => {
-        console.log('play-track');
         mainWindow?.webContents.send(
           'context-menu-command',
           MenuCommand.PLAY_TRACK,
@@ -189,15 +198,13 @@ ipcMain.on('show-context-menu', (event, track) => {
     { type: 'separator' },
     {
       label: 'Fix Tags',
-      click: () => {
-        // event.sender.send('context-menu-command', 'menu-item-1');
-        console.log(`fixing: ${track.title} duration: ${track.duration}`);
-        FixTags(track);
-        // mainWindow?.webContents.send(
-        //   'context-menu-command',
-        //   MenuCommand.FIX_TAGS,
-        //   track
-        // );
+      click: async () => {
+        const trackUdpated = await FixTags(track);
+        mainWindow?.webContents.send(
+          'context-menu-command',
+          MenuCommand.FIX_TAGS,
+          trackUdpated
+        );
       },
     },
   ];

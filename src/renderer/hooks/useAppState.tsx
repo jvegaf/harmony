@@ -3,13 +3,24 @@ import AppContext from 'renderer/context/AppContext';
 import { MenuCommand, Track } from 'shared/types/emusik';
 
 export default function useAppState() {
-  const { tracks, setTracks, trackPlaying, setTrackPlaying } =
-    React.useContext(AppContext);
+  const {
+    tracks,
+    setTracks,
+    trackPlaying,
+    setTrackPlaying,
+    trackDetail,
+    setTrackDetail,
+  } = React.useContext(AppContext);
 
   const openFolder = () => window.electron.ipcRenderer.openFolder();
 
   const addTracks = (newTracks: React.SetStateAction<Track[]>) =>
     setTracks(newTracks);
+
+  const updateTrack = (track: Track) => {
+    const newTracks = tracks.map((t) => (t.id === track.id ? track : t));
+    setTracks(newTracks);
+  };
 
   const showCtxMenu = (t: Track) => {
     window.electron.ipcRenderer.showContextMenu(t);
@@ -28,6 +39,14 @@ export default function useAppState() {
           setTrackPlaying(track);
           break;
 
+        case MenuCommand.FIX_TAGS:
+          updateTrack(track);
+          break;
+
+        case MenuCommand.VIEW_DETAIL:
+          setTrackDetail(track);
+          break;
+
         default:
           break;
       }
@@ -37,6 +56,9 @@ export default function useAppState() {
   return {
     tracks,
     trackPlaying,
+    setTrackPlaying,
+    trackDetail,
+    setTrackDetail,
     openFolder,
     showCtxMenu,
   };

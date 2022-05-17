@@ -4,7 +4,7 @@ import { handleResponse, handleError } from '../response';
 import BeatportToken from './BeaportToken';
 import { BuildBeatportQuery } from './querybuilder';
 import GetTagResults from './bpTagMapper';
-import { TagResult } from '../../../shared/types/emusik';
+import { ResultTag } from '../../../shared/types/emusik';
 
 const URI_BASE = 'https://api.beatport.com/v4/catalog/search/?q=';
 
@@ -35,7 +35,7 @@ const SearchTags = async (
   title: string,
   // duration: number,
   artist: string | null = null
-): Promise<TagResult[]> => {
+): Promise<ResultTag[]> => {
   const token = await getToken();
 
   const query = BuildBeatportQuery(title, artist);

@@ -5,8 +5,8 @@ import { v4 as uuid } from 'uuid';
 import * as NodeId3 from 'node-id3';
 import { readFileSync } from 'fs';
 import musicDuration from 'music-duration';
-import { Sanitize, parseDuration } from '../../shared/utils';
-import { Artwork, Track } from '../../shared/types/emusik';
+import { Sanitize, ParseDuration } from '../../../shared/utils';
+import { Artwork, Track } from '../../../shared/types/emusik';
 
 const getFilename = (filepath: string) => {
   return Path.basename(filepath, '.mp3');
@@ -40,7 +40,7 @@ const CreateTrack = async (file: string): Promise<Track> => {
   const tags: NodeId3.Tags = NodeId3.read(filebuffer);
 
   const trackDuration = await getDuration(filebuffer);
-  const trackTime = parseDuration(trackDuration);
+  const trackTime = ParseDuration(trackDuration);
 
   const track: Track = {
     id: uuid(),

@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { TagResult } from '../../../shared/types/emusik';
+import { ResultTag } from '../../../shared/types/emusik';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const CreateTagResult = (result: any) => {
@@ -9,7 +9,7 @@ const CreateTagResult = (result: any) => {
     artists: result.artist.name,
     album: result.album.name,
     duration: Number((result.duration / 1000).toFixed(0)),
-  } as TagResult;
+  } as ResultTag;
 };
 
 const GetTagResults = (result: any[]) => {

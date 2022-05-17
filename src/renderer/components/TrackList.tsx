@@ -2,6 +2,7 @@
 import { createStyles, ScrollArea, Table } from '@mantine/core';
 import React, { useState } from 'react';
 import { Track } from '../../shared/types/emusik';
+import useAppState from '../hooks/useAppState';
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -38,31 +39,34 @@ const useStyles = createStyles((theme) => ({
     paddingLeft: 40,
     userSelect: 'none',
   },
+
+  playingRow: {
+    backgroundColor: theme.colors.blue[9],
+  },
 }));
 
 interface TrackListProps {
-  tracks: Track[];
   tlheight: number;
   tlwidth: number;
-  onShowDetail: (selTrack: Track) => void;
-  onShowCtxMenu: () => void;
 }
 const TrackList: React.FC<TrackListProps> = (props) => {
-  const { tracks, tlheight, tlwidth, onShowDetail, onShowCtxMenu } = props;
+  const { tlheight, tlwidth } = props;
+  const { tracks, trackPlaying, setTrackPlaying, showCtxMenu } = useAppState();
   const { classes, cx } = useStyles();
   const [scrolled, setScrolled] = useState(false);
 
-  const onDetailAction = (t: Track) => onShowDetail(t);
+  const handleDblClk = (t: Track) => setTrackPlaying(t);
 
-  const clickAction = (t: Track) => {
-    onShowCtxMenu(t);
+  const handleRghClk = (t: Track) => {
+    showCtxMenu(t);
   };
 
   const rows = tracks.map((track) => (
     <tr
       key={track.id}
-      onAuxClick={() => clickAction(track)}
-      onDoubleClick={() => onDetailAction(track)}
+      onAuxClick={() => handleRghClk(track)}
+      onDoubleClick={() => handleDblClk(track)}
+      className={cx({ [classes.playingRow]: track === trackPlaying })}
     >
       <td className={classes.titleCol}>{track.title}</td>
       <td className={classes.titleCol}>{track.artist}</td>

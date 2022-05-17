@@ -1,13 +1,13 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import YoutubeMusicApi from 'youtube-music-api';
-import { TagResult } from '../../../shared/types/emusik';
+import { ResultTag } from '../../../shared/types/emusik';
 import GetTagResults from './ytTagMapper';
 
 const SearchYtTags = async (
   title: string,
   artist: string | null = null
-): Promise<TagResult[]> => {
+): Promise<ResultTag[]> => {
   const api = new YoutubeMusicApi();
   let query = title;
   if (artist !== null) {

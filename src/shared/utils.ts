@@ -3,7 +3,7 @@
 /**
  * Parse an int to a more readable string
  */
-export const parseDuration = (duration: number | null): string => {
+export const ParseDuration = (duration: number | null): string => {
   if (duration !== null) {
     const hours = Math.trunc(duration / 3600);
     const minutes = Math.trunc(duration / 60) % 60;
@@ -35,4 +35,15 @@ export const Sanitize = (str: string): string => {
   }
 
   return str.replace(reg, replacement).toLowerCase();
+};
+
+const GetTokens = (strVal: string): string[] => {
+  return strVal.toLowerCase().split(' ');
+};
+
+export const GetStringTokens = (values: string[]): string[] => {
+  return values.reduce<string[]>(
+    (acc, curr) => acc.concat(GetTokens(curr)),
+    []
+  );
 };

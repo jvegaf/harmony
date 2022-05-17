@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
-import { TagResult, Track } from '../../../shared/types/emusik';
+import { MatchResult, ResultTag, Track } from '../../../shared/types/emusik';
+import { GetStringTokens } from '../../../shared/utils';
+import Update from '../track/updater';
 // import SearchYtTags from './youtube';
 import SearchTags from './beatport';
 import SearchTrackInfo from './google';
@@ -12,18 +14,51 @@ import SearchTrackInfo from './google';
 //   console.log(ytResults);
 // };
 
-const SearchOnBeatport = async (track: Track): Promise<TagResult[]> => {
+const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
+  const tagMatches: MatchResult[] = tags.map((tag) => {
+    let tokensFounded = 0;
+    trackTokens.forEach((token) => {
+      if (tag.tokens.indexOf(token) > -1) {
+        tokensFounded += 1;
+      }
+    });
+
+    return {
+      tag,
+      trackTokens,
+      matches: tokensFounded,
+      of: trackTokens.length,
+    };
+  });
+
+  tagMatches.sort((a, b) => b.matches - a.matches);
+
+  tagMatches.forEach((tm) =>
+    console.log(`matches ${tm.matches} of ${tm.of}: `)
+  );
+
+  return tagMatches[0];
+};
+
+const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
   const { title, artist, duration } = track;
+  const reqAggregate: string[] = [title];
+  if (artist) {
+    reqAggregate.push(artist);
+  }
+  const trackTokens = GetStringTokens(reqAggregate);
   const durRounded = Math.round(duration);
   const bpResults = await SearchTags(title, artist);
   console.log(`TOTAL BP RESULTS: ${bpResults.length}`);
+  if (bpResults.length < 1) {
+    return null;
+  }
   const resultsFiltered = bpResults.filter(
     (result) =>
       result.duration >= durRounded - 10 && result.duration <= durRounded + 10
   );
-  resultsFiltered.sort((a, b) => a.duration - b.duration);
   console.log(`BP RESULTS FILTERED: ${resultsFiltered.length}`);
-  return resultsFiltered;
+  return Match(trackTokens, resultsFiltered);
 };
 
 const GetWebTrackInfo = async (track: Track): Promise<void> => {
@@ -38,12 +73,13 @@ const GetWebTrackInfo = async (track: Track): Promise<void> => {
   console.log('traxsource results: ', traxsource);
 };
 
-const FixTags = async (track: Track): Promise<void> => {
-  const bpResults = await SearchOnBeatport(track);
-  if (bpResults.length < 1) {
+const FixTags = async (track: Track): Promise<Track> => {
+  const result = await SearchOnBeatport(track);
+  if (result === null) {
     GetWebTrackInfo(track);
+    return track;
   }
-  console.log(bpResults);
+  return Update(track, result.tag);
 };
 
 export default FixTags;

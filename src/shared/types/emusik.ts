@@ -24,7 +24,7 @@ export interface Track {
   artwork: Artwork | undefined;
 }
 
-export interface TagResult {
+export interface ResultTag {
   id: string;
   album: string | undefined;
   artists: string | undefined;
@@ -35,6 +35,7 @@ export interface TagResult {
   title: string;
   year: string | undefined;
   artworkUrl: string | undefined;
+  tokens: string[];
 }
 
 export interface Playlist {
@@ -45,4 +46,12 @@ export interface Playlist {
 export enum MenuCommand {
   PLAY_TRACK,
   FIX_TAGS,
+  VIEW_DETAIL,
+}
+
+export interface MatchResult {
+  tag: ResultTag;
+  trackTokens: string[];
+  matches: number;
+  of: number;
 }
