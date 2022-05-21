@@ -2,18 +2,12 @@
 /* eslint-disable no-console */
 import * as Path from 'path';
 import { v4 as uuid } from 'uuid';
-import * as NodeId3 from 'node-id3';
-import { readFileSync } from 'fs';
-import musicDuration from 'music-duration';
 import { Sanitize, ParseDuration } from '../../../shared/utils';
-import { Artwork, Track } from '../../../shared/types/emusik';
+import { Track } from '../../../shared/types/emusik';
+import LoadTagsFromFile from '../tag/loader';
 
 const getFilename = (filepath: string) => {
   return Path.basename(filepath, '.mp3');
-};
-
-const getDuration = async (buffer: Buffer) => {
-  return musicDuration(buffer);
 };
 
 const sanitizeFilename = (filename: string) => {
@@ -28,33 +22,24 @@ const trackTitle = (title: string | undefined, filepath: string) => {
   return sanitizeFilename(filename);
 };
 
-const getArtwork = (tags: NodeId3.Tags): Artwork | undefined => {
-  if (tags.image === undefined) {
-    return undefined;
+const CreateTrack = async (file: string): Promise<?Track> => {
+  const tags = await LoadTagsFromFile(file);
+  if (!tags) {
+    return null;
   }
-  return tags.image as Artwork;
-};
-
-const CreateTrack = async (file: string): Promise<Track> => {
-  const filebuffer = readFileSync(file);
-  const tags: NodeId3.Tags = NodeId3.read(filebuffer);
-
-  const trackDuration = await getDuration(filebuffer);
-  const trackTime = ParseDuration(trackDuration);
 
   const track: Track = {
     id: uuid(),
     album: tags.album,
     artist: tags.artist,
     bpm: tags.bpm,
-    genre: tags.genre,
-    key: tags.initialKey,
-    duration: trackDuration,
-    time: trackTime,
+    genre: tags.genre?.join(', '),
+    key: tags.key,
+    duration: tags.duration,
+    time: ParseDuration(tags.duration),
     filepath: file,
     title: trackTitle(tags.title, file),
     year: tags.year,
-    artwork: getArtwork(tags),
   };
   return track;
 };

@@ -20,7 +20,7 @@ export interface Track {
   time: string;
   filepath: string;
   title: string;
-  year: string | undefined;
+  year: number | undefined;
   artwork: Artwork | undefined;
 }
 
