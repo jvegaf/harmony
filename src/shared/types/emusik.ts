@@ -27,7 +27,7 @@ export interface Track {
 export interface ResultTag {
   id: string;
   album: string | undefined;
-  artists: string | undefined;
+  artist: string | undefined;
   bpm: number | undefined;
   genre: string | undefined;
   key: string | undefined;

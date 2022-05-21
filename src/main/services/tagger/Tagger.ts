@@ -31,13 +31,7 @@ const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
     };
   });
 
-  tagMatches.sort((a, b) => b.matches - a.matches);
-
-  tagMatches.forEach((tm) =>
-    console.log(`matches ${tm.matches} of ${tm.of}: `)
-  );
-
-  return tagMatches[0];
+  return tagMatches.sort((a, b) => b.matches - a.matches)[0];
 };
 
 const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
@@ -58,7 +52,17 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
       result.duration >= durRounded - 10 && result.duration <= durRounded + 10
   );
   console.log(`BP RESULTS FILTERED: ${resultsFiltered.length}`);
-  return Match(trackTokens, resultsFiltered);
+  if (resultsFiltered.length === 1) {
+    return {
+      tag: resultsFiltered[0],
+      trackTokens,
+      matches: 1,
+      of: 1,
+    };
+  }
+  const match = Match(trackTokens, resultsFiltered);
+  console.log(`MATCH: ${match.matches} / ${match.of}`);
+  return match;
 };
 
 const GetWebTrackInfo = async (track: Track): Promise<void> => {

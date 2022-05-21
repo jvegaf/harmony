@@ -20,7 +20,7 @@ const CreateTagResult = (result: any): ResultTag => {
     id: result.id,
     title: tagTrackTitle,
     key: `${result.key.camelot_number}${result.key.camelot_letter}`,
-    artists: tagTrackArtists.join(', '),
+    artist: tagTrackArtists.join(', '),
     album: result.album,
     year: result.publish_date.substring(0, 4),
     genre: result.genre.name,

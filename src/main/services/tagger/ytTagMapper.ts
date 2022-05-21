@@ -6,7 +6,7 @@ const CreateTagResult = (result: any) => {
   return {
     id: result.videoId,
     title: result.name,
-    artists: result.artist.name,
+    artist: result.artist.name,
     album: result.album.name,
     duration: Number((result.duration / 1000).toFixed(0)),
   } as ResultTag;
