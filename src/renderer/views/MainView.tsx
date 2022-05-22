@@ -41,15 +41,13 @@ const MainView = () => {
     setTlheight(newHeight);
   }, [height]);
 
-  const handleDblClick = (t: Track) => {
-    setTrackPlaying(t);
-  };
-
-  const handleRightClk = (t: Track) => showCtxMenu(t);
-
   const tlprops = {
     tlheight,
     tlwidth: width,
+    tracks,
+    trackPlaying,
+    setTrackPlaying,
+    showCtxMenu,
   };
 
   return (

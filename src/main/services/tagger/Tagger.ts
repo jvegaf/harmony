@@ -52,7 +52,7 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
       result.duration >= durRounded - 10 && result.duration <= durRounded + 10
   );
   console.log(`BP RESULTS FILTERED: ${resultsFiltered.length}`);
-  if (resultsFiltered.length === 1) {
+  if (resultsFiltered.length < 2) {
     return {
       tag: resultsFiltered[0],
       trackTokens,

@@ -2,7 +2,6 @@
 import { createStyles, ScrollArea, Table } from '@mantine/core';
 import React, { useState } from 'react';
 import { Track } from '../../shared/types/emusik';
-import useAppState from '../hooks/useAppState';
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -43,17 +42,34 @@ const useStyles = createStyles((theme) => ({
   playingRow: {
     backgroundColor: theme.colors.blue[9],
   },
+
+  selected: {
+    backgroundColor: theme.colors.dark[7],
+  },
 }));
 
 interface TrackListProps {
   tlheight: number;
   tlwidth: number;
+  tracks: Track[];
+  trackPlaying: Track;
+  setTrackPlaying: React.Dispatch<React.SetStateAction<Track>>;
+  showCtxMenu: (track: Track) => void;
 }
 const TrackList: React.FC<TrackListProps> = (props) => {
-  const { tlheight, tlwidth } = props;
-  const { tracks, trackPlaying, setTrackPlaying, showCtxMenu } = useAppState();
+  const {
+    tlheight,
+    tlwidth,
+    tracks,
+    trackPlaying,
+    setTrackPlaying,
+    showCtxMenu,
+  } = props;
   const { classes, cx } = useStyles();
   const [scrolled, setScrolled] = useState(false);
+  const [selected, setSelected] = useState([]);
+
+  const handleClick = (t) => setSelected([t]);
 
   const handleDblClk = (t: Track) => setTrackPlaying(t);
 
@@ -65,8 +81,11 @@ const TrackList: React.FC<TrackListProps> = (props) => {
     <tr
       key={track.id}
       onAuxClick={() => handleRghClk(track)}
+      onClick={() => handleClick(track)}
       onDoubleClick={() => handleDblClk(track)}
-      className={cx({ [classes.playingRow]: track === trackPlaying })}
+      className={cx({
+        [classes.playingRow]: track === trackPlaying,
+      })}
     >
       <td className={classes.titleCol}>{track.title}</td>
       <td className={classes.titleCol}>{track.artist}</td>
@@ -82,12 +101,7 @@ const TrackList: React.FC<TrackListProps> = (props) => {
       sx={{ height: tlheight }}
       onScrollPositionChange={({ y }) => setScrolled(y !== 0)}
     >
-      <Table
-        striped
-        highlightOnHover
-        verticalSpacing="xs"
-        sx={{ minWidth: tlwidth }}
-      >
+      <Table highlightOnHover verticalSpacing="xs" sx={{ minWidth: tlwidth }}>
         <thead className={cx(classes.header, { [classes.scrolled]: scrolled })}>
           <tr>
             <th>Title</th>
