@@ -2,19 +2,17 @@ import { ResultTag } from '../../../shared/types/emusik';
 import { ParseDuration } from '../../../shared/utils';
 
 const Update = (track: Track, tag: ResultTag): Track => {
-  return {
-    ...track,
-    title: tag.title,
-    album: tag.album,
-    artist: tag.artist,
-    bpm: tag.bpm,
-    genre: tag.genre,
-    key: tag.key,
-    duration: tag.duration,
-    time: ParseDuration(tag.duration),
-    year: tag.year,
-    artUrl: tag.artworkUrl,
-  };
+  track.title = tag.title;
+  track.artist = tag.artist;
+  track.album = tag.album;
+  track.duration = tag.duration;
+  track.time = ParseDuration(tag.duration);
+  track.year = tag.year;
+  track.bpm = tag.bpm;
+  track.key = tag.key;
+  track.genre = tag.genre;
+  track.artworkUrl = tag.artworkUrl;
+  return track;
 };
 
 export default Update;
