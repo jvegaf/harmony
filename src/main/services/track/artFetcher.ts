@@ -1,5 +1,4 @@
 import fetch from 'node-fetch';
-import { log } from 'electron-log';
 import { Artwork } from '../../../shared/types/emusik';
 
 const GetArtwork = async (url: string): Artwork => {

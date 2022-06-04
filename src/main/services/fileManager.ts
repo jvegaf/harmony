@@ -3,6 +3,7 @@
 import recursiveReadDir from 'recursive-readdir';
 import * as Path from 'path';
 import * as Fs from 'fs';
+import { Track } from '../../shared/types/emusik';
 
 export const GetFilesFrom = async (filePath: string) => {
   return recursiveReadDir(filePath).then((result) => {
@@ -23,4 +24,8 @@ export const ExtractToFile = (jsonObj: any, filename: string) => {
       return console.error(err);
     }
   });
+};
+
+export const SaveTags = (track: Track) => {
+  console.log('Saving tags...', track.title);
 };

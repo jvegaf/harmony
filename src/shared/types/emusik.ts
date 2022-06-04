@@ -22,6 +22,7 @@ export interface Track {
   title: string;
   year: number | undefined;
   artwork: Artwork | undefined;
+  artUrl: string | undefined;
 }
 
 export interface ResultTag {

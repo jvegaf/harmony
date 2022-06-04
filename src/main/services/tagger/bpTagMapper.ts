@@ -2,13 +2,9 @@ import { ResultTag } from '../../../shared/types/emusik';
 import { GetStringTokens } from '../../../shared/utils';
 
 const CreateTagResult = (result: any): ResultTag => {
-  const tagTrackTitle: string = result.mix_name
-    ? `${result.name} (${result.mix_name})`
-    : result.name;
+  const tagTrackTitle: string = result.mix_name ? `${result.name} (${result.mix_name})` : result.name;
 
-  const tagTrackArtists: string[] = result.artists.map(
-    (artist: any): string => artist.name
-  );
+  const tagTrackArtists: string[] = result.artists.map((artist: any): string => artist.name);
 
   const tagValues = [...tagTrackArtists, result.name];
   if (result.mix_name) {

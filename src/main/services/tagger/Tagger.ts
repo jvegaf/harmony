@@ -48,8 +48,7 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
     return null;
   }
   const resultsFiltered = bpResults.filter(
-    (result) =>
-      result.duration >= durRounded - 10 && result.duration <= durRounded + 10
+    (result) => result.duration >= durRounded - 10 && result.duration <= durRounded + 10
   );
   console.log(`BP RESULTS FILTERED: ${resultsFiltered.length}`);
   if (resultsFiltered.length < 2) {

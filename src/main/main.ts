@@ -34,8 +34,7 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
-const isDevelopment =
-  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+const isDevelopment = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDevelopment) {
   require('electron-debug')();
@@ -83,9 +82,7 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     webPreferences: {
       webSecurity: false,
-      preload: app.isPackaged
-        ? path.join(__dirname, 'preload.js')
-        : path.join(__dirname, '../../.erb/dll/preload.js'),
+      preload: app.isPackaged ? path.join(__dirname, 'preload.js') : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
 
@@ -162,9 +159,7 @@ ipcMain.on('open-folder', async () => {
         return null;
       }
       // eslint-disable-next-line promise/no-nesting
-      return GetFilesFrom(result.filePaths[0]).then((files) =>
-        GetTracks(files)
-      );
+      return GetFilesFrom(result.filePaths[0]).then((files) => GetTracks(files));
     })
     .catch((err) => console.log(err));
   if (newTracks !== null) {
@@ -178,21 +173,13 @@ ipcMain.on('show-context-menu', (event, track) => {
     {
       label: 'Details',
       click: () => {
-        mainWindow?.webContents.send(
-          'context-menu-command',
-          MenuCommand.VIEW_DETAIL,
-          track
-        );
+        mainWindow?.webContents.send('context-menu-command', MenuCommand.VIEW_DETAIL, track);
       },
     },
     {
       label: 'Play Track',
       click: () => {
-        mainWindow?.webContents.send(
-          'context-menu-command',
-          MenuCommand.PLAY_TRACK,
-          track
-        );
+        mainWindow?.webContents.send('context-menu-command', MenuCommand.PLAY_TRACK, track);
       },
     },
     { type: 'separator' },
@@ -200,14 +187,15 @@ ipcMain.on('show-context-menu', (event, track) => {
       label: 'Fix Tags',
       click: async () => {
         const trackUdpated = await FixTags(track);
-        mainWindow?.webContents.send(
-          'context-menu-command',
-          MenuCommand.FIX_TAGS,
-          trackUdpated
-        );
+        mainWindow?.webContents.send('context-menu-command', MenuCommand.FIX_TAGS, trackUdpated);
       },
     },
   ];
   const menu = Menu.buildFromTemplate(template);
   menu.popup(BrowserWindow.fromWebContents(event.sender));
+});
+
+ipcMain.on('fix-tags', async (event, track) => {
+  const trackUdpated = await FixTags(track);
+  mainWindow?.webContents.send('context-menu-command', MenuCommand.FIX_TAGS, trackUdpated);
 });

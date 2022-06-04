@@ -19,10 +19,7 @@ const getToken = async () => {
     },
   };
 
-  const response = await axios
-    .get('https://embed.beatport.com/token', config)
-    .then(handleResponse)
-    .catch(handleError);
+  const response = await axios.get('https://embed.beatport.com/token', config).then(handleResponse).catch(handleError);
 
   const { data } = response;
 
@@ -51,10 +48,7 @@ const SearchTags = async (
     },
   };
 
-  const { data } = await axios
-    .get(uri, config)
-    .then(handleResponse)
-    .catch(handleError);
+  const { data } = await axios.get(uri, config).then(handleResponse).catch(handleError);
 
   return GetTagResults(data.tracks);
 };

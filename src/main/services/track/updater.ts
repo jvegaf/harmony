@@ -13,6 +13,7 @@ const Update = (track: Track, tag: ResultTag): Track => {
     duration: tag.duration,
     time: ParseDuration(tag.duration),
     year: tag.year,
+    artUrl: tag.artworkUrl,
   };
 };
 
