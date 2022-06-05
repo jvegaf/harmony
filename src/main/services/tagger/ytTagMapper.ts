@@ -15,7 +15,7 @@ const CreateTagResult = (result: any) => {
 const GetTagResults = (result: any[]) => {
   console.log('yt gettagresult');
   console.log(result);
-  return result.map((track) => CreateTagResult(track));
+  return result.map(track => CreateTagResult(track));
 };
 
 export default GetTagResults;

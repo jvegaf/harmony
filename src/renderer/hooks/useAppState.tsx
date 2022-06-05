@@ -3,62 +3,62 @@ import AppContext from 'renderer/context/AppContext';
 import { MenuCommand, Track } from 'shared/types/emusik';
 
 export default function useAppState() {
-    const { tracks, setTracks, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } =
-        React.useContext(AppContext);
+  const { tracks, setTracks, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } =
+    React.useContext(AppContext);
 
-    const openFolder = () => window.electron.ipcRenderer.openFolder();
+  const openFolder = () => window.electron.ipcRenderer.openFolder();
 
-    const addTracks = (newTracks: React.SetStateAction<Track[]>) => setTracks(newTracks);
+  const addTracks = (newTracks: React.SetStateAction<Track[]>) => setTracks(newTracks);
 
-    const updateTrack = (track: Track) => {
-        const newTracks = tracks.map((t) => (t.id === track.id ? track : t));
-        setTracks(newTracks);
-    };
+  const updateTrack = (track: Track) => {
+    const newTracks = tracks.map(t => (t.id === track.id ? track : t));
+    setTracks(newTracks);
+  };
 
-    const fixTrackTags = (track: Track) => {
-        window.electron.ipcRenderer.fixTags(track);
-    };
+  const fixTrackTags = (track: Track) => {
+    window.electron.ipcRenderer.fixTags(track);
+  };
 
-    const showCtxMenu = (t: Track) => {
-        window.electron.ipcRenderer.showContextMenu(t);
-    };
+  const showCtxMenu = (t: Track) => {
+    window.electron.ipcRenderer.showContextMenu(t);
+  };
 
-    const fixAllTracks = () => {
-        tracks.forEach((t) => fixTrackTags(t));
-    };
+  const fixAllTracks = () => {
+    tracks.forEach(t => fixTrackTags(t));
+  };
 
-    // calling IPC exposed from preload script
-    window.electron.ipcRenderer.on('add-tracks', (newTracks: Track[]) => {
-        addTracks(newTracks);
-    });
+  // calling IPC exposed from preload script
+  window.electron.ipcRenderer.on('add-tracks', (newTracks: Track[]) => {
+    addTracks(newTracks);
+  });
 
-    window.electron.ipcRenderer.on('context-menu-command', (command: MenuCommand, track: Track) => {
-        switch (command) {
-            case MenuCommand.PLAY_TRACK:
-                setTrackPlaying(track);
-                break;
+  window.electron.ipcRenderer.on('context-menu-command', (command: MenuCommand, track: Track) => {
+    switch (command) {
+      case MenuCommand.PLAY_TRACK:
+        setTrackPlaying(track);
+        break;
 
-            case MenuCommand.FIX_TAGS:
-                updateTrack(track);
-                break;
+      case MenuCommand.FIX_TAGS:
+        updateTrack(track);
+        break;
 
-            case MenuCommand.VIEW_DETAIL:
-                setTrackDetail(track);
-                break;
+      case MenuCommand.VIEW_DETAIL:
+        setTrackDetail(track);
+        break;
 
-            default:
-                break;
-        }
-    });
+      default:
+        break;
+    }
+  });
 
-    return {
-        tracks,
-        trackPlaying,
-        setTrackPlaying,
-        trackDetail,
-        setTrackDetail,
-        openFolder,
-        showCtxMenu,
-        fixAllTracks,
-    };
+  return {
+    tracks,
+    trackPlaying,
+    setTrackPlaying,
+    trackDetail,
+    setTrackDetail,
+    openFolder,
+    showCtxMenu,
+    fixAllTracks,
+  };
 }

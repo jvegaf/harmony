@@ -28,7 +28,7 @@ const CreateTagResult = (result: any): ResultTag => {
 };
 
 const GetTagResults = (result: any[]): ResultTag[] => {
-  return result.map((track) => CreateTagResult(track));
+  return result.map(track => CreateTagResult(track));
 };
 
 export default GetTagResults;

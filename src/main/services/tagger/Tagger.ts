@@ -15,9 +15,9 @@ import SearchTrackInfo from './google';
 // };
 
 const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
-  const tagMatches: MatchResult[] = tags.map((tag) => {
+  const tagMatches: MatchResult[] = tags.map(tag => {
     let tokensFounded = 0;
-    trackTokens.forEach((token) => {
+    trackTokens.forEach(token => {
       if (tag.tokens.indexOf(token) > -1) {
         tokensFounded += 1;
       }
@@ -48,7 +48,7 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
     return null;
   }
   const resultsFiltered = bpResults.filter(
-    (result) => result.duration >= durRounded - 10 && result.duration <= durRounded + 10
+    result => result.duration >= durRounded - 10 && result.duration <= durRounded + 10
   );
   console.log(`BP RESULTS FILTERED: ${resultsFiltered.length}`);
   if (resultsFiltered.length < 2) {
@@ -68,11 +68,11 @@ const GetWebTrackInfo = async (track: Track): Promise<void> => {
   const { title, artist } = track;
   const { results } = await SearchTrackInfo(title, artist);
   // console.log(result);
-  const shazam = results.filter((r) => r.url.includes('shazam.com'));
+  const shazam = results.filter(r => r.url.includes('shazam.com'));
   console.log('shazam results: ', shazam);
-  const yt = results.filter((r) => r.url.includes('music.youtube.com'));
+  const yt = results.filter(r => r.url.includes('music.youtube.com'));
   console.log('yt results: ', yt);
-  const traxsource = results.filter((r) => r.url.includes('traxsource.com'));
+  const traxsource = results.filter(r => r.url.includes('traxsource.com'));
   console.log('traxsource results: ', traxsource);
 };
 

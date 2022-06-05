@@ -59,9 +59,9 @@ Join our Discord: https://discord.gg/Fjy3vfgy5q
 
 **Donations will ensure the following:**
 
--   🔨 Long term maintenance of the project
--   🛣 Progress on the [roadmap](https://electron-react-boilerplate.js.org/docs/roadmap)
--   🐛 Quick responses to bug reports and help requests
+- 🔨 Long term maintenance of the project
+- 🛣 Progress on the [roadmap](https://electron-react-boilerplate.js.org/docs/roadmap)
+- 🐛 Quick responses to bug reports and help requests
 
 ## Backers
 
@@ -135,10 +135,10 @@ Become a sponsor and get your logo on our README on Github with a link to your s
 
 ## Maintainers
 
--   [Amila Welihinda](https://github.com/amilajack)
--   [John Tran](https://github.com/jooohhn)
--   [C. T. Lin](https://github.com/chentsulin)
--   [Jhen-Jie Hong](https://github.com/jhen0409)
+- [Amila Welihinda](https://github.com/amilajack)
+- [John Tran](https://github.com/jooohhn)
+- [C. T. Lin](https://github.com/chentsulin)
+- [Jhen-Jie Hong](https://github.com/jhen0409)
 
 ## License
 

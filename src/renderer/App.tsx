@@ -6,17 +6,17 @@ import './App.css';
 import { AppContextProvider } from './context/AppContext';
 
 export default function App() {
-    return (
-        <AppContextProvider>
-            <MantineProvider theme={{ colorScheme: 'dark' }}>
-                <AudioPlayerProvider>
-                    <Router>
-                        <Routes>
-                            <Route path="/" element={<MainView />} />
-                        </Routes>
-                    </Router>
-                </AudioPlayerProvider>
-            </MantineProvider>
-        </AppContextProvider>
-    );
+  return (
+    <AppContextProvider>
+      <MantineProvider theme={{ colorScheme: 'dark' }}>
+        <AudioPlayerProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<MainView />} />
+            </Routes>
+          </Router>
+        </AudioPlayerProvider>
+      </MantineProvider>
+    </AppContextProvider>
+  );
 }

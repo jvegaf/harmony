@@ -47,16 +47,16 @@ const installExtensions = async () => {
 
   return installer
     .default(
-      extensions.map((name) => installer[name]),
+      extensions.map(name => installer[name]),
       forceDownload
     )
     .catch(console.log);
 };
 
 const getDevTracks = async (musicPath: string) => {
-  const newTracks = await GetFilesFrom(musicPath).then((files) =>
+  const newTracks = await GetFilesFrom(musicPath).then(files =>
     // eslint-disable-next-line promise/no-nesting
-    GetTracks(files).catch((err) => console.log(err))
+    GetTracks(files).catch(err => console.log(err))
   );
 
   mainWindow?.webContents.send('add-tracks', newTracks);
@@ -105,7 +105,7 @@ const createWindow = async () => {
   });
 
   // Open urls in the user's browser
-  mainWindow.webContents.setWindowOpenHandler((edata) => {
+  mainWindow.webContents.setWindowOpenHandler(edata => {
     shell.openExternal(edata.url);
     return { action: 'deny' };
   });
@@ -154,14 +154,14 @@ ipcMain.on('open-folder', async () => {
     .showOpenDialog(mainWindow as BrowserWindow, {
       properties: ['openDirectory'],
     })
-    .then((result) => {
+    .then(result => {
       if (result.canceled) {
         return null;
       }
       // eslint-disable-next-line promise/no-nesting
-      return GetFilesFrom(result.filePaths[0]).then((files) => GetTracks(files));
+      return GetFilesFrom(result.filePaths[0]).then(files => GetTracks(files));
     })
-    .catch((err) => console.log(err));
+    .catch(err => console.log(err));
   if (newTracks !== null) {
     mainWindow?.webContents.send('add-tracks', newTracks);
   }

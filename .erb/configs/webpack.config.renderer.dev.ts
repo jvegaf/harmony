@@ -164,7 +164,7 @@ const configuration: webpack.Configuration = {
         stdio: 'inherit',
       })
         .on('close', (code: number) => process.exit(code!))
-        .on('error', (spawnError) => console.error(spawnError));
+        .on('error', spawnError => console.error(spawnError));
 
       console.log('Starting Main Process...');
       spawn('npm', ['run', 'start:main'], {
@@ -175,7 +175,7 @@ const configuration: webpack.Configuration = {
           preloadProcess.kill();
           process.exit(code!);
         })
-        .on('error', (spawnError) => console.error(spawnError));
+        .on('error', spawnError => console.error(spawnError));
       return middlewares;
     },
   },
