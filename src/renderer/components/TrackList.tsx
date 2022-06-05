@@ -200,10 +200,10 @@ const TrackList: React.FC<TrackListProps> = props => {
   const onDoubleClick = React.useCallback(
     (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
       if (row) {
-        setTrackPlaying(data[row.original]);
+        setTrackPlaying(row.original);
       }
     },
-    [data, setTrackPlaying]
+    [setTrackPlaying]
   );
 
   return (
