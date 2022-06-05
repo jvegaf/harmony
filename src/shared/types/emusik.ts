@@ -11,31 +11,31 @@ export interface Artwork {
 
 export interface Track {
   id: string;
-  album: string | undefined;
-  artist: string | undefined;
-  bpm: string | undefined;
-  genre: string | undefined;
-  key: string | undefined;
+  album?: string;
+  artist?: string;
+  bpm?: string;
+  genre?: string;
+  key?: string;
   duration: number;
   time: string;
   filepath: string;
   title: string;
-  year: number | undefined;
-  artwork: Artwork | undefined;
-  artUrl: string | undefined;
+  year?: number;
+  artwork?: Artwork;
+  artUrl?: string;
 }
 
 export interface ResultTag {
   id: string;
-  album: string | undefined;
-  artist: string | undefined;
-  bpm: number | undefined;
-  genre: string | undefined;
-  key: string | undefined;
+  album?: string;
+  artist?: string;
+  bpm?: number;
+  genre?: string;
+  key?: string;
   duration: number;
   title: string;
-  year: string | undefined;
-  artworkUrl: string | undefined;
+  year?: string;
+  artworkUrl?: string;
   tokens: string[];
 }
 

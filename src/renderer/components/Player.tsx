@@ -36,11 +36,10 @@ interface PlayerProps {
 }
 
 const Player: React.FC<PlayerProps> = ({ track }) => {
-  const { title, artist, filepath } = track;
   const { classes } = useStyles();
 
   const player = useAudioPlayer({
-    src: filepath,
+    src: track.filepath,
     format: 'mp3',
     autoplay: true,
   });
@@ -53,14 +52,14 @@ const Player: React.FC<PlayerProps> = ({ track }) => {
   const seekBarElem = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (filepath !== player.src) {
+    if (track.filepath !== player.src) {
       player.load({
-        src: filepath,
+        src: track.filepath,
         format: 'mp3',
         autoplay: true,
       });
     }
-  }, [filepath, player]);
+  }, [player, track.filepath]);
 
   React.useEffect(() => {
     setBarWidth(`${percentComplete}%`);
@@ -83,10 +82,10 @@ const Player: React.FC<PlayerProps> = ({ track }) => {
   return (
     <div className={classes.player}>
       <Text className={classes.title} size="lg" align="center">
-        {title}
+        {track.title}
       </Text>
       <Text size="sm" align="center">
-        {artist}
+        {track.artist}
       </Text>
       <div className={classes.seekbar} ref={seekBarElem} onClick={goTo}>
         <div style={{ width: barWidth }} className={classes.tick} />

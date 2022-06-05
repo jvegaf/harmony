@@ -1,4 +1,4 @@
-import { ResultTag } from '../../../shared/types/emusik';
+import { ResultTag, Track } from '../../../shared/types/emusik';
 import { ParseDuration } from '../../../shared/utils';
 
 const Update = (track: Track, tag: ResultTag): Track => {

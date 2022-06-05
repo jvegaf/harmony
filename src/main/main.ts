@@ -17,7 +17,7 @@ import { GetFilesFrom } from './services/fileManager';
 import { GetTracks } from './services/track/trackManager';
 import { resolveHtmlPath } from './util';
 import { MenuCommand } from '../shared/types/emusik';
-import FixTags from './services/tagger/Tagger';
+import FixTags, { FixTracks } from './services/tagger/Tagger';
 
 export default class AppUpdater {
   constructor() {
@@ -143,7 +143,7 @@ ipcMain.on('ipc-example', async (event, arg) => {
   // const response = await SearchYtTags('Stop The Beat', 'Angel Heredia');
   // console.log(response);
   // getDevTracks('/home/samsepi0l/Documents/colocadas');
-  getDevTracks('C:\\Users\\josev\\Documents\\nuevas_mayo');
+  getDevTracks('C:\\Users\\josev\\Desktop\\nuevas-mayo-junio\\nuevas_junio');
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
@@ -195,7 +195,9 @@ ipcMain.on('show-context-menu', (event, track) => {
   menu.popup(BrowserWindow.fromWebContents(event.sender));
 });
 
-ipcMain.on('fix-tags', async (event, track) => {
-  const trackUdpated = await FixTags(track);
-  mainWindow?.webContents.send('context-menu-command', MenuCommand.FIX_TAGS, trackUdpated);
+ipcMain.on('fix-tracks', async (e, tracks) => {
+  console.log(`fixing ${tracks.length} tracks`);
+  const fixedTracks = await FixTracks(tracks);
+
+  mainWindow?.webContents.send('tracks-fixed', fixedTracks);
 });

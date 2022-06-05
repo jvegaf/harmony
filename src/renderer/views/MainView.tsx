@@ -28,12 +28,19 @@ const MainView = () => {
   const { classes } = useStyles();
   const { height } = useViewportSize();
   const [tHeight, setTHheight] = useState(0);
-  const { tracks, showCtxMenu, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } = useAppState();
+  const { tracks, showCtxMenu, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail, updateTrack } =
+    useAppState();
 
   useEffect(() => {
     const newHeight = height - 100;
     setTHheight(newHeight);
   }, [height]);
+
+  const detailProps = {
+    track: trackDetail,
+    endCB: () => setTrackDetail(null),
+    saveTags: updateTrack,
+  };
 
   const tlprops = {
     tHeight,
@@ -49,7 +56,7 @@ const MainView = () => {
         <AppHeader />
       </div>
       <div className={classes.content}>
-        {trackDetail ? <TrackDetail track={trackDetail} endCB={setTrackDetail} /> : <TrackList {...tlprops} />}
+        {trackDetail ? <TrackDetail {...detailProps} /> : <TrackList {...tlprops} />}
       </div>
     </div>
   );

@@ -44,13 +44,13 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
   const durRounded = Math.round(duration);
   const bpResults = await SearchTags(title, artist);
   console.log(`TOTAL BP RESULTS: ${bpResults.length}`);
-  if (bpResults.length < 1) {
+  if (!bpResults.length) {
     return null;
   }
   const resultsFiltered = bpResults.filter(
     result => result.duration >= durRounded - 10 && result.duration <= durRounded + 10
   );
-  console.log(`BP RESULTS FILTERED: ${resultsFiltered.length}`);
+  // console.log(`BP RESULTS FILTERED: ${resultsFiltered.length}`);
   if (resultsFiltered.length < 2) {
     return {
       tag: resultsFiltered[0],
@@ -77,12 +77,31 @@ const GetWebTrackInfo = async (track: Track): Promise<void> => {
 };
 
 const FixTags = async (track: Track): Promise<Track> => {
-  const result = await SearchOnBeatport(track);
-  if (result === null) {
-    GetWebTrackInfo(track);
-    return track;
+  let fixedTrack = null;
+  try {
+    const result = await SearchOnBeatport(track);
+    if (!result) {
+      // GetWebTrackInfo(track);
+      console.log(`no match for ${track.title}`);
+      fixedTrack = track;
+    } else {
+      fixedTrack = Update(track, result.tag);
+    }
+  } catch (error) {
+    console.log(`fixing track ${track.title} failed: ${error}`);
+    // console.error(error);
+    fixedTrack = track;
   }
-  return Update(track, result.tag);
+
+  return fixedTrack;
+};
+
+export const FixTracks = async (tracks: Track[]): Promise<Array<Track>> => {
+  const updated = [];
+  tracks.forEach(track => {
+    updated.push(FixTags(track));
+  });
+  return Promise.all(updated);
 };
 
 export default FixTags;

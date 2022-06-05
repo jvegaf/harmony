@@ -9,6 +9,7 @@ import { Track } from '../../shared/types/emusik';
 interface TrackDetailProps {
   track: Track;
   endCB: () => void;
+  saveTags: (track: Track) => void;
 }
 
 const useStyles = createStyles(theme => ({
@@ -29,7 +30,7 @@ const useStyles = createStyles(theme => ({
 }));
 
 const TrackDetail: React.FC<TrackDetailProps> = props => {
-  const { track, endCB } = props;
+  const { track, endCB, saveTags } = props;
   const form = useForm({
     initialValues: {
       title: track.title,
@@ -45,18 +46,36 @@ const TrackDetail: React.FC<TrackDetailProps> = props => {
 
   const { classes } = useStyles();
 
-  const getArtData = artwork => {
-    console.log(artwork);
+  const getArtData = t => {
+    if (t.artworkUrl) {
+      console.log('artworkUrl', t.artworkUrl);
+      return t.artworkUrl;
+    }
 
-    const blob = new Blob([artwork.imageBuffer], {
-      type: artwork.mime,
-    });
-    return URL.createObjectURL(blob);
+    if (t.artwork) {
+      console.log(t.artwork);
+
+      const blob = new Blob([t.artwork.imageBuffer], {
+        type: t.artwork.mime,
+      });
+      return URL.createObjectURL(blob);
+    }
+
+    return Placeholder;
   };
 
   const onCancel = () => endCB();
 
-  const onSave = values => console.log(values);
+  const onSave = values => {
+    track.title = values.title;
+    track.artist = values.artist;
+    track.album = values.album;
+    track.genre = values.genre;
+    track.bpm = values.bpm;
+    track.key = values.key;
+    track.year = values.year;
+    saveTags(track);
+  };
 
   return (
     <Container size="sm" style={{ marginTop: 50 }}>
@@ -68,10 +87,7 @@ const TrackDetail: React.FC<TrackDetailProps> = props => {
           <Grid columns={24} gutter="lg">
             <Grid.Col span={12}>
               <Center>
-                {track.artwork === undefined && <Image src={Placeholder} radius="md" width={250} height={250} />}
-                {track.artwork !== undefined && (
-                  <Image src={getArtData(track.artwork)} radius="md" width={250} height={250} />
-                )}
+                <Image src={getArtData(track)} radius="md" width={250} height={250} />
               </Center>
             </Grid.Col>
             <Grid.Col span={12}>
