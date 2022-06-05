@@ -16,6 +16,9 @@ const useStyles = createStyles(theme => ({
     flexDirection: 'column',
     backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
   },
+  header: {
+    minHeight: 70,
+  },
   content: {
     flexGrow: 1,
   },
@@ -33,7 +36,7 @@ const MainView = () => {
   }, [height]);
 
   const tlprops = {
-    tlheight: tHeight,
+    tHeight,
     tracks,
     trackPlaying,
     setTrackPlaying,
@@ -42,7 +45,9 @@ const MainView = () => {
 
   return (
     <div className={classes.main}>
-      <AppHeader />
+      <div className={classes.heaeder}>
+        <AppHeader />
+      </div>
       <div className={classes.content}>
         {trackDetail ? <TrackDetail track={trackDetail} endCB={setTrackDetail} /> : <TrackList {...tlprops} />}
       </div>

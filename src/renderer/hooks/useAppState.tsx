@@ -11,8 +11,9 @@ export default function useAppState() {
   const addTracks = (newTracks: React.SetStateAction<Track[]>) => setTracks(newTracks);
 
   const updateTrack = (track: Track) => {
-    const newTracks = tracks.map(t => (t.id === track.id ? track : t));
-    setTracks(newTracks);
+    const index = tracks.findIndex(t => t.id === track.id);
+    tracks[index] = track;
+    setTracks([...tracks]);
   };
 
   const fixTrackTags = (track: Track) => {

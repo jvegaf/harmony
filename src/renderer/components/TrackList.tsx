@@ -106,54 +106,15 @@ const getStyles = (props, align = 'left') => [
   },
 ];
 
+interface TableViewProps extends TrackListProps {
+  columns: any[];
+}
+
 // eslint-disable-next-line react/prop-types
-const TrackList: React.FC<TrackListProps> = props => {
-  const { tHeight, tracks: data, trackPlaying, setTrackPlaying, showCtxMenu } = props;
+const TableView: React.FC<TableViewProps> = props => {
+  const { tHeight, tracks: data, trackPlaying, setTrackPlaying, showCtxMenu, columns } = props;
   const [selected, setSelected] = React.useState('');
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: '#',
-        accessor: (row, i) => i,
-        width: 25,
-        align: 'center',
-      },
-      {
-        Header: 'Title',
-        accessor: 'title',
-      },
-      {
-        Header: 'Artist',
-        accessor: 'artist',
-      },
-      {
-        Header: 'Time',
-        accessor: 'time',
-        width: 25,
-        align: 'center',
-      },
-      {
-        Header: 'Album',
-        accessor: 'album',
-      },
-      {
-        Header: 'BPM',
-        accessor: 'bpm',
-        width: 25,
-      },
-      {
-        Header: 'Key',
-        accessor: 'key',
-        width: 25,
-      },
-      {
-        Header: 'Year',
-        accessor: 'year',
-        width: 25,
-      },
-    ],
-    []
-  );
+
   const defaultColumn = React.useMemo(
     () => ({
       // When using the useFlexLayout:
@@ -207,51 +168,107 @@ const TrackList: React.FC<TrackListProps> = props => {
   );
 
   return (
-    <Styles>
-      <div {...getTableProps()} className="table">
-        <div>
-          {headerGroups.map(headerGroup => (
-            <div
-              {...headerGroup.getHeaderGroupProps({
-                // style: { paddingRight: '15px' },
-              })}
-              className="tr"
-            >
-              {headerGroup.headers.map(column => (
-                <div {...column.getHeaderProps(headerProps)} className="th">
-                  {column.render('Header')}
-                  {/* Use column.getResizerProps to hook up the events correctly */}
-                  {column.canResize && (
-                    <div {...column.getResizerProps()} className={`resizer ${column.isResizing ? 'isResizing' : ''}`} />
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-        <div className="tbody" style={{ height: tHeight }}>
-          {rows.map(row => {
-            prepareRow(row);
-            return (
-              <div
-                {...row.getRowProps()}
-                className="tr"
-                onClick={e => onClick(e, row)}
-                onDoubleClick={e => onDoubleClick(e, row)}
-                onAuxClick={e => onRightClick(e, row)}
-              >
-                {row.cells.map(cell => {
-                  return (
-                    <div {...cell.getCellProps(cellProps)} className="td">
-                      {cell.render('Cell')}
-                    </div>
-                  );
-                })}
+    <div {...getTableProps()} className="table">
+      <div>
+        {headerGroups.map(headerGroup => (
+          <div
+            {...headerGroup.getHeaderGroupProps({
+              // style: { paddingRight: '15px' },
+            })}
+            className="tr"
+          >
+            {headerGroup.headers.map(column => (
+              <div {...column.getHeaderProps(headerProps)} className="th">
+                {column.render('Header')}
+                {/* Use column.getResizerProps to hook up the events correctly */}
+                {column.canResize && (
+                  <div {...column.getResizerProps()} className={`resizer ${column.isResizing ? 'isResizing' : ''}`} />
+                )}
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ))}
       </div>
+      <div className="tbody" style={{ height: tHeight }}>
+        {rows.map(row => {
+          prepareRow(row);
+          return (
+            <div
+              {...row.getRowProps()}
+              className="tr"
+              onClick={e => onClick(e, row)}
+              onDoubleClick={e => onDoubleClick(e, row)}
+              onAuxClick={e => onRightClick(e, row)}
+            >
+              {row.cells.map(cell => {
+                return (
+                  <div {...cell.getCellProps(cellProps)} className="td">
+                    {cell.render('Cell')}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const TrackList = (props: TrackListProps) => {
+  const columns = React.useMemo(
+    () => [
+      {
+        Header: '#',
+        accessor: (row, i) => i,
+        width: 25,
+        align: 'center',
+      },
+      {
+        Header: 'Title',
+        accessor: 'title',
+      },
+      {
+        Header: 'Artist',
+        accessor: 'artist',
+      },
+      {
+        Header: 'Time',
+        accessor: 'time',
+        width: 25,
+        align: 'center',
+      },
+      {
+        Header: 'Album',
+        accessor: 'album',
+      },
+      {
+        Header: 'BPM',
+        accessor: 'bpm',
+        width: 25,
+      },
+      {
+        Header: 'Key',
+        accessor: 'key',
+        width: 25,
+      },
+      {
+        Header: 'Year',
+        accessor: 'year',
+        width: 25,
+      },
+    ],
+    []
+  );
+
+  const tableprops = {
+    ...props,
+    columns,
+  };
+
+  return (
+    <Styles>
+      <TableView {...tableprops} />
     </Styles>
   );
 };
