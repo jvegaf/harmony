@@ -14,10 +14,9 @@ import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import path from 'path';
 import { GetFilesFrom } from './services/fileManager';
+import FixTags, { FixTracks } from './services/tagger/Tagger';
 import { GetTracks } from './services/track/trackManager';
 import { resolveHtmlPath } from './util';
-import { MenuCommand } from '../shared/types/emusik';
-import FixTags, { FixTracks } from './services/tagger/Tagger';
 
 export default class AppUpdater {
   constructor() {
@@ -149,45 +148,43 @@ ipcMain.on('ipc-example', async (event, arg) => {
   event.reply('ipc-example', msgTemplate('pong'));
 });
 
-ipcMain.on('open-folder', async () => {
-  const newTracks = await dialog
+ipcMain.on('open-folder', async event => {
+  await dialog
     .showOpenDialog(mainWindow as BrowserWindow, {
       properties: ['openDirectory'],
     })
     .then(result => {
-      if (result.canceled) {
-        return null;
+      if (!result.canceled) {
+        // eslint-disable-next-line promise/no-nesting
+        GetFilesFrom(result.filePaths[0])
+          .then(files => GetTracks(files))
+          .then(newTracks => event.reply('add-tracks', newTracks))
+          .catch(error => console.log(error));
       }
-      // eslint-disable-next-line promise/no-nesting
-      return GetFilesFrom(result.filePaths[0]).then(files => GetTracks(files));
     })
     .catch(err => console.log(err));
-  if (newTracks !== null) {
-    mainWindow?.webContents.send('add-tracks', newTracks);
-  }
 });
 
-ipcMain.on('show-context-menu', (event, track) => {
-  console.log(`track id: ${track.id}`);
+ipcMain.on('show-context-menu', (event, trackId) => {
+  console.log(`track id: ${trackId}`);
   const template = [
     {
       label: 'Details',
       click: () => {
-        mainWindow?.webContents.send('context-menu-command', MenuCommand.VIEW_DETAIL, track);
+        event.reply('view-detail-command', trackId);
       },
     },
     {
       label: 'Play Track',
       click: () => {
-        mainWindow?.webContents.send('context-menu-command', MenuCommand.PLAY_TRACK, track);
+        event.reply('play-command', trackId);
       },
     },
     { type: 'separator' },
     {
       label: 'Fix Tags',
-      click: async () => {
-        const trackUdpated = await FixTags(track);
-        mainWindow?.webContents.send('context-menu-command', MenuCommand.FIX_TAGS, trackUdpated);
+      click: () => {
+        event.reply('fix-track-command', trackId);
       },
     },
   ];
@@ -197,7 +194,12 @@ ipcMain.on('show-context-menu', (event, track) => {
 
 ipcMain.on('fix-tracks', async (e, tracks) => {
   console.log(`fixing ${tracks.length} tracks`);
-  const fixedTracks = await FixTracks(tracks);
+  if (tracks.length > 1) {
+    const fixedTracks = await FixTracks(tracks);
+    e.reply('tracks-fixed', fixedTracks);
+    return;
+  }
 
-  mainWindow?.webContents.send('tracks-fixed', fixedTracks);
+  const fixed = await FixTags(tracks[0]);
+  e.reply('track-fixed', fixed);
 });

@@ -46,17 +46,19 @@ const TrackDetail: React.FC<TrackDetailProps> = props => {
 
   const { classes } = useStyles();
 
-  const getArtData = t => {
-    if (t.artworkUrl) {
-      console.log('artworkUrl', t.artworkUrl);
-      return t.artworkUrl;
+  const getArtData = (t: Track) => {
+    const { artworkUrl, artwork } = t;
+
+    if (artworkUrl) {
+      console.log('artworkUrl', artworkUrl);
+      return artworkUrl;
     }
 
-    if (t.artwork) {
-      console.log(t.artwork);
+    if (artwork) {
+      console.log(artwork);
 
-      const blob = new Blob([t.artwork.imageBuffer], {
-        type: t.artwork.mime,
+      const blob = new Blob([artwork.data], {
+        type: artwork.mime,
       });
       return URL.createObjectURL(blob);
     }

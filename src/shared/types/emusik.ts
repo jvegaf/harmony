@@ -6,7 +6,7 @@ export interface Artwork {
   mime: string;
   type: { id: number; name: string };
   description: string;
-  imageBuffer: Buffer;
+  data: Buffer;
 }
 
 export interface Track {
@@ -21,6 +21,7 @@ export interface Track {
   filepath: string;
   title: string;
   year?: number;
+  bitrate?: number;
   artwork?: Artwork;
   artUrl?: string;
 }

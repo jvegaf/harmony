@@ -13,7 +13,7 @@ interface TrackListProps {
   tracks: Track[];
   trackPlaying: Track;
   setTrackPlaying: React.Dispatch<React.SetStateAction<Track>>;
-  showCtxMenu: (track: Track) => void;
+  showCtxMenu: (trackId: string) => void;
 }
 
 const Styles = styled.div`
@@ -47,6 +47,14 @@ const Styles = styled.div`
         .td {
           border-bottom: 0;
         }
+      }
+
+      &.isSelected {
+        background-color: #967a7a;
+      }
+
+      &.isPlaying {
+        background-color: #1793f8;
       }
 
       border-bottom: 1px solid gray;
@@ -136,36 +144,27 @@ const TableView: React.FC<TableViewProps> = props => {
     useRowSelect
   );
 
-  const onClick = React.useCallback(
-    (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
-      console.log('e', e);
-      console.log('row', row);
-      if (row && e.type === 'click') {
-        setSelected(data[row.id]);
-      }
+  const onClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
+    console.log('e', e);
+    console.log('row', row);
+    if (!row) return;
+    const trackId = row.original.id;
+    if (e.type === 'click') {
+      setSelected(trackId);
       console.log('selected', selected);
-    },
-    [data, selected]
-  );
+    }
 
-  const onRightClick = React.useCallback(
-    (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
-      if (row) {
-        showCtxMenu(row.original);
-        console.log('e', e);
-      }
-    },
-    [showCtxMenu]
-  );
+    if (e.type === 'auxclick') {
+      showCtxMenu(trackId);
+      console.log('trackId', trackId);
+    }
+  };
 
-  const onDoubleClick = React.useCallback(
-    (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
-      if (row) {
-        setTrackPlaying(row.original);
-      }
-    },
-    [setTrackPlaying]
-  );
+  const onDoubleClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
+    if (row) {
+      setTrackPlaying(row.original);
+    }
+  };
 
   return (
     <div {...getTableProps()} className="table">
@@ -195,10 +194,12 @@ const TableView: React.FC<TableViewProps> = props => {
           return (
             <div
               {...row.getRowProps()}
-              className="tr"
               onClick={e => onClick(e, row)}
+              onAuxClick={e => onClick(e, row)}
               onDoubleClick={e => onDoubleClick(e, row)}
-              onAuxClick={e => onRightClick(e, row)}
+              className={`tr 
+                ${row.original.id === selected ? 'isSelected' : ''} 
+                ${row.original === trackPlaying ? 'isPlaying' : ''}`}
             >
               {row.cells.map(cell => {
                 return (
@@ -241,6 +242,11 @@ const TrackList = (props: TrackListProps) => {
       {
         Header: 'Album',
         accessor: 'album',
+      },
+      {
+        Header: 'Bit Rate',
+        accessor: 'bitrate',
+        width: 25,
       },
       {
         Header: 'BPM',

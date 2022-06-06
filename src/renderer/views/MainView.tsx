@@ -4,6 +4,7 @@ import { createStyles } from '@mantine/core';
 import { useViewportSize } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
 import useAppState from 'renderer/hooks/useAppState';
+import { MenuCommand } from '../../shared/types/emusik';
 import AppHeader from '../components/AppHeader';
 import TrackDetail from '../components/TrackDetail';
 import TrackList from '../components/TrackList';
@@ -28,8 +29,17 @@ const MainView = () => {
   const { classes } = useStyles();
   const { height } = useViewportSize();
   const [tHeight, setTHheight] = useState(0);
-  const { tracks, showCtxMenu, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail, updateTrack } =
-    useAppState();
+  const {
+    tracks,
+    addTracks,
+    showCtxMenu,
+    fixTrack,
+    trackPlaying,
+    setTrackPlaying,
+    trackDetail,
+    setTrackDetail,
+    updateTrack,
+  } = useAppState();
 
   useEffect(() => {
     const newHeight = height - 100;
@@ -61,5 +71,24 @@ const MainView = () => {
     </div>
   );
 };
+
+window.electron.ipcRenderer.on('context-menu-command', (command: MenuCommand, trackId: string) => {
+  switch (command) {
+    case MenuCommand.PLAY_TRACK:
+      setTrackPlaying(tracks.find(t => t.id === trackId));
+      break;
+
+    case MenuCommand.VIEW_DETAIL:
+      setTrackDetail(tracks.find(t => t.id === trackId));
+      break;
+
+    case MenuCommand.FIX_TAGS:
+      fixTrack(trackId);
+      break;
+
+    default:
+      break;
+  }
+});
 
 export default MainView;

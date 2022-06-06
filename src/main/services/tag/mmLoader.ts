@@ -4,6 +4,7 @@ import * as mm from 'music-metadata';
 
 export interface FileTags extends mm.ICommonTagsResult {
   duration: number;
+  bitrate: number;
 }
 
 const LoadTagsFromFile = async (file: string): Promise<?FileTags> => {

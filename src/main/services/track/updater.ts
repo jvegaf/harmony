@@ -1,7 +1,10 @@
 import { ResultTag, Track } from '../../../shared/types/emusik';
 import { ParseDuration } from '../../../shared/utils';
+import PersistTrack from '../tag/nodeId3Saver';
 
-const Update = (track: Track, tag: ResultTag): Track => {
+const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
+  if (!tag) return track;
+
   track.title = tag.title;
   track.artist = tag.artist;
   track.album = tag.album;
@@ -12,6 +15,13 @@ const Update = (track: Track, tag: ResultTag): Track => {
   track.key = tag.key;
   track.genre = tag.genre;
   track.artworkUrl = tag.artworkUrl;
+
+  try {
+    await PersistTrack(track);
+  } catch (error) {
+    log.error(error);
+  }
+
   return track;
 };
 

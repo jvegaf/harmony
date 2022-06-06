@@ -6,33 +6,48 @@ export default function useAppState() {
   const { tracks, setTracks, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } =
     React.useContext(AppContext);
 
-  const openFolder = () => window.electron.ipcRenderer.openFolder();
+  const { ipcRenderer } = window.electron;
 
-  const fixTracks = (trks: Track[]) => window.electron.ipcRenderer.fixTracks(trks);
+  const openFolder = React.useCallback(() => ipcRenderer.openFolder(), [ipcRenderer]);
+  const fixTracks = React.useCallback((trks: Track[]) => ipcRenderer.fixTracks(trks), [ipcRenderer]);
 
-  const addTracks = (newTracks: React.SetStateAction<Track[]>) => setTracks(newTracks);
+  const fixTrack = React.useCallback(
+    (id: string) => {
+      const track = tracks.find(t => t.id === id);
+      fixTracks([track]);
+    },
+    [fixTracks, tracks]
+  );
 
-  const updateTrack = (track: Track) => {
-    const index = tracks.findIndex(t => t.id === track.id);
-    tracks[index] = track;
-    setTracks([...tracks]);
-    if (trackDetail && trackDetail.id === track.id) {
-      setTrackDetail(null);
-    }
-  };
+  const addTracks = React.useCallback(
+    (newTracks: React.SetStateAction<Track[]>) => {
+      setTracks(newTracks);
+    },
+    [setTracks]
+  );
 
-  const showCtxMenu = (track: Track) => {
-    window.electron.ipcRenderer.showContextMenu(t);
-  };
+  const updateTrack = React.useCallback(
+    (track: Track) => {
+      const index = tracks.findIndex(t => t.id === track.id);
+      tracks[index] = track;
+      setTracks([...tracks]);
+      if (trackDetail && trackDetail.id === track.id) {
+        setTrackDetail(null);
+      }
+    },
+    [tracks, setTracks, trackDetail, setTrackDetail]
+  );
+
+  const showCtxMenu = React.useCallback((trackId: string) => ipcRenderer.showContextMenu(trackId), [ipcRenderer]);
 
   const fixAllTracks = () => fixTracks(tracks);
-
-  // calling IPC exposed from preload script
-  window.electron.ipcRenderer.on('add-tracks', (newTracks: Track[]) => {
+  ipcRenderer.on('add-tracks', (newTracks: Track[]) => {
     addTracks(newTracks);
   });
 
-  window.electron.ipcRenderer.on('tracks-fixed', (fixedTracks: Track[]) => {
+  ipcRenderer.on('track-fixed', track => updateTrack(track));
+
+  ipcRenderer.on('tracks-fixed', (fixedTracks: Track[]) => {
     // eslint-disable-next-line no-console
     console.log(`fixed ${fixedTracks.length} tracks`);
     const newTracks = tracks.map(t => {
@@ -45,23 +60,16 @@ export default function useAppState() {
     addTracks(newTracks);
   });
 
-  window.electron.ipcRenderer.on('context-menu-command', (command: MenuCommand, track: Track) => {
-    switch (command) {
-      case MenuCommand.PLAY_TRACK:
-        setTrackPlaying(track);
-        break;
+  ipcRenderer.on('play-command', (trackId: string) => {
+    setTrackPlaying(tracks.find(t => t.id === trackId));
+  });
 
-      case MenuCommand.FIX_TAGS:
-        updateTrack(track);
-        break;
+  ipcRenderer.on('fix-track-command', (trackId: string) => {
+    fixTrack(trackId);
+  });
 
-      case MenuCommand.VIEW_DETAIL:
-        setTrackDetail(track);
-        break;
-
-      default:
-        break;
-    }
+  ipcRenderer.on('view-detail-command', (trackId: string) => {
+    setTrackDetail(tracks.find(t => t.id === trackId));
   });
 
   return {
@@ -70,6 +78,8 @@ export default function useAppState() {
     setTrackPlaying,
     trackDetail,
     setTrackDetail,
+    addTracks,
+    fixTrack,
     updateTrack,
     openFolder,
     showCtxMenu,

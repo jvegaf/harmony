@@ -6,7 +6,7 @@ declare global {
       ipcRenderer: {
         myPing(): void;
         openFolder(): void;
-        showContextMenu(track: Track): void;
+        showContextMenu(trackId: string): void;
         fixTracks(tracks: Track[]): void;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         on(channel: string, func: (...args: any[]) => void): void;

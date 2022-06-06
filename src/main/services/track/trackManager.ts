@@ -3,8 +3,8 @@
 import * as Path from 'path';
 import { v4 as uuid } from 'uuid';
 import { Sanitize, ParseDuration } from '../../../shared/utils';
-import { Track } from '../../../shared/types/emusik';
-import LoadTagsFromFile from '../tag/loader';
+import { Artwork, Track } from '../../../shared/types/emusik';
+import LoadTagsFromFile, { FileTags } from '../tag/mmLoader';
 
 const getFilename = (filepath: string) => {
   return Path.basename(filepath, '.mp3');
@@ -14,12 +14,25 @@ const sanitizeFilename = (filename: string) => {
   return Sanitize(filename).replaceAll('-', ' ').split('_').join(' ').trim();
 };
 
-const trackTitle = (title: string | undefined, filepath: string) => {
+const GetTrackTitle = (title: string | undefined, filepath: string) => {
   if (title && title.length) {
     return title;
   }
   const filename = getFilename(filepath);
   return sanitizeFilename(filename);
+};
+
+const GetArtwork = (tags: FileTags): Artwork | null => {
+  const { picture } = tags;
+  if (picture?.length) {
+    return {
+      mime: picture[0].format,
+      type: { id: 3, name: 'front cover' },
+      description: picture[0].description,
+      data: picture[0].data,
+    };
+  }
+  return null;
 };
 
 const CreateTrack = async (file: string): Promise<?Track> => {
@@ -38,8 +51,10 @@ const CreateTrack = async (file: string): Promise<?Track> => {
     duration: tags.duration,
     time: ParseDuration(tags.duration),
     filepath: file,
-    title: trackTitle(tags.title, file),
+    title: GetTrackTitle(tags.title, file),
     year: tags.year,
+    artwork: GetArtwork(tags),
+    bitrate: tags.bitrate,
   };
   return track;
 };

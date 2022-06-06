@@ -9,8 +9,8 @@ contextBridge.exposeInMainWorld('electron', {
     openFolder() {
       ipcRenderer.send('open-folder');
     },
-    showContextMenu(track: Track) {
-      ipcRenderer.send('show-context-menu', track);
+    showContextMenu(trackId: string) {
+      ipcRenderer.send('show-context-menu', trackId);
     },
     fixTracks(tracks: Track[]) {
       ipcRenderer.send('fix-tracks', tracks);
@@ -18,7 +18,15 @@ contextBridge.exposeInMainWorld('electron', {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(channel: string, func: (...args: any[]) => void) {
-      const validChannels = ['ipc-example', 'add-tracks', 'context-menu-command', 'tracks-fixed'];
+      const validChannels = [
+        'ipc-example',
+        'add-tracks',
+        'track-fixed',
+        'tracks-fixed',
+        'view-detail-command',
+        'play-command',
+        'fix-track-command',
+      ];
       if (validChannels.includes(channel)) {
         // Deliberately strip event as it includes `sender`
         ipcRenderer.on(channel, (_event, ...args) => func(...args));
@@ -26,7 +34,15 @@ contextBridge.exposeInMainWorld('electron', {
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     once(channel: string, func: (...args: any[]) => void) {
-      const validChannels = ['ipc-example', 'add-tracks', 'context-menu-command'];
+      const validChannels = [
+        'ipc-example',
+        'add-tracks',
+        'track-fixed',
+        'tracks-fixed',
+        'view-detail-command',
+        'play-command',
+        'fix-track-command',
+      ];
       if (validChannels.includes(channel)) {
         // Deliberately strip event as it includes `sender`
         ipcRenderer.once(channel, (_event, ...args) => func(...args));
