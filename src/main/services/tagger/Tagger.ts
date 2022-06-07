@@ -4,7 +4,7 @@ import { GetStringTokens } from '../../../shared/utils';
 import Update from '../track/updater';
 // import SearchYtTags from './youtube';
 import SearchTags from './beatport';
-import SearchTrackInfo from './google';
+// import SearchTrackInfo from './google';
 
 // const SearchTagsYt = (track: Track) => {
 //   const { title, artist } = track;
@@ -43,7 +43,6 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
   const trackTokens = GetStringTokens(reqAggregate);
   const durRounded = Math.round(duration);
   const bpResults = await SearchTags(title, artist);
-  console.log(`TOTAL BP RESULTS: ${bpResults.length}`);
   if (!bpResults.length) {
     return null;
   }
@@ -60,24 +59,23 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
     };
   }
   const match = Match(trackTokens, resultsFiltered);
-  console.log(`MATCH: ${match.matches} / ${match.of}`);
   return match;
 };
 
-const GetWebTrackInfo = async (track: Track): Promise<void> => {
-  const { title, artist } = track;
-  const { results } = await SearchTrackInfo(title, artist);
-  // console.log(result);
-  const shazam = results.filter(r => r.url.includes('shazam.com'));
-  console.log('shazam results: ', shazam);
-  const yt = results.filter(r => r.url.includes('music.youtube.com'));
-  console.log('yt results: ', yt);
-  const traxsource = results.filter(r => r.url.includes('traxsource.com'));
-  console.log('traxsource results: ', traxsource);
-};
+// const GetWebTrackInfo = async (track: Track): Promise<void> => {
+//   const { title, artist } = track;
+//   const { results } = await SearchTrackInfo(title, artist);
+//   // console.log(result);
+//   const shazam = results.filter(r => r.url.includes('shazam.com'));
+//   console.log('shazam results: ', shazam);
+//   const yt = results.filter(r => r.url.includes('music.youtube.com'));
+//   console.log('yt results: ', yt);
+//   const traxsource = results.filter(r => r.url.includes('traxsource.com'));
+//   console.log('traxsource results: ', traxsource);
+// };
 
 const FixTags = async (track: Track): Promise<Track> => {
-  let fixedTrack = null;
+  let fixedTrack;
   try {
     const result = await SearchOnBeatport(track);
     if (!result) {
@@ -96,8 +94,8 @@ const FixTags = async (track: Track): Promise<Track> => {
   return fixedTrack;
 };
 
-export const FixTracks = async (tracks: Track[]): Promise<Array<Track>> => {
-  const updated = [];
+export const FixTracks = async (tracks: Track[]) => {
+  const updated: Array<Promise<Track>> = [];
   tracks.forEach(track => {
     updated.push(FixTags(track));
   });

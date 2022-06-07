@@ -1,29 +1,34 @@
-import React from 'react';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+import React, { useContext } from 'react';
 import AppContext from 'renderer/context/AppContext';
-import { MenuCommand, Track } from 'shared/types/emusik';
+import { Track } from 'shared/types/emusik';
 
 export default function useAppState() {
-  const { tracks, setTracks, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } =
-    React.useContext(AppContext);
+  const { tracks, setTracks, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } = useContext(AppContext);
 
-  const { ipcRenderer } = window.electron;
+  const { fixTrack, fixTracks, on, openFolder, showContextMenu } = window.electron.ipcRenderer;
 
-  const openFolder = React.useCallback(() => ipcRenderer.openFolder(), [ipcRenderer]);
-  const fixTracks = React.useCallback((trks: Track[]) => ipcRenderer.fixTracks(trks), [ipcRenderer]);
+  const onOpenFolder = React.useCallback(async () => {
+    const newTracks = await openFolder();
+    if (!newTracks) return;
 
-  const fixTrack = React.useCallback(
-    (id: string) => {
-      const track = tracks.find(t => t.id === id);
-      fixTracks([track]);
+    setTracks(newTracks);
+  }, [openFolder, setTracks]);
+
+  const onFixTracks = React.useCallback(
+    async (trks: Track[]) => {
+      const fixedTracks = await fixTracks(trks);
+      const updTracks = tracks.map(t => {
+        const fixedTrack = fixedTracks.find(ft => ft.id === t.id);
+        if (fixedTrack) {
+          return fixedTrack;
+        }
+        return t;
+      });
+      setTracks(updTracks);
     },
-    [fixTracks, tracks]
-  );
-
-  const addTracks = React.useCallback(
-    (newTracks: React.SetStateAction<Track[]>) => {
-      setTracks(newTracks);
-    },
-    [setTracks]
+    [fixTracks, setTracks, tracks]
   );
 
   const updateTrack = React.useCallback(
@@ -38,39 +43,24 @@ export default function useAppState() {
     [tracks, setTracks, trackDetail, setTrackDetail]
   );
 
-  const showCtxMenu = React.useCallback((trackId: string) => ipcRenderer.showContextMenu(trackId), [ipcRenderer]);
+  const onFixTrack = React.useCallback(
+    async (id: string) => {
+      const track = tracks.find(t => t.id === id);
+      const updated = await fixTrack(track);
+      updateTrack(updated);
+    },
+    [fixTrack, tracks, updateTrack]
+  );
 
-  const fixAllTracks = () => fixTracks(tracks);
-  ipcRenderer.on('add-tracks', (newTracks: Track[]) => {
-    addTracks(newTracks);
-  });
+  const showCtxMenu = React.useCallback((trackId: string) => showContextMenu(trackId), [showContextMenu]);
 
-  ipcRenderer.on('track-fixed', track => updateTrack(track));
+  const onFixAllTracks = React.useCallback(() => onFixTracks(tracks), [onFixTracks, tracks]);
 
-  ipcRenderer.on('tracks-fixed', (fixedTracks: Track[]) => {
-    // eslint-disable-next-line no-console
-    console.log(`fixed ${fixedTracks.length} tracks`);
-    const newTracks = tracks.map(t => {
-      const fixedTrack = fixedTracks.find(ft => ft.id === t.id);
-      if (fixedTrack) {
-        return fixedTrack;
-      }
-      return t;
-    });
-    addTracks(newTracks);
-  });
+  on('view-detail-command', (trackId: string) => setTrackDetail(tracks.find(t => t.id === trackId)));
 
-  ipcRenderer.on('play-command', (trackId: string) => {
-    setTrackPlaying(tracks.find(t => t.id === trackId));
-  });
+  on('play-command', (trackId: string) => setTrackPlaying(tracks.find(t => t.id === trackId)));
 
-  ipcRenderer.on('fix-track-command', (trackId: string) => {
-    fixTrack(trackId);
-  });
-
-  ipcRenderer.on('view-detail-command', (trackId: string) => {
-    setTrackDetail(tracks.find(t => t.id === trackId));
-  });
+  on('fix-track-command', (trackId: string) => onFixTrack(trackId));
 
   return {
     tracks,
@@ -78,11 +68,11 @@ export default function useAppState() {
     setTrackPlaying,
     trackDetail,
     setTrackDetail,
-    addTracks,
-    fixTrack,
+    onFixTrack,
+    onFixTracks,
+    onFixAllTracks,
     updateTrack,
-    openFolder,
+    onOpenFolder,
     showCtxMenu,
-    fixAllTracks,
   };
 }

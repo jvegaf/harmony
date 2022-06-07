@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint global-require: off, no-console: off, promise/always-return: off */
-
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 /**
  * This module executes inside of electron's main process. You can start
  * electron renderer process from here and communicate with the other processes
@@ -25,6 +26,8 @@ export default class AppUpdater {
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
+
+process.on('warning', e => console.warn(e.stack));
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -52,15 +55,6 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
-const getDevTracks = async (musicPath: string) => {
-  const newTracks = await GetFilesFrom(musicPath).then(files =>
-    // eslint-disable-next-line promise/no-nesting
-    GetTracks(files).catch(err => console.log(err))
-  );
-
-  mainWindow?.webContents.send('add-tracks', newTracks);
-};
-
 const createWindow = async () => {
   if (isDevelopment) {
     await installExtensions();
@@ -81,6 +75,7 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     webPreferences: {
       webSecurity: false,
+      contextIsolation: true,
       preload: app.isPackaged ? path.join(__dirname, 'preload.js') : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
@@ -142,27 +137,11 @@ ipcMain.on('ipc-example', async (event, arg) => {
   // const response = await SearchYtTags('Stop The Beat', 'Angel Heredia');
   // console.log(response);
   // getDevTracks('/home/samsepi0l/Documents/colocadas');
-  getDevTracks('C:\\Users\\josev\\Desktop\\nuevas-mayo-junio\\nuevas_junio');
+  // getDevTracks('C:\\Users\\josev\\Desktop\\nuevas-mayo-junio\\nuevas_junio');
+  // getDevTracks('C:\\Users\\jevf\\My Private Documents\\nuevas-mayo-junio');
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-});
-
-ipcMain.on('open-folder', async event => {
-  await dialog
-    .showOpenDialog(mainWindow as BrowserWindow, {
-      properties: ['openDirectory'],
-    })
-    .then(result => {
-      if (!result.canceled) {
-        // eslint-disable-next-line promise/no-nesting
-        GetFilesFrom(result.filePaths[0])
-          .then(files => GetTracks(files))
-          .then(newTracks => event.reply('add-tracks', newTracks))
-          .catch(error => console.log(error));
-      }
-    })
-    .catch(err => console.log(err));
+  event.sender.send('ipc-example', msgTemplate('pong'));
 });
 
 ipcMain.on('show-context-menu', (event, trackId) => {
@@ -171,20 +150,20 @@ ipcMain.on('show-context-menu', (event, trackId) => {
     {
       label: 'Details',
       click: () => {
-        event.reply('view-detail-command', trackId);
+        event.sender.send('view-detail-command', trackId);
       },
     },
     {
       label: 'Play Track',
       click: () => {
-        event.reply('play-command', trackId);
+        event.sender.send('play-command', trackId);
       },
     },
     { type: 'separator' },
     {
       label: 'Fix Tags',
       click: () => {
-        event.reply('fix-track-command', trackId);
+        event.sender.send('fix-track-command', trackId);
       },
     },
   ];
@@ -192,14 +171,26 @@ ipcMain.on('show-context-menu', (event, trackId) => {
   menu.popup(BrowserWindow.fromWebContents(event.sender));
 });
 
-ipcMain.on('fix-tracks', async (e, tracks) => {
-  console.log(`fixing ${tracks.length} tracks`);
-  if (tracks.length > 1) {
-    const fixedTracks = await FixTracks(tracks);
-    e.reply('tracks-fixed', fixedTracks);
-    return;
-  }
+ipcMain.handle('open-folder', async event => {
+  const resultPath = await dialog.showOpenDialog(mainWindow as BrowserWindow, {
+    properties: ['openDirectory'],
+  });
 
-  const fixed = await FixTags(tracks[0]);
-  e.reply('track-fixed', fixed);
+  if (resultPath.canceled) return null;
+
+  const files = await GetFilesFrom(resultPath.filePaths[0]);
+  const tracks = await GetTracks(files);
+  return tracks;
+});
+
+ipcMain.handle('fix-track', async (e, track) => {
+  const updated = await FixTags(track);
+  return updated;
+});
+
+ipcMain.handle('fix-tracks', async (e, tracks) => {
+  console.log(`fixing ${tracks.length} tracks`);
+  const fixed = await FixTracks(tracks);
+  console.log(`fixed ${fixed.length} tracks`);
+  return fixed;
 });

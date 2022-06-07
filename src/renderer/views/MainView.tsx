@@ -1,10 +1,9 @@
-/* eslint-disable no-console */
 /* eslint-disable react/jsx-props-no-spreading */
 import { createStyles } from '@mantine/core';
 import { useViewportSize } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
+import OnBoarding from 'renderer/components/OnBoarding';
 import useAppState from 'renderer/hooks/useAppState';
-import { MenuCommand } from '../../shared/types/emusik';
 import AppHeader from '../components/AppHeader';
 import TrackDetail from '../components/TrackDetail';
 import TrackList from '../components/TrackList';
@@ -29,17 +28,9 @@ const MainView = () => {
   const { classes } = useStyles();
   const { height } = useViewportSize();
   const [tHeight, setTHheight] = useState(0);
-  const {
-    tracks,
-    addTracks,
-    showCtxMenu,
-    fixTrack,
-    trackPlaying,
-    setTrackPlaying,
-    trackDetail,
-    setTrackDetail,
-    updateTrack,
-  } = useAppState();
+  const { tracks, showCtxMenu, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail, updateTrack } =
+    useAppState();
+  const [content, setContent] = useState(<OnBoarding />);
 
   useEffect(() => {
     const newHeight = height - 100;
@@ -52,43 +43,29 @@ const MainView = () => {
     saveTags: updateTrack,
   };
 
-  const tlprops = {
-    tHeight,
-    tracks,
-    trackPlaying,
-    setTrackPlaying,
-    showCtxMenu,
-  };
+  useEffect(() => {
+    const tlprops = {
+      tHeight,
+      tracks,
+      trackPlaying,
+      setTrackPlaying,
+      showCtxMenu,
+    };
+    if (tracks.length > 0) {
+      setContent(<TrackList {...tlprops} />);
+    }
+
+    return () => setContent(<OnBoarding />);
+  }, [setTrackPlaying, showCtxMenu, tHeight, trackPlaying, tracks]);
 
   return (
     <div className={classes.main}>
-      <div className={classes.heaeder}>
+      <div className={classes.header}>
         <AppHeader />
       </div>
-      <div className={classes.content}>
-        {trackDetail ? <TrackDetail {...detailProps} /> : <TrackList {...tlprops} />}
-      </div>
+      <div className={classes.content}>{trackDetail ? <TrackDetail {...detailProps} /> : content}</div>
     </div>
   );
 };
-
-window.electron.ipcRenderer.on('context-menu-command', (command: MenuCommand, trackId: string) => {
-  switch (command) {
-    case MenuCommand.PLAY_TRACK:
-      setTrackPlaying(tracks.find(t => t.id === trackId));
-      break;
-
-    case MenuCommand.VIEW_DETAIL:
-      setTrackDetail(tracks.find(t => t.id === trackId));
-      break;
-
-    case MenuCommand.FIX_TAGS:
-      fixTrack(trackId);
-      break;
-
-    default:
-      break;
-  }
-});
 
 export default MainView;

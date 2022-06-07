@@ -5,7 +5,7 @@
 export interface Artwork {
   mime: string;
   type: { id: number; name: string };
-  description: string;
+  description?: string;
   data: Buffer;
 }
 
@@ -13,7 +13,7 @@ export interface Track {
   id: string;
   album?: string;
   artist?: string;
-  bpm?: string;
+  bpm?: number;
   genre?: string;
   key?: string;
   duration: number;

@@ -3,6 +3,8 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import React from 'react';
 import styled from 'styled-components';
 import { useTable, useResizeColumns, useFlexLayout, useRowSelect } from 'react-table';
@@ -39,8 +41,16 @@ const Styles = styled.div`
     }
 
     .tr {
+      :nth-child(even) {
+        background-color: #23292b;
+      }
+
+      :nth-child(odd) {
+        background-color: #2e3436;
+      }
+
       :hover {
-        background-color: #313030;
+        background-color: #796868;
       }
 
       :last-child {
@@ -56,16 +66,24 @@ const Styles = styled.div`
       &.isPlaying {
         background-color: #1793f8;
       }
+    }
 
-      border-bottom: 1px solid gray;
+    .td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .th {
+      background-color: #23292b;
+      color: #eeeeee;
     }
 
     .th,
     .td {
       margin: 0;
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 1rem;
       user-select: none;
-
       :first-child {
         padding: 0.4rem 0.5rem;
       }
@@ -82,8 +100,8 @@ const Styles = styled.div`
 
       .resizer {
         right: 0;
-        background: blue;
-        width: 5px;
+        background: #464849;
+        width: 2px;
         height: 100%;
         position: absolute;
         top: 0;
@@ -92,7 +110,7 @@ const Styles = styled.div`
         touch-action :none;
 
         &.isResizing {
-          background: red;
+          background: #5a878a;
         }
       }
     }
@@ -219,12 +237,12 @@ const TableView: React.FC<TableViewProps> = props => {
 const TrackList = (props: TrackListProps) => {
   const columns = React.useMemo(
     () => [
-      {
-        Header: '#',
-        accessor: (row, i) => i,
-        width: 25,
-        align: 'center',
-      },
+      //   {
+      //     Header: '#',
+      //     accessor: (row, i) => i,
+      //     width: 25,
+      //     align: 'center',
+      //   },
       {
         Header: 'Title',
         accessor: 'title',
@@ -244,7 +262,7 @@ const TrackList = (props: TrackListProps) => {
         accessor: 'album',
       },
       {
-        Header: 'Bit Rate',
+        Header: 'Rate',
         accessor: 'bitrate',
         width: 25,
       },
