@@ -28,9 +28,19 @@ const MainView = () => {
   const { classes } = useStyles();
   const { height } = useViewportSize();
   const [tHeight, setTHheight] = useState(0);
-  const { tracks, showCtxMenu, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail, updateTrack } =
+  const { tracks, showCtxMenu, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail, updateTrack, onFixTrack } =
     useAppState();
   const [content, setContent] = useState(<OnBoarding />);
+
+  window.electron.ipcRenderer.on('view-detail-command', (trackId: string) =>
+    setTrackDetail(tracks.find(t => t.id === trackId))
+  );
+
+  window.electron.ipcRenderer.on('play-command', (trackId: string) =>
+    setTrackPlaying(tracks.find(t => t.id === trackId))
+  );
+
+  window.electron.ipcRenderer.on('fix-track-command', (trackId: string) => onFixTrack(trackId));
 
   useEffect(() => {
     const newHeight = height - 100;

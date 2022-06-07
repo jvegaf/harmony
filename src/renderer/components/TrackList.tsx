@@ -72,11 +72,13 @@ const Styles = styled.div`
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      font-size: medium;
     }
 
     .th {
       background-color: #23292b;
       color: #eeeeee;
+      font-size: small;
     }
 
     .th,
@@ -163,6 +165,7 @@ const TableView: React.FC<TableViewProps> = props => {
   );
 
   const onClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
+    e.preventDefault();
     console.log('e', e);
     console.log('row', row);
     if (!row) return;
@@ -176,11 +179,10 @@ const TableView: React.FC<TableViewProps> = props => {
       showCtxMenu(trackId);
       console.log('trackId', trackId);
     }
-  };
 
-  const onDoubleClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
-    if (row) {
+    if (e.type === 'dblclick') {
       setTrackPlaying(row.original);
+      console.log('trackId', trackId);
     }
   };
 
@@ -214,7 +216,7 @@ const TableView: React.FC<TableViewProps> = props => {
               {...row.getRowProps()}
               onClick={e => onClick(e, row)}
               onAuxClick={e => onClick(e, row)}
-              onDoubleClick={e => onDoubleClick(e, row)}
+              onDoubleClick={e => onClick(e, row)}
               className={`tr 
                 ${row.original.id === selected ? 'isSelected' : ''} 
                 ${row.original === trackPlaying ? 'isPlaying' : ''}`}

@@ -6,6 +6,10 @@ const GetArtwork = async (url: string): Promise<Artwork> => {
 
   const response = await fetch(url);
   const buffer = await response.buffer();
+
+  // eslint-disable-next-line no-console
+  console.log('artwork fetched');
+
   return {
     mime: response.headers.get('content-type') || '',
     type: { id: 3, name: 'front cover' },

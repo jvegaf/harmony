@@ -52,6 +52,7 @@ const Player: React.FC<PlayerProps> = ({ track }) => {
   const seekBarElem = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
+    if (!audioPlayer.player) return;
     if (track.filepath !== audioPlayer.player.src) {
       audioPlayer.load({
         src: track.filepath,

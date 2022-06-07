@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('electron', {
     showContextMenu: (trackId: string) => ipcRenderer.send('show-context-menu', trackId),
     fixTrack: (track: Track) => ipcRenderer.invoke('fix-track', track),
     fixTracks: (tracks: Track[]) => ipcRenderer.invoke('fix-tracks', tracks),
+    persistTrack: (track: Track) => ipcRenderer.send('persist', track),
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(channel: string, func: (...args: any[]) => void) {

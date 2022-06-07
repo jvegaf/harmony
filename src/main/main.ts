@@ -15,6 +15,7 @@ import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import path from 'path';
 import { GetFilesFrom } from './services/fileManager';
+import PersistTrack from './services/tag/nodeId3Saver';
 import FixTags, { FixTracks } from './services/tagger/Tagger';
 import { GetTracks } from './services/track/trackManager';
 import { resolveHtmlPath } from './util';
@@ -170,6 +171,8 @@ ipcMain.on('show-context-menu', (event, trackId) => {
   const menu = Menu.buildFromTemplate(template);
   menu.popup(BrowserWindow.fromWebContents(event.sender));
 });
+
+ipcMain.on('persist', (_, track) => PersistTrack(track));
 
 ipcMain.handle('open-folder', async event => {
   const resultPath = await dialog.showOpenDialog(mainWindow as BrowserWindow, {
