@@ -1,29 +1,33 @@
-import React from 'react';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+import { once } from 'events';
+import React, { useContext } from 'react';
 import AppContext from 'renderer/context/AppContext';
-import { MenuCommand, Track } from 'shared/types/emusik';
+import { Track } from 'shared/types/emusik';
 
 export default function useAppState() {
-  const { tracks, setTracks, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } =
-    React.useContext(AppContext);
+  const { tracks, setTracks, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } = useContext(AppContext);
 
-  const { ipcRenderer } = window.electron;
+  const onOpenFolder = React.useCallback(async () => {
+    const newTracks = await window.electron.ipcRenderer.openFolder();
+    if (!newTracks) return;
 
-  const openFolder = React.useCallback(() => ipcRenderer.openFolder(), [ipcRenderer]);
-  const fixTracks = React.useCallback((trks: Track[]) => ipcRenderer.fixTracks(trks), [ipcRenderer]);
+    setTracks(newTracks);
+  }, [setTracks]);
 
-  const fixTrack = React.useCallback(
-    (id: string) => {
-      const track = tracks.find(t => t.id === id);
-      fixTracks([track]);
+  const onFixTracks = React.useCallback(
+    async (trks: Track[]) => {
+      const fixedTracks = await window.electron.ipcRenderer.fixTracks(trks);
+      const updTracks = tracks.map(t => {
+        const fixedTrack = fixedTracks.find(ft => ft.id === t.id);
+        if (fixedTrack) {
+          return fixedTrack;
+        }
+        return t;
+      });
+      setTracks(updTracks);
     },
-    [fixTracks, tracks]
-  );
-
-  const addTracks = React.useCallback(
-    (newTracks: React.SetStateAction<Track[]>) => {
-      setTracks(newTracks);
-    },
-    [setTracks]
+    [setTracks, tracks]
   );
 
   const updateTrack = React.useCallback(
@@ -38,39 +42,18 @@ export default function useAppState() {
     [tracks, setTracks, trackDetail, setTrackDetail]
   );
 
-  const showCtxMenu = React.useCallback((trackId: string) => ipcRenderer.showContextMenu(trackId), [ipcRenderer]);
+  const onFixTrack = React.useCallback(
+    async (id: string) => {
+      const track = tracks.find(t => t.id === id);
+      const updated = await window.electron.ipcRenderer.fixTrack(track);
+      updateTrack(updated);
+    },
+    [tracks, updateTrack]
+  );
 
-  const fixAllTracks = () => fixTracks(tracks);
-  ipcRenderer.on('add-tracks', (newTracks: Track[]) => {
-    addTracks(newTracks);
-  });
+  const showCtxMenu = React.useCallback((trackId: string) => window.electron.ipcRenderer.showContextMenu(trackId), []);
 
-  ipcRenderer.on('track-fixed', track => updateTrack(track));
-
-  ipcRenderer.on('tracks-fixed', (fixedTracks: Track[]) => {
-    // eslint-disable-next-line no-console
-    console.log(`fixed ${fixedTracks.length} tracks`);
-    const newTracks = tracks.map(t => {
-      const fixedTrack = fixedTracks.find(ft => ft.id === t.id);
-      if (fixedTrack) {
-        return fixedTrack;
-      }
-      return t;
-    });
-    addTracks(newTracks);
-  });
-
-  ipcRenderer.on('play-command', (trackId: string) => {
-    setTrackPlaying(tracks.find(t => t.id === trackId));
-  });
-
-  ipcRenderer.on('fix-track-command', (trackId: string) => {
-    fixTrack(trackId);
-  });
-
-  ipcRenderer.on('view-detail-command', (trackId: string) => {
-    setTrackDetail(tracks.find(t => t.id === trackId));
-  });
+  const onFixAllTracks = React.useCallback(() => onFixTracks(tracks), [onFixTracks, tracks]);
 
   return {
     tracks,
@@ -78,11 +61,11 @@ export default function useAppState() {
     setTrackPlaying,
     trackDetail,
     setTrackDetail,
-    addTracks,
-    fixTrack,
+    onFixTrack,
+    onFixTracks,
+    onFixAllTracks,
     updateTrack,
-    openFolder,
+    onOpenFolder,
     showCtxMenu,
-    fixAllTracks,
   };
 }

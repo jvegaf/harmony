@@ -35,7 +35,7 @@ const GetArtwork = (tags: FileTags): Artwork | null => {
   return null;
 };
 
-const CreateTrack = async (file: string): Promise<?Track> => {
+const CreateTrack = async (file: string): Promise<Track | null> => {
   const tags = await LoadTagsFromFile(file);
   if (!tags) {
     return null;
@@ -53,19 +53,21 @@ const CreateTrack = async (file: string): Promise<?Track> => {
     filepath: file,
     title: GetTrackTitle(tags.title, file),
     year: tags.year,
-    artwork: GetArtwork(tags),
+    artwork: GetArtwork(tags) || undefined,
     bitrate: tags.bitrate,
   };
   return track;
 };
 
 export const GetTracks = async (files: string[]) => {
-  const tracks = [];
+  const tracks: Track[] = [];
   // eslint-disable-next-line no-restricted-syntax
   for (const file of files) {
     // eslint-disable-next-line no-await-in-loop
     const track = await CreateTrack(file);
-    tracks.push(track);
+    if (track !== null) {
+      tracks.push(track);
+    }
   }
 
   return tracks;

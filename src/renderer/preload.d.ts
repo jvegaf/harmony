@@ -5,9 +5,11 @@ declare global {
     electron: {
       ipcRenderer: {
         myPing(): void;
-        openFolder(): void;
+        openFolder(): Track[] | null;
         showContextMenu(trackId: string): void;
-        fixTracks(tracks: Track[]): void;
+        fixTracks(tracks: Track[]): Track[];
+        fixTrack(track: Track): Track;
+        persistTrack(track: Track): void;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         on(channel: string, func: (...args: any[]) => void): void;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

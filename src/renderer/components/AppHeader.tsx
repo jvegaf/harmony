@@ -43,13 +43,11 @@ const useStyles = createStyles(theme => ({
 const AppHeader: React.FC = () => {
   const { classes } = useStyles();
 
-  const { openFolder, trackPlaying, fixAllTracks } = useAppState();
+  const { tracks, trackPlaying, onFixAllTracks } = useAppState();
 
   const { playing, togglePlayPause } = useAudioPlayer();
 
-  const openHandler = () => openFolder();
-
-  const fixAllHandler = () => fixAllTracks();
+  const fixAllHandler = () => onFixAllTracks();
 
   const btnProps = {
     color: 'white',
@@ -64,12 +62,11 @@ const AppHeader: React.FC = () => {
       </div>
       <div className={classes.playerContainer}>{trackPlaying && <Player track={trackPlaying} />}</div>
       <div className={classes.rightContainer}>
-        <Button onClick={fixAllHandler} size="sm">
-          Fix All tracks
-        </Button>
-        <Button onClick={openHandler} size="sm">
-          Open Folder
-        </Button>
+        {tracks.length && (
+          <Button onClick={fixAllHandler} size="sm">
+            Fix All tracks
+          </Button>
+        )}
       </div>
     </Header>
   );

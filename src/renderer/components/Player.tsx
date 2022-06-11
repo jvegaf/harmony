@@ -38,7 +38,7 @@ interface PlayerProps {
 const Player: React.FC<PlayerProps> = ({ track }) => {
   const { classes } = useStyles();
 
-  const player = useAudioPlayer({
+  const audioPlayer = useAudioPlayer({
     src: track.filepath,
     format: 'mp3',
     autoplay: true,
@@ -52,14 +52,15 @@ const Player: React.FC<PlayerProps> = ({ track }) => {
   const seekBarElem = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (track.filepath !== player.src) {
-      player.load({
+    if (!audioPlayer.player) return;
+    if (track.filepath !== audioPlayer.player.src) {
+      audioPlayer.load({
         src: track.filepath,
         format: 'mp3',
         autoplay: true,
       });
     }
-  }, [player, track.filepath]);
+  }, [audioPlayer, track.filepath]);
 
   React.useEffect(() => {
     setBarWidth(`${percentComplete}%`);

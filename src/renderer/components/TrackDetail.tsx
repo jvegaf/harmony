@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable react/jsx-props-no-spreading */
 import { Button, Center, Container, createStyles, Grid, Group, Image, Space, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/hooks';
@@ -47,23 +46,15 @@ const TrackDetail: React.FC<TrackDetailProps> = props => {
   const { classes } = useStyles();
 
   const getArtData = (t: Track) => {
-    const { artworkUrl, artwork } = t;
+    const { artwork } = t;
 
-    if (artworkUrl) {
-      console.log('artworkUrl', artworkUrl);
-      return artworkUrl;
-    }
+    if (!artwork) return Placeholder;
 
-    if (artwork) {
-      console.log(artwork);
+    const blob = new Blob([artwork.data], {
+      type: artwork.mime,
+    });
 
-      const blob = new Blob([artwork.data], {
-        type: artwork.mime,
-      });
-      return URL.createObjectURL(blob);
-    }
-
-    return Placeholder;
+    return URL.createObjectURL(blob);
   };
 
   const onCancel = () => endCB();
