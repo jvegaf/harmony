@@ -17,7 +17,7 @@ const CreateTagResult = (result: any): ResultTag => {
     title: tagTrackTitle,
     key: `${result.key.camelot_number}${result.key.camelot_letter}`,
     artist: tagTrackArtists.join(', '),
-    album: result.album,
+    album: result.release.name,
     year: result.publish_date.substring(0, 4),
     genre: result.genre.name,
     bpm: result.bpm,

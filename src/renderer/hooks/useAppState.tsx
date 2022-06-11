@@ -32,9 +32,13 @@ export default function useAppState() {
 
   const updateTrack = React.useCallback(
     (track: Track) => {
-      const index = tracks.findIndex(t => t.id === track.id);
-      tracks[index] = track;
-      setTracks([...tracks]);
+      const newTracks = tracks.map(t => {
+        if (t.id === track.id) {
+          return track;
+        }
+        return t;
+      });
+      setTracks(newTracks);
       if (trackDetail && trackDetail.id === track.id) {
         setTrackDetail(null);
       }

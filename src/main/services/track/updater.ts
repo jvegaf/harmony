@@ -17,12 +17,12 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
   track.genre = tag.genre;
   track.artwork = tag.artworkUrl ? await GetArtwork(tag.artworkUrl) : undefined;
 
-  try {
-    await PersistTrack(track);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
-  }
+  // try {
+  //   await PersistTrack(track);
+  // } catch (error) {
+  //   // eslint-disable-next-line no-console
+  //   console.error(error);
+  // }
 
   return track;
 };

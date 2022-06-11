@@ -32,15 +32,17 @@ const MainView = () => {
     useAppState();
   const [content, setContent] = useState(<OnBoarding />);
 
-  window.electron.ipcRenderer.on('view-detail-command', (trackId: string) =>
-    setTrackDetail(tracks.find(t => t.id === trackId))
-  );
+  useEffect(() => {
+    window.electron.ipcRenderer.on('view-detail-command', (trackId: string) =>
+      setTrackDetail(tracks.find(t => t.id === trackId))
+    );
 
-  window.electron.ipcRenderer.on('play-command', (trackId: string) =>
-    setTrackPlaying(tracks.find(t => t.id === trackId))
-  );
+    window.electron.ipcRenderer.on('play-command', (trackId: string) =>
+      setTrackPlaying(tracks.find(t => t.id === trackId))
+    );
 
-  window.electron.ipcRenderer.on('fix-track-command', (trackId: string) => onFixTrack(trackId));
+    window.electron.ipcRenderer.on('fix-track-command', (trackId: string) => onFixTrack(trackId));
+  }, [onFixTrack, setTrackDetail, setTrackPlaying, tracks]);
 
   useEffect(() => {
     const newHeight = height - 100;

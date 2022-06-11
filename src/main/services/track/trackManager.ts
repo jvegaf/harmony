@@ -54,7 +54,7 @@ const CreateTrack = async (file: string): Promise<Track | null> => {
     title: GetTrackTitle(tags.title, file),
     year: tags.year,
     artwork: GetArtwork(tags) || undefined,
-    bitrate: tags.bitrate,
+    bitrate: tags.bitrate / 1000,
   };
   return track;
 };

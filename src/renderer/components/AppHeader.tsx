@@ -62,7 +62,7 @@ const AppHeader: React.FC = () => {
       </div>
       <div className={classes.playerContainer}>{trackPlaying && <Player track={trackPlaying} />}</div>
       <div className={classes.rightContainer}>
-        {tracks.length && (
+        {tracks.length > 0 && (
           <Button onClick={fixAllHandler} size="sm">
             Fix All tracks
           </Button>
