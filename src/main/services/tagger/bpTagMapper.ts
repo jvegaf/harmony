@@ -2,13 +2,9 @@ import { ResultTag } from '../../../shared/types/emusik';
 import { GetStringTokens } from '../../../shared/utils';
 
 const CreateTagResult = (result: any): ResultTag => {
-  const tagTrackTitle: string = result.mix_name
-    ? `${result.name} (${result.mix_name})`
-    : result.name;
+  const tagTrackTitle: string = result.mix_name ? `${result.name} (${result.mix_name})` : result.name;
 
-  const tagTrackArtists: string[] = result.artists.map(
-    (artist: any): string => artist.name
-  );
+  const tagTrackArtists: string[] = result.artists.map((artist: any): string => artist.name);
 
   const tagValues = [...tagTrackArtists, result.name];
   if (result.mix_name) {
@@ -21,7 +17,7 @@ const CreateTagResult = (result: any): ResultTag => {
     title: tagTrackTitle,
     key: `${result.key.camelot_number}${result.key.camelot_letter}`,
     artist: tagTrackArtists.join(', '),
-    album: result.album,
+    album: result.release.name,
     year: result.publish_date.substring(0, 4),
     genre: result.genre.name,
     bpm: result.bpm,
@@ -32,7 +28,7 @@ const CreateTagResult = (result: any): ResultTag => {
 };
 
 const GetTagResults = (result: any[]): ResultTag[] => {
-  return result.map((track) => CreateTagResult(track));
+  return result.map(track => CreateTagResult(track));
 };
 
 export default GetTagResults;

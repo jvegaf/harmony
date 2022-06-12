@@ -9,7 +9,7 @@ const commandMap = {
   dll: webpackPaths.dllPath,
 };
 
-args.forEach((x) => {
+args.forEach(x => {
   const pathToRemove = commandMap[x];
   if (pathToRemove !== undefined) {
     rimraf.sync(pathToRemove);

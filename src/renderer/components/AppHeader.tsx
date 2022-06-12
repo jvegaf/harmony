@@ -8,7 +8,7 @@ import PauseButton from './PauseButton';
 import PlayButton from './PlayButton';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const useStyles = createStyles((theme) => ({
+const useStyles = createStyles(theme => ({
   header: {
     backgroundColor: '#222222',
     borderBottom: 0,
@@ -33,8 +33,9 @@ const useStyles = createStyles((theme) => ({
   },
   rightContainer: {
     gridColumn: 3,
+    marginRight: 30,
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     alignItems: 'center',
   },
 }));
@@ -42,11 +43,11 @@ const useStyles = createStyles((theme) => ({
 const AppHeader: React.FC = () => {
   const { classes } = useStyles();
 
-  const { openFolder, trackPlaying } = useAppState();
+  const { tracks, trackPlaying, onFixAllTracks, onOpenFolder } = useAppState();
 
   const { playing, togglePlayPause } = useAudioPlayer();
 
-  const openHandler = () => openFolder();
+  const fixAllHandler = () => onFixAllTracks();
 
   const btnProps = {
     color: 'white',
@@ -59,13 +60,18 @@ const AppHeader: React.FC = () => {
       <div className={classes.leftContainer}>
         {playing ? <PauseButton {...btnProps} /> : <PlayButton {...btnProps} />}
       </div>
-      <div className={classes.playerContainer}>
-        {trackPlaying && <Player track={trackPlaying} />}
-      </div>
+      <div className={classes.playerContainer}>{trackPlaying && <Player track={trackPlaying} />}</div>
       <div className={classes.rightContainer}>
-        <Button onClick={openHandler} variant="default">
-          Open Folder
-        </Button>
+        {tracks.length > 0 && (
+          <>
+            <Button onClick={onOpenFolder} size="sm">
+              Open Folder
+            </Button>
+            <Button onClick={fixAllHandler} size="sm">
+              Fix All tracks
+            </Button>
+          </>
+        )}
       </div>
     </Header>
   );

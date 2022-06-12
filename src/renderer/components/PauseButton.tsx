@@ -3,7 +3,7 @@
 import { createStyles } from '@mantine/core';
 import React from 'react';
 
-const useStyles = createStyles((theme) => ({
+const useStyles = createStyles(theme => ({
   btnstyle: {
     width: 60,
     height: 60,
@@ -16,7 +16,7 @@ interface PlayButtonProps {
   action: () => void;
 }
 
-const PauseButton: React.FC<PlayButtonProps> = (props) => {
+const PauseButton: React.FC<PlayButtonProps> = props => {
   const { color, size, action } = props;
   const classes = useStyles();
   return (

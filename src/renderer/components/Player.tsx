@@ -5,7 +5,7 @@ import { createStyles, Text } from '@mantine/core';
 import { useAudioPlayer, useAudioPosition } from 'react-use-audio-player';
 import { Track } from '../../shared/types/emusik';
 
-const useStyles = createStyles((theme) => ({
+const useStyles = createStyles(theme => ({
   player: {
     width: 300,
     height: '100%',
@@ -13,8 +13,7 @@ const useStyles = createStyles((theme) => ({
     flexDirection: 'column',
     alignItems: 'strech',
     justifyContent: 'space-between',
-    backgroundColor:
-      theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.white,
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.white,
   },
   seekbar: {
     width: '100%',
@@ -37,11 +36,10 @@ interface PlayerProps {
 }
 
 const Player: React.FC<PlayerProps> = ({ track }) => {
-  const { title, artist, filepath } = track;
   const { classes } = useStyles();
 
-  const player = useAudioPlayer({
-    src: filepath,
+  const audioPlayer = useAudioPlayer({
+    src: track.filepath,
     format: 'mp3',
     autoplay: true,
   });
@@ -54,14 +52,15 @@ const Player: React.FC<PlayerProps> = ({ track }) => {
   const seekBarElem = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (filepath !== player.src) {
-      player.load({
-        src: filepath,
+    if (!audioPlayer.player) return;
+    if (track.filepath !== audioPlayer.player.src) {
+      audioPlayer.load({
+        src: track.filepath,
         format: 'mp3',
         autoplay: true,
       });
     }
-  }, [filepath, player]);
+  }, [audioPlayer, track.filepath]);
 
   React.useEffect(() => {
     setBarWidth(`${percentComplete}%`);
@@ -84,10 +83,10 @@ const Player: React.FC<PlayerProps> = ({ track }) => {
   return (
     <div className={classes.player}>
       <Text className={classes.title} size="lg" align="center">
-        {title}
+        {track.title}
       </Text>
       <Text size="sm" align="center">
-        {artist}
+        {track.artist}
       </Text>
       <div className={classes.seekbar} ref={seekBarElem} onClick={goTo}>
         <div style={{ width: barWidth }} className={classes.tick} />

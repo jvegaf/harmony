@@ -1,18 +1,19 @@
 import fetch from 'node-fetch';
-import { log } from 'electron-log';
 import { Artwork } from '../../../shared/types/emusik';
 
-const GetArtwork = async (url: string): Artwork => {
-  url.replace(/[0-9]{3,}x[0-9]{3,}/, '500x500');
+const GetArtwork = async (url: string): Promise<Artwork> => {
+  const fixedUrl = url.replace(/[0-9]{3,}x[0-9]{3,}/, '500x500');
 
-  const response = await fetch(url);
+  const response = await fetch(fixedUrl);
   const buffer = await response.buffer();
-  return {
-    mime: response.headers.get('content-type') || '',
+
+  const artwork: Artwork = {
+    mime: response.headers.get('content-type'),
     type: { id: 3, name: 'front cover' },
     description: '',
-    imageBuffer: buffer,
+    data: buffer,
   };
+  return artwork;
 };
 
 export default GetArtwork;
