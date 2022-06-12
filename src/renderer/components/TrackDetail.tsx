@@ -60,6 +60,7 @@ const TrackDetail: React.FC<TrackDetailProps> = props => {
 
   const onSave = values => {
     saveTags({ ...track, ...values });
+    endCB();
   };
 
   return (

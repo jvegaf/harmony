@@ -33,13 +33,9 @@ const MainView = () => {
   const [content, setContent] = useState(<OnBoarding />);
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('view-detail-command', (trackId: string) =>
-      setTrackDetail(tracks.find(t => t.id === trackId))
-    );
+    window.electron.ipcRenderer.on('view-detail-command', (trackId: string) => setTrackDetail(trackId));
 
-    window.electron.ipcRenderer.on('play-command', (trackId: string) =>
-      setTrackPlaying(tracks.find(t => t.id === trackId))
-    );
+    window.electron.ipcRenderer.on('play-command', (trackId: string) => setTrackPlaying(trackId));
 
     window.electron.ipcRenderer.on('fix-track-command', (trackId: string) => onFixTrack(trackId));
   }, [onFixTrack, setTrackDetail, setTrackPlaying, tracks]);
@@ -50,7 +46,7 @@ const MainView = () => {
   }, [height]);
 
   const detailProps = {
-    track: trackDetail,
+    track: tracks.find(t => t.id === trackDetail),
     endCB: () => setTrackDetail(null),
     saveTags: updateTrack,
   };

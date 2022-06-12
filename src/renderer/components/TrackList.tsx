@@ -8,13 +8,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTable, useResizeColumns, useFlexLayout, useRowSelect } from 'react-table';
-import { Track } from 'shared/types/emusik';
+import { Track, TrackId } from 'shared/types/emusik';
 
 interface TrackListProps {
   tHeight: number;
   tracks: Track[];
-  trackPlaying: Track;
-  setTrackPlaying: React.Dispatch<React.SetStateAction<Track>>;
+  trackPlaying: TrackId | null;
+  setTrackPlaying: React.Dispatch<React.SetStateAction<TrackId>>;
   showCtxMenu: (trackId: string) => void;
 }
 
@@ -166,8 +166,6 @@ const TableView: React.FC<TableViewProps> = props => {
 
   const onClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
     e.preventDefault();
-    console.log('e', e);
-    console.log('row', row);
     if (!row) return;
     const trackId = row.original.id;
     if (e.type === 'click') {
@@ -181,7 +179,7 @@ const TableView: React.FC<TableViewProps> = props => {
     }
 
     if (e.type === 'dblclick') {
-      setTrackPlaying(row.original);
+      setTrackPlaying(trackId);
       console.log('trackId', trackId);
     }
   };
@@ -219,7 +217,7 @@ const TableView: React.FC<TableViewProps> = props => {
               onDoubleClick={e => onClick(e, row)}
               className={`tr 
                 ${row.original.id === selected ? 'isSelected' : ''} 
-                ${row.original === trackPlaying ? 'isPlaying' : ''}`}
+                ${row.original.id === trackPlaying ? 'isPlaying' : ''}`}
             >
               {row.cells.map(cell => {
                 return (

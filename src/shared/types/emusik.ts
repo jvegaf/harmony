@@ -2,6 +2,8 @@
  * App models
  */
 
+export type TrackId = string;
+
 export interface Artwork {
   mime: string;
   type: { id: number; name: string };
@@ -10,7 +12,7 @@ export interface Artwork {
 }
 
 export interface Track {
-  id: string;
+  id: TrackId;
   album?: string;
   artist?: string;
   bpm?: number;
