@@ -6,14 +6,14 @@ const PersistTrack = (track: Track) => {
 
   const beats = bpm ? bpm.toString() : undefined;
   const yearStr = year ? year.toString() : undefined;
-
+  const art = artwork ? { ...artwork, imageBuffer: artwork.data } : undefined;
   const tags = {
     title,
     artist,
     album,
     year: yearStr,
     genre,
-    artwork,
+    artwork: art,
     bpm: beats,
     key,
   };
@@ -21,7 +21,7 @@ const PersistTrack = (track: Track) => {
   NodeId3.update(tags, track.filepath, (_, err) => {
     if (err) {
       // eslint-disable-next-line no-console
-      console.error(`Error persisting track: ${err}`);
+      console.log(`Error persisting track: ${err}`);
     }
   });
 

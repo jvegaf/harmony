@@ -23,7 +23,6 @@ export interface Track {
   year?: number;
   bitrate?: number;
   artwork?: Artwork;
-  artUrl?: string;
 }
 
 export interface ResultTag {

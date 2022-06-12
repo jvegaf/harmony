@@ -35,7 +35,7 @@ const useStyles = createStyles(theme => ({
     gridColumn: 3,
     marginRight: 30,
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     alignItems: 'center',
   },
 }));
@@ -43,7 +43,7 @@ const useStyles = createStyles(theme => ({
 const AppHeader: React.FC = () => {
   const { classes } = useStyles();
 
-  const { tracks, trackPlaying, onFixAllTracks } = useAppState();
+  const { tracks, trackPlaying, onFixAllTracks, onOpenFolder } = useAppState();
 
   const { playing, togglePlayPause } = useAudioPlayer();
 
@@ -63,9 +63,14 @@ const AppHeader: React.FC = () => {
       <div className={classes.playerContainer}>{trackPlaying && <Player track={trackPlaying} />}</div>
       <div className={classes.rightContainer}>
         {tracks.length > 0 && (
-          <Button onClick={fixAllHandler} size="sm">
-            Fix All tracks
-          </Button>
+          <>
+            <Button onClick={onOpenFolder} size="sm">
+              Open Folder
+            </Button>
+            <Button onClick={fixAllHandler} size="sm">
+              Fix All tracks
+            </Button>
+          </>
         )}
       </div>
     </Header>

@@ -194,6 +194,5 @@ ipcMain.handle('fix-track', async (e, track) => {
 ipcMain.handle('fix-tracks', async (e, tracks) => {
   console.log(`fixing ${tracks.length} tracks`);
   const fixed = await FixTracks(tracks);
-  console.log(`fixed ${fixed.length} tracks`);
   return fixed;
 });

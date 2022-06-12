@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-console */
 import * as Path from 'path';
+import * as mm from 'music-metadata';
 import { v4 as uuid } from 'uuid';
 import { Sanitize, ParseDuration } from '../../../shared/utils';
 import { Artwork, Track } from '../../../shared/types/emusik';
@@ -24,13 +25,16 @@ const GetTrackTitle = (title: string | undefined, filepath: string) => {
 
 const GetArtwork = (tags: FileTags): Artwork | null => {
   const { picture } = tags;
-  if (picture?.length) {
+
+  const cover = mm.selectCover(picture);
+
+  if (cover) {
     return {
-      mime: picture[0].format,
+      mime: cover.format,
       type: { id: 3, name: 'front cover' },
-      description: picture[0].description,
-      data: picture[0].data,
-    };
+      description: cover.description,
+      data: cover.data,
+    } as Artwork;
   }
   return null;
 };
@@ -53,9 +57,10 @@ const CreateTrack = async (file: string): Promise<Track | null> => {
     filepath: file,
     title: GetTrackTitle(tags.title, file),
     year: tags.year,
-    artwork: GetArtwork(tags) || undefined,
+    artwork: GetArtwork(tags),
     bitrate: tags.bitrate / 1000,
   };
+  console.log({ track });
   return track;
 };
 

@@ -45,29 +45,21 @@ const TrackDetail: React.FC<TrackDetailProps> = props => {
 
   const { classes } = useStyles();
 
-  const getArtData = (t: Track) => {
-    const { artwork } = t;
+  const getArtData = (t: Track): string => {
+    if (!t.artwork) return Placeholder;
 
-    if (!artwork) return Placeholder;
-
-    const blob = new Blob([artwork.data], {
-      type: artwork.mime,
+    const blob = new Blob([t.artwork.data], {
+      type: t.artwork.mime,
     });
 
-    return URL.createObjectURL(blob);
+    const src = URL.createObjectURL(blob);
+    return src;
   };
 
   const onCancel = () => endCB();
 
   const onSave = values => {
-    track.title = values.title;
-    track.artist = values.artist;
-    track.album = values.album;
-    track.genre = values.genre;
-    track.bpm = values.bpm;
-    track.key = values.key;
-    track.year = values.year;
-    saveTags(track);
+    saveTags({ ...track, ...values });
   };
 
   return (

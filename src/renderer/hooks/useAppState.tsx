@@ -32,6 +32,7 @@ export default function useAppState() {
 
   const updateTrack = React.useCallback(
     (track: Track) => {
+      window.electron.ipcRenderer.persistTrack(track);
       const newTracks = tracks.map(t => {
         if (t.id === track.id) {
           return track;
