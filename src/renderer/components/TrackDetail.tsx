@@ -7,8 +7,8 @@ import { Track } from '../../shared/types/emusik';
 
 interface TrackDetailProps {
   track: Track;
-  endCB: () => void;
-  saveTags: (track: Track) => void;
+  closeDetail: () => void;
+  saveChanges: (track: Track) => void;
 }
 
 const useStyles = createStyles(theme => ({
@@ -29,7 +29,7 @@ const useStyles = createStyles(theme => ({
 }));
 
 const TrackDetail: React.FC<TrackDetailProps> = props => {
-  const { track, endCB, saveTags } = props;
+  const { track, closeDetail, saveChanges } = props;
   const form = useForm({
     initialValues: {
       title: track.title,
@@ -42,26 +42,32 @@ const TrackDetail: React.FC<TrackDetailProps> = props => {
       artwork: track.artwork,
     },
   });
+  const [srcData, setSrcData] = React.useState(Placeholder);
 
-  const { classes } = useStyles();
+  React.useEffect(() => {
+    const { artwork } = track;
 
-  const getArtData = (t: Track): string => {
-    if (!t.artwork) return Placeholder;
+    if (artwork) {
+      const blob = new Blob([artwork.data], {
+        type: artwork.mime,
+      });
 
-    const blob = new Blob([t.artwork.data], {
-      type: t.artwork.mime,
-    });
+      const src = URL.createObjectURL(blob);
+      setSrcData(src);
+    }
 
-    const src = URL.createObjectURL(blob);
-    return src;
-  };
+    return () => setSrcData(Placeholder);
+  }, [track]);
 
-  const onCancel = () => endCB();
+  const onCancel = React.useCallback(() => closeDetail(), [closeDetail]);
 
-  const onSave = values => {
-    saveTags({ ...track, ...values });
-    endCB();
-  };
+  const onSave = React.useCallback(
+    values => {
+      saveChanges({ ...track, ...values });
+      closeDetail();
+    },
+    [closeDetail, saveChanges, track]
+  );
 
   return (
     <Container size="sm" style={{ marginTop: 50 }}>
@@ -73,7 +79,7 @@ const TrackDetail: React.FC<TrackDetailProps> = props => {
           <Grid columns={24} gutter="lg">
             <Grid.Col span={12}>
               <Center>
-                <Image src={getArtData(track)} radius="md" width={250} height={250} />
+                <Image src={srcData} radius="md" width={250} height={250} />
               </Center>
             </Grid.Col>
             <Grid.Col span={12}>
@@ -91,12 +97,16 @@ const TrackDetail: React.FC<TrackDetailProps> = props => {
             </Grid.Col>
           </Grid>
           <Group position="right" mt="md">
-            <Button className={classes.actionButton} type="submit" variant="default">
-              Save
-            </Button>
-            <Button className={classes.actionButton} variant="default" onClick={onCancel}>
-              Cancel
-            </Button>
+            <div style={{ marginRight: 30 }}>
+              <Button size="md" variant="default" onClick={onCancel}>
+                Cancel
+              </Button>
+            </div>
+            <div style={{ width: 120 }}>
+              <Button size="md" fullWidth type="submit" color="blue" variant="filled">
+                Save
+              </Button>
+            </div>
           </Group>
         </Stack>
       </form>

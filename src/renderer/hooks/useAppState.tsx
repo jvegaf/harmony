@@ -3,7 +3,7 @@
 import { once } from 'events';
 import React, { useContext } from 'react';
 import AppContext from 'renderer/context/AppContext';
-import { Track } from 'shared/types/emusik';
+import { Track, TrackId } from 'shared/types/emusik';
 
 export default function useAppState() {
   const { tracks, setTracks, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } = useContext(AppContext);
@@ -32,6 +32,8 @@ export default function useAppState() {
 
   const updateTrack = React.useCallback(
     (track: Track) => {
+      console.log('track update', track);
+
       window.electron.ipcRenderer.persistTrack(track);
       const newTracks = tracks.map(t => {
         if (t.id === track.id) {
@@ -40,23 +42,25 @@ export default function useAppState() {
         return t;
       });
       setTracks(newTracks);
-      if (trackDetail && trackDetail.id === track.id) {
-        setTrackDetail(null);
+      if (trackDetail === track.id) {
+        setTrackDetail(undefined);
       }
     },
     [tracks, setTracks, trackDetail, setTrackDetail]
   );
 
   const onFixTrack = React.useCallback(
-    async (id: string) => {
+    async (id: TrackId) => {
       const track = tracks.find(t => t.id === id);
+      console.log('track to fix', track);
+
       const updated = await window.electron.ipcRenderer.fixTrack(track);
       updateTrack(updated);
     },
     [tracks, updateTrack]
   );
 
-  const showCtxMenu = React.useCallback((trackId: string) => window.electron.ipcRenderer.showContextMenu(trackId), []);
+  const showCtxMenu = React.useCallback((trackId: TrackId) => window.electron.ipcRenderer.showContextMenu(trackId), []);
 
   const onFixAllTracks = React.useCallback(() => onFixTracks(tracks), [onFixTracks, tracks]);
 

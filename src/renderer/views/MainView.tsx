@@ -1,9 +1,10 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import { createStyles } from '@mantine/core';
 import { useViewportSize } from '@mantine/hooks';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import OnBoarding from 'renderer/components/OnBoarding';
 import useAppState from 'renderer/hooks/useAppState';
+import { Track, TrackId } from 'shared/types/emusik';
 import AppHeader from '../components/AppHeader';
 import TrackDetail from '../components/TrackDetail';
 import TrackList from '../components/TrackList';
@@ -33,11 +34,11 @@ const MainView = () => {
   const [content, setContent] = useState(<OnBoarding />);
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('view-detail-command', (trackId: string) => setTrackDetail(trackId));
+    window.electron.ipcRenderer.on('view-detail-command', (trackId: TrackId) => setTrackDetail(trackId));
 
-    window.electron.ipcRenderer.on('play-command', (trackId: string) => setTrackPlaying(trackId));
+    window.electron.ipcRenderer.on('play-command', (trackId: TrackId) => setTrackPlaying(trackId));
 
-    window.electron.ipcRenderer.on('fix-track-command', (trackId: string) => onFixTrack(trackId));
+    window.electron.ipcRenderer.on('fix-track-command', (trackId: TrackId) => onFixTrack(trackId));
   }, [onFixTrack, setTrackDetail, setTrackPlaying, tracks]);
 
   useEffect(() => {
@@ -45,11 +46,15 @@ const MainView = () => {
     setTHheight(newHeight);
   }, [height]);
 
-  const detailProps = {
-    track: tracks.find(t => t.id === trackDetail),
-    endCB: () => setTrackDetail(null),
-    saveTags: updateTrack,
-  };
+  const detailProps = useMemo(() => {
+    const track = tracks.find(t => t.id === trackDetail) as Track;
+
+    return {
+      track,
+      closeDetail: () => setTrackDetail(undefined),
+      saveChanges: updateTrack,
+    };
+  }, [setTrackDetail, trackDetail, tracks, updateTrack]);
 
   useEffect(() => {
     const tlprops = {

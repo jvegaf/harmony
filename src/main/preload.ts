@@ -1,11 +1,11 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { Track } from 'shared/types/emusik';
+import { Track, TrackId } from 'shared/types/emusik';
 
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
     myPing: () => ipcRenderer.send('ipc-example', 'ping'),
     openFolder: () => ipcRenderer.invoke('open-folder'),
-    showContextMenu: (trackId: string) => ipcRenderer.send('show-context-menu', trackId),
+    showContextMenu: (trackId: TrackId) => ipcRenderer.send('show-context-menu', trackId),
     fixTrack: (track: Track) => ipcRenderer.invoke('fix-track', track),
     fixTracks: (tracks: Track[]) => ipcRenderer.invoke('fix-tracks', tracks),
     persistTrack: (track: Track) => ipcRenderer.send('persist', track),

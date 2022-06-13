@@ -9,8 +9,8 @@ const AppContext = React.createContext({} as AppContextType);
 // eslint-disable-next-line react/prop-types
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [trackPlaying, setTrackPlaying] = useState<TrackId | null>(null);
-  const [trackDetail, setTrackDetail] = useState<TrackId | null>(null);
+  const [trackPlaying, setTrackPlaying] = useState<TrackId | undefined>(undefined);
+  const [trackDetail, setTrackDetail] = useState<TrackId | undefined>(undefined);
 
   return (
     <AppContext.Provider

@@ -135,11 +135,6 @@ app
   .catch(console.log);
 
 ipcMain.on('ipc-example', async (event, arg) => {
-  // const response = await SearchYtTags('Stop The Beat', 'Angel Heredia');
-  // console.log(response);
-  // getDevTracks('/home/samsepi0l/Documents/colocadas');
-  // getDevTracks('C:\\Users\\josev\\Desktop\\nuevas-mayo-junio\\nuevas_junio');
-  // getDevTracks('C:\\Users\\jevf\\My Private Documents\\nuevas-mayo-junio');
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.sender.send('ipc-example', msgTemplate('pong'));
@@ -192,7 +187,6 @@ ipcMain.handle('fix-track', async (e, track) => {
 });
 
 ipcMain.handle('fix-tracks', async (e, tracks) => {
-  console.log(`fixing ${tracks.length} tracks`);
   const fixed = await FixTracks(tracks);
   return fixed;
 });

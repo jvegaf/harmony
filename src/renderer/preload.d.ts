@@ -1,4 +1,4 @@
-import { Track } from 'shared/types/emusik';
+import { Track, TrackId } from 'shared/types/emusik';
 
 declare global {
   interface Window {
@@ -6,7 +6,7 @@ declare global {
       ipcRenderer: {
         myPing(): void;
         openFolder(): Track[] | null;
-        showContextMenu(trackId: string): void;
+        showContextMenu(trackId: TrackId): void;
         fixTracks(tracks: Track[]): Track[];
         fixTrack(track: Track): Track;
         persistTrack(track: Track): void;

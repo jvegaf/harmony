@@ -23,7 +23,7 @@ const GetTrackTitle = (title: string | undefined, filepath: string) => {
   return sanitizeFilename(filename);
 };
 
-const GetArtwork = (tags: FileTags): Artwork | null => {
+const GetArtwork = (tags: FileTags): Artwork | undefined => {
   const { picture } = tags;
 
   const cover = mm.selectCover(picture);
@@ -36,7 +36,7 @@ const GetArtwork = (tags: FileTags): Artwork | null => {
       data: cover.data,
     } as Artwork;
   }
-  return null;
+  return undefined;
 };
 
 const CreateTrack = async (file: string): Promise<Track | null> => {
@@ -60,7 +60,6 @@ const CreateTrack = async (file: string): Promise<Track | null> => {
     artwork: GetArtwork(tags),
     bitrate: tags.bitrate / 1000,
   };
-  console.log({ track });
   return track;
 };
 
