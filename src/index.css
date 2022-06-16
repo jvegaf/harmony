@@ -4,24 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
-.ag-theme-alpine {
-  --ag-foreground-color: #eeeeee;
-  --ag-background-color: #23292b;
-  --ag-odd-row-background-color: #2e3436;
-  --ag-row-border-color: transparent;
-  --ag-row-hover-color: #796868;
-  --ag-header-background-color: #23292b;
-  --ag-borders: none;
-}
-
-.ag-theme-alpine .ag-cell {
-  --ag-borders: none;
-}
-
-
-.ag-menu-option-active {
-  background-color: #2661ad;
-  color: white;
+:root {
+  height: 100vh;
 }
 
 

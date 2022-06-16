@@ -1,18 +1,17 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { Track, TrackId } from '../../electron/types/emusik';
 import AppContext from '../context/AppContext';
 
 export default function useAppState() {
   const { tracks, setTracks, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } = useContext(AppContext);
-  const [updatedTracks, setUpdatedTracks] = useState<Track[]>([]);
 
   const onOpenFolder = React.useCallback(async () => {
+    if (tracks.length) setTracks([]);
     const newTracks = await window.Main.OpenFolder();
 
     if (!newTracks) return;
-    if (tracks.length) setTracks([]);
 
     setTracks(newTracks);
   }, [tracks, setTracks]);
@@ -22,7 +21,6 @@ export default function useAppState() {
       console.log('tracks to fix:', selected);
       const fixedTracks = await window.Main.FixTracks(selected);
       console.log(fixedTracks);
-      setUpdatedTracks(fixedTracks);
       const newTracks = tracks.map((t) => {
         const fixed = fixedTracks.find((ft) => ft.id === t.id);
         if (fixed) {
@@ -32,7 +30,7 @@ export default function useAppState() {
       });
       setTracks(newTracks);
     },
-    [tracks, setTracks, setUpdatedTracks]
+    [tracks, setTracks]
   );
 
   const closeDetail = React.useCallback(() => {
@@ -94,8 +92,6 @@ export default function useAppState() {
     saveChanges,
     closeDetail,
     onOpenFolder,
-    showCtxMenu,
-    updatedTracks,
-    setUpdatedTracks
+    showCtxMenu
   };
 }
