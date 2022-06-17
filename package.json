@@ -1,228 +1,93 @@
 {
-  "name": "emusik",
-  "description": "The music organizer for classic DJs",
+  "name": "vite-reactts-electron-starter",
+  "version": "0.5.0",
+  "license": "MIT",
+  "main": "main/index.js",
+  "author": {
+    "name": "Maximilian Stümpfl"
+  },
+  "description": "Starter using Vite 2+ React +Typescript + Electron for fast prototyping.",
+  "keywords": [
+    "vite",
+    "react",
+    "electron",
+    "typescript"
+  ],
+  "repository": {
+    "url": "https://github.com/lTimeless/vite-reactts-electron-starter"
+  },
+  "productName": "vite-reactts-electron-starter",
   "scripts": {
-    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
-    "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
-    "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
-    "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
-    "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
-    "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never",
-    "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts && opencollective-postinstall",
-    "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
-    "start:main": "cross-env NODE_ENV=development electron -r ts-node/register/transpile-only ./src/main/main.ts",
-    "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
-    "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "test": "jest",
-    "test:clean": "jest --clearCache",
-    "prepare": "husky install",
+    "dev": "concurrently \"yarn dev:vite\" \" yarn dev:electron\"",
+    "dev:vite": "vite",
+    "dev:electron": "npm run build:electron && electron .",
+    "build": "npm run build:vite && npm run build:electron",
+    "build:vite": "vite build",
+    "build:electron": "tsc -p electron",
+    "dist": "npm run build && electron-builder",
+    "pack": "npm run build && electron-builder --dir",
+    "clean": "rimraf dist main src/out",
+    "type-check": "tsc",
+    "lint": "eslint . --ext js,jsx,ts,tsx",
+    "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix",
     "stylelint": "prettier --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
     "format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
   },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "cross-env NODE_ENV=development eslint --cache"
-    ],
-    "*.json,.{eslintrc,prettierrc}": [
-      "prettier --ignore-path .eslintignore --parser json --write"
-    ],
-    "*.{css,scss}": [
-      "prettier --ignore-path .eslintignore --single-quote --write"
-    ],
-    "*.{html,md,yml}": [
-      "prettier --ignore-path .eslintignore --single-quote --write"
-    ]
-  },
-  "build": {
-    "productName": "eMusik",
-    "appId": "me.jvegaf.eMusik",
-    "asar": true,
-    "asarUnpack": "**\\*.{node,dll}",
-    "files": [
-      "dist",
-      "node_modules",
-      "package.json"
-    ],
-    "afterSign": ".erb/scripts/notarize.js",
-    "mac": {
-      "target": {
-        "target": "default",
-        "arch": [
-          "arm64",
-          "x64"
-        ]
-      },
-      "type": "distribution",
-      "hardenedRuntime": true,
-      "entitlements": "assets/entitlements.mac.plist",
-      "entitlementsInherit": "assets/entitlements.mac.plist",
-      "gatekeeperAssess": false
-    },
-    "dmg": {
-      "contents": [
-        {
-          "x": 130,
-          "y": 220
-        },
-        {
-          "x": 410,
-          "y": 220,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
-    },
-    "win": {
-      "target": [
-        "nsis"
-      ]
-    },
-    "linux": {
-      "target": [
-        "AppImage"
-      ],
-      "category": "Development"
-    },
-    "directories": {
-      "app": "release/app",
-      "buildResources": "assets",
-      "output": "release/build"
-    },
-    "extraResources": [
-      "./assets/**"
-    ],
-    "publish": {
-      "provider": "github",
-      "owner": "jvegaf",
-      "repo": "eMusik"
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jvegaf/emusik.git"
-  },
-  "author": {
-    "name": "Jose Vega",
-    "email": "josevega234@gmail.com",
-    "url": "https://github.com/jvegaf/emusik"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/jvegaf/emusik/issues"
-  },
-  "keywords": [
-    "electron",
-    "boilerplate",
-    "react",
-    "typescript",
-    "ts",
-    "sass",
-    "webpack",
-    "hot",
-    "reload"
-  ],
-  "homepage": "https://github.com/jvegaf/emusik#readme",
-  "devDependencies": {
-    "@pmmmwh/react-refresh-webpack-plugin": "0.5.4",
-    "@teamsupercell/typings-for-css-modules-loader": "2.5.1",
-    "@testing-library/jest-dom": "5.16.1",
-    "@testing-library/react": "12.1.2",
-    "@types/axios": "0.14.0",
-    "@types/jest": "27.0.3",
-    "@types/node": "17.0.25",
-    "@types/react": "17.0.38",
-    "@types/react-dom": "17.0.11",
-    "@types/react-test-renderer": "17.0.1",
-    "@types/recursive-readdir": "2.2.1",
-    "@types/uuid": "8.3.4",
-    "@types/webpack-bundle-analyzer": "4.4.1",
-    "@types/webpack-env": "1.16.3",
-    "@typescript-eslint/eslint-plugin": "5.8.1",
-    "@typescript-eslint/parser": "5.8.1",
-    "browserslist-config-erb": "0.0.3",
-    "chalk": "4.1.2",
-    "concurrently": "6.5.1",
-    "core-js": "3.20.1",
-    "cross-env": "7.0.3",
-    "css-loader": "6.5.1",
-    "css-minimizer-webpack-plugin": "3.3.1",
-    "detect-port": "1.3.0",
-    "electron": "16.0.5",
-    "electron-builder": "22.13.1",
-    "electron-devtools-installer": "3.2.0",
-    "electron-notarize": "1.1.1",
-    "electron-rebuild": "3.2.5",
-    "eslint": "8.5.0",
-    "eslint-config-airbnb-base": "15.0.0",
-    "eslint-config-erb": "4.0.3",
-    "eslint-config-prettier": "8.5.0",
-    "eslint-import-resolver-typescript": "2.5.0",
-    "eslint-import-resolver-webpack": "0.13.2",
-    "eslint-plugin-compat": "4.0.0",
-    "eslint-plugin-import": "2.25.3",
-    "eslint-plugin-jest": "25.3.2",
-    "eslint-plugin-jsx-a11y": "6.5.1",
-    "eslint-plugin-prettier": "4.0.0",
-    "eslint-plugin-promise": "6.0.0",
-    "eslint-plugin-react": "7.28.0",
-    "eslint-plugin-react-hooks": "4.3.0",
-    "file-loader": "6.2.0",
-    "html-webpack-plugin": "5.5.0",
-    "husky": "7.0.4",
-    "identity-obj-proxy": "3.0.0",
-    "jest": "27.4.5",
-    "lint-staged": "12.1.4",
-    "mini-css-extract-plugin": "2.4.5",
-    "opencollective-postinstall": "2.0.3",
-    "prettier": "2.6.2",
-    "react-refresh": "0.11.0",
-    "react-refresh-typescript": "2.0.3",
-    "react-test-renderer": "17.0.2",
-    "rimraf": "3.0.2",
-    "sass": "1.45.1",
-    "sass-loader": "12.4.0",
-    "style-loader": "3.3.1",
-    "terser-webpack-plugin": "5.3.0",
-    "ts-jest": "27.1.2",
-    "ts-loader": "9.2.6",
-    "ts-node": "10.4.0",
-    "typescript": "4.5.4",
-    "url-loader": "4.1.1",
-    "webpack": "5.65.0",
-    "webpack-bundle-analyzer": "4.5.0",
-    "webpack-cli": "4.9.1",
-    "webpack-dev-server": "4.7.1",
-    "webpack-merge": "5.8.0"
-  },
   "dependencies": {
-    "@mantine/core": "4.1.1",
-    "@mantine/form": "4.2.2",
-    "@mantine/hooks": "4.1.1",
+    "@vitejs/plugin-react": "1.2.0",
+    "ag-grid-community": "25.3.0",
+    "ag-grid-react": "25.3.0",
     "axios": "0.27.2",
-    "electron-context-menu": "3.1.2",
-    "electron-debug": "3.2.0",
-    "electron-log": "4.4.6",
-    "electron-updater": "4.6.5",
-    "googlethis": "1.2.9",
-    "history": "5.3.0",
+    "electron-is-dev": "2.0.0",
+    "googlethis": "1.3.0",
     "moment": "2.29.3",
     "music-metadata": "7.12.3",
-    "node-id3": "0.2.3",
     "node-fetch": "2.6.1",
+    "node-id3": "0.2.3",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-router-dom": "6.2.2",
+    "react-hook-form": "7.32.1",
     "react-table": "7.8.0",
     "react-use-audio-player": "1.2.5",
-    "react-window": "1.8.7",
     "recursive-readdir": "2.2.2",
     "styled-components": "5.3.5",
     "uuid": "8.3.2",
+    "vite": "2.8.6",
     "youtube-music-api": "1.0.6"
   },
-  "devEngines": {
-    "node": ">=14.x",
-    "npm": ">=7.x"
+  "devDependencies": {
+    "@types/node": "17.0.22",
+    "@types/node-fetch": "2.6.1",
+    "@types/react": "17.0.41",
+    "@types/react-dom": "17.0.14",
+    "@types/recursive-readdir": "2.2.1",
+    "@types/uuid": "8.3.4",
+    "@typescript-eslint/eslint-plugin": "5.16.0",
+    "@typescript-eslint/parser": "5.16.0",
+    "autoprefixer": "10.4.4",
+    "concurrently": "7.0.0",
+    "electron": "17.1.2",
+    "electron-builder": "22.14.13",
+    "eslint": "8.11.0",
+    "eslint-config-airbnb": "19.0.4",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-jsx-a11y": "6.5.1",
+    "eslint-plugin-prettier": "4.0.0",
+    "eslint-plugin-react": "7.29.4",
+    "postcss": "8.4.12",
+    "prettier": "2.6.0",
+    "tailwindcss": "3.0.23",
+    "typescript": "4.6.2"
   },
-  "browserslist": []
+  "build": {
+    "asar": true,
+    "files": [
+      "main",
+      "src/out"
+    ],
+    "directories": {
+      "buildResources": "resources"
+    }
+  }
 }
