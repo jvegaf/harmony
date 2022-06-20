@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { useTable, useResizeColumns, useFlexLayout, useRowSelect } from 'react-table';
 import { Track, TrackId } from '../../electron/types/emusik';
 import useAppState from '../hooks/useAppState';
-import { useViewportSize } from '@mantine/hooks';
 
 interface TrackListProps {
   tracks: Track[];
@@ -18,7 +17,6 @@ interface TrackListProps {
   setTrackDetail: React.Dispatch<React.SetStateAction<TrackId>>;
   showCtxMenu: (trackId: string) => void;
   columns: any[];
-  height: number;
 }
 
 const Styles = styled.div`
@@ -27,6 +25,8 @@ const Styles = styled.div`
   display: block;
   ${'' /* These styles are required for a horizontaly scrollable table overflow */}
   overflow: auto;
+  width: 100%;
+  height: 100%;
   color: #eeeeee;
 
   .table {
@@ -41,8 +41,8 @@ const Styles = styled.div`
     }
 
     .tbody {
+      height: max-content;
       overflow-y: scroll;
-      overflow-x: hidden;
     }
 
     .tr {
@@ -141,7 +141,7 @@ const getStyles = (props, align = 'left') => [
 
 // eslint-disable-next-line react/prop-types
 const TableView: React.FC<TrackListProps> = (props) => {
-  const { tracks: data, trackPlaying, setTrackDetail, showCtxMenu, columns, height } = props;
+  const { tracks: data, trackPlaying, setTrackDetail, showCtxMenu, columns } = props;
   const [lastIndexSelected, setLastIndexSelected] = React.useState(-1);
 
   const defaultColumn = React.useMemo(
@@ -153,14 +153,6 @@ const TableView: React.FC<TrackListProps> = (props) => {
     }),
     []
   );
-  const [bHeight, setBHeight] = React.useState(0);
-
-  React.useEffect(() => {
-    if (height) {
-      const ht = height - 112;
-      setBHeight(ht);
-    }
-  }, [height]);
 
   const {
     getTableProps,
@@ -260,7 +252,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
           </div>
         ))}
       </div>
-      <div style={{ height: bHeight }} className="tbody">
+      <div className="tbody">
         {rows.map((row) => {
           prepareRow(row);
           return (
@@ -289,7 +281,6 @@ const TableView: React.FC<TrackListProps> = (props) => {
 };
 
 const TrackList: React.FC = () => {
-  const { height } = useViewportSize();
   const { tracks, trackPlaying, setTrackDetail, showCtxMenu } = useAppState();
   const columns = React.useMemo(
     () => [
@@ -340,8 +331,7 @@ const TrackList: React.FC = () => {
     trackPlaying,
     setTrackDetail,
     showCtxMenu,
-    columns,
-    height
+    columns
   };
 
   return (

@@ -33,8 +33,10 @@ function App() {
   }, [tracks, trackDetail, setContent]);
 
   return (
-    <div className="flex flex-col h-screen">
-      <AppHeader />
+    <div className="flex flex-col h-screen w-full overflow-hidden">
+      <div className="grow-0">
+        <AppHeader />
+      </div>
       <div className="grow">{content}</div>
     </div>
   );
