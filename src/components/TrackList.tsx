@@ -7,10 +7,10 @@
 // @ts-nocheck
 import React from 'react';
 import styled from 'styled-components';
-import { useTable, useResizeColumns, useFlexLayout, useRowSelect } from 'react-table';
+import { useTable, useResizeColumns, useFlexLayout, useRowSelect, useSortBy } from 'react-table';
+import { useViewportSize } from '@mantine/hooks';
 import { Track, TrackId } from '../../electron/types/emusik';
 import useAppState from '../hooks/useAppState';
-import { useViewportSize } from '@mantine/hooks';
 
 interface TrackListProps {
   tracks: Track[];
@@ -132,7 +132,7 @@ const getStyles = (props, align = 'left') => [
   props,
   {
     style: {
-      justifyContent: align === 'right' ? 'flex-end' : 'flex-start',
+      justifyContent: align === 'center' ? 'center' : 'flex-start',
       alignItems: 'flex-start',
       display: 'flex'
     }
@@ -147,7 +147,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
   const defaultColumn = React.useMemo(
     () => ({
       // When using the useFlexLayout:
-      minWidth: 25, // minWidth is only used as a limit for resizing
+      minWidth: 35, // minWidth is only used as a limit for resizing
       width: 150, // width is used for both the flex-basis and flex-grow
       maxWidth: 200 // maxWidth is only used as a limit for resizing
     }),
@@ -162,14 +162,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
     }
   }, [height]);
 
-  const {
-    getTableProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    selectedFlatRows,
-    state: { selectedRowIds }
-  } = useTable(
+  const { getTableProps, headerGroups, rows, prepareRow, selectedFlatRows } = useTable(
     {
       columns,
       data,
@@ -177,6 +170,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
     },
     useResizeColumns,
     useFlexLayout,
+    useSortBy,
     useRowSelect
   );
 
@@ -249,9 +243,10 @@ const TableView: React.FC<TrackListProps> = (props) => {
             className="tr"
           >
             {headerGroup.headers.map((column) => (
-              <div {...column.getHeaderProps(headerProps)} className="th">
+              <div {...column.getHeaderProps({ ...column.getSortByToggleProps(), ...headerProps })} className="th">
                 {column.render('Header')}
                 {/* Use column.getResizerProps to hook up the events correctly */}
+                <span>{column.isSorted ? (column.isSortedDesc ? '  🔽' : '  🔼') : ''}</span>
                 {column.canResize && (
                   <div {...column.getResizerProps()} className={`resizer ${column.isResizing ? 'isResizing' : ''}`} />
                 )}
@@ -304,7 +299,7 @@ const TrackList: React.FC = () => {
       {
         Header: 'Time',
         accessor: 'time',
-        width: 25,
+        width: 35,
         align: 'center'
       },
       {
@@ -314,22 +309,26 @@ const TrackList: React.FC = () => {
       {
         Header: 'Rate',
         accessor: 'bitrate',
-        width: 25
+        width: 35,
+        align: 'center'
       },
       {
         Header: 'BPM',
         accessor: 'bpm',
-        width: 25
+        width: 35,
+        align: 'center'
       },
       {
         Header: 'Key',
         accessor: 'key',
-        width: 25
+        width: 35,
+        align: 'center'
       },
       {
         Header: 'Year',
         accessor: 'year',
-        width: 25
+        width: 35,
+        align: 'center'
       }
     ],
     []
