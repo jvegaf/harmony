@@ -18,9 +18,7 @@ export default function useAppState() {
 
   const onFixTracks = React.useCallback(
     async (selected: Track[]) => {
-      console.log('tracks to fix:', selected);
       const fixedTracks = await window.Main.FixTracks(selected);
-      console.log(fixedTracks);
       const newTracks = tracks.map((t) => {
         const fixed = fixedTracks.find((ft) => ft.id === t.id);
         if (fixed) {

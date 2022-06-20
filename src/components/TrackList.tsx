@@ -174,6 +174,10 @@ const TableView: React.FC<TrackListProps> = (props) => {
     useRowSelect
   );
 
+  React.useEffect(() => {
+    selectedFlatRows.forEach((r) => r.toggleRowSelected(false));
+  }, [rows]);
+
   const onClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
     console.log(e);
     console.log(row);
@@ -182,6 +186,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
 
     if (!row) return;
     const trackId = row.original.id;
+    const index = rows.indexOf(row);
 
     if (e.type === 'dblclick') {
       setTrackDetail(trackId);
@@ -192,7 +197,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
     if (e.type === 'auxclick') {
       if (!selectedFlatRows.includes(row)) {
         selectedFlatRows.forEach((r) => r.toggleRowSelected(false));
-        setLastIndexSelected(row.index);
+        setLastIndexSelected(index);
         row.toggleRowSelected();
       }
       showCtxMenu(selectedFlatRows.map((r) => r.original));
@@ -205,29 +210,29 @@ const TableView: React.FC<TrackListProps> = (props) => {
         console.log(lastIndexSelected);
 
         if (lastIndexSelected < 0) {
-          setLastIndexSelected(row.index);
+          setLastIndexSelected(index);
           row.toggleRowSelected();
           return;
         }
 
-        const from = row.index < lastIndexSelected ? row.index : lastIndexSelected + 1;
-        const to = row.index > lastIndexSelected ? row.index + 1 : lastIndexSelected;
+        const from = row.index < lastIndexSelected ? index : lastIndexSelected + 1;
+        const to = row.index > lastIndexSelected ? index + 1 : lastIndexSelected;
         // eslint-disable-next-line no-plusplus
         for (let i = from; i < to; i++) {
           rows[i].toggleRowSelected();
         }
-        setLastIndexSelected(row.index);
+        setLastIndexSelected(index);
         return;
       }
 
       if (e.ctrlKey) {
         row.toggleRowSelected();
-        setLastIndexSelected(row.index);
+        setLastIndexSelected(index);
         return;
       }
 
       selectedFlatRows.forEach((r) => r.toggleRowSelected(false));
-      setLastIndexSelected(row.index);
+      setLastIndexSelected(index);
       row.toggleRowSelected();
     }
   };

@@ -2,14 +2,15 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { useAudioPlayer, useAudioPosition } from 'react-use-audio-player';
-import { Track } from '../../electron/types/emusik';
+import { Track, TrackId } from '../../electron/types/emusik';
 
 interface PlayerProps {
   track: Track;
 }
 
 const Player: React.FC<PlayerProps> = ({ track }) => {
-  const audioPlayer = useAudioPlayer({
+  const [playingId, setPlayingId] = React.useState<TrackId | undefined>();
+  const player = useAudioPlayer({
     src: track.filepath,
     format: 'mp3',
     autoplay: true
@@ -23,15 +24,24 @@ const Player: React.FC<PlayerProps> = ({ track }) => {
   const seekBarElem = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (!audioPlayer.player) return;
-    if (track.filepath !== audioPlayer.player.src) {
-      audioPlayer.load({
+    if (!playingId) {
+      player.load({
         src: track.filepath,
         format: 'mp3',
         autoplay: true
       });
+      setPlayingId(track.id);
+      return;
     }
-  }, [audioPlayer, track.filepath]);
+    if (track.id !== playingId) {
+      player.load({
+        src: track.filepath,
+        format: 'mp3',
+        autoplay: true
+      });
+      setPlayingId(track.id);
+    }
+  }, [player, track]);
 
   React.useEffect(() => {
     setBarWidth(`${percentComplete}%`);

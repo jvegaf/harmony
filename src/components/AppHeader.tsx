@@ -15,10 +15,10 @@ function AppHeader() {
 
   React.useEffect(() => {
     if (trackPlaying) {
-      const t = tracks.find((tr) => tr.id === trackPlaying);
+      const t = tracks.find((tr) => tr.id === trackPlaying) as Track;
       setPlayTrack(t);
     }
-  }, [trackPlaying]);
+  }, [tracks, trackPlaying]);
 
   const btnProps = {
     color: 'white',
@@ -31,9 +31,7 @@ function AppHeader() {
       <div className="flex justify-center items-center">
         {playing ? <PauseButton {...btnProps} /> : <PlayButton {...btnProps} />}
       </div>
-      <div className="flex justify-center items-center col-span-3">
-        {trackPlaying && <Player track={playTrack as Track} />}
-      </div>
+      <div className="flex justify-center items-center col-span-3">{playTrack && <Player track={playTrack} />}</div>
       <div className="mr-8 flex justify-around items-center">
         {tracks.length > 0 && (
           <>
