@@ -1,11 +1,11 @@
 import { Dispatch, SetStateAction } from 'react';
-import { Track, TrackId } from '../../electron/types/emusik';
+import { Track } from '../../electron/types/emusik';
 
 export type AppContextType = {
   tracks: Track[];
   setTracks: Dispatch<SetStateAction<Track[]>>;
-  trackDetail: TrackId | null;
-  setTrackDetail: Dispatch<SetStateAction<TrackId>>;
-  trackPlaying: TrackId | null;
-  setTrackPlaying: Dispatch<SetStateAction<TrackId>>;
+  trackDetail: Track | null;
+  setTrackDetail: Dispatch<SetStateAction<Track | null>>;
+  trackPlaying: Track | null;
+  setTrackPlaying: Dispatch<SetStateAction<Track | null>>;
 };

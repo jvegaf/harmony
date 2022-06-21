@@ -1,58 +1,48 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Track } from '../../electron/types/emusik';
 import Placeholder from '../assets/placeholder.png';
 import useAppState from '../hooks/useAppState';
 
-interface DetailedTrack extends Track {
-  imgSrc: string;
-}
-
-function TrackDetail() {
-  const { tracks, trackDetail, closeDetail, saveChanges } = useAppState();
+function Detail() {
+  const { trackDetail, closeDetail, saveChanges } = useAppState();
+  const [src, setSrc] = useState(Placeholder);
   const { register, handleSubmit } = useForm();
-  const [detailed, setDetailed] = React.useState<DetailedTrack | undefined>(undefined);
 
   React.useEffect(() => {
     if (trackDetail) {
-      const track = tracks.find((t) => t.id === trackDetail) as Track;
-
-      const { artwork } = track;
-      let src = Placeholder;
+      const { artwork } = trackDetail;
       if (artwork) {
         const blob = new Blob([artwork.data], {
           type: artwork.mime
         });
 
-        src = URL.createObjectURL(blob);
+        const artData = URL.createObjectURL(blob);
+        setSrc(artData);
       }
-
-      const det = { ...track, imgSrc: src };
-      setDetailed(det);
     }
   }, [trackDetail]);
 
-  const onCancel = React.useCallback(() => closeDetail(), [closeDetail]);
+  const onCancel = () => closeDetail();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = (data: any) => {
-    const track = tracks.find((t) => t.id === detailed?.id);
-    const updated = { ...track, ...data };
+    const updated = { ...trackDetail, ...data };
     saveChanges(updated);
     closeDetail();
   };
 
   return (
     <div className="pt-4 h-full bg-neutral-700">
-      {detailed && (
+      {trackDetail && (
         <form className="w-full max-w-xl m-auto" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-rows-8 gap-3">
             <div>
               <label className="font-normal text-md text-neutral-400">Title</label>
               <input
                 className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                defaultValue={detailed.title}
+                defaultValue={trackDetail.title}
                 {...register('title')}
               />
             </div>
@@ -60,7 +50,7 @@ function TrackDetail() {
               <label className="font-normal text-md text-neutral-400">Artist</label>
               <input
                 className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                defaultValue={detailed.artist}
+                defaultValue={trackDetail.artist}
                 {...register('artist')}
               />
             </div>
@@ -68,20 +58,20 @@ function TrackDetail() {
               <label className="font-normal text-md text-neutral-400">Album</label>
               <input
                 className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                defaultValue={detailed.album}
+                defaultValue={trackDetail.album}
                 {...register('album')}
               />
             </div>
             <div className="row-span-4 grid grid-cols-2 gap-2">
               <div className="m-auto">
-                <img src={detailed.imgSrc} className="rounded-md" width={250} height={250} alt="" />
+                <img src={src} className="rounded-md" width={250} height={250} alt="" />
               </div>
               <div>
                 <div>
                   <label className="font-normal text-md text-neutral-400">Genre</label>
                   <input
                     className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                    defaultValue={detailed.genre}
+                    defaultValue={trackDetail.genre}
                     {...register('genre')}
                   />
                 </div>
@@ -90,7 +80,7 @@ function TrackDetail() {
                   <input
                     type="number"
                     className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                    defaultValue={detailed.bpm}
+                    defaultValue={trackDetail.bpm}
                     {...register('bpm')}
                   />
                 </div>
@@ -98,7 +88,7 @@ function TrackDetail() {
                   <label className="font-normal text-md text-neutral-400">Key</label>
                   <input
                     className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                    defaultValue={detailed.key}
+                    defaultValue={trackDetail.key}
                     {...register('key')}
                   />
                 </div>
@@ -107,7 +97,7 @@ function TrackDetail() {
                   <input
                     type="number"
                     className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                    defaultValue={detailed.year}
+                    defaultValue={trackDetail.year}
                     {...register('year')}
                   />
                 </div>
@@ -134,4 +124,4 @@ function TrackDetail() {
   );
 }
 
-export default TrackDetail;
+export default Detail;

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Track, TrackId } from '../electron/types/emusik';
+import { Track } from '../electron/types/emusik';
 import AppHeader from './components/AppHeader';
 import OnBoarding from './components/OnBoarding';
-import TrackDetail from './components/TrackDetail';
+import Detail from './components/Detail';
 import TrackList from './components/TrackList';
 import useAppState from './hooks/useAppState';
 
@@ -12,11 +12,11 @@ function App() {
 
   useEffect(() => {
     if (window.Main) {
-      window.Main.on('view-detail-command', (trackId: TrackId) => setTrackDetail(trackId));
+      window.Main.on('view-detail-command', (track: Track) => setTrackDetail(track));
 
-      window.Main.on('play-command', (trackId: TrackId) => setTrackPlaying(trackId));
+      window.Main.on('play-command', (track: Track) => setTrackPlaying(track));
 
-      window.Main.on('fix-track-command', (trackId: TrackId) => onFixTrack(trackId));
+      window.Main.on('fix-track-command', (track: Track) => onFixTrack(track));
 
       window.Main.on('fix-tracks-command', (selected: Track[]) => onFixSelectedTracks(selected));
     }
@@ -27,14 +27,20 @@ function App() {
       setContent(<TrackList />);
     }
 
+    if (tracks.length < 1) {
+      setContent(<OnBoarding />);
+    }
+
     if (trackDetail) {
-      setContent(<TrackDetail />);
+      setContent(<Detail />);
     }
   }, [tracks, trackDetail, setContent]);
 
   return (
-    <div className="flex flex-col h-screen">
-      <AppHeader />
+    <div className="flex flex-col h-screen w-full overflow-hidden">
+      <div className="grow-0">
+        <AppHeader />
+      </div>
       <div className="grow">{content}</div>
     </div>
   );

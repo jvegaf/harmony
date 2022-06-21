@@ -33,6 +33,7 @@ function createWindow() {
     resizable: true,
     fullscreenable: true,
     webPreferences: {
+      webSecurity: false,
       preload: join(__dirname, 'preload.js')
     }
   });
@@ -99,20 +100,20 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
     {
       label: 'View Details',
       click: () => {
-        event.sender.send('view-detail-command', selected[0].id);
+        event.sender.send('view-detail-command', selected[0]);
       }
     },
     {
       label: 'Play Track',
       click: () => {
-        event.sender.send('play-command', selected[0].id);
+        event.sender.send('play-command', selected[0]);
       }
     },
     { type: 'separator' },
     {
       label: 'Fix Track',
       click: () => {
-        event.sender.send('fix-track-command', selected[0].id);
+        event.sender.send('fix-track-command', selected[0]);
       }
     }
   ] as MenuItemConstructorOptions[];

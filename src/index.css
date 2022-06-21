@@ -4,13 +4,31 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  height: 100vh;
-}
 
+
+body {
+  box-sizing: border-box;
+}
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+
+.container {
+  position: relative;
+  margin: 0 100px;
+  width: 60%;
+  padding: 10px;
+}
+
+.button {
+  position: absolute;
+  left: -60px;
+  top: 34%;
+  cursor: pointer;
+  font-size: 34px;
+  filter: hue-rotate(0deg);
 }

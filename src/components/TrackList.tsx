@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-console */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -7,16 +8,18 @@
 // @ts-nocheck
 import React from 'react';
 import styled from 'styled-components';
-import { useTable, useResizeColumns, useFlexLayout, useRowSelect } from 'react-table';
+import { useTable, useResizeColumns, useFlexLayout, useRowSelect, useSortBy } from 'react-table';
+import { useViewportSize } from '@mantine/hooks';
 import { Track, TrackId } from '../../electron/types/emusik';
 import useAppState from '../hooks/useAppState';
 
 interface TrackListProps {
   tracks: Track[];
-  trackPlaying?: TrackId;
+  trackPlaying?: Track;
   setTrackDetail: React.Dispatch<React.SetStateAction<TrackId>>;
   showCtxMenu: (trackId: string) => void;
   columns: any[];
+  height: number;
 }
 
 const Styles = styled.div`
@@ -25,8 +28,6 @@ const Styles = styled.div`
   display: block;
   ${'' /* These styles are required for a horizontaly scrollable table overflow */}
   overflow: auto;
-  width: 100%;
-  height: 100%;
   color: #eeeeee;
 
   .table {
@@ -41,10 +42,8 @@ const Styles = styled.div`
     }
 
     .tbody {
-      ${'' /* These styles are required for a scrollable table body */}
       overflow-y: scroll;
       overflow-x: hidden;
-      height: auto;
     }
 
     .tr {
@@ -134,7 +133,7 @@ const getStyles = (props, align = 'left') => [
   props,
   {
     style: {
-      justifyContent: align === 'right' ? 'flex-end' : 'flex-start',
+      justifyContent: align === 'center' ? 'center' : 'flex-start',
       alignItems: 'flex-start',
       display: 'flex'
     }
@@ -143,27 +142,28 @@ const getStyles = (props, align = 'left') => [
 
 // eslint-disable-next-line react/prop-types
 const TableView: React.FC<TrackListProps> = (props) => {
-  const { tracks: data, trackPlaying, setTrackDetail, showCtxMenu, columns } = props;
+  const { tracks: data, trackPlaying, setTrackDetail, showCtxMenu, columns, height } = props;
   const [lastIndexSelected, setLastIndexSelected] = React.useState(-1);
 
   const defaultColumn = React.useMemo(
     () => ({
       // When using the useFlexLayout:
-      minWidth: 25, // minWidth is only used as a limit for resizing
+      minWidth: 35, // minWidth is only used as a limit for resizing
       width: 150, // width is used for both the flex-basis and flex-grow
       maxWidth: 200 // maxWidth is only used as a limit for resizing
     }),
     []
   );
+  const [bHeight, setBHeight] = React.useState(0);
 
-  const {
-    getTableProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    selectedFlatRows,
-    state: { selectedRowIds }
-  } = useTable(
+  React.useEffect(() => {
+    if (height) {
+      const ht = height - 112;
+      setBHeight(ht);
+    }
+  }, [height]);
+
+  const { getTableProps, headerGroups, rows, prepareRow, selectedFlatRows } = useTable(
     {
       columns,
       data,
@@ -171,17 +171,24 @@ const TableView: React.FC<TrackListProps> = (props) => {
     },
     useResizeColumns,
     useFlexLayout,
+    useSortBy,
     useRowSelect
   );
+
+  React.useEffect(() => {
+    selectedFlatRows.forEach((r) => r.toggleRowSelected(false));
+  }, [rows]);
 
   const onClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
     console.log(e);
     console.log(row);
+    console.log(selectedFlatRows);
 
     e.preventDefault();
 
     if (!row) return;
     const trackId = row.original.id;
+    const index = rows.indexOf(row);
 
     if (e.type === 'dblclick') {
       setTrackDetail(trackId);
@@ -192,11 +199,16 @@ const TableView: React.FC<TrackListProps> = (props) => {
     if (e.type === 'auxclick') {
       if (!selectedFlatRows.includes(row)) {
         selectedFlatRows.forEach((r) => r.toggleRowSelected(false));
-        setLastIndexSelected(row.index);
-        row.toggleRowSelected();
       }
-      showCtxMenu(selectedFlatRows.map((r) => r.original));
-      return;
+
+      if (selectedFlatRows.lenght < 1) {
+        selectedFlatRows.push(row);
+        setLastIndexSelected(index);
+      }
+
+      const tracks = selectedFlatRows.map((r) => r.original);
+      console.log('tracks', tracks);
+      showCtxMenu(tracks);
     }
 
     if (e.type === 'click') {
@@ -205,29 +217,29 @@ const TableView: React.FC<TrackListProps> = (props) => {
         console.log(lastIndexSelected);
 
         if (lastIndexSelected < 0) {
-          setLastIndexSelected(row.index);
+          setLastIndexSelected(index);
           row.toggleRowSelected();
           return;
         }
 
-        const from = row.index < lastIndexSelected ? row.index : lastIndexSelected + 1;
-        const to = row.index > lastIndexSelected ? row.index + 1 : lastIndexSelected;
+        const from = row.index < lastIndexSelected ? index : lastIndexSelected + 1;
+        const to = row.index > lastIndexSelected ? index + 1 : lastIndexSelected;
         // eslint-disable-next-line no-plusplus
         for (let i = from; i < to; i++) {
           rows[i].toggleRowSelected();
         }
-        setLastIndexSelected(row.index);
+        setLastIndexSelected(index);
         return;
       }
 
       if (e.ctrlKey) {
         row.toggleRowSelected();
-        setLastIndexSelected(row.index);
+        setLastIndexSelected(index);
         return;
       }
 
       selectedFlatRows.forEach((r) => r.toggleRowSelected(false));
-      setLastIndexSelected(row.index);
+      setLastIndexSelected(index);
       row.toggleRowSelected();
     }
   };
@@ -243,9 +255,10 @@ const TableView: React.FC<TrackListProps> = (props) => {
             className="tr"
           >
             {headerGroup.headers.map((column) => (
-              <div {...column.getHeaderProps(headerProps)} className="th">
+              <div {...column.getHeaderProps({ ...column.getSortByToggleProps(), ...headerProps })} className="th">
                 {column.render('Header')}
                 {/* Use column.getResizerProps to hook up the events correctly */}
+                <span>{column.isSorted ? (column.isSortedDesc ? '  🔽' : '  🔼') : ''}</span>
                 {column.canResize && (
                   <div {...column.getResizerProps()} className={`resizer ${column.isResizing ? 'isResizing' : ''}`} />
                 )}
@@ -254,7 +267,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
           </div>
         ))}
       </div>
-      <div className="tbody">
+      <div style={{ height: bHeight }} className="tbody">
         {rows.map((row) => {
           prepareRow(row);
           return (
@@ -265,7 +278,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
               onDoubleClick={(e) => onClick(e, row)}
               className={`tr 
                 ${row.isSelected ? 'isSelected' : ''} 
-                ${row.original.id === trackPlaying ? 'isPlaying' : ''}`}
+                ${trackPlaying && row.original.id === trackPlaying.id ? 'isPlaying' : ''}`}
             >
               {row.cells.map((cell) => {
                 return (
@@ -283,6 +296,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
 };
 
 const TrackList: React.FC = () => {
+  const { height } = useViewportSize();
   const { tracks, trackPlaying, setTrackDetail, showCtxMenu } = useAppState();
   const columns = React.useMemo(
     () => [
@@ -297,7 +311,7 @@ const TrackList: React.FC = () => {
       {
         Header: 'Time',
         accessor: 'time',
-        width: 25,
+        width: 35,
         align: 'center'
       },
       {
@@ -307,22 +321,26 @@ const TrackList: React.FC = () => {
       {
         Header: 'Rate',
         accessor: 'bitrate',
-        width: 25
+        width: 35,
+        align: 'center'
       },
       {
         Header: 'BPM',
         accessor: 'bpm',
-        width: 25
+        width: 35,
+        align: 'center'
       },
       {
         Header: 'Key',
         accessor: 'key',
-        width: 25
+        width: 35,
+        align: 'center'
       },
       {
         Header: 'Year',
         accessor: 'year',
-        width: 25
+        width: 35,
+        align: 'center'
       }
     ],
     []
@@ -333,7 +351,8 @@ const TrackList: React.FC = () => {
     trackPlaying,
     setTrackDetail,
     showCtxMenu,
-    columns
+    columns,
+    height
   };
 
   return (
