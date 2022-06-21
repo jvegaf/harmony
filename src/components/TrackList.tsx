@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-console */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -181,6 +182,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
   const onClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
     console.log(e);
     console.log(row);
+    console.log(selectedFlatRows);
 
     e.preventDefault();
 
@@ -197,11 +199,17 @@ const TableView: React.FC<TrackListProps> = (props) => {
     if (e.type === 'auxclick') {
       if (!selectedFlatRows.includes(row)) {
         selectedFlatRows.forEach((r) => r.toggleRowSelected(false));
-        setLastIndexSelected(index);
-        row.toggleRowSelected();
       }
-      showCtxMenu(selectedFlatRows.map((r) => r.original));
-      return;
+
+      if (selectedFlatRows.lenght < 1) {
+        selectedFlatRows.push(row);
+        setLastIndexSelected(index);
+      }
+
+      console.log(selectedFlatRows);
+
+      const tracks = selectedFlatRows.map((r) => r.original);
+      showCtxMenu(tracks);
     }
 
     if (e.type === 'click') {

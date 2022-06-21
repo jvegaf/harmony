@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React, { useContext } from 'react';
-import { Track, TrackId } from '../../electron/types/emusik';
+import { Track } from '../../electron/types/emusik';
 import AppContext from '../context/AppContext';
 
 export default function useAppState() {
@@ -32,13 +32,11 @@ export default function useAppState() {
   );
 
   const closeDetail = React.useCallback(() => {
-    setTrackDetail(undefined);
+    setTrackDetail(null);
   }, [setTrackDetail]);
 
   const saveChanges = React.useCallback(
     (track: Track) => {
-      console.log('track update', track);
-
       window.Main.PersistTrack(track);
       const newTracks = tracks.map((t) => {
         if (t.id === track.id) {
@@ -47,7 +45,7 @@ export default function useAppState() {
         return t;
       });
       setTracks(newTracks);
-      if (trackDetail === track.id) {
+      if (trackDetail.id === track.id) {
         closeDetail();
       }
     },
@@ -55,9 +53,7 @@ export default function useAppState() {
   );
 
   const onFixTrack = React.useCallback(
-    async (id: TrackId) => {
-      const track = tracks.find((t) => t.id === id);
-
+    async (track: Track) => {
       const updated = await window.Main.FixTrack(track);
       saveChanges(updated);
     },

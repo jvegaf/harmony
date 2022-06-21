@@ -12,11 +12,11 @@ function App() {
 
   useEffect(() => {
     if (window.Main) {
-      window.Main.on('view-detail-command', (trackId: TrackId) => setTrackDetail(trackId));
+      window.Main.on('view-detail-command', (track: Track) => setTrackDetail(track));
 
-      window.Main.on('play-command', (trackId: TrackId) => setTrackPlaying(trackId));
+      window.Main.on('play-command', (track: Track) => setTrackPlaying(track));
 
-      window.Main.on('fix-track-command', (trackId: TrackId) => onFixTrack(trackId));
+      window.Main.on('fix-track-command', (track: Track) => onFixTrack(track));
 
       window.Main.on('fix-tracks-command', (selected: Track[]) => onFixSelectedTracks(selected));
     }
