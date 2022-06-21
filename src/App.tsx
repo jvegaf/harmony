@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Track, TrackId } from '../electron/types/emusik';
+import { Track } from '../electron/types/emusik';
 import AppHeader from './components/AppHeader';
 import OnBoarding from './components/OnBoarding';
-import TrackDetail from './components/TrackDetail';
+import Detail from './components/Detail';
 import TrackList from './components/TrackList';
 import useAppState from './hooks/useAppState';
 
@@ -27,8 +27,12 @@ function App() {
       setContent(<TrackList />);
     }
 
+    if (tracks.length < 1) {
+      setContent(<OnBoarding />);
+    }
+
     if (trackDetail) {
-      setContent(<TrackDetail />);
+      setContent(<Detail />);
     }
   }, [tracks, trackDetail, setContent]);
 

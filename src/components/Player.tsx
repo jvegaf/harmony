@@ -9,7 +9,6 @@ import useAppState from '../hooks/useAppState';
 
 const Player = () => {
   const { trackPlaying } = useAppState();
-  const [wavesurfer, setWavesurfer] = React.useState(null);
   const [playing, setPlaying] = React.useState(false);
   const [position, setPosition] = React.useState(0);
 
@@ -22,10 +21,9 @@ const Player = () => {
     }
   }, [trackPlaying]);
 
-  const onPosChange = ({ pos, ws }) => {
-    if (pos !== position) {
-      setPosition(pos);
-      setWavesurfer(ws);
+  const onPosChange = (ws) => {
+    if (ws.pos !== position) {
+      setPosition(ws.pos);
     }
   };
 

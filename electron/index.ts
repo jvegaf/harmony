@@ -100,7 +100,7 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
     {
       label: 'View Details',
       click: () => {
-        event.sender.send('view-detail-command', selected);
+        event.sender.send('view-detail-command', selected[0]);
       }
     },
     {

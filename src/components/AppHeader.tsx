@@ -8,26 +8,27 @@ function AppHeader() {
 
   return (
     <div className="h-20 bg-neutral-700 grid grid-rows-1 grid-cols-5">
-      <div className="flex justify-center items-center"></div>
+      <div className="flex justify-center items-center">
+        {tracks.length > 0 && (
+          <button
+            onClick={() => onFixAllTracks()}
+            className="bg-blue-500 rounded py-2 px-4 mr-10 focus:outline-none shadow hover:bg-blue-200"
+          >
+            Fix all
+          </button>
+        )}
+      </div>
       <div className="flex justify-center items-center col-span-3">
         <Player />
       </div>
       <div className="mr-8 flex justify-around items-center">
         {tracks.length > 0 && (
-          <>
-            <button
-              onClick={() => onOpenFolder()}
-              className="bg-blue-500 rounded py-2 px-4 mr-10 focus:outline-none shadow hover:bg-blue-200"
-            >
-              Open Folder
-            </button>
-            <button
-              onClick={() => onFixAllTracks()}
-              className="bg-blue-500 rounded py-2 px-4 mr-10 focus:outline-none shadow hover:bg-blue-200"
-            >
-              Fix all
-            </button>
-          </>
+          <button
+            onClick={() => onOpenFolder()}
+            className="bg-blue-500 rounded py-2 px-4 mr-10 focus:outline-none shadow hover:bg-blue-200"
+          >
+            Open Folder
+          </button>
         )}
       </div>
     </div>

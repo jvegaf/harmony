@@ -2752,11 +2752,6 @@ hosted-git-info@^4.0.2:
   dependencies:
     lru-cache "^6.0.0"
 
-howler@^2.2.1:
-  version "2.2.3"
-  resolved "https://registry.npmjs.org/howler/-/howler-2.2.3.tgz"
-  integrity sha512-QM0FFkw0LRX1PR8pNzJVAY25JhIWvbKMBFM4gqk+QdV+kPXOhleWGCB6AiAF/goGjIHK2e/nIElplvjQwhr0jg==
-
 htmlparser2@^6.1.0:
   version "6.1.0"
   resolved "https://registry.npmjs.org/htmlparser2/-/htmlparser2-6.1.0.tgz"
@@ -3829,13 +3824,6 @@ react-table@7.8.0:
   version "7.8.0"
   resolved "https://registry.npmjs.org/react-table/-/react-table-7.8.0.tgz"
   integrity sha512-hNaz4ygkZO4bESeFfnfOft73iBUj8K5oKi1EcSHPAibEydfsX2MyU6Z8KCr3mv3C9Kqqh71U+DhZkFvibbnPbA==
-
-react-use-audio-player@1.2.5:
-  version "1.2.5"
-  resolved "https://registry.npmjs.org/react-use-audio-player/-/react-use-audio-player-1.2.5.tgz"
-  integrity sha512-nnW0G1p9x76Zpfg1lhz1chOG+X8XHopSM2YReSaHgcgeVZUrl45PIoJURX2/6u+RtVDC57qjm5w+JPRtlOnr1w==
-  dependencies:
-    howler "^2.2.1"
 
 react@17.0.2:
   version "17.0.2"

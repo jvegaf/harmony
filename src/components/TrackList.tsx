@@ -15,7 +15,7 @@ import useAppState from '../hooks/useAppState';
 
 interface TrackListProps {
   tracks: Track[];
-  trackPlaying?: TrackId;
+  trackPlaying?: Track;
   setTrackDetail: React.Dispatch<React.SetStateAction<TrackId>>;
   showCtxMenu: (trackId: string) => void;
   columns: any[];
@@ -206,9 +206,8 @@ const TableView: React.FC<TrackListProps> = (props) => {
         setLastIndexSelected(index);
       }
 
-      console.log(selectedFlatRows);
-
       const tracks = selectedFlatRows.map((r) => r.original);
+      console.log('tracks', tracks);
       showCtxMenu(tracks);
     }
 
@@ -279,7 +278,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
               onDoubleClick={(e) => onClick(e, row)}
               className={`tr 
                 ${row.isSelected ? 'isSelected' : ''} 
-                ${row.original.id === trackPlaying ? 'isPlaying' : ''}`}
+                ${trackPlaying && row.original.id === trackPlaying.id ? 'isPlaying' : ''}`}
             >
               {row.cells.map((cell) => {
                 return (
