@@ -6,17 +6,16 @@ const PersistTrack = (track: Track) => {
 
   const beats = bpm ? bpm.toString() : undefined;
   const yearStr = year ? year.toString() : undefined;
-  const art = artwork ? { ...artwork, imageBuffer: artwork.data } : undefined;
   const tags = {
     title,
     artist,
     album,
     year: yearStr,
     genre,
-    artwork: art,
+    image: artwork,
     bpm: beats,
     key
-  };
+  } as NodeId3.Tags;
 
   NodeId3.update(tags, track.filepath, (_: unknown, err: Error) => {
     if (err) {

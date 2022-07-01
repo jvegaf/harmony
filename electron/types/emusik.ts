@@ -8,7 +8,7 @@ export interface Artwork {
   mime?: string;
   type: { id: number; name: string };
   description?: string;
-  data: Buffer;
+  imageBuffer: Buffer;
 }
 
 export interface Track {

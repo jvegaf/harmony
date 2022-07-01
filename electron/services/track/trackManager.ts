@@ -1,11 +1,11 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-console */
 import * as Path from 'path';
-import * as mm from 'music-metadata';
 import { v4 as uuid } from 'uuid';
-import LoadTagsFromFile, { FileTags } from '../tag/mmLoader';
+import { Track } from '../../types/emusik';
 import { ParseDuration, Sanitize } from '../../utils';
-import { Artwork, Track } from '../../types/emusik';
+import LoadTagsFromFile from '../tag/mmLoader';
+import LoadArtworkFromFile from '../tag/nId3ArtLoader';
 
 const getFilename = (filepath: string) => {
   return Path.basename(filepath, '.mp3');
@@ -21,22 +21,6 @@ const GetTrackTitle = (title: string | undefined, filepath: string) => {
   }
   const filename = getFilename(filepath);
   return sanitizeFilename(filename);
-};
-
-const GetArtwork = (tags: FileTags): Artwork | undefined => {
-  const { picture } = tags;
-
-  const cover = mm.selectCover(picture);
-
-  if (cover) {
-    return {
-      mime: cover.format,
-      type: { id: 3, name: 'front cover' },
-      description: cover.description,
-      data: cover.data
-    } as Artwork;
-  }
-  return undefined;
 };
 
 const CreateTrack = async (file: string): Promise<Track | null> => {
@@ -57,7 +41,7 @@ const CreateTrack = async (file: string): Promise<Track | null> => {
     filepath: file,
     title: GetTrackTitle(tags.title, file),
     year: tags.year,
-    artwork: GetArtwork(tags),
+    artwork: await LoadArtworkFromFile(file),
     bitrate: tags.bitrate ? tags.bitrate / 1000 : undefined
   };
   return track;

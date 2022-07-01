@@ -9,19 +9,21 @@ import useAppState from '../hooks/useAppState';
 
 function Detail() {
   const { trackDetail, onFindArtwork, closeDetail, saveChanges } = useAppState();
-  const [src, setSrc] = useState(Placeholder);
+  const [artSrc, setArtSrc] = useState(Placeholder);
   const { register, handleSubmit } = useForm();
 
   React.useEffect(() => {
     if (trackDetail) {
       const { artwork } = trackDetail;
       if (artwork) {
-        const blob = new Blob([artwork.data], {
+        console.log('have artwork');
+
+        const blob = new Blob([artwork.imageBuffer], {
           type: artwork.mime
         });
 
         const artData = URL.createObjectURL(blob);
-        setSrc(artData);
+        setArtSrc(artData);
       }
     }
   }, [trackDetail]);
@@ -69,7 +71,7 @@ function Detail() {
             <div className="row-span-4 grid grid-cols-2 gap-2">
               <div className="flex justify-center items-center ">
                 <div className="transform transition duration-300 hover:scale-105 hover: cursor-pointer flex justify-center items-center">
-                  <img onClick={findArtwork} src={src} className="rounded-md" width={250} height={250} alt="" />
+                  <img onClick={findArtwork} src={artSrc} className="rounded-md" width={250} height={250} alt="" />
                 </div>
               </div>
               <div>
