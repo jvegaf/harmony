@@ -2,7 +2,7 @@
 import { search } from 'googlethis';
 import { BuildGoogleQuery } from './querybuilder';
 
-const SearchTrackInfo = async (title: string, artist: string | null = null) => {
+const SearchTrackInfo = async (title: string, artist?: string) => {
   const options = {
     page: 0,
     safe: false, // hide explicit results?

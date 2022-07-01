@@ -14,21 +14,21 @@ import {
 } from 'electron';
 import isDev from 'electron-is-dev';
 import { GetFilesFrom } from './services/fileManager';
+import PersistTrack from './services/tag/nodeId3Saver';
+import FindArtwork from './services/tagger/artworkFinder';
 import FixTags, { FixTracks } from './services/tagger/Tagger';
 import { GetTracks } from './services/track/trackManager';
-import PersistTrack from './services/tag/nodeId3Saver';
-import { Track } from './types/emusik';
+import { Track, ArtsTrackDTO } from './types/emusik';
+import UpdateArtwork from './services/track/artworkUpdater';
 
-const height = 600;
-const width = 800;
+let mainWindow: BrowserWindow | null = null;
+let artsWindow: BrowserWindow | null = null;
 
-let win: BrowserWindow | null = null;
-
-function createWindow() {
+function createMainWindow() {
   // Create the browser window.
-  win = new BrowserWindow({
-    width,
-    height,
+  mainWindow = new BrowserWindow({
+    width: 1350,
+    height: 900,
     show: true,
     resizable: true,
     fullscreenable: true,
@@ -43,57 +43,69 @@ function createWindow() {
 
   // and load the index.html of the app.
   if (isDev) {
-    win?.loadURL(url);
+    mainWindow?.loadURL(url);
   } else {
-    win?.loadFile(url);
+    mainWindow?.loadFile(url);
   }
   // Open the DevTools.
-  win.webContents.openDevTools();
-
-  // For AppBar
-  // ipcMain.on('minimize', () => {
-  //   // eslint-disable-next-line no-unused-expressions
-  //   window.isMinimized() ? window.restore() : window.minimize();
-  //   // or alternatively: win.isVisible() ? win.hide() : win.show()
-  // });
-  // ipcMain.on('maximize', () => {
-  //   // eslint-disable-next-line no-unused-expressions
-  //   window.isMaximized() ? window.restore() : window.maximize();
-  // });
-
-  // ipcMain.on('close', () => {
-  //   window.close();
-  // });
+  mainWindow.webContents.openDevTools();
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+function createArtsWindow(artsDTO: ArtsTrackDTO) {
+  // Create the browser window.
+  artsWindow = new BrowserWindow({
+    width: 1100,
+    height: 820,
+    resizable: true,
+    fullscreenable: false,
+    minimizable: false,
+    parent: mainWindow as BrowserWindow,
+    modal: true,
+    webPreferences: {
+      webSecurity: false,
+      preload: join(__dirname, 'preload.js')
+    }
+  });
+
+  const port = process.env.PORT || 3000;
+  const url = isDev ? `http://localhost:${port}/artworks.html` : join(__dirname, '../src/out/artworks.html');
+
+  // and load the index.html of the app.
+  if (isDev) {
+    artsWindow?.loadURL(url);
+  } else {
+    artsWindow?.loadFile(url);
+  }
+  // Open the DevTools.
+  artsWindow.webContents.openDevTools();
+
+  artsWindow.setMenu(null);
+
+  artsWindow.webContents.on('did-finish-load', () => {
+    console.log('did-finish-load:', artsWindow?.webContents.getTitle());
+    artsWindow?.webContents.send('dto', artsDTO);
+  });
+
+  artsWindow.once('ready-to-show', () => {
+    artsWindow?.show();
+
+    console.log('ready-to-show');
+  });
+}
+
 app.whenReady().then(() => {
-  createWindow();
+  createMainWindow();
 
   app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
   });
 });
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
-
-// listen the channel `message` and resend the received message to the renderer process
-// ipcMain.on('message', (event: IpcMainEvent, message: any) => {
-//   console.log(message);
-//   setTimeout(() => event.sender.send('message', 'hi from electron'), 500);
-// });
 
 ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
   const templateSingle = [
@@ -135,12 +147,24 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
 
 ipcMain.on('persist', (_, track) => PersistTrack(track));
 
+ipcMain.on('find-artwork', async (_, track: Track) => {
+  const results = await FindArtwork(track.title, track.artist);
+  if (results.length) {
+    const artsDto: ArtsTrackDTO = {
+      reqTrack: track,
+      artsUrls: results
+    };
+    createArtsWindow(artsDto);
+  }
+});
+
 ipcMain.handle('open-folder', async () => {
-  const resultPath = await dialog.showOpenDialog(win as BrowserWindow, {
+  const resultPath = await dialog.showOpenDialog(mainWindow as BrowserWindow, {
     properties: ['openDirectory']
   });
 
   if (resultPath.canceled) return null;
+  console.log('path', resultPath);
 
   const files = await GetFilesFrom(resultPath.filePaths[0]);
   const tracks: Track[] = await GetTracks(files);
@@ -155,4 +179,11 @@ ipcMain.handle('fix-track', async (_, track) => {
 ipcMain.handle('fix-tracks', async (_, tracks) => {
   const fixed = await FixTracks(tracks);
   return fixed;
+});
+
+ipcMain.on('save-artwork', async (_, artTrack) => {
+  const newTrack = await UpdateArtwork(artTrack);
+  mainWindow?.webContents.send('track-saved', newTrack);
+  artsWindow?.close();
+  artsWindow?.destroy();
 });

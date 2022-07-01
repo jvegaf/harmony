@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -6,7 +8,7 @@ import Placeholder from '../assets/placeholder.png';
 import useAppState from '../hooks/useAppState';
 
 function Detail() {
-  const { trackDetail, closeDetail, saveChanges } = useAppState();
+  const { trackDetail, onFindArtwork, closeDetail, saveChanges } = useAppState();
   const [src, setSrc] = useState(Placeholder);
   const { register, handleSubmit } = useForm();
 
@@ -25,6 +27,8 @@ function Detail() {
   }, [trackDetail]);
 
   const onCancel = () => closeDetail();
+
+  const findArtwork = () => onFindArtwork(trackDetail as Track);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = (data: any) => {
@@ -63,8 +67,10 @@ function Detail() {
               />
             </div>
             <div className="row-span-4 grid grid-cols-2 gap-2">
-              <div className="m-auto">
-                <img src={src} className="rounded-md" width={250} height={250} alt="" />
+              <div className="flex justify-center items-center ">
+                <div className="transform transition duration-300 hover:scale-105 hover: cursor-pointer flex justify-center items-center">
+                  <img onClick={findArtwork} src={src} className="rounded-md" width={250} height={250} alt="" />
+                </div>
               </div>
               <div>
                 <div>

@@ -52,3 +52,12 @@ export interface MatchResult {
   matches: number;
   of: number;
 }
+
+export interface ArtTrack {
+  reqTrack: Track;
+  selectedArtUrl?: string;
+}
+
+export interface ArtsTrackDTO extends ArtTrack {
+  artsUrls: string[];
+}

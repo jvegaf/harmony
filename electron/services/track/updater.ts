@@ -1,7 +1,13 @@
 import { ResultTag, Track } from '../../types/emusik';
 import { ParseDuration } from '../../utils';
 import PersistTrack from '../tag/nodeId3Saver';
-import GetArtwork from './artFetcher';
+import FetchArtwork from './artFetcher';
+
+const artwork = async (url?: string) => {
+  if (!url) return undefined;
+  const art = await FetchArtwork(url);
+  return art;
+};
 
 const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
   if (!tag) return track;
@@ -17,7 +23,7 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     bpm: tag.bpm,
     key: tag.key,
     genre: tag.genre,
-    artwork: tag.artworkUrl ? await GetArtwork(tag.artworkUrl) : undefined
+    artwork: await artwork(tag.artworkUrl)
   };
 
   try {
