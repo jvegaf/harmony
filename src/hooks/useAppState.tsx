@@ -73,6 +73,8 @@ export default function useAppState() {
     [onFixTracks]
   );
 
+  const onFindArtwork = React.useCallback((track: Track) => window.Main.FindArtwork(track), []);
+
   return {
     tracks,
     trackPlaying,
@@ -83,6 +85,7 @@ export default function useAppState() {
     onFixTracks,
     onFixSelectedTracks,
     onFixAllTracks,
+    onFindArtwork,
     saveChanges,
     closeDetail,
     onOpenFolder,
