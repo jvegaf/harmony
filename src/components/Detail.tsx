@@ -16,8 +16,6 @@ function Detail() {
     if (trackDetail) {
       const { artwork } = trackDetail;
       if (artwork) {
-        console.log('have artwork');
-
         const blob = new Blob([artwork.imageBuffer], {
           type: artwork.mime
         });

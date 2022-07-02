@@ -2,9 +2,7 @@ import fetch from 'node-fetch';
 import { Artwork } from '../../types/emusik';
 
 const FetchArtwork = async (url: string): Promise<Artwork> => {
-  const fixedUrl = url.replace(/[0-9]{3,}x[0-9]{3,}/, '500x500');
-
-  const response = await fetch(fixedUrl);
+  const response = await fetch(url);
   const buf = await response.buffer();
 
   const artwork: Artwork = {

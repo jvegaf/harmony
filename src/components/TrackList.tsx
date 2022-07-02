@@ -17,7 +17,7 @@ interface TrackListProps {
   tracks: Track[];
   trackPlaying?: Track;
   setTrackDetail: React.Dispatch<React.SetStateAction<TrackId>>;
-  showCtxMenu: (trackId: string) => void;
+  showCtxMenu: (selected: Track[]) => void;
   columns: any[];
   height: number;
 }
@@ -144,6 +144,7 @@ const getStyles = (props, align = 'left') => [
 const TableView: React.FC<TrackListProps> = (props) => {
   const { tracks: data, trackPlaying, setTrackDetail, showCtxMenu, columns, height } = props;
   const [lastIndexSelected, setLastIndexSelected] = React.useState(-1);
+  const [selectedTracks, setSelectedTracks] = React.useState([]);
 
   const defaultColumn = React.useMemo(
     () => ({
@@ -163,7 +164,7 @@ const TableView: React.FC<TrackListProps> = (props) => {
     }
   }, [height]);
 
-  const { getTableProps, headerGroups, rows, prepareRow, selectedFlatRows } = useTable(
+  const { getTableProps, headerGroups, rows, prepareRow } = useTable(
     {
       columns,
       data,
@@ -175,73 +176,72 @@ const TableView: React.FC<TrackListProps> = (props) => {
     useRowSelect
   );
 
-  React.useEffect(() => {
-    selectedFlatRows.forEach((r) => r.toggleRowSelected(false));
-  }, [rows]);
-
-  const onClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
+  const clickHandler = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
     console.log(e);
-    console.log(row);
-    console.log(selectedFlatRows);
-
-    e.preventDefault();
+    console.log(row.original.title);
 
     if (!row) return;
-    const trackId = row.original.id;
     const index = rows.indexOf(row);
 
-    if (e.type === 'dblclick') {
-      setTrackDetail(trackId);
-      setLastIndexSelected(undefined);
-      selectedFlatRows.forEach((r) => r.toggleRowSelected(false));
-    }
+    if (e.shiftKey) {
+      console.log('shift pressed');
+      console.log(lastIndexSelected);
 
-    if (e.type === 'auxclick') {
-      if (!selectedFlatRows.includes(row)) {
-        selectedFlatRows.forEach((r) => r.toggleRowSelected(false));
-      }
-
-      if (selectedFlatRows.lenght < 1) {
-        selectedFlatRows.push(row);
+      const tempSelected = [];
+      if (lastIndexSelected < 0) {
         setLastIndexSelected(index);
-      }
-
-      const tracks = selectedFlatRows.map((r) => r.original);
-      console.log('tracks', tracks);
-      showCtxMenu(tracks);
-    }
-
-    if (e.type === 'click') {
-      if (e.shiftKey) {
-        console.log('shift pressed');
-        console.log(lastIndexSelected);
-
-        if (lastIndexSelected < 0) {
-          setLastIndexSelected(index);
-          row.toggleRowSelected();
-          return;
-        }
-
-        const from = row.index < lastIndexSelected ? index : lastIndexSelected + 1;
-        const to = row.index > lastIndexSelected ? index + 1 : lastIndexSelected;
-        // eslint-disable-next-line no-plusplus
-        for (let i = from; i < to; i++) {
-          rows[i].toggleRowSelected();
-        }
-        setLastIndexSelected(index);
+        tempSelected.push(row.original);
         return;
       }
 
-      if (e.ctrlKey) {
-        row.toggleRowSelected();
-        setLastIndexSelected(index);
-        return;
+      const from = row.index < lastIndexSelected ? index : lastIndexSelected + 1;
+      const to = row.index > lastIndexSelected ? index + 1 : lastIndexSelected;
+      // eslint-disable-next-line no-plusplus
+      for (let i = from; i < to; i++) {
+        tempSelected.push(rows[i].original);
       }
-
-      selectedFlatRows.forEach((r) => r.toggleRowSelected(false));
       setLastIndexSelected(index);
-      row.toggleRowSelected();
+      setSelectedTracks([...tempSelected]);
+      return;
     }
+
+    if (e.ctrlKey) {
+      setSelectedTracks([...selectedTracks, row.original]);
+      return;
+    }
+
+    setLastIndexSelected(index);
+    setSelectedTracks([row.original]);
+  };
+
+  const auxClickHandler = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
+    console.log(e);
+    console.log(row.original.title);
+    const tempSelected = [];
+
+    if (!row) return;
+    const trackClicked: Track = row.original;
+
+    if (selectedTracks.indexOf(trackClicked) < 0) {
+      tempSelected.push(trackClicked);
+      setSelectedTracks([...tempSelected]);
+      showCtxMenu(tempSelected);
+      return;
+    }
+
+    showCtxMenu(selectedTracks);
+  };
+
+  const doubleClickHandler = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
+    console.log(e);
+    console.log(row.original.title);
+
+    if (!row) return;
+    const trackClicked: Track = row.original;
+
+    setTrackDetail(trackClicked);
+    setLastIndexSelected(undefined);
+    setSelectedTracks([]);
   };
 
   return (
@@ -273,11 +273,11 @@ const TableView: React.FC<TrackListProps> = (props) => {
           return (
             <div
               {...row.getRowProps()}
-              onClick={(e) => onClick(e, row)}
-              onAuxClick={(e) => onClick(e, row)}
-              onDoubleClick={(e) => onClick(e, row)}
+              onClick={(e) => clickHandler(e, row)}
+              onAuxClick={(e) => auxClickHandler(e, row)}
+              onDoubleClick={(e) => doubleClickHandler(e, row)}
               className={`tr 
-                ${row.isSelected ? 'isSelected' : ''} 
+                ${selectedTracks.indexOf(row.original) < 0 ? '' : 'isSelected'} 
                 ${trackPlaying && row.original.id === trackPlaying.id ? 'isPlaying' : ''}`}
             >
               {row.cells.map((cell) => {

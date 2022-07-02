@@ -1,22 +1,23 @@
 {
-  "name": "vite-reactts-electron-starter",
-  "version": "0.5.0",
+  "name": "emusik",
+  "version": "0.5.1",
   "license": "MIT",
   "main": "main/index.js",
   "author": {
-    "name": "Maximilian Stümpfl"
+    "name": "Jose Vega"
   },
-  "description": "Starter using Vite 2+ React +Typescript + Electron for fast prototyping.",
+  "description": "The music organizer for classic DJs",
   "keywords": [
-    "vite",
-    "react",
-    "electron",
-    "typescript"
+    "music",
+    "manager",
+    "dj",
+    "id3",
+    "fix"
   ],
   "repository": {
-    "url": "https://github.com/lTimeless/vite-reactts-electron-starter"
+    "url": "https://github.com/jvegaf/eMusik"
   },
-  "productName": "vite-reactts-electron-starter",
+  "productName": "eMusik",
   "scripts": {
     "dev": "concurrently \"yarn dev:vite\" \" yarn dev:electron\"",
     "dev:vite": "vite",

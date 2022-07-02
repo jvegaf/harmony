@@ -5,7 +5,8 @@ import FetchArtwork from './artFetcher';
 
 const artwork = async (url?: string) => {
   if (!url) return undefined;
-  const art = await FetchArtwork(url);
+  const fixedUrl = url.replace(/[0-9]{3,}x[0-9]{3,}/, '500x500');
+  const art = await FetchArtwork(fixedUrl);
   return art;
 };
 

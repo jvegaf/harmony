@@ -9,7 +9,7 @@ window.Main.on('dto', (artsDTO: ArtsTrackDTO) => {
   artsUrls.forEach((artUrl: string) => {
     const image = new Image(250, 250);
     image.src = artUrl;
-    image.onclick = () => window.Main.SaveArtwork({ track, selected: artUrl });
+    image.onclick = () => window.Main.SaveArtwork({ reqTrack: track, selectedArtUrl: artUrl });
 
     container.appendChild(image);
   });

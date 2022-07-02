@@ -44,11 +44,13 @@ function createMainWindow() {
   // and load the index.html of the app.
   if (isDev) {
     mainWindow?.loadURL(url);
+    mainWindow.webContents.openDevTools();
   } else {
     mainWindow?.loadFile(url);
   }
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // if (process.env.NODE_ENV === 'development') {
+  // }
 }
 
 function createArtsWindow(artsDTO: ArtsTrackDTO) {
@@ -73,23 +75,22 @@ function createArtsWindow(artsDTO: ArtsTrackDTO) {
   // and load the index.html of the app.
   if (isDev) {
     artsWindow?.loadURL(url);
+    artsWindow.webContents.openDevTools();
   } else {
     artsWindow?.loadFile(url);
   }
   // Open the DevTools.
-  artsWindow.webContents.openDevTools();
+  // if (process.env.NODE_ENV === 'development') {
+  // }
 
   artsWindow.setMenu(null);
 
   artsWindow.webContents.on('did-finish-load', () => {
-    console.log('did-finish-load:', artsWindow?.webContents.getTitle());
     artsWindow?.webContents.send('dto', artsDTO);
   });
 
   artsWindow.once('ready-to-show', () => {
     artsWindow?.show();
-
-    console.log('ready-to-show');
   });
 }
 
@@ -108,6 +109,8 @@ app.on('window-all-closed', () => {
 });
 
 ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
+  console.log(selected.length);
+
   const templateSingle = [
     {
       label: 'View Details',
@@ -139,6 +142,9 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
     }
   ] as MenuItemConstructorOptions[];
 
+  if (!selected.length) {
+    return;
+  }
   const template = selected.length > 1 ? templateMultiple : templateSingle;
 
   const menu = Menu.buildFromTemplate(template);
@@ -164,7 +170,6 @@ ipcMain.handle('open-folder', async () => {
   });
 
   if (resultPath.canceled) return null;
-  console.log('path', resultPath);
 
   const files = await GetFilesFrom(resultPath.filePaths[0]);
   const tracks: Track[] = await GetTracks(files);
