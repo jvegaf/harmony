@@ -4,8 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
 body {
   box-sizing: border-box;
 }

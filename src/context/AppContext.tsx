@@ -1,7 +1,6 @@
 /* eslint-disable react/jsx-no-constructed-context-values */
 import React, { useState } from 'react';
 import { Track } from '../../electron/types/emusik';
-// eslint-disable-next-line import/no-unresolved
 import { AppContextType } from '../@types/emusik';
 
 const AppContext = React.createContext({} as AppContextType);

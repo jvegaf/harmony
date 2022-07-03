@@ -2,16 +2,7 @@
 import { join } from 'path';
 
 // Packages
-import {
-  app,
-  BrowserWindow,
-  dialog,
-  ipcMain,
-  IpcMainEvent,
-  Menu,
-  MenuItemConstructorOptions,
-  PopupOptions
-} from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import isDev from 'electron-is-dev';
 import { GetFilesFrom } from './services/fileManager';
 import PersistTrack from './services/tag/nodeId3Saver';
@@ -108,49 +99,6 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
-  console.log(selected.length);
-
-  const templateSingle = [
-    {
-      label: 'View Details',
-      click: () => {
-        event.sender.send('view-detail-command', selected[0]);
-      }
-    },
-    {
-      label: 'Play Track',
-      click: () => {
-        event.sender.send('play-command', selected[0]);
-      }
-    },
-    { type: 'separator' },
-    {
-      label: 'Fix Track',
-      click: () => {
-        event.sender.send('fix-track-command', selected[0]);
-      }
-    }
-  ] as MenuItemConstructorOptions[];
-
-  const templateMultiple = [
-    {
-      label: `Fix this ${selected.length} Tracks`,
-      click: () => {
-        event.sender.send('fix-tracks-command', selected);
-      }
-    }
-  ] as MenuItemConstructorOptions[];
-
-  if (!selected.length) {
-    return;
-  }
-  const template = selected.length > 1 ? templateMultiple : templateSingle;
-
-  const menu = Menu.buildFromTemplate(template);
-  menu.popup(BrowserWindow.fromWebContents(event.sender) as PopupOptions);
-});
-
 ipcMain.on('persist', (_, track) => PersistTrack(track));
 
 ipcMain.on('find-artwork', async (_, track: Track) => {
@@ -176,9 +124,9 @@ ipcMain.handle('open-folder', async () => {
   return tracks;
 });
 
-ipcMain.handle('fix-track', async (_, track) => {
+ipcMain.on('fix-track', async (event, track) => {
   const updated = await FixTags(track);
-  return updated;
+  event.sender.send('track-fixed', updated);
 });
 
 ipcMain.handle('fix-tracks', async (_, tracks) => {

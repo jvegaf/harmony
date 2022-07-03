@@ -16,10 +16,9 @@ const api = {
    *
    * The function below can accessed using `window.Main.sayHello`
    */
-  ShowContextMenu: (selected: Track[]) => ipcRenderer.send('show-context-menu', selected),
   PersistTrack: (track: Track) => ipcRenderer.send('persist', track),
   OpenFolder: (): Promise<Track[]> => ipcRenderer.invoke('open-folder'),
-  FixTrack: (track: Track): Promise<Track> => ipcRenderer.invoke('fix-track', track),
+  FixTrack: (track: Track) => ipcRenderer.send('fix-track', track),
   FixTracks: (tracks: Track[]): Promise<Track[]> => ipcRenderer.invoke('fix-tracks', tracks),
   FindArtwork: (track: Track) => ipcRenderer.send('find-artwork', track),
   SaveArtwork: (artTrack: ArtTrack) => ipcRenderer.send('save-artwork', artTrack),
@@ -29,6 +28,11 @@ const api = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on: (channel: string, callback: (data: any) => void) => {
     ipcRenderer.on(channel, (_, data) => callback(data));
+  },
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  once: (channel: string, callback: (data: any) => void) => {
+    ipcRenderer.once(channel, (_, data) => callback(data));
   }
 };
 contextBridge.exposeInMainWorld('Main', api);

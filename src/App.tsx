@@ -7,18 +7,13 @@ import TrackList from './components/TrackList';
 import useAppState from './hooks/useAppState';
 
 function App() {
-  const { tracks, setTrackPlaying, setTrackDetail, trackDetail, onFixTrack, onFixSelectedTracks } = useAppState();
+  const { tracks, setTrackPlaying, updateTrack, setTrackDetail, trackDetail, onFixTrack, onFixSelectedTracks } =
+    useAppState();
   const [content, setContent] = useState(<OnBoarding />);
 
   useEffect(() => {
     if (window.Main) {
-      window.Main.on('view-detail-command', (track: Track) => setTrackDetail(track));
-
-      window.Main.on('play-command', (track: Track) => setTrackPlaying(track));
-
-      window.Main.on('fix-track-command', (track: Track) => onFixTrack(track));
-
-      window.Main.on('fix-tracks-command', (selected: Track[]) => onFixSelectedTracks(selected));
+      window.Main.once('track-fixed', (track: Track) => updateTrack(track));
     }
   }, []);
 
@@ -38,7 +33,7 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden">
-      <div className="grow-0">
+      <div>
         <AppHeader />
       </div>
       <div className="grow">{content}</div>

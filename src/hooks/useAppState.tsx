@@ -19,8 +19,8 @@ export default function useAppState() {
   const onFixTracks = React.useCallback(
     async (selected: Track[]) => {
       const fixedTracks = await window.Main.FixTracks(selected);
-      const newTracks = tracks.map((t) => {
-        const fixed = fixedTracks.find((ft) => ft.id === t.id);
+      const newTracks = tracks.map(t => {
+        const fixed = fixedTracks.find(ft => ft.id === t.id);
         if (fixed) {
           return fixed;
         }
@@ -35,39 +35,33 @@ export default function useAppState() {
     setTrackDetail(null);
   }, [setTrackDetail]);
 
+  const updateTrack = (updated: Track) => {
+    console.log('updated', updated);
+    console.log('tracks length', tracks.length);
+
+    const newtracks = tracks.map(t => (updated.id === t.id ? updated : t));
+    console.log(newtracks.length);
+
+    setTracks(newtracks);
+  };
+
   const saveChanges = React.useCallback(
     (track: Track) => {
       window.Main.PersistTrack(track);
-      const newTracks = tracks.map((t) => {
-        if (t.id === track.id) {
-          return track;
-        }
-        return t;
-      });
-      setTracks(newTracks);
+      updateTrack(track);
       if (trackDetail.id === track.id) {
         closeDetail();
       }
     },
-    [tracks, setTracks, trackDetail, closeDetail]
+    [trackDetail, closeDetail]
   );
 
-  const onFixTrack = React.useCallback(
-    async (track: Track) => {
-      const updated = await window.Main.FixTrack(track);
-      saveChanges(updated);
-    },
-    [tracks, saveChanges]
-  );
-
-  const showCtxMenu = React.useCallback((selected: Track[]) => window.Main.ShowContextMenu(selected), []);
+  const onFixTrack = React.useCallback((track: Track) => window.Main.FixTrack(track), []);
 
   const onFixAllTracks = React.useCallback(() => onFixTracks(tracks), [onFixTracks, tracks]);
 
   const onFixSelectedTracks = React.useCallback(
     (selected: Track[]) => {
-      console.log('selectedTracks', selected);
-
       onFixTracks(selected);
     },
     [onFixTracks]
@@ -81,6 +75,7 @@ export default function useAppState() {
     setTrackPlaying,
     trackDetail,
     setTrackDetail,
+    updateTrack,
     onFixTrack,
     onFixTracks,
     onFixSelectedTracks,
@@ -88,7 +83,6 @@ export default function useAppState() {
     onFindArtwork,
     saveChanges,
     closeDetail,
-    onOpenFolder,
-    showCtxMenu
+    onOpenFolder
   };
 }
