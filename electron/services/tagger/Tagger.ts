@@ -1,8 +1,7 @@
-/* eslint-disable no-console */
-
 import { MatchResult, ResultTag, Track } from '../../types/emusik';
 import { GetStringTokens } from '../../utils';
-import Update from '../track/updater';
+import log from 'electron-log';
+import Update from '../track/track.updater';
 // import SearchYtTags from './youtube';
 import SearchTags from './beatport';
 // import SearchTrackInfo from './google';
@@ -12,7 +11,7 @@ import SearchTags from './beatport';
 
 //   const ytResults = SearchYtTags(title, artist);
 //   // eslint-disable-next-line no-console
-//   console.log(ytResults);
+//   log.info(ytResults);
 // };
 
 const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
@@ -69,13 +68,13 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
 // const GetWebTrackInfo = async (track: Track): Promise<void> => {
 //   const { title, artist } = track;
 //   const { results } = await SearchTrackInfo(title, artist);
-//   // console.log(result);
+//   // log.info(result);
 //   const shazam = results.filter(r => r.url.includes('shazam.com'));
-//   console.log('shazam results: ', shazam);
+//   log.info('shazam results: ', shazam);
 //   const yt = results.filter(r => r.url.includes('music.youtube.com'));
-//   console.log('yt results: ', yt);
+//   log.info('yt results: ', yt);
 //   const traxsource = results.filter(r => r.url.includes('traxsource.com'));
-//   console.log('traxsource results: ', traxsource);
+//   log.info('traxsource results: ', traxsource);
 // };
 
 const FixTags = async (track: Track): Promise<Track> => {
@@ -84,14 +83,13 @@ const FixTags = async (track: Track): Promise<Track> => {
     const result = await SearchOnBeatport(track);
     if (!result) {
       // GetWebTrackInfo(track);
-      console.log(`no match for ${track.title}`);
+      log.warn(`no match for ${track.title}`);
       fixedTrack = track;
     } else {
       fixedTrack = Update(track, result.tag);
     }
   } catch (error) {
-    console.log(`fixing track ${track.title} failed: ${error}`);
-    // console.error(error);
+    log.error(`fixing track ${track.title} failed: ${error}`);
     fixedTrack = track;
   }
 

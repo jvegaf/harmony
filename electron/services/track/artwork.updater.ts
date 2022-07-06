@@ -1,6 +1,7 @@
+import log from 'electron-log';
 import { ArtTrack, Track } from '../../types/emusik';
 import PersistTrack from '../tag/nodeId3Saver';
-import FetchArtwork from './artFetcher';
+import FetchArtwork from './artwork.fetcher';
 
 const UpdateArtwork = async (artTrack: ArtTrack): Promise<Track> => {
   const { reqTrack, selectedArtUrl } = artTrack;
@@ -8,14 +9,13 @@ const UpdateArtwork = async (artTrack: ArtTrack): Promise<Track> => {
 
   const newTrack = {
     ...reqTrack,
-    artwork: art
+    artwork: art !== null ? art : undefined
   };
 
   try {
     await PersistTrack(newTrack);
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    log.error(error);
   }
 
   return newTrack;

@@ -1,76 +1,57 @@
-/* eslint-disable react/display-name */
 /* eslint-disable react/prop-types */
+/* eslint-disable react/display-name */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* // @ts-ignore */
 
+import { localeData } from 'moment';
 import React from 'react';
-import { Dropdown, Popover, Table, Whisper } from 'rsuite';
-import { Track } from '../../electron/types/emusik';
+import { Table } from 'rsuite';
+import { Track, TrackId } from '../../electron/types/emusik';
 import useAppState from '../hooks/useAppState';
+import log from 'electron-log';
 
 interface TrackListProps {
   tracks: Track[];
-  trackPlaying?: Track;
-  setTrackPlaying: React.Dispatch<React.SetStateAction<Track>>;
-  setTrackDetail: React.Dispatch<React.SetStateAction<Track>>;
-  onFixTrack: (track: Track) => void;
+  trackPlaying?: TrackId;
+  updateTrackDetail: (trackId: TrackId) => void;
+  updateTrackPlaying: (trackId: TrackId) => void;
+  onFixTrack: (trackId: TrackId) => void;
 }
 
-const MenuPopover = React.forwardRef(({ onSelect, ...rest }, ref) => (
-  <Popover ref={ref} {...rest} full>
-    <Dropdown.Menu onSelect={onSelect}>
-      <Dropdown.Item eventKey={'playTrack'}>PlayTrack</Dropdown.Item>
-      <Dropdown.Item eventKey={'viewDetail'}>View Details</Dropdown.Item>
-      <Dropdown.Item divider />
-      <Dropdown.Item eventKey={'fixTrack'}>Fix Tags</Dropdown.Item>
-    </Dropdown.Menu>
-  </Popover>
-));
+const TableView: React.FC<TrackListProps> = (props) => {
+  const { tracks, trackPlaying, updateTrackDetail, updateTrackPlaying, onFixTrack } = props;
 
-const TableView: React.FC<TrackListProps> = props => {
-  const { tracks, trackPlaying, setTrackDetail, setTrackPlaying, onFixTrack } = props;
-
-  function Row(rowProps) {
+  function Row(rowProps: { children: any; id: any; rowData: any }) {
     const { children, id, rowData } = rowProps;
     const styles = {
       width: '100%',
       height: '100%',
-      userSelect: 'none'
+      select: 'none'
     };
 
     const ref = React.useRef(null);
 
     function dblClickHandler(event, rowData) {
-      setTrackDetail(rowData);
+      event.preventDefault();
+      log.info(rowData);
+      log.info(event);
     }
 
-    function handleSelectMenu(eventKey, event, rowData) {
-      switch (eventKey) {
-        case 'playTrack':
-          setTrackPlaying(rowData);
-          break;
-        case 'viewDetail':
-          setTrackDetail(rowData);
-          break;
-        case 'fixTrack':
-          onFixTrack(rowData);
-          break;
-      }
-
-      ref.current.close();
+    function ctxMenuHandler(event, rowData) {
+      event.preventDefault();
+      log.info(rowData);
+      log.info(event);
     }
 
     return (
-      <Whisper
-        placement="bottom"
-        controlId="control-id-with-dropdown"
-        trigger="contextMenu"
-        // followCursor
+      <div
         ref={ref}
-        speaker={<MenuPopover onSelect={(ek, e) => handleSelectMenu(ek, e, rowData)} />}
+        onContextMenu={(event) => ctxMenuHandler(event, rowData)}
+        onDoubleClick={(event) => dblClickHandler(event, rowData)}
+        style={styles}
       >
-        <div ref={ref} onDoubleClick={e => dblClickHandler(e, rowData)} style={styles}>
-          {children}
-        </div>
-      </Whisper>
+        {children}
+      </div>
     );
   }
 
@@ -139,13 +120,20 @@ const TableView: React.FC<TrackListProps> = props => {
 };
 
 const TrackList: React.FC = () => {
-  const { tracks, trackPlaying, setTrackDetail, setTrackPlaying, onFixTrack } = useAppState();
+  const { trackPlaying, updateTrackDetail, updateTrackPlaying, onFixTrack } = useAppState();
+  const [tracks, setTracks] = React.useState<Track[]>([]);
+
+  React.useEffect(() => {
+    if (window.Main) {
+      window.Main.on('all-tracks', (tracksResponse) => setTracks(tracksResponse));
+    }
+  }, []);
 
   const props = {
     tracks,
     trackPlaying,
-    setTrackDetail,
-    setTrackPlaying,
+    updateTrackDetail,
+    updateTrackPlaying,
     onFixTrack
   };
 
@@ -153,3 +141,6 @@ const TrackList: React.FC = () => {
 };
 
 export default TrackList;
+function ctxMenuHandler(rowData: any): void {
+  throw new Error('Function not implemented.');
+}

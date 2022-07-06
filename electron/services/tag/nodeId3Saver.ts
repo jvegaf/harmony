@@ -1,3 +1,4 @@
+import log from 'electron-log';
 import * as NodeId3 from 'node-id3';
 import { Track } from '../../types/emusik';
 
@@ -19,13 +20,11 @@ const PersistTrack = (track: Track) => {
 
   NodeId3.update(tags, track.filepath, (_: unknown, err: Error) => {
     if (err) {
-      // eslint-disable-next-line no-console
-      console.log(`Error persisting track: ${err}`);
+      log.error(`Error persisting track: ${err}`);
     }
   });
 
-  // eslint-disable-next-line no-console
-  console.log(`track persisted: ${track.title}`);
+  log.info(`track persisted: ${track.title}`);
 };
 
 export default PersistTrack;

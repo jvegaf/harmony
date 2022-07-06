@@ -1,12 +1,5 @@
 import { ipcRenderer, contextBridge } from 'electron';
 
-declare global {
-  interface Window {
-    Arts: typeof artApi;
-    ipcRenderer: typeof ipcRenderer;
-  }
-}
-
 const artApi = {
   /**
    * Here you can expose functions to the renderer process
