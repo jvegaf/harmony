@@ -1,10 +1,23 @@
-import { ResultTag } from '../../../shared/types/emusik';
-import { GetStringTokens } from '../../../shared/utils';
+import { ResultTag } from '../../types/emusik';
+import { GetStringTokens } from '../../utils';
 
-const CreateTagResult = (result: any): ResultTag => {
+interface Result {
+  mix_name: string;
+  name: string;
+  artists: [{ name: string }];
+  id: string;
+  key: { camelot_number: string; camelot_letter: string };
+  release: { name: string; image: { uri: string } };
+  publish_date: string;
+  genre: { name: string };
+  bpm: number;
+  length_ms: number;
+}
+
+const CreateTagResult = (result: Result): ResultTag => {
   const tagTrackTitle: string = result.mix_name ? `${result.name} (${result.mix_name})` : result.name;
 
-  const tagTrackArtists: string[] = result.artists.map((artist: any): string => artist.name);
+  const tagTrackArtists: string[] = result.artists.map((artist): string => artist.name);
 
   const tagValues = [...tagTrackArtists, result.name];
   if (result.mix_name) {
@@ -23,12 +36,12 @@ const CreateTagResult = (result: any): ResultTag => {
     bpm: result.bpm,
     duration: Number((result.length_ms / 1000).toFixed(0)),
     artworkUrl: result.release.image.uri,
-    tokens: tagTokens,
+    tokens: tagTokens
   } as ResultTag;
 };
 
-const GetTagResults = (result: any[]): ResultTag[] => {
-  return result.map(track => CreateTagResult(track));
+const GetTagResults = (result: Result[]): ResultTag[] => {
+  return result.map((track) => CreateTagResult(track));
 };
 
 export default GetTagResults;

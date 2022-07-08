@@ -2,13 +2,13 @@
  * App models
  */
 
-export type TrackId = string;
+export type TrackId = string | null;
 
 export interface Artwork {
-  mime: string;
+  mime?: string;
   type: { id: number; name: string };
   description?: string;
-  data: Buffer;
+  imageBuffer: Buffer;
 }
 
 export interface Track {
@@ -18,8 +18,8 @@ export interface Track {
   bpm?: number;
   genre?: string;
   key?: string;
-  duration: number;
-  time: string;
+  duration?: number;
+  time?: string;
   filepath: string;
   title: string;
   year?: number;
@@ -46,15 +46,18 @@ export interface Playlist {
   tracks: string[];
 }
 
-export enum MenuCommand {
-  PLAY_TRACK,
-  FIX_TAGS,
-  VIEW_DETAIL,
-}
-
 export interface MatchResult {
   tag: ResultTag;
   trackTokens: string[];
   matches: number;
   of: number;
+}
+
+export interface ArtTrack {
+  reqTrack: Track;
+  selectedArtUrl?: string;
+}
+
+export interface ArtsTrackDTO extends ArtTrack {
+  artsUrls: string[];
 }

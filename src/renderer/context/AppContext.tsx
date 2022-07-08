@@ -1,26 +1,22 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
+/* eslint-disable react/jsx-no-constructed-context-values */
 import React, { useState } from 'react';
-import { AppContextType } from 'renderer/@types/emusik';
-import { Track, TrackId } from 'shared/types/emusik';
+import { TrackId } from '../../electron/types/emusik';
+import { AppContextType } from '../@types/emusik';
 
 const AppContext = React.createContext({} as AppContextType);
 
 // eslint-disable-next-line react/prop-types
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [trackPlaying, setTrackPlaying] = useState<TrackId | undefined>(undefined);
-  const [trackDetail, setTrackDetail] = useState<TrackId | undefined>(undefined);
+  const [trackPlaying, setTrackPlaying] = useState<TrackId | null>(null);
+  const [trackDetail, setTrackDetail] = useState<TrackId | null>(null);
 
   return (
     <AppContext.Provider
       value={{
-        tracks,
-        setTracks,
         trackPlaying,
         setTrackPlaying,
         trackDetail,
-        setTrackDetail,
+        setTrackDetail
       }}
     >
       {children}

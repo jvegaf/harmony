@@ -1,5 +1,5 @@
-/* eslint-disable no-console */
-import { ResultTag } from '../../../shared/types/emusik';
+import { ResultTag } from '../../types/emusik';
+import log from 'electron-log';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const CreateTagResult = (result: any) => {
@@ -8,14 +8,14 @@ const CreateTagResult = (result: any) => {
     title: result.name,
     artist: result.artist.name,
     album: result.album.name,
-    duration: Number((result.duration / 1000).toFixed(0)),
+    duration: Number((result.duration / 1000).toFixed(0))
   } as ResultTag;
 };
 
 const GetTagResults = (result: any[]) => {
-  console.log('yt gettagresult');
-  console.log(result);
-  return result.map(track => CreateTagResult(track));
+  log.info('yt gettagresult');
+  log.info(result);
+  return result.map((track) => CreateTagResult(track));
 };
 
 export default GetTagResults;

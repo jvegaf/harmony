@@ -31,6 +31,7 @@ export default class AppUpdater {
 process.on('warning', e => console.warn(e.stack));
 
 let mainWindow: BrowserWindow | null = null;
+let artsWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -56,7 +57,7 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
-const createWindow = async () => {
+const createMainWindow = async () => {
   if (isDevelopment) {
     await installExtensions();
   }
@@ -110,6 +111,58 @@ const createWindow = async () => {
   new AppUpdater();
 };
 
+const createArtsWindow = async () => {
+
+
+  const RESOURCES_PATH = app.isPackaged
+    ? path.join(process.resourcesPath, 'assets')
+    : path.join(__dirname, '../../assets');
+
+  const getAssetPath = (...paths: string[]): string => {
+    return path.join(RESOURCES_PATH, ...paths);
+  };
+
+  artsWindow = new BrowserWindow({
+    show: false,
+    width: 1300,
+    height: 900,
+    icon: getAssetPath('icon.png'),
+    webPreferences: {
+      webSecurity: false,
+      contextIsolation: true,
+      preload: app.isPackaged ? path.join(__dirname, 'preload.js') : path.join(__dirname, '../../.erb/dll/preload.js'),
+    },
+  });
+
+  artsWindow.loadURL(resolveHtmlPath('arts-window/index.html'));
+
+  artsWindow.on('ready-to-show', () => {
+    if (!artsWindow) {
+      throw new Error('"artsWindow" is not defined');
+    }
+    if (process.env.START_MINIMIZED) {
+      artsWindow.minimize();
+    } else {
+      artsWindow.maximize();
+      artsWindow.show();
+    }
+  });
+
+  artsWindow.on('closed', () => {
+    artsWindow = null;
+  });
+
+  // Open urls in the user's browser
+  artsWindow.webContents.setWindowOpenHandler(edata => {
+    shell.openExternal(edata.url);
+    return { action: 'deny' };
+  });
+
+  // Remove this if your app does not use auto updates
+  // eslint-disable-next-line
+  new AppUpdater();
+};
+
 /**
  * Add event listeners...
  */
@@ -125,20 +178,14 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
-    createWindow();
+    createMainWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) createWindow();
+      if (mainWindow === null) createMainWindow();
     });
   })
   .catch(console.log);
-
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.sender.send('ipc-example', msgTemplate('pong'));
-});
 
 ipcMain.on('show-context-menu', (event, trackId) => {
   console.log(`track id: ${trackId}`);
@@ -169,24 +216,72 @@ ipcMain.on('show-context-menu', (event, trackId) => {
 
 ipcMain.on('persist', (_, track) => PersistTrack(track));
 
-ipcMain.handle('open-folder', async event => {
+ipcMain.on('find-artwork', async (_, trackId: TrackId) => {
+  const track = trackRepository.getTrack(trackId);
+  const results = await FindArtwork(track.title, track.artist);
+  if (results.length) {
+    const artsDto: ArtsTrackDTO = {
+      reqTrack: track,
+      artsUrls: results
+    };
+    createArtsWindow(artsDto);
+  }
+});
+
+ipcMain.on('open-folder', async (event) => {
   const resultPath = await dialog.showOpenDialog(mainWindow as BrowserWindow, {
-    properties: ['openDirectory'],
+    properties: ['openDirectory']
   });
 
-  if (resultPath.canceled) return null;
+  if (resultPath.canceled) return;
+
+  trackRepository.removeAll();
 
   const files = await GetFilesFrom(resultPath.filePaths[0]);
-  const tracks = await GetTracks(files);
-  return tracks;
+  const tracks: Track[] = await CreateTracks(files);
+  tracks.forEach((t) => trackRepository.add(t));
+
+  event.sender.send('tracks-updated');
 });
 
-ipcMain.handle('fix-track', async (e, track) => {
+ipcMain.on('get-all', (event) => {
+  const tracks = trackRepository.all();
+  event.sender.send('all-tracks', tracks);
+});
+
+ipcMain.on('get-track', (event, trackId) => (event.returnValue = trackRepository.getTrack(trackId)));
+
+ipcMain.on('fix-all', async (event) => {
+  const tracks = trackRepository.all();
+  await Promise.all(
+    tracks.map(async (track) => {
+      const updated = await FixTags(track);
+      trackRepository.update(updated);
+    })
+  );
+  event.sender.send('tracks-updated');
+});
+
+ipcMain.on('fix-track', async (event, trackId) => {
+  const track = trackRepository.getTrack(trackId);
   const updated = await FixTags(track);
-  return updated;
+  trackRepository.update(updated);
+  event.sender.send('track-fixed', trackId);
 });
 
-ipcMain.handle('fix-tracks', async (e, tracks) => {
-  const fixed = await FixTracks(tracks);
-  return fixed;
+ipcMain.on('fix-tracks', async (event, trackIds: TrackId[]) => {
+  await Promise.all(
+    trackIds.map(async (trackId) => {
+      const updated = await FixTags(trackRepository.getTrack(trackId));
+      trackRepository.update(updated);
+    })
+  );
+  event.sender.send('tracks-updated');
+});
+
+ipcMain.on('save-artwork', async (_, artTrack) => {
+  const newTrack = await UpdateArtwork(artTrack);
+  mainWindow?.webContents.send('track-saved', newTrack.id);
+  artsWindow?.close();
+  artsWindow?.destroy();
 });

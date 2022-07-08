@@ -1,4 +1,4 @@
-import { Sanitize } from '../../../shared/utils';
+import { Sanitize } from '../../utils';
 
 /* eslint-disable import/prefer-default-export */
 const DELIMITER = '+';
@@ -14,11 +14,16 @@ export const BuildBeatportQuery = (title: string, artist: string | null = null):
   return `${Sanitize(titleQuery)}${SEARCH_TYPE}${ARTIST_FLAG}${Sanitize(artistQuery)}`;
 };
 
-export const BuildGoogleQuery = (title: string, artist: string | null = null): string => {
+export const BuildGoogleQuery = (title: string, artist?: string): string => {
   const titleQuery = title.replace(/ /g, DELIMITER);
   if (!artist || artist.length < 1) {
     return `${Sanitize(titleQuery)}`;
   }
   const artistQuery = artist.replace(/ /g, DELIMITER);
   return `${Sanitize(titleQuery)}+${Sanitize(artistQuery)}`;
+};
+
+export const BuildGoogleArtworkQuery = (title: string, artist?: string): string => {
+  const query = BuildGoogleQuery(title, artist);
+  return `${query}+cover+art`;
 };
