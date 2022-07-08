@@ -28,11 +28,11 @@ const Player = () => {
   };
 
   const onSeek = (ws) => {
-    console.log('seek', ws);
+    log.info('seek', ws);
   };
 
   const onReady = (ws) => {
-    console.log('ready', ws);
+    log.info('ready', ws);
     setPosition(0);
     setPlaying(true);
   };
@@ -62,7 +62,7 @@ const Player = () => {
           hideScrollbar: true,
           progressColor: '#EC407A',
           responsive: true,
-          waveColor: '#D1D6DA'
+          waveColor: '#D1D6DA',
         }}
         volume={1}
         zoom={1}

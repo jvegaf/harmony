@@ -1,10 +1,10 @@
-/* eslint-disable no-console */
 import axios from 'axios';
 import { handleResponse, handleError } from '../response';
 import BeatportToken from './BeaportToken';
 import { BuildBeatportQuery } from './querybuilder';
 import GetTagResults from './bpTagMapper';
 import { ResultTag } from '../../types/emusik';
+import log from 'electron-log';
 
 const URI_BASE = 'https://api.beatport.com/v4/catalog/search/?q=';
 
@@ -36,10 +36,10 @@ const SearchTags = async (
   const token = await getToken();
 
   const query = BuildBeatportQuery(title, artist);
-  // console.log(`query: ${query}`);
+  log.info(`query: ${query}`);
 
   const uri = `${URI_BASE}${query}`;
-  // console.log(`URI: ${uri}`);
+  log.info(`URI: ${uri}`);
 
   const config = {
     headers: {

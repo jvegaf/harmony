@@ -1,60 +1,56 @@
 {
-    "env": {
-        "browser": true,
-        "es2021": true
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
     },
-    "extends": [
-        "eslint:recommended",
-        "plugin:react/recommended",
-        "plugin:@typescript-eslint/recommended",
-        "plugin:prettier/recommended",
-        "prettier"
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": ["react", "@typescript-eslint", "prettier"],
+  "rules": {
+    // Prettier
+    "prettier/prettier": "error",
+    // Typescript
+    "no-use-before-define": "off",
+    "import/prefer-default-export": "off",
+    "@typescript-eslint/no-use-before-define": ["error"],
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-var-requires": "warn",
+    // react
+    "react/require-default-props": 0,
+    "react/button-has-type": 0,
+    "react/no-children-prop": 0,
+    "react/jsx-props-no-spreading": 0,
+    "react/function-component-definition": "off",
+    "react/jsx-filename-extension": [
+      2,
+      {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
     ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "ecmaFeatures": {
-            "jsx": true
-        },
-        "ecmaVersion": 12,
-        "sourceType": "module"
+    // Import
+    "import/extensions": 0
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
     },
-    "plugins": [
-        "react",
-        "@typescript-eslint",
-        "prettier"
-    ],
-    "rules": {
-        // Prettier
-        "prettier/prettier": "error",
-        // Typescript
-        "no-use-before-define": "off",
-        "import/prefer-default-export": "warn",
-        "@typescript-eslint/no-use-before-define": ["error"],
-        "@typescript-eslint/no-unused-vars": "warn",
-        "@typescript-eslint/no-explicit-any": "warn",
-        "@typescript-eslint/no-var-requires": "warn",
-        // react
-        "react/require-default-props": 0,
-        "react/button-has-type": 0,
-        "react/no-children-prop": 0,
-        "react/jsx-props-no-spreading": 0,
-        "react/function-component-definition": "off",
-        "react/jsx-filename-extension": [
-            2,
-            {
-                "extensions": [".js",".jsx",".ts",".tsx"]
-            }
-        ],
-        // Import
-        "import/extensions": 0
-    },
-    "settings": {
-        "import/resolver": {
-          "node": {
-            "extensions": [".js", ".jsx", ".ts", ".tsx"]
-          }
-        },
-        "import/core-modules": [ "electron", "electron-is-dev" ]
-    },
-    "ignorePatterns": ["node_modules/", "dist/", "main/"]
+    "import/core-modules": ["electron", "electron-is-dev"]
+  },
+  "ignorePatterns": ["node_modules/", "dist/", "main/"]
 }

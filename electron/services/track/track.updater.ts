@@ -1,12 +1,14 @@
 import { ResultTag, Track } from '../../types/emusik';
 import { ParseDuration } from '../../utils';
+import log from 'electron-log';
 import PersistTrack from '../tag/nodeId3Saver';
-import FetchArtwork from './artFetcher';
+import FetchArtwork from './artwork.fetcher';
 
-const artwork = async (url?: string) => {
+const getArtwork = async (url?: string) => {
   if (!url) return undefined;
   const fixedUrl = url.replace(/[0-9]{3,}x[0-9]{3,}/, '500x500');
   const art = await FetchArtwork(fixedUrl);
+  if (art === null) return undefined;
   return art;
 };
 
@@ -24,14 +26,13 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     bpm: tag.bpm,
     key: tag.key,
     genre: tag.genre,
-    artwork: await artwork(tag.artworkUrl)
+    artwork: await getArtwork(tag.artworkUrl)
   };
 
   try {
     await PersistTrack(newTrack);
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    log.error(error);
   }
 
   return newTrack;

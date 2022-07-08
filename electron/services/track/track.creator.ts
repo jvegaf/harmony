@@ -1,9 +1,8 @@
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable no-console */
 import * as Path from 'path';
 import { v4 as uuid } from 'uuid';
 import { Track } from '../../types/emusik';
 import { ParseDuration, Sanitize } from '../../utils';
+import log from 'electron-log';
 import LoadTagsFromFile from '../tag/mmLoader';
 import LoadArtworkFromFile from '../tag/nId3ArtLoader';
 
@@ -26,6 +25,7 @@ const GetTrackTitle = (title: string | undefined, filepath: string) => {
 const CreateTrack = async (file: string): Promise<Track | null> => {
   const tags = await LoadTagsFromFile(file);
   if (!tags) {
+    log.warn(`can not create track of ${file}`);
     return null;
   }
 
@@ -47,16 +47,19 @@ const CreateTrack = async (file: string): Promise<Track | null> => {
   return track;
 };
 
-export const GetTracks = async (files: string[]) => {
+const CreateTracks = async (files: string[]) => {
   const tracks: Track[] = [];
-  // eslint-disable-next-line no-restricted-syntax
-  for (const file of files) {
-    // eslint-disable-next-line no-await-in-loop
-    const track = await CreateTrack(file);
-    if (track !== null) {
-      tracks.push(track);
-    }
-  }
+
+  await Promise.all(
+    files.map(async (file) => {
+      const track = await CreateTrack(file);
+      if (track !== null) {
+        tracks.push(track);
+      }
+    })
+  );
 
   return tracks;
 };
+
+export default CreateTracks;

@@ -1,84 +1,35 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
-import React, { useContext } from 'react';
-import { Track } from '../../electron/types/emusik';
+import React from 'react';
+import { Track, TrackId } from '../../electron/types/emusik';
 import AppContext from '../context/AppContext';
 
 export default function useAppState() {
-  const { tracks, setTracks, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } = useContext(AppContext);
+  const { trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } = React.useContext(AppContext);
 
-  const onOpenFolder = React.useCallback(async () => {
-    if (tracks.length) setTracks([]);
-    const newTracks = await window.Main.OpenFolder();
+  const onOpenFolder = React.useCallback(() => window.Main.OpenFolder(), []);
 
-    if (!newTracks) return;
+  const onFixTracks = React.useCallback((selected: TrackId[]) => window.Main.FixTracks(selected), []);
 
-    setTracks(newTracks);
-  }, [tracks, setTracks]);
+  const closeDetail = React.useCallback(() => setTrackDetail(null), [setTrackDetail]);
 
-  const onFixTracks = React.useCallback(
-    async (selected: Track[]) => {
-      const fixedTracks = await window.Main.FixTracks(selected);
-      const newTracks = tracks.map(t => {
-        const fixed = fixedTracks.find(ft => ft.id === t.id);
-        if (fixed) {
-          return fixed;
-        }
-        return t;
-      });
-      setTracks(newTracks);
-    },
-    [tracks, setTracks]
-  );
+  const saveChanges = React.useCallback((track: Track) => window.Main.PersistTrack(track), []);
 
-  const closeDetail = React.useCallback(() => {
-    setTrackDetail(null);
-  }, [setTrackDetail]);
+  const onFixTrack = React.useCallback((trackId: TrackId) => window.Main.FixTrack(trackId), []);
 
-  const updateTrack = (updated: Track) => {
-    console.log('updated', updated);
-    console.log('tracks length', tracks.length);
+  const onFixAllTracks = React.useCallback(() => window.Main.FixAll(), []);
 
-    const newtracks = tracks.map(t => (updated.id === t.id ? updated : t));
-    console.log(newtracks.length);
+  const onFindArtwork = React.useCallback((trackId: TrackId) => window.Main.FindArtwork(trackId), []);
 
-    setTracks(newtracks);
-  };
+  const updateTrackPlaying = (trackId: TrackId) => setTrackPlaying(trackId);
 
-  const saveChanges = React.useCallback(
-    (track: Track) => {
-      window.Main.PersistTrack(track);
-      updateTrack(track);
-      if (trackDetail.id === track.id) {
-        closeDetail();
-      }
-    },
-    [trackDetail, closeDetail]
-  );
-
-  const onFixTrack = React.useCallback((track: Track) => window.Main.FixTrack(track), []);
-
-  const onFixAllTracks = React.useCallback(() => onFixTracks(tracks), [onFixTracks, tracks]);
-
-  const onFixSelectedTracks = React.useCallback(
-    (selected: Track[]) => {
-      onFixTracks(selected);
-    },
-    [onFixTracks]
-  );
-
-  const onFindArtwork = React.useCallback((track: Track) => window.Main.FindArtwork(track), []);
+  const updateTrackDetail = (trackId: TrackId) => setTrackDetail(trackId);
 
   return {
-    tracks,
     trackPlaying,
-    setTrackPlaying,
+    updateTrackPlaying,
     trackDetail,
-    setTrackDetail,
-    updateTrack,
+    updateTrackDetail,
     onFixTrack,
     onFixTracks,
-    onFixSelectedTracks,
     onFixAllTracks,
     onFindArtwork,
     saveChanges,

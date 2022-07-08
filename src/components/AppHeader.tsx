@@ -4,12 +4,22 @@ import useAppState from '../hooks/useAppState';
 import Player from './Player';
 
 function AppHeader() {
-  const { tracks, onFixAllTracks, onOpenFolder } = useAppState();
+  const { onFixAllTracks, onOpenFolder } = useAppState();
+
+  const [haveTracks, setHaveTracks] = React.useState(false);
+
+  React.useEffect(() => {
+    if (window.Main) {
+      window.Main.on('tracks-updated', () => setHaveTracks(true));
+
+      window.Main.on('tracks-cleaned', () => setHaveTracks(false));
+    }
+  }, []);
 
   return (
     <div className="h-20 bg-neutral-700 grid grid-rows-1 grid-cols-5">
       <div className="flex justify-center items-center">
-        {tracks.length > 0 && (
+        {haveTracks && (
           <button
             onClick={() => onFixAllTracks()}
             className="bg-blue-500 rounded py-2 px-4 mr-10 focus:outline-none shadow hover:bg-blue-200"
@@ -22,7 +32,7 @@ function AppHeader() {
         <Player />
       </div>
       <div className="mr-8 flex justify-around items-center">
-        {tracks.length > 0 && (
+        {haveTracks && (
           <button
             onClick={() => onOpenFolder()}
             className="bg-blue-500 rounded py-2 px-4 mr-10 focus:outline-none shadow hover:bg-blue-200"

@@ -1,6 +1,3 @@
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Track } from '../../electron/types/emusik';
@@ -11,13 +8,15 @@ function Detail() {
   const { trackDetail, onFindArtwork, closeDetail, saveChanges } = useAppState();
   const [artSrc, setArtSrc] = useState(Placeholder);
   const { register, handleSubmit } = useForm();
+  const [trackDetailed, setTrackDetailed] = React.useState<Track>();
 
   React.useEffect(() => {
     if (trackDetail) {
-      const { artwork } = trackDetail;
-      if (artwork) {
-        const blob = new Blob([artwork.imageBuffer], {
-          type: artwork.mime
+      const track = window.Main.GetTrack(trackDetail);
+      setTrackDetailed(track);
+      if (track.artwork) {
+        const blob = new Blob([track.artwork.imageBuffer], {
+          type: track.artwork.mime
         });
 
         const artData = URL.createObjectURL(blob);
@@ -28,25 +27,25 @@ function Detail() {
 
   const onCancel = () => closeDetail();
 
-  const findArtwork = () => onFindArtwork(trackDetail as Track);
+  const findArtwork = () => onFindArtwork(trackDetail);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = (data: any) => {
-    const updated = { ...trackDetail, ...data };
+    const updated = { ...trackDetailed, ...data };
     saveChanges(updated);
     closeDetail();
   };
 
   return (
     <div className="pt-4 h-full bg-neutral-700">
-      {trackDetail && (
+      {trackDetailed && (
         <form className="w-full max-w-xl m-auto" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-rows-8 gap-3">
             <div>
               <label className="font-normal text-md text-neutral-400">Title</label>
               <input
                 className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                defaultValue={trackDetail.title}
+                defaultValue={trackDetailed.title}
                 {...register('title')}
               />
             </div>
@@ -54,7 +53,7 @@ function Detail() {
               <label className="font-normal text-md text-neutral-400">Artist</label>
               <input
                 className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                defaultValue={trackDetail.artist}
+                defaultValue={trackDetailed.artist}
                 {...register('artist')}
               />
             </div>
@@ -62,7 +61,7 @@ function Detail() {
               <label className="font-normal text-md text-neutral-400">Album</label>
               <input
                 className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                defaultValue={trackDetail.album}
+                defaultValue={trackDetailed.album}
                 {...register('album')}
               />
             </div>
@@ -77,7 +76,7 @@ function Detail() {
                   <label className="font-normal text-md text-neutral-400">Genre</label>
                   <input
                     className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                    defaultValue={trackDetail.genre}
+                    defaultValue={trackDetailed.genre}
                     {...register('genre')}
                   />
                 </div>
@@ -86,7 +85,7 @@ function Detail() {
                   <input
                     type="number"
                     className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                    defaultValue={trackDetail.bpm}
+                    defaultValue={trackDetailed.bpm}
                     {...register('bpm')}
                   />
                 </div>
@@ -94,7 +93,7 @@ function Detail() {
                   <label className="font-normal text-md text-neutral-400">Key</label>
                   <input
                     className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                    defaultValue={trackDetail.key}
+                    defaultValue={trackDetailed.key}
                     {...register('key')}
                   />
                 </div>
@@ -103,7 +102,7 @@ function Detail() {
                   <input
                     type="number"
                     className="border-solid border-neutral-400 border py-2 px-4 w-full text-lg rounded text-neutral-100 bg-stone-700"
-                    defaultValue={trackDetail.year}
+                    defaultValue={trackDetailed.year}
                     {...register('year')}
                   />
                 </div>

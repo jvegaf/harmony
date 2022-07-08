@@ -1,5 +1,4 @@
-/* eslint-disable no-console */
-/* eslint-disable import/prefer-default-export */
+import log from 'electron-log';
 import * as mm from 'music-metadata';
 
 export interface FileTags extends mm.ICommonTagsResult {
@@ -12,7 +11,7 @@ const LoadTagsFromFile = async (file: string): Promise<FileTags | null> => {
     const metadata = await mm.parseFile(file);
     return { ...metadata.common, duration: metadata.format.duration, bitrate: metadata.format.bitrate };
   } catch (err) {
-    console.error(err);
+    log.error(err);
     return null;
   }
 };

@@ -1,5 +1,7 @@
+import { TrackRepository } from './services/track/track.repository';
 // Native
 import { join } from 'path';
+require('electron-log');
 
 // Packages
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
@@ -7,13 +9,15 @@ import isDev from 'electron-is-dev';
 import { GetFilesFrom } from './services/fileManager';
 import PersistTrack from './services/tag/nodeId3Saver';
 import FindArtwork from './services/tagger/artworkFinder';
-import FixTags, { FixTracks } from './services/tagger/Tagger';
-import { GetTracks } from './services/track/trackManager';
-import { Track, ArtsTrackDTO } from './types/emusik';
-import UpdateArtwork from './services/track/artworkUpdater';
+import FixTags from './services/tagger/Tagger';
+import CreateTracks from './services/track/track.creator';
+import { Track, ArtsTrackDTO, TrackId } from './types/emusik';
+import UpdateArtwork from './services/track/artwork.updater';
 
 let mainWindow: BrowserWindow | null = null;
 let artsWindow: BrowserWindow | null = null;
+
+const trackRepository = new TrackRepository();
 
 function createMainWindow() {
   // Create the browser window.
@@ -25,6 +29,7 @@ function createMainWindow() {
     fullscreenable: true,
     webPreferences: {
       webSecurity: false,
+      nodeIntegration: true,
       preload: join(__dirname, 'preload.js')
     }
   });
@@ -56,6 +61,7 @@ function createArtsWindow(artsDTO: ArtsTrackDTO) {
     modal: true,
     webPreferences: {
       webSecurity: false,
+      nodeIntegration: true,
       preload: join(__dirname, 'preload.js')
     }
   });
@@ -101,7 +107,8 @@ app.on('window-all-closed', () => {
 
 ipcMain.on('persist', (_, track) => PersistTrack(track));
 
-ipcMain.on('find-artwork', async (_, track: Track) => {
+ipcMain.on('find-artwork', async (_, trackId: TrackId) => {
+  const track = trackRepository.getTrack(trackId);
   const results = await FindArtwork(track.title, track.artist);
   if (results.length) {
     const artsDto: ArtsTrackDTO = {
@@ -112,31 +119,60 @@ ipcMain.on('find-artwork', async (_, track: Track) => {
   }
 });
 
-ipcMain.handle('open-folder', async () => {
+ipcMain.on('open-folder', async (event) => {
   const resultPath = await dialog.showOpenDialog(mainWindow as BrowserWindow, {
     properties: ['openDirectory']
   });
 
-  if (resultPath.canceled) return null;
+  if (resultPath.canceled) return;
+
+  trackRepository.removeAll();
 
   const files = await GetFilesFrom(resultPath.filePaths[0]);
-  const tracks: Track[] = await GetTracks(files);
-  return tracks;
+  const tracks: Track[] = await CreateTracks(files);
+  tracks.forEach((t) => trackRepository.add(t));
+
+  event.sender.send('tracks-updated');
 });
 
-ipcMain.on('fix-track', async (event, track) => {
+ipcMain.on('get-all', (event) => {
+  const tracks = trackRepository.all();
+  event.sender.send('all-tracks', tracks);
+});
+
+ipcMain.on('get-track', (event, trackId) => (event.returnValue = trackRepository.getTrack(trackId)));
+
+ipcMain.on('fix-all', async (event) => {
+  const tracks = trackRepository.all();
+  await Promise.all(
+    tracks.map(async (track) => {
+      const updated = await FixTags(track);
+      trackRepository.update(updated);
+    })
+  );
+  event.sender.send('tracks-updated');
+});
+
+ipcMain.on('fix-track', async (event, trackId) => {
+  const track = trackRepository.getTrack(trackId);
   const updated = await FixTags(track);
-  event.sender.send('track-fixed', updated);
+  trackRepository.update(updated);
+  event.sender.send('track-fixed', trackId);
 });
 
-ipcMain.handle('fix-tracks', async (_, tracks) => {
-  const fixed = await FixTracks(tracks);
-  return fixed;
+ipcMain.on('fix-tracks', async (event, trackIds: TrackId[]) => {
+  await Promise.all(
+    trackIds.map(async (trackId) => {
+      const updated = await FixTags(trackRepository.getTrack(trackId));
+      trackRepository.update(updated);
+    })
+  );
+  event.sender.send('tracks-updated');
 });
 
 ipcMain.on('save-artwork', async (_, artTrack) => {
   const newTrack = await UpdateArtwork(artTrack);
-  mainWindow?.webContents.send('track-saved', newTrack);
+  mainWindow?.webContents.send('track-saved', newTrack.id);
   artsWindow?.close();
   artsWindow?.destroy();
 });

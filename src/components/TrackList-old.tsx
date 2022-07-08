@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-/* eslint-disable no-console */
+
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable @typescript-eslint/no-use-before-define */
@@ -12,6 +12,7 @@ import { useTable, useResizeColumns, useFlexLayout, useRowSelect, useSortBy } fr
 import { useViewportSize } from '@mantine/hooks';
 import { Track, TrackId } from '../../electron/types/emusik';
 import useAppState from '../hooks/useAppState';
+import { Logger } from '../../electron/services/logger.service';
 
 interface TrackListProps {
   tracks: Track[];
@@ -177,15 +178,15 @@ const TableView: React.FC<TrackListProps> = (props) => {
   );
 
   const clickHandler = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
-    console.log(e);
-    console.log(row.original.title);
+    log.info(e);
+    log.info(row.original.title);
 
     if (!row) return;
     const index = rows.indexOf(row);
 
     if (e.shiftKey) {
-      console.log('shift pressed');
-      console.log(lastIndexSelected);
+      log.info('shift pressed');
+      log.info(lastIndexSelected);
 
       const tempSelected = [];
       if (lastIndexSelected < 0) {
@@ -215,8 +216,8 @@ const TableView: React.FC<TrackListProps> = (props) => {
   };
 
   const auxClickHandler = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
-    console.log(e);
-    console.log(row.original.title);
+    Logger.info(e);
+    Logger.info(row.original.title);
     const tempSelected = [];
     e.preventDefault();
 
@@ -234,8 +235,8 @@ const TableView: React.FC<TrackListProps> = (props) => {
   };
 
   const doubleClickHandler = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
-    console.log(e);
-    console.log(row.original.title);
+    Logger.info(e);
+    Logger.info(row.original.title);
 
     if (!row) return;
     const trackClicked: Track = row.original;

@@ -1,5 +1,5 @@
-/* eslint-disable no-console */
 import { search } from 'googlethis';
+import log from 'electron-log';
 import { BuildGoogleQuery } from './querybuilder';
 
 const SearchTrackInfo = async (title: string, artist?: string) => {
@@ -14,7 +14,7 @@ const SearchTrackInfo = async (title: string, artist?: string) => {
   };
 
   const trackQuery = BuildGoogleQuery(title, artist);
-  console.log(trackQuery);
+  log.info(trackQuery);
   const response = await search(trackQuery, options);
 
   return response;

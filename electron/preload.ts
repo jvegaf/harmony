@@ -1,10 +1,15 @@
 import { ipcRenderer, contextBridge } from 'electron';
-import { Track, ArtTrack } from './types/emusik';
+import { TrackId, ArtTrack, Track } from './types/emusik';
+import log from 'electron-log';
+import ElectronLog from 'electron-log';
+
+window.log = log.functions;
 
 declare global {
   interface Window {
     Main: typeof api;
     ipcRenderer: typeof ipcRenderer;
+    log: typeof ElectronLog.functions;
   }
 }
 
@@ -17,11 +22,14 @@ const api = {
    * The function below can accessed using `window.Main.sayHello`
    */
   PersistTrack: (track: Track) => ipcRenderer.send('persist', track),
-  OpenFolder: (): Promise<Track[]> => ipcRenderer.invoke('open-folder'),
-  FixTrack: (track: Track) => ipcRenderer.send('fix-track', track),
-  FixTracks: (tracks: Track[]): Promise<Track[]> => ipcRenderer.invoke('fix-tracks', tracks),
-  FindArtwork: (track: Track) => ipcRenderer.send('find-artwork', track),
+  OpenFolder: () => ipcRenderer.send('open-folder'),
+  FixAll: () => ipcRenderer.send('fix-all'),
+  FixTrack: (trackId: TrackId) => ipcRenderer.send('fix-track', trackId),
+  FixTracks: (trackIds: TrackId[]) => ipcRenderer.send('fix-tracks', trackIds),
+  FindArtwork: (trackId: TrackId) => ipcRenderer.send('find-artwork', trackId),
   SaveArtwork: (artTrack: ArtTrack) => ipcRenderer.send('save-artwork', artTrack),
+  GetTrack: (trackId: TrackId): Track => ipcRenderer.sendSync('get-track', trackId),
+  GetAll: () => ipcRenderer.send('get-all'),
   /**
    * Provide an easier way to listen to events
    */
