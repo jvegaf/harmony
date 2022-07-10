@@ -1,5 +1,7 @@
 import { ResultTag } from '../../types/emusik';
-import log from 'electron-log';
+import { AppLogger } from '../log/app.logger';
+
+const log = AppLogger.getInstance();
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const CreateTagResult = (result: any) => {
@@ -13,8 +15,7 @@ const CreateTagResult = (result: any) => {
 };
 
 const GetTagResults = (result: any[]) => {
-  log.info('yt gettagresult');
-  log.info(result);
+  log.info(`YT-Result ${result}`);
   return result.map((track) => CreateTagResult(track));
 };
 

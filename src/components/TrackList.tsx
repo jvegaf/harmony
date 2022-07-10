@@ -6,9 +6,11 @@
 import { localeData } from 'moment';
 import React from 'react';
 import { Table } from 'rsuite';
+import { AppLogger } from '../../electron/services/log/app.logger';
 import { Track, TrackId } from '../../electron/types/emusik';
 import useAppState from '../hooks/useAppState';
-import log from 'electron-log';
+
+const log = AppLogger.getInstance();
 
 interface TrackListProps {
   tracks: Track[];
@@ -31,17 +33,15 @@ const TableView: React.FC<TrackListProps> = (props) => {
 
     const ref = React.useRef(null);
 
-    function dblClickHandler(event, rowData) {
+    const dblClickHandler = (event, rowData) => {
       event.preventDefault();
-      log.info(rowData);
-      log.info(event);
-    }
+      log.debug('rowData');
+      log.debug('event');
+    };
 
-    function ctxMenuHandler(event, rowData) {
+    const ctxMenuHandler = (event, rowData) => {
       event.preventDefault();
-      log.info(rowData);
-      log.info(event);
-    }
+    };
 
     return (
       <div
@@ -141,6 +141,3 @@ const TrackList: React.FC = () => {
 };
 
 export default TrackList;
-function ctxMenuHandler(rowData: any): void {
-  throw new Error('Function not implemented.');
-}

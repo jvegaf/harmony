@@ -1,8 +1,10 @@
 import { ResultTag, Track } from '../../types/emusik';
 import { ParseDuration } from '../../utils';
-import log from 'electron-log';
+import { AppLogger } from '../log/app.logger';
 import PersistTrack from '../tag/nodeId3Saver';
 import FetchArtwork from './artwork.fetcher';
+
+const log = AppLogger.getInstance();
 
 const getArtwork = async (url?: string) => {
   if (!url) return undefined;
@@ -32,7 +34,7 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
   try {
     await PersistTrack(newTrack);
   } catch (error) {
-    log.error(error);
+    log.error(`error in track persist: ${error}`);
   }
 
   return newTrack;

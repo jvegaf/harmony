@@ -1,11 +1,11 @@
 import { TrackRepository } from './services/track/track.repository';
 // Native
 import { join } from 'path';
-require('electron-log');
 
 // Packages
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import isDev from 'electron-is-dev';
+import { AppLogger } from './services/log/app.logger';
 import { GetFilesFrom } from './services/fileManager';
 import PersistTrack from './services/tag/nodeId3Saver';
 import FindArtwork from './services/tagger/artworkFinder';
@@ -13,6 +13,10 @@ import FixTags from './services/tagger/Tagger';
 import CreateTracks from './services/track/track.creator';
 import { Track, ArtsTrackDTO, TrackId } from './types/emusik';
 import UpdateArtwork from './services/track/artwork.updater';
+
+const log = AppLogger.getInstance();
+
+log.info('app start');
 
 let mainWindow: BrowserWindow | null = null;
 let artsWindow: BrowserWindow | null = null;
@@ -29,7 +33,6 @@ function createMainWindow() {
     fullscreenable: true,
     webPreferences: {
       webSecurity: false,
-      nodeIntegration: true,
       preload: join(__dirname, 'preload.js')
     }
   });
@@ -61,7 +64,6 @@ function createArtsWindow(artsDTO: ArtsTrackDTO) {
     modal: true,
     webPreferences: {
       webSecurity: false,
-      nodeIntegration: true,
       preload: join(__dirname, 'preload.js')
     }
   });
@@ -93,7 +95,7 @@ function createArtsWindow(artsDTO: ArtsTrackDTO) {
 
 app.whenReady().then(() => {
   createMainWindow();
-
+  log.info('app ready');
   app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.

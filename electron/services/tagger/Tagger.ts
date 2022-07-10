@@ -1,6 +1,6 @@
 import { MatchResult, ResultTag, Track } from '../../types/emusik';
 import { GetStringTokens } from '../../utils';
-import log from 'electron-log';
+import { AppLogger } from '../log/app.logger';
 import Update from '../track/track.updater';
 // import SearchYtTags from './youtube';
 import SearchTags from './beatport';
@@ -13,6 +13,8 @@ import SearchTags from './beatport';
 //   // eslint-disable-next-line no-console
 //   log.info(ytResults);
 // };
+
+const log = AppLogger.getInstance();
 
 const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
   const tagMatches: MatchResult[] = tags.map((tag) => {
@@ -83,13 +85,13 @@ const FixTags = async (track: Track): Promise<Track> => {
     const result = await SearchOnBeatport(track);
     if (!result) {
       // GetWebTrackInfo(track);
-      log.warn(`no match for ${track.title}`);
+      log.info(`no match for ${track.title}`);
       fixedTrack = track;
     } else {
       fixedTrack = Update(track, result.tag);
     }
   } catch (error) {
-    log.error(`fixing track ${track.title} failed: ${error}`);
+    log.error(`fixing track ${track.title} failed`);
     fixedTrack = track;
   }
 

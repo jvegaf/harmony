@@ -1,6 +1,8 @@
 import fetch, { Response } from 'node-fetch';
 import { Artwork } from '../../types/emusik';
-import log from 'electron-log';
+import { AppLogger } from '../log/app.logger';
+
+const log = AppLogger.getInstance();
 
 const FetchArtwork = async (url: string): Promise<Artwork | null> => {
   let response: Response | null = null;
@@ -10,7 +12,7 @@ const FetchArtwork = async (url: string): Promise<Artwork | null> => {
     response = await fetch(url);
     buf = await response.buffer();
   } catch (error) {
-    log.error(error);
+    log.error(`Fetch Art Error: ${error}`);
   }
 
   if (response === null || buf === null) return null;

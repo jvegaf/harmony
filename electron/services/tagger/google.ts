@@ -1,6 +1,8 @@
 import { search } from 'googlethis';
-import log from 'electron-log';
+import { AppLogger } from '../log/app.logger';
 import { BuildGoogleQuery } from './querybuilder';
+
+const log = AppLogger.getInstance();
 
 const SearchTrackInfo = async (title: string, artist?: string) => {
   const options = {

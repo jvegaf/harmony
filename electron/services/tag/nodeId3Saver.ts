@@ -1,6 +1,8 @@
-import log from 'electron-log';
 import * as NodeId3 from 'node-id3';
 import { Track } from '../../types/emusik';
+import { AppLogger } from '../log/app.logger';
+
+const log = AppLogger.getInstance();
 
 const PersistTrack = (track: Track) => {
   const { title, artist, album, year, genre, artwork, bpm, key } = track;

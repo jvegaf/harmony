@@ -2,7 +2,8 @@ import recursiveReadDir from 'recursive-readdir';
 import * as Path from 'path';
 import * as Fs from 'fs';
 import { Track } from '../types/emusik';
-import log from 'electron-log';
+import { AppLogger } from './log/app.logger';
+const log = AppLogger.getInstance();
 
 export const GetFilesFrom = async (filePath: string) => {
   return recursiveReadDir(filePath).then((result) => {
@@ -20,11 +21,10 @@ export const ExtractToFile = (jsonObj: unknown, filename: string) => {
   Fs.writeFile(fname, jsonContent, 'utf8', (err) => {
     if (err) {
       log.error('An error occured while writing JSON Object to File.');
-      return log.error(err);
     }
   });
 };
 
 export const SaveTags = (track: Track) => {
-  log.info('Saving tags...', track.title);
+  log.info(`Saving tags: ${track.title}`);
 };

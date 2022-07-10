@@ -2,9 +2,11 @@ import * as Path from 'path';
 import { v4 as uuid } from 'uuid';
 import { Track } from '../../types/emusik';
 import { ParseDuration, Sanitize } from '../../utils';
-import log from 'electron-log';
+import { AppLogger } from '../log/app.logger';
 import LoadTagsFromFile from '../tag/mmLoader';
 import LoadArtworkFromFile from '../tag/nId3ArtLoader';
+
+const log = AppLogger.getInstance();
 
 const getFilename = (filepath: string) => {
   return Path.basename(filepath, '.mp3');
@@ -25,7 +27,7 @@ const GetTrackTitle = (title: string | undefined, filepath: string) => {
 const CreateTrack = async (file: string): Promise<Track | null> => {
   const tags = await LoadTagsFromFile(file);
   if (!tags) {
-    log.warn(`can not create track of ${file}`);
+    log.info(`can not create track of ${file}`);
     return null;
   }
 

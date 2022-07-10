@@ -1,15 +1,10 @@
 import { ipcRenderer, contextBridge } from 'electron';
 import { TrackId, ArtTrack, Track } from './types/emusik';
-import log from 'electron-log';
-import ElectronLog from 'electron-log';
-
-window.log = log.functions;
 
 declare global {
   interface Window {
     Main: typeof api;
     ipcRenderer: typeof ipcRenderer;
-    log: typeof ElectronLog.functions;
   }
 }
 

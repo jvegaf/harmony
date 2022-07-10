@@ -4,7 +4,9 @@ import BeatportToken from './BeaportToken';
 import { BuildBeatportQuery } from './querybuilder';
 import GetTagResults from './bpTagMapper';
 import { ResultTag } from '../../types/emusik';
-import log from 'electron-log';
+import { AppLogger } from '../log/app.logger';
+
+const log = AppLogger.getInstance();
 
 const URI_BASE = 'https://api.beatport.com/v4/catalog/search/?q=';
 

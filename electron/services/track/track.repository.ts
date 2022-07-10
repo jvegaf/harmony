@@ -1,6 +1,7 @@
 import { TrackId } from './../../types/emusik';
 import { Track } from '../../types/emusik';
-import log from 'electron-log';
+import { AppLogger } from '../log/app.logger';
+const log = AppLogger.getInstance();
 
 export class TrackRepository {
   private _tracks: Track[] = [];
@@ -21,7 +22,7 @@ export class TrackRepository {
   public update(updated: Track) {
     const index = this._tracks.findIndex((t) => t.id === updated.id);
     if (index < 0) {
-      log.error('track not found');
+      log.info('track not found');
       return;
     }
     this._tracks[index] = updated;
