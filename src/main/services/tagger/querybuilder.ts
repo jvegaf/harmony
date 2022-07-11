@@ -1,4 +1,4 @@
-import { Sanitize } from '../../utils';
+import { Sanitize } from '../../../shared/utils';
 
 /* eslint-disable import/prefer-default-export */
 const DELIMITER = '+';

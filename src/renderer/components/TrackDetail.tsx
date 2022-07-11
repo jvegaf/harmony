@@ -4,11 +4,10 @@ import { useForm } from '@mantine/hooks';
 import React from 'react';
 import Placeholder from '../../../assets/placeholder.png';
 import { Track } from '../../shared/types/emusik';
+import useAppState from '../hooks/useAppState';
 
 interface TrackDetailProps {
   track: Track;
-  closeDetail: () => void;
-  saveChanges: (track: Track) => void;
 }
 
 const useStyles = createStyles(theme => ({
@@ -29,7 +28,8 @@ const useStyles = createStyles(theme => ({
 }));
 
 const TrackDetail: React.FC<TrackDetailProps> = props => {
-  const { track, closeDetail, saveChanges } = props;
+  const { track } = props;
+  const { closeDetail, saveChanges } = useAppState();
   const form = useForm({
     initialValues: {
       title: track.title,

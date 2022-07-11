@@ -1,13 +1,13 @@
-import * as Path from 'path';
+import path from 'path';
 import { v4 as uuid } from 'uuid';
-import { Track } from '../../types/emusik';
-import { ParseDuration, Sanitize } from '../../utils';
-import log from 'electron-log';
+import { Track } from '../../../shared/types/emusik';
+import { ParseDuration, Sanitize } from '../../../shared/utils';
+import { log } from '../log/log';
 import LoadTagsFromFile from '../tag/mmLoader';
 import LoadArtworkFromFile from '../tag/nId3ArtLoader';
 
 const getFilename = (filepath: string) => {
-  return Path.basename(filepath, '.mp3');
+  return path.basename(filepath, '.mp3');
 };
 
 const sanitizeFilename = (filename: string) => {
@@ -42,7 +42,7 @@ const CreateTrack = async (file: string): Promise<Track | null> => {
     title: GetTrackTitle(tags.title, file),
     year: tags.year,
     artwork: await LoadArtworkFromFile(file),
-    bitrate: tags.bitrate ? tags.bitrate / 1000 : undefined
+    bitrate: tags.bitrate ? tags.bitrate / 1000 : undefined,
   };
   return track;
 };
@@ -51,7 +51,7 @@ const CreateTracks = async (files: string[]) => {
   const tracks: Track[] = [];
 
   await Promise.all(
-    files.map(async (file) => {
+    files.map(async file => {
       const track = await CreateTrack(file);
       if (track !== null) {
         tracks.push(track);

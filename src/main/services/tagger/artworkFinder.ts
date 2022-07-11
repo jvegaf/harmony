@@ -6,11 +6,11 @@ const FindArtwork = async (title: string, artist?: string): Promise<string[]> =>
 
   const images = await image(query, { safe: false });
 
-  const result = images.filter((i) => i.height === i.width);
+  const result = images.filter(i => i.height === i.width);
 
   // if (result.length) log.info('result', result);
   if (!result.length) return [];
-  const res = result.map((r) => r.url);
+  const res = result.map(r => r.url);
   return res;
 };
 

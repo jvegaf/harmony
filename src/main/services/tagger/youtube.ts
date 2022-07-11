@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import YoutubeMusicApi from 'youtube-music-api';
-import { ResultTag } from '../../types/emusik';
-import log from 'electron-log';
+import { ResultTag } from '../../../shared/types/emusik';
+import { log } from '../log/log';
 import GetTagResults from './ytTagMapper';
 
 const SearchYtTags = async (title: string, artist: string | null = null): Promise<ResultTag[]> => {

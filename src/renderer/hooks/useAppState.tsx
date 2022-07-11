@@ -1,9 +1,10 @@
 import React from 'react';
-import { Track, TrackId } from '../../electron/types/emusik';
+import { Track, TrackId } from '../../shared/types/emusik';
 import AppContext from '../context/AppContext';
 
 export default function useAppState() {
-  const { trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } = React.useContext(AppContext);
+  const { trackPlaying, setTrackPlaying, trackDetail, setTrackDetail, tracksLoaded, setTracksLoaded } =
+    React.useContext(AppContext);
 
   const onOpenFolder = React.useCallback(() => window.Main.OpenFolder(), []);
 
@@ -34,6 +35,8 @@ export default function useAppState() {
     onFindArtwork,
     saveChanges,
     closeDetail,
-    onOpenFolder
+    onOpenFolder,
+    tracksLoaded,
+    setTracksLoaded,
   };
 }

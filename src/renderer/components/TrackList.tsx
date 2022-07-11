@@ -5,119 +5,23 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+import { useViewportSize } from '@mantine/hooks';
 import React from 'react';
-import styled from 'styled-components';
 import { useTable, useResizeColumns, useFlexLayout, useRowSelect } from 'react-table';
 import { Track, TrackId } from 'shared/types/emusik';
+import styled, { keyframes } from 'styled-components';
+import useAppState from '../hooks/useAppState';
+import { ContextMenu } from './ContextMenu';
+import { Container } from './TrackList.styles';
 
 interface TrackListProps {
-  tHeight: number;
+  height: number;
   tracks: Track[];
-  trackPlaying: TrackId | null;
-  setTrackPlaying: React.Dispatch<React.SetStateAction<TrackId>>;
-  showCtxMenu: (trackId: string) => void;
+  columns: [];
+  trackPlaying: TrackId;
+  updateTrackPlaying: (id: TrackId) => void;
+  updateTrackDetail: (id: TrackId) => void;
 }
-
-const Styles = styled.div`
-  padding: 0;
-  ${'' /* These styles are suggested for the table fill all available space in its containing element */}
-  display: block;
-  ${'' /* These styles are required for a horizontaly scrollable table overflow */}
-  overflow: auto;
-
-  .table {
-    border-spacing: 0;
-
-    .thead {
-      ${'' /* These styles are required for a scrollable body to align with the header properly */}
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    .tbody {
-      ${'' /* These styles are required for a scrollable table body */}
-      overflow-y: scroll;
-      overflow-x: hidden;
-    }
-
-    .tr {
-      :nth-child(even) {
-        background-color: #23292b;
-      }
-
-      :nth-child(odd) {
-        background-color: #2e3436;
-      }
-
-      :hover {
-        background-color: #796868;
-      }
-
-      :last-child {
-        .td {
-          border-bottom: 0;
-        }
-      }
-
-      &.isSelected {
-        background-color: #967a7a;
-      }
-
-      &.isPlaying {
-        background-color: #1793f8;
-      }
-    }
-
-    .td {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: medium;
-    }
-
-    .th {
-      background-color: #23292b;
-      color: #eeeeee;
-      font-size: small;
-    }
-
-    .th,
-    .td {
-      margin: 0;
-      padding: 0.4rem 1rem;
-      user-select: none;
-      :first-child {
-        padding: 0.4rem 0.5rem;
-      }
-
-      ${
-        '' /* In this example we use an absolutely position resizer,
-       so this is required. */
-      }
-      position: relative;
-
-      :last-child {
-        border-right: 0;
-      }
-
-      .resizer {
-        right: 0;
-        background: #464849;
-        width: 2px;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        z-index: 1;
-        ${'' /* prevents from scrolling while dragging on touch devices */}
-        touch-action :none;
-
-        &.isResizing {
-          background: #5a878a;
-        }
-      }
-    }
-  }
-`;
 
 const headerProps = (props, { column }) => getStyles(props, column.align);
 
@@ -134,14 +38,15 @@ const getStyles = (props, align = 'left') => [
   },
 ];
 
-interface TableViewProps extends TrackListProps {
-  columns: any[];
-}
-
 // eslint-disable-next-line react/prop-types
-const TableView: React.FC<TableViewProps> = props => {
-  const { tHeight, tracks: data, trackPlaying, setTrackPlaying, showCtxMenu, columns } = props;
+const TrackListView: React.FC<TrackListProps> = props => {
+  const { height, tracks: data, trackPlaying, updateTrackPlaying, updateTrackDetail, columns } = props;
   const [selected, setSelected] = React.useState('');
+  const [popupProps, setPopupProps] = React.useState({
+    visible: false,
+    x: 0,
+    y: 0,
+  });
 
   const defaultColumn = React.useMemo(
     () => ({
@@ -164,77 +69,101 @@ const TableView: React.FC<TableViewProps> = props => {
     useRowSelect
   );
 
+  const onDblClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
+    e.preventDefault();
+    if (!row) return;
+    const trackId = row.original.id;
+
+    updateTrackPlaying(trackId);
+  };
+
   const onClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
     e.preventDefault();
     if (!row) return;
     const trackId = row.original.id;
-    if (e.type === 'click') {
-      setSelected(trackId);
-      console.log('selected', selected);
-    }
+    setSelected(trackId);
+    console.log('selected', selected);
+  };
 
-    if (e.type === 'auxclick') {
-      showCtxMenu(trackId);
-      console.log('trackId', trackId);
-    }
+  const onRightClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row): void => {
+    e.preventDefault();
+    if (!row) return;
+    const trackId = row.original.id;
+    const record = row.original;
+    console.log(`X: ${e.clientX} Y: ${e.clientY}`);
+    console.log('trackId', trackId);
 
-    if (e.type === 'dblclick') {
-      setTrackPlaying(trackId);
-      console.log('trackId', trackId);
+    if (!popupProps.visible) {
+      document.addEventListener(`click`, function onClickOutside() {
+        setPopupProps({ ...popupProps, visible: false });
+        document.removeEventListener(`click`, onClickOutside);
+      });
     }
+    setPopupProps({
+      record,
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+    });
   };
 
   return (
-    <div {...getTableProps()} className="table">
-      <div>
-        {headerGroups.map(headerGroup => (
-          <div
-            {...headerGroup.getHeaderGroupProps({
-              // style: { paddingRight: '15px' },
-            })}
-            className="tr"
-          >
-            {headerGroup.headers.map(column => (
-              <div {...column.getHeaderProps(headerProps)} className="th">
-                {column.render('Header')}
-                {/* Use column.getResizerProps to hook up the events correctly */}
-                {column.canResize && (
-                  <div {...column.getResizerProps()} className={`resizer ${column.isResizing ? 'isResizing' : ''}`} />
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-      <div className="tbody" style={{ height: tHeight }}>
-        {rows.map(row => {
-          prepareRow(row);
-          return (
+    <div>
+      <div {...getTableProps()} className="table">
+        <div>
+          {headerGroups.map(headerGroup => (
             <div
-              {...row.getRowProps()}
-              onClick={e => onClick(e, row)}
-              onAuxClick={e => onClick(e, row)}
-              onDoubleClick={e => onClick(e, row)}
-              className={`tr 
-                ${row.original.id === selected ? 'isSelected' : ''} 
-                ${row.original.id === trackPlaying ? 'isPlaying' : ''}`}
-            >
-              {row.cells.map(cell => {
-                return (
-                  <div {...cell.getCellProps(cellProps)} className="td">
-                    {cell.render('Cell')}
-                  </div>
-                );
+              {...headerGroup.getHeaderGroupProps({
+                // style: { paddingRight: '15px' },
               })}
+              className="tr"
+            >
+              {headerGroup.headers.map(column => (
+                <div {...column.getHeaderProps(headerProps)} className="th">
+                  {column.render('Header')}
+                  {/* Use column.getResizerProps to hook up the events correctly */}
+                  {column.canResize && (
+                    <div {...column.getResizerProps()} className={`resizer ${column.isResizing ? 'isResizing' : ''}`} />
+                  )}
+                </div>
+              ))}
             </div>
-          );
-        })}
+          ))}
+        </div>
+        <div className="tbody" style={{ height: height - 100 }}>
+          {rows.map(row => {
+            prepareRow(row);
+            return (
+              <div
+                {...row.getRowProps()}
+                onContextMenu={e => onRightClick(e, row)}
+                onClick={e => onClick(e, row)}
+                onDoubleClick={e => onDblClick(e, row)}
+                className={`tr 
+                  ${row.original.id === selected ? 'isSelected' : ''} 
+                  ${row.original.id === trackPlaying ? 'isPlaying' : ''}`}
+              >
+                {row.cells.map(cell => {
+                  return (
+                    <div {...cell.getCellProps(cellProps)} className="td">
+                      {cell.render('Cell')}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
+      <ContextMenu {...popupProps} />
     </div>
   );
 };
 
 const TrackList = (props: TrackListProps) => {
+  const { trackPlaying, updateTrackPlaying, updateTrackDetail } = useAppState();
+  const { height } = useViewportSize();
+  const [tracks, setTracks] = React.useState([]);
   const columns = React.useMemo(
     () => [
       //   {
@@ -285,15 +214,25 @@ const TrackList = (props: TrackListProps) => {
     []
   );
 
+  React.useEffect(() => {
+    if (window.Main) {
+      window.Main.on('all-tracks', updatedTracks => setTracks(updatedTracks));
+    }
+  }, []);
+
   const tableprops = {
-    ...props,
+    height,
+    tracks,
     columns,
+    trackPlaying,
+    updateTrackPlaying,
+    updateTrackDetail,
   };
 
   return (
-    <Styles>
-      <TableView {...tableprops} />
-    </Styles>
+    <Container>
+      <TrackListView {...tableprops} />
+    </Container>
   );
 };
 

@@ -15,8 +15,8 @@ const getToken = async () => {
 
   const config = {
     headers: {
-      Accept: 'application/json'
-    }
+      Accept: 'application/json',
+    },
   };
 
   const response = await axios.get('https://embed.beatport.com/token', config).then(handleResponse).catch(handleError);
@@ -44,8 +44,8 @@ const SearchTags = async (
   const config = {
     headers: {
       Accept: 'application/json',
-      Authorization: `Bearer ${token.Value()}`
-    }
+      Authorization: `Bearer ${token.Value()}`,
+    },
   };
 
   const { data } = await axios.get(uri, config).then(handleResponse).catch(handleError);

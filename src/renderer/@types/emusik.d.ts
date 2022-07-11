@@ -1,6 +1,10 @@
-import { Track } from '../../shared/types/emusik';
+import { Dispatch, SetStateAction } from 'react';
 
 export type AppContextType = {
-  tracks: Track[];
-  addTracks: (tracks: Track[]) => void;
+  trackDetail: TrackId | null;
+  setTrackDetail: Dispatch<SetStateAction<TrackId | null>>;
+  trackPlaying: TrackId | null;
+  setTrackPlaying: Dispatch<SetStateAction<TrackId | null>>;
+  tracksLoaded: boolean;
+  setTracksLoaded: Dispatch<SetStateAction<boolean>>;
 };

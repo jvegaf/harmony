@@ -28,55 +28,33 @@ const useStyles = createStyles(theme => ({
 const MainView = () => {
   const { classes } = useStyles();
   const { height } = useViewportSize();
-  const [tHeight, setTHheight] = useState(0);
-  const { tracks, showCtxMenu, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail, updateTrack, onFixTrack } =
-    useAppState();
+  const { tracksLoaded, setTracksLoaded, trackDetail } = useAppState();
   const [content, setContent] = useState(<OnBoarding />);
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('view-detail-command', (trackId: TrackId) => setTrackDetail(trackId));
-
-    window.electron.ipcRenderer.on('play-command', (trackId: TrackId) => setTrackPlaying(trackId));
-
-    window.electron.ipcRenderer.on('fix-track-command', (trackId: TrackId) => onFixTrack(trackId));
-  }, [onFixTrack, setTrackDetail, setTrackPlaying, tracks]);
-
-  useEffect(() => {
-    const newHeight = height - 100;
-    setTHheight(newHeight);
-  }, [height]);
-
-  const detailProps = useMemo(() => {
-    const track = tracks.find(t => t.id === trackDetail) as Track;
-
-    return {
-      track,
-      closeDetail: () => setTrackDetail(undefined),
-      saveChanges: updateTrack,
-    };
-  }, [setTrackDetail, trackDetail, tracks, updateTrack]);
+    window.Main.on('tracks-updated', () => {
+      setTracksLoaded(true);
+      window.Main.GetAll();
+    });
+  }, [setTracksLoaded]);
 
   useEffect(() => {
-    const tlprops = {
-      tHeight,
-      tracks,
-      trackPlaying,
-      setTrackPlaying,
-      showCtxMenu,
-    };
-    if (tracks.length > 0) {
-      setContent(<TrackList {...tlprops} />);
+    if (tracksLoaded) {
+      setContent(<TrackList />);
     }
 
-    return () => setContent(<OnBoarding />);
-  }, [setTrackPlaying, showCtxMenu, tHeight, trackPlaying, tracks]);
+    if (trackDetail) {
+      const track = window.Main.GetTrack(trackDetail);
+      setContent(<TrackDetail track={track} />);
+    }
+  }, [tracksLoaded, trackDetail]);
 
   return (
     <div className={classes.main}>
       <div className={classes.header}>
         <AppHeader />
       </div>
-      <div className={classes.content}>{trackDetail ? <TrackDetail {...detailProps} /> : content}</div>
+      <div className={classes.content}>{content}</div>
     </div>
   );
 };

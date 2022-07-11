@@ -1,7 +1,7 @@
-import { MatchResult, ResultTag, Track } from '../../types/emusik';
-import { GetStringTokens } from '../../utils';
-import log from 'electron-log';
-import Update from '../track/track.updater';
+import { MatchResult, ResultTag, Track } from '../../../shared/types/emusik';
+import { GetStringTokens } from '../../../shared/utils';
+import { log } from '../log/log';
+import Update from '../track/updater';
 // import SearchYtTags from './youtube';
 import SearchTags from './beatport';
 // import SearchTrackInfo from './google';
@@ -15,9 +15,9 @@ import SearchTags from './beatport';
 // };
 
 const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
-  const tagMatches: MatchResult[] = tags.map((tag) => {
+  const tagMatches: MatchResult[] = tags.map(tag => {
     let tokensFounded = 0;
-    trackTokens.forEach((token) => {
+    trackTokens.forEach(token => {
       if (tag.tokens.indexOf(token) > -1) {
         tokensFounded += 1;
       }
@@ -27,7 +27,7 @@ const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
       tag,
       trackTokens,
       matches: tokensFounded,
-      of: trackTokens.length
+      of: trackTokens.length,
     };
   });
 
@@ -51,14 +51,14 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
   }
   const durRounded = Math.round(duration);
   const resultsFiltered = bpResults.filter(
-    (result) => result.duration >= durRounded - 10 && result.duration <= durRounded + 10
+    result => result.duration >= durRounded - 10 && result.duration <= durRounded + 10
   );
   if (resultsFiltered.length < 2) {
     return {
       tag: resultsFiltered[0],
       trackTokens,
       matches: 1,
-      of: 1
+      of: 1,
     };
   }
   const match = Match(trackTokens, resultsFiltered);
@@ -98,7 +98,7 @@ const FixTags = async (track: Track): Promise<Track> => {
 
 export const FixTracks = async (tracks: Track[]) => {
   const updated: Array<Promise<Track>> = [];
-  tracks.forEach((track) => {
+  tracks.forEach(track => {
     updated.push(FixTags(track));
   });
   return Promise.all(updated);

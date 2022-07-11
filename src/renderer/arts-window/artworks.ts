@@ -1,5 +1,4 @@
-import { ArtsTrackDTO } from "shared/types/emusik";
-
+import { ArtsTrackDTO } from 'shared/types/emusik';
 
 const container = document.getElementById('arts-container') as HTMLDivElement;
 

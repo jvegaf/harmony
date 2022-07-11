@@ -17,8 +17,11 @@ import path from 'path';
 import { GetFilesFrom } from './services/fileManager';
 import PersistTrack from './services/tag/nodeId3Saver';
 import FixTags, { FixTracks } from './services/tagger/Tagger';
+import CreateTracks from './services/track/creator';
+import { TrackRepository } from './services/track/repository';
 import { GetTracks } from './services/track/trackManager';
 import { resolveHtmlPath } from './util';
+
 
 export default class AppUpdater {
   constructor() {
@@ -30,6 +33,7 @@ export default class AppUpdater {
 
 process.on('warning', e => console.warn(e.stack));
 
+let trackRepository: TrackRepository | null = null;
 let mainWindow: BrowserWindow | null = null;
 let artsWindow: BrowserWindow | null = null;
 
@@ -112,8 +116,6 @@ const createMainWindow = async () => {
 };
 
 const createArtsWindow = async () => {
-
-
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'assets')
     : path.join(__dirname, '../../assets');
@@ -178,6 +180,7 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
+    trackRepository = new TrackRepository();
     createMainWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
@@ -185,34 +188,7 @@ app
       if (mainWindow === null) createMainWindow();
     });
   })
-  .catch(console.log);
-
-ipcMain.on('show-context-menu', (event, trackId) => {
-  console.log(`track id: ${trackId}`);
-  const template = [
-    {
-      label: 'Details',
-      click: () => {
-        event.sender.send('view-detail-command', trackId);
-      },
-    },
-    {
-      label: 'Play Track',
-      click: () => {
-        event.sender.send('play-command', trackId);
-      },
-    },
-    { type: 'separator' },
-    {
-      label: 'Fix Tags',
-      click: () => {
-        event.sender.send('fix-track-command', trackId);
-      },
-    },
-  ];
-  const menu = Menu.buildFromTemplate(template);
-  menu.popup(BrowserWindow.fromWebContents(event.sender));
-});
+  .catch( e => log.error(e));
 
 ipcMain.on('persist', (_, track) => PersistTrack(track));
 
@@ -222,39 +198,39 @@ ipcMain.on('find-artwork', async (_, trackId: TrackId) => {
   if (results.length) {
     const artsDto: ArtsTrackDTO = {
       reqTrack: track,
-      artsUrls: results
+      artsUrls: results,
     };
     createArtsWindow(artsDto);
   }
 });
 
-ipcMain.on('open-folder', async (event) => {
-  const resultPath = await dialog.showOpenDialog(mainWindow as BrowserWindow, {
-    properties: ['openDirectory']
+ipcMain.on('open-folder', async event => {
+  const resultPath = await dialog.showOpenDialog({
+    properties: ['openDirectory'],
   });
 
   if (resultPath.canceled) return;
 
-  trackRepository.removeAll();
+  // trackRepository.removeAll();
 
   const files = await GetFilesFrom(resultPath.filePaths[0]);
   const tracks: Track[] = await CreateTracks(files);
-  tracks.forEach((t) => trackRepository.add(t));
+  trackRepository?.addAll(tracks);
 
   event.sender.send('tracks-updated');
 });
 
-ipcMain.on('get-all', (event) => {
-  const tracks = trackRepository.all();
+ipcMain.on('get-all', event => {
+  const tracks = trackRepository?.all();
   event.sender.send('all-tracks', tracks);
 });
 
 ipcMain.on('get-track', (event, trackId) => (event.returnValue = trackRepository.getTrack(trackId)));
 
-ipcMain.on('fix-all', async (event) => {
+ipcMain.on('fix-all', async event => {
   const tracks = trackRepository.all();
   await Promise.all(
-    tracks.map(async (track) => {
+    tracks.map(async track => {
       const updated = await FixTags(track);
       trackRepository.update(updated);
     })
@@ -266,12 +242,12 @@ ipcMain.on('fix-track', async (event, trackId) => {
   const track = trackRepository.getTrack(trackId);
   const updated = await FixTags(track);
   trackRepository.update(updated);
-  event.sender.send('track-fixed', trackId);
+  event.sender.send('tracks-updated');
 });
 
 ipcMain.on('fix-tracks', async (event, trackIds: TrackId[]) => {
   await Promise.all(
-    trackIds.map(async (trackId) => {
+    trackIds.map(async trackId => {
       const updated = await FixTags(trackRepository.getTrack(trackId));
       trackRepository.update(updated);
     })
@@ -281,7 +257,8 @@ ipcMain.on('fix-tracks', async (event, trackIds: TrackId[]) => {
 
 ipcMain.on('save-artwork', async (_, artTrack) => {
   const newTrack = await UpdateArtwork(artTrack);
-  mainWindow?.webContents.send('track-saved', newTrack.id);
+  trackRepository.update(newTrack);
+  mainWindow?.webContents.send('tracks-updated');
   artsWindow?.close();
   artsWindow?.destroy();
 });

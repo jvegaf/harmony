@@ -20,7 +20,7 @@ const artApi = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on: (channel: string, callback: (data: any) => void) => {
     ipcRenderer.on(channel, (_, data) => callback(data));
-  }
+  },
 };
 contextBridge.exposeInMainWorld('Main', artApi);
 /**

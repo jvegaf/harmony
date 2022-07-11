@@ -1,5 +1,5 @@
-import log from 'electron-log';
 import * as mm from 'music-metadata';
+import { log } from '../log/log';
 
 export interface FileTags extends mm.ICommonTagsResult {
   duration?: number;

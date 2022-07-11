@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios';
-import log from 'electron-log';
+import { log } from './log/log';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handleResponse = (response: AxiosResponse<any, any>) => {

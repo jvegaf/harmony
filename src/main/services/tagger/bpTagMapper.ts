@@ -1,5 +1,5 @@
-import { ResultTag } from '../../types/emusik';
-import { GetStringTokens } from '../../utils';
+import { ResultTag } from '../../../shared/types/emusik';
+import { GetStringTokens } from '../../../shared/utils';
 
 interface Result {
   mix_name: string;
@@ -36,12 +36,12 @@ const CreateTagResult = (result: Result): ResultTag => {
     bpm: result.bpm,
     duration: Number((result.length_ms / 1000).toFixed(0)),
     artworkUrl: result.release.image.uri,
-    tokens: tagTokens
+    tokens: tagTokens,
   } as ResultTag;
 };
 
 const GetTagResults = (result: Result[]): ResultTag[] => {
-  return result.map((track) => CreateTagResult(track));
+  return result.map(track => CreateTagResult(track));
 };
 
 export default GetTagResults;

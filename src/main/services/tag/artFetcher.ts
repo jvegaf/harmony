@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import { Artwork } from '../../../shared/types/emusik';
 
 const GetArtwork = async (url: string): Promise<Artwork> => {
+  // TODO:  move url replace to beatport tagger
   const fixedUrl = url.replace(/[0-9]{3,}x[0-9]{3,}/, '500x500');
 
   const response = await fetch(fixedUrl);

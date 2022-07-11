@@ -1,6 +1,5 @@
-import log from 'electron-log';
 import * as NodeId3 from 'node-id3';
-import { Track } from '../../types/emusik';
+import { Track } from '../../../shared/types/emusik';
 
 const PersistTrack = (track: Track) => {
   const { title, artist, album, year, genre, artwork, bpm, key } = track;
@@ -15,7 +14,7 @@ const PersistTrack = (track: Track) => {
     genre,
     image: artwork,
     bpm: beats,
-    key
+    key,
   } as NodeId3.Tags;
 
   NodeId3.update(tags, track.filepath, (_: unknown, err: Error) => {

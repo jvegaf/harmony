@@ -8,14 +8,14 @@ const CreateTagResult = (result: any) => {
     title: result.name,
     artist: result.artist.name,
     album: result.album.name,
-    duration: Number((result.duration / 1000).toFixed(0))
+    duration: Number((result.duration / 1000).toFixed(0)),
   } as ResultTag;
 };
 
 const GetTagResults = (result: any[]) => {
   log.info('yt gettagresult');
   log.info(result);
-  return result.map((track) => CreateTagResult(track));
+  return result.map(track => CreateTagResult(track));
 };
 
 export default GetTagResults;

@@ -8,7 +8,6 @@ import React from 'react';
 import { Table } from 'rsuite';
 import { Track, TrackId } from '../../electron/types/emusik';
 import useAppState from '../hooks/useAppState';
-import log from 'electron-log';
 
 interface TrackListProps {
   tracks: Track[];
@@ -18,7 +17,7 @@ interface TrackListProps {
   onFixTrack: (trackId: TrackId) => void;
 }
 
-const TableView: React.FC<TrackListProps> = (props) => {
+const TableView: React.FC<TrackListProps> = props => {
   const { tracks, trackPlaying, updateTrackDetail, updateTrackPlaying, onFixTrack } = props;
 
   function Row(rowProps: { children: any; id: any; rowData: any }) {
@@ -26,28 +25,28 @@ const TableView: React.FC<TrackListProps> = (props) => {
     const styles = {
       width: '100%',
       height: '100%',
-      select: 'none'
+      select: 'none',
     };
 
     const ref = React.useRef(null);
 
     function dblClickHandler(event, rowData) {
       event.preventDefault();
-      log.info(rowData);
-      log.info(event);
+      // log.info(rowData);
+      // log.info(event);
     }
 
     function ctxMenuHandler(event, rowData) {
       event.preventDefault();
-      log.info(rowData);
-      log.info(event);
+      // log.info(rowData);
+      // log.info(event);
     }
 
     return (
       <div
         ref={ref}
-        onContextMenu={(event) => ctxMenuHandler(event, rowData)}
-        onDoubleClick={(event) => dblClickHandler(event, rowData)}
+        onContextMenu={event => ctxMenuHandler(event, rowData)}
+        onDoubleClick={event => dblClickHandler(event, rowData)}
         style={styles}
       >
         {children}
@@ -125,7 +124,7 @@ const TrackList: React.FC = () => {
 
   React.useEffect(() => {
     if (window.Main) {
-      window.Main.on('all-tracks', (tracksResponse) => setTracks(tracksResponse));
+      window.Main.on('all-tracks', tracksResponse => setTracks(tracksResponse));
     }
   }, []);
 
@@ -134,7 +133,7 @@ const TrackList: React.FC = () => {
     trackPlaying,
     updateTrackDetail,
     updateTrackPlaying,
-    onFixTrack
+    onFixTrack,
   };
 
   return <TableView {...props} />;

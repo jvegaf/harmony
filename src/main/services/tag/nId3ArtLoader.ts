@@ -1,19 +1,21 @@
 import * as NodeId3 from 'node-id3';
-import { Artwork } from '../../types/emusik';
+import { Artwork } from '../../../shared/types/emusik';
 
 const LoadArtworkFromFile = (musicFile: string): Promise<Artwork | undefined> => {
   return NodeId3.Promise.read(musicFile).then((value: NodeId3.Tags) => {
     const { image } = value;
-    if (!image) return undefined;
-
-    if (typeof image !== 'string') {
-      return {
+    let artwork;
+    
+    if (image && typeof image !== 'string') {
+      artwork = {
         mime: image.mime,
         type: { id: image.type.id, name: image.type.name },
         description: image.description,
-        imageBuffer: image.imageBuffer
+        imageBuffer: image.imageBuffer,
       } as Artwork;
     }
+
+    return artwork;
   });
 };
 

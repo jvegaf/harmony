@@ -3,7 +3,7 @@ import { Button, createStyles, Header } from '@mantine/core';
 import React from 'react';
 import { useAudioPlayer } from 'react-use-audio-player';
 import useAppState from 'renderer/hooks/useAppState';
-import Player from './Player';
+import Player from './Player-wavesurfer';
 import PauseButton from './PauseButton';
 import PlayButton from './PlayButton';
 
@@ -43,31 +43,27 @@ const useStyles = createStyles(theme => ({
 const AppHeader: React.FC = () => {
   const { classes } = useStyles();
 
-  const { tracks, trackPlaying, onFixAllTracks, onOpenFolder } = useAppState();
+  const { tracksLoaded, onFixAllTracks, onOpenFolder } = useAppState();
 
-  const { playing, togglePlayPause } = useAudioPlayer();
-
-  const fixAllHandler = () => onFixAllTracks();
-
-  const btnProps = {
-    color: 'white',
-    size: 40,
-    action: togglePlayPause,
-  };
+  // const btnProps = {
+  //   color: 'white',
+  //   size: 40,
+  //   action: togglePlayPause,
+  // };
 
   return (
     <Header height={70} className={classes.header}>
-      <div className={classes.leftContainer}>
-        {playing ? <PauseButton {...btnProps} /> : <PlayButton {...btnProps} />}
+      <div className={classes.leftContainer} />
+      <div className={classes.playerContainer}>
+        {/* <Player /> */}
       </div>
-      <div className={classes.playerContainer}>{trackPlaying && <Player track={trackPlaying} />}</div>
       <div className={classes.rightContainer}>
-        {tracks.length > 0 && (
+        {tracksLoaded > 0 && (
           <>
             <Button onClick={onOpenFolder} size="sm">
               Open Folder
             </Button>
-            <Button onClick={fixAllHandler} size="sm">
+            <Button onClick={onFixAllTracks} size="sm">
               Fix All tracks
             </Button>
           </>

@@ -1,30 +1,51 @@
 import { ResultTag, Track } from '../../../shared/types/emusik';
 import { ParseDuration } from '../../../shared/utils';
 import PersistTrack from '../tag/nodeId3Saver';
-import GetArtwork from './artFetcher';
+import FetchArtwork from '../artwork/fetcher';
+import { log } from '../log/log';
+
+const getArtwork = async (url?: string) => {
+  if (!url) return undefined;
+  const fixedUrl = url.replace(/[0-9]{3,}x[0-9]{3,}/, '500x500');
+  const art = await FetchArtwork(fixedUrl);
+  if (art === null) return undefined;
+  return art;
+};
 
 const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
   if (!tag) return track;
 
-  track.title = tag.title;
-  track.artist = tag.artist;
-  track.album = tag.album;
-  track.duration = tag.duration;
-  track.time = ParseDuration(tag.duration);
-  track.year = tag.year ? Number(tag.year) : undefined;
-  track.bpm = tag.bpm;
-  track.key = tag.key;
-  track.genre = tag.genre;
-  track.artwork = tag.artworkUrl ? await GetArtwork(tag.artworkUrl) : undefined;
+  const art = async () => {
+    if (!tag.artworkUrl) {
+      return undefined;
+    }
+
+    const artwork = await getArtwork(tag.artworkUrl);
+
+    return artwork;
+  };
+
+  const newTrack = {
+    ...track,
+    title: tag.title,
+    artist: tag.artist,
+    album: tag.album,
+    duration: tag.duration,
+    time: ParseDuration(tag.duration),
+    year: tag.year ? Number(tag.year) : undefined,
+    bpm: tag.bpm,
+    key: tag.key,
+    genre: tag.genre,
+    artwork: await art(),
+  };
 
   try {
-    await PersistTrack(track);
+    await PersistTrack(newTrack);
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    log.error(error);
   }
 
-  return track;
+  return newTrack;
 };
 
 export default Update;

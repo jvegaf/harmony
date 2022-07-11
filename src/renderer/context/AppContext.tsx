@@ -1,14 +1,13 @@
 /* eslint-disable react/jsx-no-constructed-context-values */
 import React, { useState } from 'react';
-import { TrackId } from '../../electron/types/emusik';
 import { AppContextType } from '../@types/emusik';
 
 const AppContext = React.createContext({} as AppContextType);
 
-// eslint-disable-next-line react/prop-types
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [trackPlaying, setTrackPlaying] = useState<TrackId | null>(null);
   const [trackDetail, setTrackDetail] = useState<TrackId | null>(null);
+  const [tracksLoaded, setTracksLoaded] = useState(false);
 
   return (
     <AppContext.Provider
@@ -16,7 +15,9 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
         trackPlaying,
         setTrackPlaying,
         trackDetail,
-        setTrackDetail
+        setTrackDetail,
+        tracksLoaded,
+        setTracksLoaded,
       }}
     >
       {children}

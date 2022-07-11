@@ -1,6 +1,6 @@
 import fetch, { Response } from 'node-fetch';
-import { Artwork } from '../../types/emusik';
-import log from 'electron-log';
+import { Artwork } from '../../../shared/types/emusik';
+import { log } from '../log/log';
 
 const FetchArtwork = async (url: string): Promise<Artwork | null> => {
   let response: Response | null = null;
@@ -19,7 +19,7 @@ const FetchArtwork = async (url: string): Promise<Artwork | null> => {
     mime: response.headers.get('content-type') || undefined,
     type: { id: 3, name: 'front cover' },
     description: '',
-    imageBuffer: buf
+    imageBuffer: buf,
   };
   return artwork;
 };

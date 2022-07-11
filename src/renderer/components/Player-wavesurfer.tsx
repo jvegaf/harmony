@@ -4,10 +4,19 @@
 // @ts-nocheck
 
 import ReactWaves from '@dschoon/react-waves';
+import { createStyles } from '@mantine/core';
 import React from 'react';
 import useAppState from '../hooks/useAppState';
 
+const useStyles = createStyles(theme => ({
+  container: {
+    width: '100%',
+    height: 70,
+  },
+}));
+
 const Player = () => {
+  const { classes } = useStyles();
   const { trackPlaying } = useAppState();
   const [playing, setPlaying] = React.useState(false);
   const [position, setPosition] = React.useState(0);
@@ -16,29 +25,30 @@ const Player = () => {
 
   React.useEffect(() => {
     if (trackPlaying !== null) {
+      const track = window.Main.GetTrack(trackPlaying);
       setPlaying(false);
-      setTrackSrc(trackPlaying.filepath);
+      setTrackSrc(track.filepath);
     }
   }, [trackPlaying]);
 
-  const onPosChange = (ws) => {
+  const onPosChange = ws => {
     if (ws.pos !== position) {
       setPosition(ws.pos);
     }
   };
 
-  const onSeek = (ws) => {
+  const onSeek = ws => {
     log.info('seek', ws);
   };
 
-  const onReady = (ws) => {
+  const onReady = ws => {
     log.info('ready', ws);
     setPosition(0);
     setPlaying(true);
   };
 
   return (
-    <div className="container">
+    <div className={classes.container}>
       {trackSrc && (
         <div
           className="play button"

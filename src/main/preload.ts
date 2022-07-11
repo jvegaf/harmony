@@ -1,30 +1,31 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { Track, TrackId } from 'shared/types/emusik';
 
-contextBridge.exposeInMainWorld('electron', {
-  ipcRenderer: {
-    myPing: () => ipcRenderer.send('ipc-example', 'ping'),
-    openFolder: () => ipcRenderer.invoke('open-folder'),
-    showContextMenu: (trackId: TrackId) => ipcRenderer.send('show-context-menu', trackId),
-    fixTrack: (track: Track) => ipcRenderer.invoke('fix-track', track),
-    fixTracks: (tracks: Track[]) => ipcRenderer.invoke('fix-tracks', tracks),
-    persistTrack: (track: Track) => ipcRenderer.send('persist', track),
+declare global {
+  interface Window {
+    Main: typeof api;
+    ipcRenderer: typeof ipcRenderer;
+  }
+}
+const api = {
+  OpenFolder: () => ipcRenderer.send('open-folder'),
+  FixTrack: (trackId: TrackId) => ipcRenderer.invoke('fix-track', trackId),
+  FixTracks: (trackIds: TrackId[]) => ipcRenderer.send('fix-tracks', trackIds),
+  PersistTrack: (track: Track) => ipcRenderer.send('persist', track),
+  FixAll: () => ipcRenderer.send('fix-all'),
+  GetTrack: (trackId: TrackId) => ipcRenderer.sendSync('get-track', trackId),
+  GetAll: () => ipcRenderer.send('get-all'),
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    on(channel: string, func: (...args: any[]) => void) {
-      const validChannels = ['ipc-example', 'play-command', 'view-detail-command', 'fix-track-command'];
-      if (validChannels.includes(channel)) {
-        // Deliberately strip event as it includes `sender`
-        ipcRenderer.on(channel, (_event, ...args) => func(...args));
-      }
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    once(channel: string, func: (...args: any[]) => void) {
-      const validChannels = ['ipc-example'];
-      if (validChannels.includes(channel)) {
-        // Deliberately strip event as it includes `sender`
-        ipcRenderer.once(channel, (_event, ...args) => func(...args));
-      }
-    },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  on(channel: string, func: (...args: any[]) => void) {
+    ipcRenderer.on(channel, (_event, ...args) => func(...args));
   },
-});
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  once(channel: string, func: (...args: any[]) => void) {
+    ipcRenderer.once(channel, (_event, ...args) => func(...args));
+  },
+};
+
+contextBridge.exposeInMainWorld('Main', api);
+
+contextBridge.exposeInMainWorld('ipcRenderer', ipcRenderer);
