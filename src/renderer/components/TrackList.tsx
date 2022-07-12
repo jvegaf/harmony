@@ -8,6 +8,7 @@ import {
 } from "react-table";
 import type { Track, TrackId } from "shared/types/emusik";
 import useAppState from "../hooks/useAppState";
+import Columns from "./columns";
 import { ContextMenu } from "./ContextMenu";
 import { Container } from "./TrackList.styles";
 
@@ -180,49 +181,7 @@ export const TrackList: React.FC = () => {
     useAppState();
   const { height }            = useViewportSize();
   const [ tracks, setTracks ] = React.useState([]);
-  const columns               = React.useMemo(
-    () => [
-      {
-        Header:   "Title",
-        accessor: "title"
-      },
-      {
-        Header:   "Artist",
-        accessor: "artist"
-      },
-      {
-        Header:   "Time",
-        accessor: "time",
-        width:    25,
-        align:    "center"
-      },
-      {
-        Header:   "Album",
-        accessor: "album"
-      },
-      {
-        Header:   "Rate",
-        accessor: "bitrate",
-        width:    25
-      },
-      {
-        Header:   "BPM",
-        accessor: "bpm",
-        width:    25
-      },
-      {
-        Header:   "Key",
-        accessor: "key",
-        width:    25
-      },
-      {
-        Header:   "Year",
-        accessor: "year",
-        width:    25
-      }
-    ],
-    []
-  );
+  const columns               = Columns();
 
   React.useEffect(() => {
     if(window.Main){

@@ -7,52 +7,54 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import {
-  app, BrowserWindow, dialog, ipcMain, shell
-} from 'electron';
-import log from 'electron-log';
-import { autoUpdater } from 'electron-updater';
-import path from 'path';
-import { GetFilesFrom } from './services/fileManager';
-import PersistTrack from './services/tag/nodeId3Saver';
-import FixTags from './services/tagger/Tagger';
-import CreateTracks from './services/track/creator';
-import { TrackRepository } from './services/track/repository';
-import { resolveHtmlPath } from './util';
-
+  app, BrowserWindow, dialog, ipcMain, shell 
+} from "electron";
+import log from "electron-log";
+import { autoUpdater } from "electron-updater";
+import path from "path";
+import { LogCategory } from "../shared/types/emusik";
+import { GetFilesFrom } from "./services/fileManager";
+import PersistTrack from "./services/tag/nodeId3Saver";
+import FixTags from "./services/tagger/Tagger";
+import CreateTracks from "./services/track/creator";
+import { TrackRepository } from "./services/track/repository";
+import { resolveHtmlPath } from "./util";
+import { log } from "./services/log/log";
 
 export default class AppUpdater{
   constructor(){
-    log.transports.file.level = 'info';
+    log.transports.file.level = "info";
     autoUpdater.logger        = log;
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
 
-process.on('warning', e => console.warn(e.stack));
+process.on("warning", (e) => console.warn(e.stack));
 
 let trackRepository: TrackRepository | null = null;
 let mainWindow: BrowserWindow | null        = null;
 let artsWindow: BrowserWindow | null        = null;
 
-if(process.env.NODE_ENV === 'production'){
-  const sourceMapSupport = require('source-map-support');
+if(process.env.NODE_ENV === "production"){
+  const sourceMapSupport = require("source-map-support");
   sourceMapSupport.install();
 }
 
-const isDevelopment = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+const isDevelopment =
+  process.env.NODE_ENV === "development" || process.env.DEBUG_PROD === "true";
 
 if(isDevelopment){
-  require('electron-debug')();
+  require("electron-debug")();
 }
 
 const installExtensions = async() => {
-  const installer     = require('electron-devtools-installer');
+  const installer     = require("electron-devtools-installer");
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions    = [ 'REACT_DEVELOPER_TOOLS' ];
+  const extensions    = [ "REACT_DEVELOPER_TOOLS" ];
 
   return installer
     .default(
-      extensions.map(name => installer[name]),
+      extensions.map((name) => installer[name]),
       forceDownload
     )
     .catch(console.log);
@@ -64,8 +66,8 @@ const createMainWindow = async() => {
   }
 
   const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
+    ? path.join(process.resourcesPath, "assets")
+    : path.join(__dirname, "../../assets");
 
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
@@ -75,17 +77,19 @@ const createMainWindow = async() => {
     show:           false,
     width:          1300,
     height:         900,
-    icon:           getAssetPath('icon.png'),
+    icon:           getAssetPath("icon.png"),
     webPreferences: {
       webSecurity:      false,
       contextIsolation: true,
-      preload:          app.isPackaged ? path.join(__dirname, 'preload.js') : path.join(__dirname, '../../.erb/dll/preload.js'),
-    },
+      preload:          app.isPackaged
+        ? path.join(__dirname, "preload.js")
+        : path.join(__dirname, "../../.erb/dll/preload.js")
+    }
   });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  mainWindow.loadURL(resolveHtmlPath("index.html"));
 
-  mainWindow.on('ready-to-show', () => {
+  mainWindow.on("ready-to-show", () => {
     if(!mainWindow){
       throw new Error('"mainWindow" is not defined');
     }
@@ -97,14 +101,14 @@ const createMainWindow = async() => {
     }
   });
 
-  mainWindow.on('closed', () => {
+  mainWindow.on("closed", () => {
     mainWindow = null;
   });
 
   // Open urls in the user's browser
-  mainWindow.webContents.setWindowOpenHandler(edata => {
+  mainWindow.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
-    return { action: 'deny' };
+    return { action: "deny" };
   });
 
   // Remove this if your app does not use auto updates
@@ -114,8 +118,8 @@ const createMainWindow = async() => {
 
 const createArtsWindow = async() => {
   const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
+    ? path.join(process.resourcesPath, "assets")
+    : path.join(__dirname, "../../assets");
 
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
@@ -125,17 +129,19 @@ const createArtsWindow = async() => {
     show:           false,
     width:          1300,
     height:         900,
-    icon:           getAssetPath('icon.png'),
+    icon:           getAssetPath("icon.png"),
     webPreferences: {
       webSecurity:      false,
       contextIsolation: true,
-      preload:          app.isPackaged ? path.join(__dirname, 'preload.js') : path.join(__dirname, '../../.erb/dll/preload.js'),
-    },
+      preload:          app.isPackaged
+        ? path.join(__dirname, "preload.js")
+        : path.join(__dirname, "../../.erb/dll/preload.js")
+    }
   });
 
-  artsWindow.loadURL(resolveHtmlPath('arts-window/index.html'));
+  artsWindow.loadURL(resolveHtmlPath("arts-window/index.html"));
 
-  artsWindow.on('ready-to-show', () => {
+  artsWindow.on("ready-to-show", () => {
     if(!artsWindow){
       throw new Error('"artsWindow" is not defined');
     }
@@ -147,14 +153,14 @@ const createArtsWindow = async() => {
     }
   });
 
-  artsWindow.on('closed', () => {
+  artsWindow.on("closed", () => {
     artsWindow = null;
   });
 
   // Open urls in the user's browser
-  artsWindow.webContents.setWindowOpenHandler(edata => {
+  artsWindow.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
-    return { action: 'deny' };
+    return { action: "deny" };
   });
 
   // Remove this if your app does not use auto updates
@@ -166,10 +172,10 @@ const createArtsWindow = async() => {
  * Add event listeners...
  */
 
-app.on('window-all-closed', () => {
+app.on("window-all-closed", () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
-  if(process.platform !== 'darwin'){
+  if(process.platform !== "darwin"){
     app.quit();
   }
 });
@@ -179,30 +185,30 @@ app
   .then(() => {
     trackRepository = new TrackRepository();
     createMainWindow();
-    app.on('activate', () => {
+    app.on("activate", () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if(mainWindow === null) createMainWindow();
     });
   })
-  .catch(e => log.error(e));
+  .catch((e) => log.error(e));
 
-ipcMain.on('persist', (_, track) => PersistTrack(track));
+ipcMain.on("persist", (_, track) => PersistTrack(track));
 
-ipcMain.on('find-artwork', async(_, trackId: TrackId) => {
+ipcMain.on("find-artwork", async(_, trackId: TrackId) => {
   const track   = trackRepository.getTrack(trackId);
   const results = await FindArtwork(track.title, track.artist);
   if(results.length){
     const artsDto: ArtsTrackDTO = {
       reqTrack: track,
-      artsUrls: results,
+      artsUrls: results
     };
     createArtsWindow(artsDto);
   }
 });
 
-ipcMain.on('open-folder', async event => {
-  const resultPath = await dialog.showOpenDialog({ properties: [ 'openDirectory' ] });
+ipcMain.on("open-folder", async(event) => {
+  const resultPath = await dialog.showOpenDialog({ properties: [ "openDirectory" ] });
 
   if(resultPath.canceled) return;
 
@@ -212,48 +218,77 @@ ipcMain.on('open-folder', async event => {
   const tracks: Track[] = await CreateTracks(files);
   trackRepository?.addAll(tracks);
 
-  event.sender.send('tracks-updated');
+  event.sender.send("tracks-updated");
 });
 
-ipcMain.on('get-all', event => {
+ipcMain.on("get-all", (event) => {
   const tracks = trackRepository?.all();
-  event.sender.send('all-tracks', tracks);
+  event.sender.send("all-tracks", tracks);
 });
 
-ipcMain.on('get-track', (event, trackId) => (event.returnValue = trackRepository.getTrack(trackId)));
+ipcMain.on(
+  "get-track",
+  (event, trackId) => (event.returnValue = trackRepository.getTrack(trackId))
+);
 
-ipcMain.on('fix-all', async event => {
+ipcMain.on("fix-all", async(event) => {
   const tracks = trackRepository.all();
   await Promise.all(
-    tracks.map(async track => {
+    tracks.map(async(track) => {
       const updated = await FixTags(track);
       trackRepository.update(updated);
     })
   );
-  event.sender.send('tracks-updated');
+  event.sender.send("tracks-updated");
 });
 
-ipcMain.on('fix-track', async(event, trackId) => {
+ipcMain.on("fix-track", async(event, trackId) => {
   const track   = trackRepository.getTrack(trackId);
   const updated = await FixTags(track);
   trackRepository.update(updated);
-  event.sender.send('tracks-updated');
+  event.sender.send("tracks-updated");
 });
 
-ipcMain.on('fix-tracks', async(event, trackIds: TrackId[]) => {
+ipcMain.on("fix-tracks", async(event, trackIds: TrackId[]) => {
   await Promise.all(
-    trackIds.map(async trackId => {
+    trackIds.map(async(trackId) => {
       const updated = await FixTags(trackRepository.getTrack(trackId));
       trackRepository.update(updated);
     })
   );
-  event.sender.send('tracks-updated');
+  event.sender.send("tracks-updated");
 });
 
-ipcMain.on('save-artwork', async(_, artTrack) => {
+ipcMain.on("save-artwork", async(_, artTrack) => {
   const newTrack = await UpdateArtwork(artTrack);
   trackRepository.update(newTrack);
-  mainWindow?.webContents.send('tracks-updated');
+  mainWindow?.webContents.send("tracks-updated");
   artsWindow?.close();
   artsWindow?.destroy();
+});
+
+ipcMain.on("log", (_, ...props) => {
+  const [ category, ...params ] = props;
+
+  switch (category){
+  case LogCategory.Info:
+    log.info(...params);
+    break;
+
+  case LogCategory.Error:
+    log.error(params);
+    break;
+
+  case LogCategory.Debug:
+    log.debug(params);
+    break;
+
+  case LogCategory.Warn:
+    log.warn(params);
+    break;
+
+  case LogCategory.Verbose:
+    log.verbose(params);
+    break;
+  }
 });

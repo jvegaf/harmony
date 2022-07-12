@@ -61,3 +61,11 @@ export interface ArtTrack {
 export interface ArtsTrackDTO extends ArtTrack {
   artsUrls: string[];
 }
+
+export const enum LogCategory {
+  Info,
+  Warn,
+  Debug,
+  Error,
+  Verbose
+}
