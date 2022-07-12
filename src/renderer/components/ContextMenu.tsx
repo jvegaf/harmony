@@ -1,24 +1,37 @@
-import { Divider } from '@mantine/core';
-import React from 'react';
+import { Divider } from "@mantine/core";
+import React from "react";
+import useAppState from "../hooks/useAppState";
 
-import { Container } from './ContextMenu.styles';
+import { Container } from "./ContextMenu.styles";
 
 type Props = {
-  record: Track;
+  trackId: TrackId;
   visible: boolean;
   x: number;
   y: number;
 };
 
-export const ContextMenu: React.FC = ({ record, visible, x, y }: Props) => {
+export const ContextMenu: React.FC = ({
+  trackId, visible, x, y 
+}: Props) => {
+  const {
+    updateTrackPlaying, 
+    updateTrackDetail, 
+    onFixTrack 
+  } = useAppState();
+
+  const playOnClickListener   = () => updateTrackPlaying(trackId);
+  const detailOnClickListener = () => updateTrackDetail(trackId);
+  const fixOnClickListener    = () => onFixTrack(trackId);
+
   return (
     <Container>
       {visible && (
         <ul className="popup" style={{ left: `${x}px`, top: `${y}px` }}>
-          <li>Play</li>
-          <li>Details</li>
+          <li onClick={playOnClickListener}>Play</li>
+          <li onClick={detailOnClickListener}>Details</li>
           <Divider />
-          <li>Fix Tags</li>
+          <li onClick={fixOnClickListener}>Fix Tags</li>
           <Divider />
           <li>Delete</li>
         </ul>

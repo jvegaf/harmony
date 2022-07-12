@@ -1,81 +1,75 @@
-/* eslint-disable react/jsx-props-no-spreading */
-import { Button, Center, Container, createStyles, Grid, Group, Image, Space, Stack, TextInput } from '@mantine/core';
-import { useForm } from '@mantine/hooks';
-import React from 'react';
-import Placeholder from '../../../assets/placeholder.png';
-import { Track } from '../../shared/types/emusik';
-import useAppState from '../hooks/useAppState';
+import {
+  Button,
+  Center,
+  Container,
+  Grid,
+  Group,
+  Image,
+  Space,
+  Stack,
+  TextInput
+} from "@mantine/core";
+import { useForm } from "@mantine/hooks";
+import React from "react";
+import Placeholder from "../../../assets/placeholder.png";
+import type { Track } from "../../shared/types/emusik";
+import useAppState from "../hooks/useAppState";
 
 interface TrackDetailProps {
   track: Track;
 }
 
-const useStyles = createStyles(theme => ({
-  detail: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-  },
-  actionButton: {
-    marginRight: 30,
-    paddingLeft: 20,
-    paddingRight: 20,
-  },
-}));
-
-const TrackDetail: React.FC<TrackDetailProps> = props => {
-  const { track } = props;
+const TrackDetail: React.FC<TrackDetailProps> = (props) => {
+  const { track }                    = props;
   const { closeDetail, saveChanges } = useAppState();
   const form = useForm({
     initialValues: {
-      title: track.title,
-      artist: track.artist,
-      album: track.album,
-      genre: track.genre,
-      bpm: track.bpm,
-      key: track.key,
-      year: track.year,
-      artwork: track.artwork,
-    },
+      title:   track.title,
+      artist:  track.artist,
+      album:   track.album,
+      genre:   track.genre,
+      bpm:     track.bpm,
+      key:     track.key,
+      year:    track.year,
+      artwork: track.artwork
+    }
   });
-  const [srcData, setSrcData] = React.useState(Placeholder);
+  const [ srcData, setSrcData ] = React.useState(Placeholder);
 
   React.useEffect(() => {
     const { artwork } = track;
 
-    if (artwork) {
-      const blob = new Blob([artwork.data], {
-        type: artwork.mime,
-      });
+    if(artwork){
+      const blob = new Blob([ artwork.data ], { type: artwork.mime });
 
       const src = URL.createObjectURL(blob);
       setSrcData(src);
     }
 
     return () => setSrcData(Placeholder);
-  }, [track]);
+  }, [ track ]);
 
-  const onCancel = React.useCallback(() => closeDetail(), [closeDetail]);
+  const onCancel = React.useCallback(() => closeDetail(), [ closeDetail ]);
 
   const onSave = React.useCallback(
-    values => {
+    (values) => {
       saveChanges({ ...track, ...values });
       closeDetail();
     },
-    [closeDetail, saveChanges, track]
+    [ closeDetail, saveChanges, track ]
   );
 
   return (
     <Container size="sm" style={{ marginTop: 50 }}>
-      <form onSubmit={form.onSubmit(values => onSave(values))}>
+      <form onSubmit={form.onSubmit((values) => onSave(values))}>
         <Stack spacing="xl">
-          <TextInput size="md" label="Title" {...form.getInputProps('title')} />
-          <TextInput size="md" label="Artist" {...form.getInputProps('artist')} />
-          <TextInput size="md" label="Album" {...form.getInputProps('album')} />
+          <TextInput size="md" label="Title" {...form.getInputProps("title")} />
+          <TextInput
+            size="md"
+            label="Artist"
+            {...form.getInputProps("artist")}
+          />
+          <TextInput size="md" label="Album" {...form.getInputProps("album")} />
           <Grid columns={24} gutter="lg">
             <Grid.Col span={12}>
               <Center>
@@ -83,16 +77,32 @@ const TrackDetail: React.FC<TrackDetailProps> = props => {
               </Center>
             </Grid.Col>
             <Grid.Col span={12}>
-              <TextInput size="md" label="Genre" {...form.getInputProps('genre')} />
+              <TextInput
+                size="md"
+                label="Genre"
+                {...form.getInputProps("genre")}
+              />
               <Space h="md" />
               <Group grow>
                 <TextInput value={track.time} size="md" label="Time" readOnly />
-                <TextInput size="md" label="BPM" {...form.getInputProps('bpm')} />
+                <TextInput
+                  size="md"
+                  label="BPM"
+                  {...form.getInputProps("bpm")}
+                />
               </Group>
               <Space h="md" />
               <Group grow>
-                <TextInput size="md" label="Year" {...form.getInputProps('year')} />
-                <TextInput size="md" label="Key" {...form.getInputProps('key')} />
+                <TextInput
+                  size="md"
+                  label="Year"
+                  {...form.getInputProps("year")}
+                />
+                <TextInput
+                  size="md"
+                  label="Key"
+                  {...form.getInputProps("key")}
+                />
               </Group>
             </Grid.Col>
           </Grid>
@@ -103,7 +113,13 @@ const TrackDetail: React.FC<TrackDetailProps> = props => {
               </Button>
             </div>
             <div style={{ width: 120 }}>
-              <Button size="md" fullWidth type="submit" color="blue" variant="filled">
+              <Button
+                size="md"
+                fullWidth
+                type="submit"
+                color="blue"
+                variant="filled"
+              >
                 Save
               </Button>
             </div>

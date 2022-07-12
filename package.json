@@ -16,21 +16,12 @@
     "test": "jest",
     "test:clean": "jest --clearCache",
     "prepare": "husky install",
-    "stylelint": "prettier --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
-    "format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
+    "stylelint": "prettier-eslint --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
+    "format": "prettier-eslint --write \"src/**/*.[ts,tsx,js,jsx]\""
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "cross-env NODE_ENV=development eslint --cache"
-    ],
-    "*.json,.{eslintrc,prettierrc}": [
-      "prettier --ignore-path .eslintignore --parser json --write"
-    ],
-    "*.{css,scss}": [
-      "prettier --ignore-path .eslintignore --single-quote --write"
-    ],
-    "*.{html,md,yml}": [
-      "prettier --ignore-path .eslintignore --single-quote --write"
     ]
   },
   "build": {
@@ -123,6 +114,8 @@
   ],
   "homepage": "^https://github.com/jvegaf/emusik#readme",
   "devDependencies": {
+    "@0x706b/eslint-plugin-align-assignments": "^0.1.2",
+    "@meoc/eslint-config-format": "^0.1.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.4",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
     "@testing-library/jest-dom": "^5.16.1",
@@ -154,14 +147,12 @@
     "eslint": "^8.5.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-erb": "^4.0.3",
-    "eslint-config-prettier": "^8.5.0",
     "eslint-import-resolver-typescript": "^2.5.0",
     "eslint-import-resolver-webpack": "^0.13.2",
     "eslint-plugin-compat": "^4.0.0",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-jest": "^25.3.2",
     "eslint-plugin-jsx-a11y": "^6.5.1",
-    "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
@@ -173,7 +164,8 @@
     "lint-staged": "^12.1.4",
     "mini-css-extract-plugin": "^2.4.5",
     "opencollective-postinstall": "^2.0.3",
-    "prettier": "^2.6.2",
+    "prettier-eslint": "^15.0.1",
+    "prettier-eslint-cli": "^6.0.1",
     "react-refresh": "^0.11.0",
     "react-refresh-typescript": "^2.0.3",
     "react-test-renderer": "^17.0.2",
@@ -212,7 +204,6 @@
     "react-dom": "^17.0.2",
     "react-router-dom": "^6.2.2",
     "react-table": "^7.8.0",
-    "react-use-audio-player": "^1.2.5",
     "react-window": "^1.8.7",
     "recursive-readdir": "^2.2.2",
     "styled-components": "^5.3.5",

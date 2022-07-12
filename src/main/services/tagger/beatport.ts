@@ -3,8 +3,8 @@ import { handleResponse, handleError } from '../response';
 import BeatportToken from './BeaportToken';
 import { BuildBeatportQuery } from './querybuilder';
 import GetTagResults from './bpTagMapper';
-import { ResultTag } from '../../types/emusik';
-import log from 'electron-log';
+import { ResultTag } from '../../../shared/types/emusik';
+import { log } from '../log/log';
 
 const URI_BASE = 'https://api.beatport.com/v4/catalog/search/?q=';
 
@@ -28,7 +28,7 @@ const getToken = async () => {
   return bpToken;
 };
 
-const SearchTags = async (
+export const SearchTags = async (
   title: string,
   // duration: number,
   artist: string | null = null
@@ -52,5 +52,3 @@ const SearchTags = async (
 
   return GetTagResults(data.tracks);
 };
-
-export default SearchTags;

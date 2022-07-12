@@ -1,0 +1,127 @@
+{
+  "root": true,
+  "env": {
+    "es2021": true,
+    "node": true,
+    "browser": false
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint", "@0x706b/align-assignments"],
+  "ignorePatterns": ["node_modules/**", "**/dist/**"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/consistent-type-imports": "error",
+    /**
+     * Having a semicolon helps the optimizer interpret your code correctly.
+     * This avoids rare errors in optimized code.
+     * @see https://twitter.com/alex_kozack/status/1364210394328408066
+     */
+    "semi": ["error", "always"],
+    /**
+     * This will make the history of changes in the hit a little cleaner
+     */
+    "comma-dangle": [
+      "error",
+      {
+        "arrays": "only-multiline",
+        "objects": "only-multiline",
+        "imports": "never",
+        "exports": "never",
+        "functions": "never"
+      }
+    ],
+    /**
+     * Code Style
+     */
+    // Continuous spaces are not allowed
+    // "no-multi-spaces": [
+    //   "error",
+    //   { "exceptions": { "VariableDeclarator": true, "ImportDeclaration" : true } }
+    // ],
+    "no-multi-spaces": "off",
+    // empty 2 grid
+    "indent": ["error", 2],
+    // Object braces space { a:b } => { a:b }
+    "object-curly-spacing": ["error", "always"],
+    // Parentheses remove spaces foo( 'bar' ) => foo('bar');
+    "space-in-parens": ["error", "never"],
+    // There is only one space before and after the semicolon of the object { "foo" : 42 } => { "foo": 42 };
+    "key-spacing": ["error", { "align": "value" }],
+    // Space before and after comma [1, 2, 3 ,4] => [1, 2, 4, 4]
+    "comma-spacing": ["error", { "before": false, "after": true }],
+    // Use spaces in parentheses [ 1,2 ] => [ 1,2 ]
+    "array-bracket-spacing": ["error", "always"],
+    // if else style
+    "brace-style": ["error", "1tbs"],
+    // Function call space fn () => fn()
+    "func-call-spacing": ["error", "never"],
+    // Function left parenthesis space function name () {} => function name(){}
+    "space-before-function-paren": ["error", "never"],
+    // The space of the statement block function name() {} => function name(){}
+    "space-before-blocks": ["error", "never"],
+    // Spaces before and after keywords if () => if()
+    "keyword-spacing": [
+      "error",
+      {
+        "overrides": {
+          "if": { "after": false, "before": false },
+          "else": { "after": false, "before": false }
+        }
+      }
+    ],
+    // Object value cannot have spaces obj . foo => obj.foo
+    "no-whitespace-before-property": "error",
+    // Maximum number of consecutive blank lines
+    "no-multiple-empty-lines": [
+      "error",
+      { "max": 2, "maxEOF": 1, "maxBOF": 0 }
+    ],
+    // Remove blank lines from the code block
+    "padded-blocks": ["error", "never"],
+    // ; Space before and after var foo ; var bar; => var foo;var bar;
+    "semi-spacing": ["error", { "before": false, "after": false }],
+    // Whether the operator is a space a=0 => a = 0
+    "space-infix-ops": "error",
+    // Operator space + -
+    "space-unary-ops": "error",
+    // Arrow function space ()=>{} => () => {}
+    "arrow-spacing": ["error", { "before": true, "after": true }],
+    // Extension operator {... f} => {...f}
+    "rest-spread-spacing": "error",
+    // String splicing uses template strings 'hello' + world => `hello${world}`
+    "prefer-template": "error",
+    // Remove spaces from template string `${ fo }` =>${fo}
+    "template-curly-spacing": ["error", "never"],
+    // Chain call line feed
+    "newline-per-chained-call": ["error", { "ignoreChainWithDepth": 1 }],
+    // Prohibit duplicate module import
+    "no-duplicate-imports": "error",
+    // One note each //a => // a
+    "spaced-comment": ["error", "always"],
+    // Objects multiline
+    "object-curly-newline": [
+      "error",
+      {
+        "ObjectExpression": { "multiline": true, "minProperties": 3 },
+        "ObjectPattern": { "multiline": true, "minProperties": 3 },
+        "ImportDeclaration": { "multiline": true, "minProperties": 3 },
+        "ExportDeclaration": { "multiline": true, "minProperties": 3 }
+      }
+    ],
+    // Align assignments
+    "@0x706b/align-assignments/align-assignments": [
+      2,
+      { "requiresOnly": false }
+    ]
+  }
+}

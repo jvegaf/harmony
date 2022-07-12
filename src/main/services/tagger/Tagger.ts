@@ -3,7 +3,7 @@ import { GetStringTokens } from '../../../shared/utils';
 import { log } from '../log/log';
 import Update from '../track/updater';
 // import SearchYtTags from './youtube';
-import SearchTags from './beatport';
+import { SearchTags } from './beatport';
 // import SearchTrackInfo from './google';
 
 // const SearchTagsYt = (track: Track) => {

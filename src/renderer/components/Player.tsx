@@ -1,97 +1,110 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
-import { createStyles, Text } from '@mantine/core';
-import { useAudioPlayer, useAudioPosition } from 'react-use-audio-player';
-import { Track } from '../../shared/types/emusik';
+import React from "react";
+import ReactWaves from "@dschoon/react-waves";
+import useAppState from "../hooks/useAppState";
+import styled from "styled-components";
 
-const useStyles = createStyles(theme => ({
-  player: {
-    width: 300,
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'strech',
-    justifyContent: 'space-between',
-    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.white,
-  },
-  seekbar: {
-    width: '100%',
-    height: 10,
-    cursor: 'pointer',
-    backgroundColor: 'white',
-    overflow: 'hidden',
-  },
-  tick: {
-    backgroundColor: '#a1d0d1',
-    height: '100%',
-  },
-  title: {
-    paddingTop: 5,
-  },
-}));
+const Styles = styled.div`
+  height: 100px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  .container {
+    width: 70%;
+  }
 
-interface PlayerProps {
-  track: Track;
-}
+  .button {
+    position: absolute;
+    left: -60px;
+    top: 44%;
+    cursor: pointer;
+    font-size: 34px;
+    filter: hue-rotate(0deg);
+  }
 
-const Player: React.FC<PlayerProps> = ({ track }) => {
-  const { classes } = useStyles();
+  .react-waves {
+    display: inline-block;
+    width: 100%;
+    height: 70px;
+    padding: 0;
+    margin: 0;
 
-  const audioPlayer = useAudioPlayer({
-    src: track.filepath,
-    format: 'mp3',
-    autoplay: true,
-  });
-
-  const { duration, seek, percentComplete } = useAudioPosition({
-    highRefreshRate: true,
-  });
-  const [barWidth, setBarWidth] = React.useState('0%');
-
-  const seekBarElem = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    if (!audioPlayer.player) return;
-    if (track.filepath !== audioPlayer.player.src) {
-      audioPlayer.load({
-        src: track.filepath,
-        format: 'mp3',
-        autoplay: true,
-      });
+    .wave {
+      width: 80%;
     }
-  }, [audioPlayer, track.filepath]);
+  }
+`;
+
+const Player = () => {
+  const { trackPlaying }          = useAppState();
+  const [ playing, setPlaying ]   = React.useState(false);
+  const [ position, setPosition ] = React.useState(0);
+
+  const [ trackSrc, setTrackSrc ] = React.useState();
 
   React.useEffect(() => {
-    setBarWidth(`${percentComplete}%`);
-  }, [percentComplete]);
+    if(trackPlaying){
+      const track = window.Main.GetTrack(trackPlaying);
+      setTrackSrc(track.filepath);
+      setPlaying(false);
+    }
+  }, [ trackPlaying ]);
 
-  const goTo = React.useCallback(
-    (event: React.MouseEvent) => {
-      const { pageX: eventOffsetX } = event;
+  const onPosChange = (ws) => {
+    if(ws.pos !== position){
+      setPosition(ws.pos);
+    }
+  };
 
-      if (seekBarElem.current) {
-        const elementOffsetX = seekBarElem.current.offsetLeft;
-        const elementWidth = seekBarElem.current.clientWidth;
-        const percent = (eventOffsetX - elementOffsetX) / elementWidth;
-        seek(percent * duration);
-      }
-    },
-    [duration, seek]
-  );
+  const onSeek = (ws) => {
+    console.log("seek", ws);
+  };
+
+  const onReady = (ws) => {
+    console.log("ready", ws);
+    setPosition(0);
+    setPlaying(true);
+  };
 
   return (
-    <div className={classes.player}>
-      <Text className={classes.title} size="lg" align="center">
-        {track.title}
-      </Text>
-      <Text size="sm" align="center">
-        {track.artist}
-      </Text>
-      <div className={classes.seekbar} ref={seekBarElem} onClick={goTo}>
-        <div style={{ width: barWidth }} className={classes.tick} />
+    <Styles>
+      <div className="container">
+        {trackSrc && (
+          <div
+            className="play button"
+            onClick={() => {
+              setPlaying(!playing);
+            }}
+            style={{ left: "-99px" }}
+          >
+            {!playing ? "▶️" : "⏹"}
+          </div>
+        )}
+        <ReactWaves
+          audioFile={trackSrc}
+          className="react-waves"
+          options={{
+            barHeight:     1,
+            barWidth:      2,
+            cursorWidth:   0,
+            barGap:        0,
+            height:        80,
+            hideScrollbar: true,
+            progressColor: "#EC407A",
+            responsive:    true,
+            waveColor:     "#D1D6DA"
+          }}
+          volume={1}
+          zoom={1}
+          playing={playing}
+          pos={position}
+          onPosChange={onPosChange}
+          onSeek={onSeek}
+          onReady={onReady}
+        />
       </div>
-    </div>
+    </Styles>
   );
 };
 
