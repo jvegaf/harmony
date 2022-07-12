@@ -1,11 +1,9 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import { createStyles } from '@mantine/core';
 import React from 'react';
 
-const useStyles = createStyles(theme => ({
+const useStyles = createStyles(() => ({
   btnstyle: {
-    width: 60,
+    width:  60,
     height: 60,
   },
 }));
@@ -17,7 +15,9 @@ interface PlayButtonProps {
 }
 
 const PauseButton: React.FC<PlayButtonProps> = props => {
-  const { color, size, action } = props;
+  const {
+    color, size, action 
+  } = props;
   const classes = useStyles();
   return (
     <div className={classes.btnstyle} onClick={action}>

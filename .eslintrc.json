@@ -105,7 +105,7 @@
     // Chain call line feed
     "newline-per-chained-call": ["error", { "ignoreChainWithDepth": 1 }],
     // Prohibit duplicate module import
-    "no-duplicate-imports": "error",
+    "no-duplicate-imports": "off",
     // One note each //a => // a
     "spaced-comment": ["error", "always"],
     // Objects multiline

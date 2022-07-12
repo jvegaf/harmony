@@ -1,4 +1,4 @@
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 import { log } from './log/log';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

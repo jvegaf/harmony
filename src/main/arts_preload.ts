@@ -18,7 +18,7 @@ const artApi = {
    * Provide an easier way to listen to events
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  on: (channel: string, callback: (data: any) => void) => {
+  on:          (channel: string, callback: (data: any) => void) => {
     ipcRenderer.on(channel, (_, data) => callback(data));
   },
 };

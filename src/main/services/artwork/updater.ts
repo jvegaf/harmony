@@ -1,9 +1,9 @@
 import { log } from '../log/log';
-import { ArtTrack, Track } from '../../../shared/types/emusik';
+import type { ArtTrack, Track } from '../../../shared/types/emusik';
 import PersistTrack from '../tag/nodeId3Saver';
 import FetchArtwork from './fetcher';
 
-const UpdateArtwork = async (artTrack: ArtTrack): Promise<Track> => {
+const UpdateArtwork = async(artTrack: ArtTrack): Promise<Track> => {
   const { reqTrack, selectedArtUrl } = artTrack;
   const art = await FetchArtwork(selectedArtUrl as string);
 
@@ -14,7 +14,7 @@ const UpdateArtwork = async (artTrack: ArtTrack): Promise<Track> => {
 
   try {
     await PersistTrack(newTrack);
-  } catch (error) {
+  } catch (error){
     log.error(error);
   }
 

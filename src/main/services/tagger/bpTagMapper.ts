@@ -1,4 +1,4 @@
-import { ResultTag } from '../../../shared/types/emusik';
+import type { ResultTag } from '../../../shared/types/emusik';
 import { GetStringTokens } from '../../../shared/utils';
 
 interface Result {
@@ -19,24 +19,24 @@ const CreateTagResult = (result: Result): ResultTag => {
 
   const tagTrackArtists: string[] = result.artists.map((artist): string => artist.name);
 
-  const tagValues = [...tagTrackArtists, result.name];
-  if (result.mix_name) {
+  const tagValues = [ ...tagTrackArtists, result.name ];
+  if(result.mix_name){
     tagValues.push(result.mix_name);
   }
   const tagTokens = GetStringTokens(tagValues);
 
   return {
-    id: result.id,
-    title: tagTrackTitle,
-    key: `${result.key.camelot_number}${result.key.camelot_letter}`,
-    artist: tagTrackArtists.join(', '),
-    album: result.release.name,
-    year: result.publish_date.substring(0, 4),
-    genre: result.genre.name,
-    bpm: result.bpm,
-    duration: Number((result.length_ms / 1000).toFixed(0)),
+    id:         result.id,
+    title:      tagTrackTitle,
+    key:        `${result.key.camelot_number}${result.key.camelot_letter}`,
+    artist:     tagTrackArtists.join(', '),
+    album:      result.release.name,
+    year:       result.publish_date.substring(0, 4),
+    genre:      result.genre.name,
+    bpm:        result.bpm,
+    duration:   Number((result.length_ms / 1000).toFixed(0)),
     artworkUrl: result.release.image.uri,
-    tokens: tagTokens,
+    tokens:     tagTokens,
   } as ResultTag;
 };
 

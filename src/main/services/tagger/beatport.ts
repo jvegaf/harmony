@@ -3,23 +3,21 @@ import { handleResponse, handleError } from '../response';
 import BeatportToken from './BeaportToken';
 import { BuildBeatportQuery } from './querybuilder';
 import GetTagResults from './bpTagMapper';
-import { ResultTag } from '../../../shared/types/emusik';
+import type { ResultTag } from '../../../shared/types/emusik';
 import { log } from '../log/log';
 
 const URI_BASE = 'https://api.beatport.com/v4/catalog/search/?q=';
 
 let bpToken: BeatportToken | null = null;
 
-const getToken = async () => {
-  if (bpToken !== null && bpToken.IsValid()) return bpToken;
+const getToken = async() => {
+  if(bpToken !== null && bpToken.IsValid()) return bpToken;
 
-  const config = {
-    headers: {
-      Accept: 'application/json',
-    },
-  };
+  const config = { headers: { Accept: 'application/json' } };
 
-  const response = await axios.get('https://embed.beatport.com/token', config).then(handleResponse).catch(handleError);
+  const response = await axios.get('https://embed.beatport.com/token', config)
+    .then(handleResponse)
+    .catch(handleError);
 
   const { data } = response;
 
@@ -28,7 +26,7 @@ const getToken = async () => {
   return bpToken;
 };
 
-export const SearchTags = async (
+export const SearchTags = async(
   title: string,
   // duration: number,
   artist: string | null = null
@@ -43,12 +41,14 @@ export const SearchTags = async (
 
   const config = {
     headers: {
-      Accept: 'application/json',
+      Accept:        'application/json',
       Authorization: `Bearer ${token.Value()}`,
     },
   };
 
-  const { data } = await axios.get(uri, config).then(handleResponse).catch(handleError);
+  const { data } = await axios.get(uri, config)
+    .then(handleResponse)
+    .catch(handleError);
 
   return GetTagResults(data.tracks);
 };

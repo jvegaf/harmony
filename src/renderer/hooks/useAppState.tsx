@@ -1,16 +1,18 @@
 import React from 'react';
-import { Track, TrackId } from '../../shared/types/emusik';
+import type { Track, TrackId } from '../../shared/types/emusik';
 import AppContext from '../context/AppContext';
 
-export default function useAppState() {
-  const { trackPlaying, setTrackPlaying, trackDetail, setTrackDetail, tracksLoaded, setTracksLoaded } =
+export default function useAppState(){
+  const {
+    trackPlaying, setTrackPlaying, trackDetail, setTrackDetail, tracksLoaded, setTracksLoaded 
+  } =
     React.useContext(AppContext);
 
   const onOpenFolder = React.useCallback(() => window.Main.OpenFolder(), []);
 
   const onFixTracks = React.useCallback((selected: TrackId[]) => window.Main.FixTracks(selected), []);
 
-  const closeDetail = React.useCallback(() => setTrackDetail(null), [setTrackDetail]);
+  const closeDetail = React.useCallback(() => setTrackDetail(null), [ setTrackDetail ]);
 
   const saveChanges = React.useCallback((track: Track) => window.Main.PersistTrack(track), []);
 
