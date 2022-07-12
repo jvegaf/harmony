@@ -8,20 +8,19 @@ import {
   Space,
   Stack,
   TextInput
-} from "@mantine/core";
-import { useForm } from "@mantine/hooks";
-import React from "react";
-import Placeholder from "../../../assets/placeholder.png";
-import type { Track } from "../../shared/types/emusik";
-import useAppState from "../hooks/useAppState";
-
+} from '@mantine/core';
+import { useForm } from '@mantine/hooks';
+import React from 'react';
+import Placeholder from '../../../assets/placeholder.png';
+import type { Track } from '../../shared/types/emusik';
+import useAppState from '../hooks/useAppState';
+import styles from './TrackDetail.module.css';
 interface TrackDetailProps {
   track: Track;
 }
 
-const TrackDetail: React.FC<TrackDetailProps> = (props) => {
-  const { track }                    = props;
-  const { closeDetail, saveChanges } = useAppState();
+const TrackDetail: React.FC<TrackDetailProps> = ({ track }) => {
+  const { closeDetail, saveChanges, onFindArtwork } = useAppState();
   const form = useForm({
     initialValues: {
       title:   track.title,
@@ -39,8 +38,8 @@ const TrackDetail: React.FC<TrackDetailProps> = (props) => {
   React.useEffect(() => {
     const { artwork } = track;
 
-    if(artwork){
-      const blob = new Blob([ artwork.data ], { type: artwork.mime });
+    if (artwork){
+      const blob = new Blob([ artwork.imageBuffer ], { type: artwork.mime });
 
       const src = URL.createObjectURL(blob);
       setSrcData(src);
@@ -59,28 +58,35 @@ const TrackDetail: React.FC<TrackDetailProps> = (props) => {
     [ closeDetail, saveChanges, track ]
   );
 
+  const onFindArtworkListener = () => onFindArtwork(track);
+
   return (
     <Container size="sm" style={{ marginTop: 50 }}>
       <form onSubmit={form.onSubmit((values) => onSave(values))}>
         <Stack spacing="xl">
-          <TextInput size="md" label="Title" {...form.getInputProps("title")} />
+          <TextInput size="md" label="Title" {...form.getInputProps('title')} />
           <TextInput
             size="md"
             label="Artist"
-            {...form.getInputProps("artist")}
+            {...form.getInputProps('artist')}
           />
-          <TextInput size="md" label="Album" {...form.getInputProps("album")} />
+          <TextInput size="md" label="Album" {...form.getInputProps('album')} />
           <Grid columns={24} gutter="lg">
             <Grid.Col span={12}>
               <Center>
-                <Image src={srcData} radius="md" width={250} height={250} />
+                <div
+                  onClick={onFindArtworkListener}
+                  className={styles.imageview}
+                >
+                  <Image src={srcData} radius="md" width={250} height={250} />
+                </div>
               </Center>
             </Grid.Col>
             <Grid.Col span={12}>
               <TextInput
                 size="md"
                 label="Genre"
-                {...form.getInputProps("genre")}
+                {...form.getInputProps('genre')}
               />
               <Space h="md" />
               <Group grow>
@@ -88,7 +94,7 @@ const TrackDetail: React.FC<TrackDetailProps> = (props) => {
                 <TextInput
                   size="md"
                   label="BPM"
-                  {...form.getInputProps("bpm")}
+                  {...form.getInputProps('bpm')}
                 />
               </Group>
               <Space h="md" />
@@ -96,12 +102,12 @@ const TrackDetail: React.FC<TrackDetailProps> = (props) => {
                 <TextInput
                   size="md"
                   label="Year"
-                  {...form.getInputProps("year")}
+                  {...form.getInputProps('year')}
                 />
                 <TextInput
                   size="md"
                   label="Key"
-                  {...form.getInputProps("key")}
+                  {...form.getInputProps('key')}
                 />
               </Group>
             </Grid.Col>

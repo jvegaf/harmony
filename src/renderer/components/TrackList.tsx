@@ -1,16 +1,16 @@
-import { useViewportSize } from "@mantine/hooks";
-import React from "react";
+import { useViewportSize } from '@mantine/hooks';
+import React from 'react';
 import {
   useFlexLayout,
   useResizeColumns,
   useRowSelect,
   useTable
-} from "react-table";
-import type { Track, TrackId } from "shared/types/emusik";
-import useAppState from "../hooks/useAppState";
-import Columns from "./columns";
-import { ContextMenu } from "./ContextMenu";
-import { Container } from "./TrackList.styles";
+} from 'react-table';
+import type { Track, TrackId } from 'shared/types/emusik';
+import useAppState from '../hooks/useAppState';
+import Columns from './columns';
+import { ContextMenu } from './ContextMenu';
+import { Container } from './TrackList.styles';
 
 interface TrackListProps {
   height: number;
@@ -25,13 +25,13 @@ const headerProps = (props, { column }) => getStyles(props, column.align);
 
 const cellProps = (props, { cell }) => getStyles(props, cell.column.align);
 
-const getStyles = (props, align = "left") => [
+const getStyles = (props, align = 'left') => [
   props,
   {
     style: {
-      justifyContent: align === "right" ? "flex-end" : "flex-start",
-      alignItems:     "flex-start",
-      display:        "flex"
+      justifyContent: align === 'right' ? 'flex-end' : 'flex-start',
+      alignItems:     'flex-start',
+      display:        'flex'
     }
   }
 ];
@@ -44,7 +44,7 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
     updateTrackDetail,
     columns
   } = props;
-  const [ selected, setSelected ]     = React.useState("");
+  const [ selected, setSelected ]     = React.useState('');
   const [ popupProps, setPopupProps ] = React.useState({
     visible: false,
     x:       0,
@@ -61,9 +61,7 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
     []
   );
 
-  const {
-    getTableProps, headerGroups, rows, prepareRow 
-  } = useTable(
+  const { getTableProps, headerGroups, rows, prepareRow } = useTable(
     {
       columns,
       data,
@@ -79,7 +77,7 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
     row
   ): void => {
     e.preventDefault();
-    if(!row) return;
+    if (!row) return;
     const trackId = row.original.id;
 
     updateTrackDetail(trackId);
@@ -90,10 +88,10 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
     row
   ): void => {
     e.preventDefault();
-    if(!row) return;
+    if (!row) return;
     const trackId = row.original.id;
     setSelected(trackId);
-    console.log("selected", selected);
+    console.log('selected', selected);
   };
 
   const onRightClick = (
@@ -101,10 +99,10 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
     row
   ): void => {
     e.preventDefault();
-    if(!row) return;
+    if (!row) return;
     const trackId = row.original.id;
 
-    if(!popupProps.visible){
+    if (!popupProps.visible){
       document.addEventListener(`click`, function onClickOutside(){
         setPopupProps({ ...popupProps, visible: false });
         document.removeEventListener(`click`, onClickOutside);
@@ -127,13 +125,13 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
               <div {...headerGroup.getHeaderGroupProps()} className="tr">
                 {headerGroup.headers.map((column) => (
                   <div {...column.getHeaderProps(headerProps)} className="th">
-                    {column.render("Header")}
+                    {column.render('Header')}
                     {/* Use column.getResizerProps to hook up the events correctly */}
                     {column.canResize && (
                       <div
                         {...column.getResizerProps()}
                         className={`resizer ${
-                          column.isResizing ? "isResizing" : ""
+                          column.isResizing ? 'isResizing' : ''
                         }`}
                       />
                     )}
@@ -152,13 +150,13 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
                   onClick={(e) => onClick(e, row)}
                   onDoubleClick={(e) => onDblClick(e, row)}
                   className={`tr 
-              ${row.original.id === selected ? "isSelected" : ""} 
-              ${row.original.id === trackPlaying ? "isPlaying" : ""}`}
+              ${row.original.id === selected ? 'isSelected' : ''} 
+              ${row.original.id === trackPlaying ? 'isPlaying' : ''}`}
                 >
                   {row.cells.map((cell) => {
                     return (
                       <div {...cell.getCellProps(cellProps)} className="td">
-                        {cell.render("Cell")}
+                        {cell.render('Cell')}
                       </div>
                     );
                   })}
@@ -175,22 +173,20 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
 };
 
 export const TrackList: React.FC = () => {
-  const {
-    tracksLoaded, trackPlaying, updateTrackPlaying, updateTrackDetail 
-  } =
+  const { tracksLoaded, trackPlaying, updateTrackPlaying, updateTrackDetail } =
     useAppState();
   const { height }            = useViewportSize();
   const [ tracks, setTracks ] = React.useState([]);
   const columns               = Columns();
 
   React.useEffect(() => {
-    if(window.Main){
-      window.Main.on("all-tracks", (updatedTracks) => setTracks(updatedTracks));
+    if (window.Main){
+      window.Main.on('all-tracks', (updatedTracks) => setTracks(updatedTracks));
     }
   }, []);
 
   React.useEffect(() => {
-    if(tracksLoaded){
+    if (tracksLoaded){
       window.Main.GetAll();
     }
   }, [ tracksLoaded ]);

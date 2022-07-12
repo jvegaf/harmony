@@ -1,16 +1,21 @@
-import { image } from 'googlethis';
+import gis from 'async-g-i-s';
+import { log } from '../log/log';
 import { BuildGoogleArtworkQuery } from './querybuilder';
 
-const FindArtwork = async(title: string, artist?: string): Promise<string[]> => {
+const FindArtwork = async(track: Track): Promise<string[]> => {
+  const { title, artist } = track;
+  let result;
   const query = BuildGoogleArtworkQuery(title, artist);
+  try {
+    const images = await gis(query);
+    result       = images.filter((i) => i.height === i.width);
+  } catch (error){
+    log.error('error finding artwork', error);
+  }
 
-  const images = await image(query, { safe: false });
-
-  const result = images.filter(i => i.height === i.width);
-
-  // if (result.length) log.info('result', result);
-  if(!result.length) return [];
-  const res = result.map(r => r.url);
+  // if (result.length) log.info('result', result); &tbs=isz:m,iar:s,ift:jpg
+  if (!result.length) return [];
+  const res = result.map((r) => r.url);
   return res;
 };
 
