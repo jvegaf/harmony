@@ -3,10 +3,19 @@
 	"tasks": [
 		{
 			"type": "npm",
-			"script": "dev",
+			"script": "start",
+			"problemMatcher": [
+				"$eslint-compact"
+			],
+			"label": "npm: start",
+			"detail": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer"
+		},
+		{
+			"type": "npm",
+			"script": "lint:fix",
 			"problemMatcher": [],
-			"label": "npm: dev",
-			"detail": "concurrently \"yarn dev:vite\" \" yarn dev:electron\""
+			"label": "npm: lint:fix",
+			"detail": "cross-env NODE_ENV=development eslint . --fix --ext .js,.jsx,.ts,.tsx"
 		}
 	]
 }

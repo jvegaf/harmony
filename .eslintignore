@@ -1,7 +1,6 @@
 # Logs
 logs
 *.log
-./log
 
 # Runtime data
 pids
@@ -29,5 +28,8 @@ npm-debug.log.*
 *.sass.d.ts
 *.scss.d.ts
 
-.tmp
-/.vscode
+# eslint ignores hidden directories by default:
+# https://github.com/eslint/eslint/issues/8429
+# !.erb
+
+docs/

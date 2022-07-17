@@ -1,22 +1,26 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "types": ["vite/client", "node"],
-    "allowJs": false,
-    "skipLibCheck": false,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
+    "target": "es2021",
+    "module": "commonjs",
+    "lib": ["dom", "esnext"],
+    "declaration": true,
+    "declarationMap": true,
+    "jsx": "react-jsx",
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "noImplicitAny": true,
+    "pretty": true,
+    "sourceMap": true,
+    "baseUrl": "./src",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noImplicitAny": false,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react"
+    "allowJs": true,
+    "outDir": "release/app/dist"
   },
-  "exclude": ["node_modules"],
-  "include": ["**/*.ts", "**/*.tsx", "**/*.js"]
+  "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
 }
