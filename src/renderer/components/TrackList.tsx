@@ -11,13 +11,14 @@ import useAppState from '../hooks/useAppState';
 import Columns from './columns';
 import { ContextMenu } from './ContextMenu';
 import { Container } from './TrackList.styles';
+import usePlayer from './../hooks/usePlayer';
 
 interface TrackListProps {
   height: number;
   tracks: Track[];
   columns: [];
-  trackPlaying: TrackId;
-  updateTrackPlaying: (id: TrackId) => void;
+  playingId: TrackId;
+  playTrack: (id: TrackId) => void;
   updateTrackDetail: (id: TrackId) => void;
 }
 
@@ -40,8 +41,8 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
   const {
     height,
     tracks: data,
-    trackPlaying,
-    updateTrackDetail,
+    playingId,
+    playTrack,
     columns
   } = props;
   const [ selected, setSelected ]     = React.useState('');
@@ -78,9 +79,9 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
   ): void => {
     e.preventDefault();
     if (!row) return;
-    const trackId = row.original.id;
+    const track = row.original;
 
-    updateTrackDetail(trackId);
+    playTrack(track);
   };
 
   const onClick = (
@@ -100,7 +101,7 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
   ): void => {
     e.preventDefault();
     if (!row) return;
-    const trackId = row.original.id;
+    const track = row.original;
 
     if (!popupProps.visible){
       document.addEventListener(`click`, function onClickOutside(){
@@ -109,7 +110,7 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
       });
     }
     setPopupProps({
-      trackId,
+      track,
       visible: true,
       x:       e.clientX,
       y:       e.clientY
@@ -140,7 +141,7 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
               </div>
             ))}
           </div>
-          <div className="tbody" style={{ height: height - 120 }}>
+          <div className="tbody" style={{ height: height - 100 }}>
             {rows.map((row) => {
               prepareRow(row);
               return (
@@ -151,7 +152,7 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
                   onDoubleClick={(e) => onDblClick(e, row)}
                   className={`tr 
               ${row.original.id === selected ? 'isSelected' : ''} 
-              ${row.original.id === trackPlaying ? 'isPlaying' : ''}`}
+              ${row.original.id === playingId ? 'isPlaying' : ''}`}
                 >
                   {row.cells.map((cell) => {
                     return (
@@ -173,11 +174,12 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
 };
 
 export const TrackList: React.FC = () => {
-  const { tracksLoaded, trackPlaying, updateTrackPlaying, updateTrackDetail } =
+  const { tracksLoaded, updateTrackDetail } =
     useAppState();
-  const { height }            = useViewportSize();
-  const [ tracks, setTracks ] = React.useState([]);
-  const columns               = Columns();
+  const { playingId, playTrack } = usePlayer();
+  const { height }               = useViewportSize();
+  const [ tracks, setTracks ]    = React.useState([]);
+  const columns                  = Columns();
 
   React.useEffect(() => {
     if (window.Main){
@@ -195,8 +197,8 @@ export const TrackList: React.FC = () => {
     height,
     tracks,
     columns,
-    trackPlaying,
-    updateTrackPlaying,
+    playingId,
+    playTrack,
     updateTrackDetail
   };
 

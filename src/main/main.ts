@@ -87,6 +87,8 @@ const createMainWindow = async() => {
     }
   });
 
+  mainWindow.menuBarVisible = false;
+
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {

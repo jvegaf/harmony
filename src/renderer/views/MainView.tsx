@@ -5,6 +5,7 @@ import AppHeader from '../components/AppHeader';
 import OnBoarding from '../components/OnBoarding';
 import TrackDetail from '../components/TrackDetail';
 import { TrackList } from '../components/TrackList';
+import { PlayerContextProvider } from '../context/PlayerContext';
 import useLog from './../hooks/useLog';
 
 const useStyles = createStyles((theme) => ({
@@ -16,7 +17,7 @@ const useStyles = createStyles((theme) => ({
     backgroundColor:
       theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white
   },
-  header:  { height: 100 },
+  header:  { height: 70 },
   content: { flexGrow: 1 }
 }));
 
@@ -47,12 +48,14 @@ const MainView = () => {
   }, [ trackDetail ]);
 
   return (
-    <div className={classes.main}>
-      <div className={classes.header}>
-        <AppHeader />
+    <PlayerContextProvider>
+      <div className={classes.main}>
+        <div className={classes.header}>
+          <AppHeader />
+        </div>
+        <div className={classes.content}>{content}</div>
       </div>
-      <div className={classes.content}>{content}</div>
-    </div>
+    </PlayerContextProvider>
   );
 };
 
