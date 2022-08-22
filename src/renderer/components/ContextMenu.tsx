@@ -1,7 +1,6 @@
 import { Divider } from '@mantine/core';
 import React from 'react';
 import useAppState from '../hooks/useAppState';
-import usePlayer from '../hooks/usePlayer';
 
 import { Container } from './ContextMenu.styles';
 
@@ -13,11 +12,10 @@ type Props = {
 };
 
 export const ContextMenu: React.FC = ({ track, visible, x, y }: Props) => {
-  const { playTrack } = usePlayer();
-  
   const {
     updateTrackDetail, 
-    onFixTrack 
+    onFixTrack,
+    playTrack 
   } = useAppState();
 
   const playOnClickListener   = () => playTrack(track);

@@ -17,10 +17,11 @@ import useAppState from '../hooks/useAppState';
 import styles from './TrackDetail.module.css';
 interface TrackDetailProps {
   track: Track;
+  close: () => void;
 }
 
-const TrackDetail: React.FC<TrackDetailProps> = ({ track }) => {
-  const { closeDetail, saveChanges, onFindArtwork } = useAppState();
+const TrackDetail: React.FC<TrackDetailProps> = ({ track, close }) => {
+  const { saveChanges, onFindArtwork } = useAppState();
   const form = useForm({
     initialValues: {
       title:   track.title,
@@ -48,14 +49,14 @@ const TrackDetail: React.FC<TrackDetailProps> = ({ track }) => {
     return () => setSrcData(Placeholder);
   }, [ track ]);
 
-  const onCancel = React.useCallback(() => closeDetail(), [ closeDetail ]);
+  const onCancel = React.useCallback(() => close(), [ close ]);
 
   const onSave = React.useCallback(
     (values) => {
       saveChanges({ ...track, ...values });
-      closeDetail();
+      close();
     },
-    [ closeDetail, saveChanges, track ]
+    [ close, saveChanges, track ]
   );
 
   const onFindArtworkListener = () => onFindArtwork(track);

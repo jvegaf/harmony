@@ -1,85 +1,117 @@
-import ReactWaves from '@dschoon/react-waves';
+import { createStyles, Image, Text } from '@mantine/core';
 import React from 'react';
-import styled from 'styled-components';
-import usePlayer from '../hooks/usePlayer';
+import { useAudioPlayer, useAudioPosition } from 'react-use-audio-player';
+import Placeholder from '../../../assets/placeholder.png';
+import useAppState from './../hooks/useAppState';
 
-const Styles = styled.div`
-  height: 70px;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  .container {
-    width: 70%;
-  }
+const useStyles = createStyles((theme) => ({
 
-  .react-waves {
-    display: inline-block;
-    width: 100%;
-    height: 50px;
-    padding: 0;
-    margin: 0;
+  playerContainer: {
+    height:          70,
+    width:           370,
+    display:         'flex',
+    backgroundColor: theme.colors.dark[4],
+  },
 
-    .wave {
-      width: 100%;
-    }
-  }
-`;
+  artwork: {
+    height: 70,
+    width:  70,
+  },
 
-const Player = () => {
-  const { trackPlaying, isPlaying, setIsPlaying } = usePlayer();
-  
-  const [ position, setPosition ] = React.useState(0);
+  player: {
+    display:        'flex',
+    height:         '100%',
+    width:          300,
+    flexDirection:  'column',
+    alignItems:     'center',
+    justifyContent: 'center',
+  },
+  seekbar: {
+    width:           '100%',
+    height:          10,
+    cursor:          'pointer',
+    backgroundColor: '#989da8',
+    overflow:        'hidden',
+  },
+  tick: {
+    backgroundColor: '#6e7179',
+    height:          '100%',
+  },
+  title: { paddingTop: 5 },
+}));
 
-  const [ trackSrc, setTrackSrc ] = React.useState();
+
+const Player: React.FC<PlayerProps> = () => {
+  const { trackPlaying }      = useAppState();
+  const [ artSrc, setArtSrc ] = React.useState(Placeholder);
+  const { classes }           = useStyles();
+  const player                = useAudioPlayer();
+
+  const { duration, seek, percentComplete } = useAudioPosition({ highRefreshRate: true });
+  const [ barWidth, setBarWidth ]           = React.useState('0%');
+
+  const seekBarElem = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (trackPlaying){
-      setTrackSrc(trackPlaying.filepath);
-      setIsPlaying(false);
+      player.load({
+        src:      trackPlaying.filepath,
+        html5:    true,
+        format:   'mp3',
+        autoplay: true,
+      });
     }
-  }, [ trackPlaying, setIsPlaying ]);
+  }, [ trackPlaying ]);
 
-  const onPosChange = (ws) => {
-    if (ws.pos !== position){
-      setPosition(ws.pos);
+  React.useEffect(() => {
+    if (trackPlaying?.artwork){
+      const blob = new Blob([ trackPlaying.artwork.imageBuffer ], { type: trackPlaying.artwork.mime });
+
+      const src = URL.createObjectURL(blob);
+      setArtSrc(src);
     }
-  };
+  
+    return () => setArtSrc(Placeholder);
+  }, [ trackPlaying ]);
+  
 
-  const onReady = () => {
-    setPosition(0);
-    setIsPlaying(true);
-  };
+  React.useEffect(() => {
+    setBarWidth(`${percentComplete}%`);
+  }, [ percentComplete ]);
+
+  const goTo = React.useCallback(
+    (event: React.MouseEvent) => {
+      const { pageX: eventOffsetX } = event;
+
+      if (seekBarElem.current){
+        const elementOffsetX = seekBarElem.current.offsetLeft;
+        const elementWidth   = seekBarElem.current.clientWidth;
+        const percent        = (eventOffsetX - elementOffsetX) / elementWidth;
+        seek(percent * duration);
+      }
+    },
+    [ duration, seek ]
+  );
 
   return (
-    <Styles>
-      <div className="container">
-        <ReactWaves
-          audioFile={trackSrc}
-          className="react-waves"
-          options={{
-            barHeight:     1,
-            barWidth:      2,
-            cursorWidth:   0,
-            barGap:        0,
-            height:        50,
-            hideScrollbar: true,
-            progressColor: '#EC407A',
-            responsive:    true,
-            waveColor:     '#D1D6DA'
-          }}
-          volume={1}
-          zoom={1}
-          playing={isPlaying}
-          pos={position}
-          onPosChange={onPosChange}
-          onReady={onReady}
-        />
+    <div className={classes.playerContainer}>
+      <div className={classes.artwork}>
+        <Image src={artSrc} width={70} height={70}/>
       </div>
-    </Styles>
+      {trackPlaying && (
+        <div className={classes.player}>
+          <Text className={classes.title} size="sm" lineClamp={1} align="center">
+            {trackPlaying.title}
+          </Text>
+          <Text size="sm" align="center" lineClamp={1}>
+            {trackPlaying.artist}
+          </Text>
+          <div className={classes.seekbar} ref={seekBarElem} onClick={goTo}>
+            <div style={{ width: barWidth }} className={classes.tick} />
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

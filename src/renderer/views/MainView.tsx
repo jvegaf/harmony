@@ -1,12 +1,12 @@
 import { createStyles } from '@mantine/core';
 import React from 'react';
+import { AudioPlayerProvider } from 'react-use-audio-player';
 import useAppState from 'renderer/hooks/useAppState';
 import AppHeader from '../components/AppHeader';
 import OnBoarding from '../components/OnBoarding';
-import TrackDetail from '../components/TrackDetail';
 import { TrackList } from '../components/TrackList';
-import { PlayerContextProvider } from '../context/PlayerContext';
 import useLog from './../hooks/useLog';
+import TrackDetail from './TrackDetail';
 
 const useStyles = createStyles((theme) => ({
   main: {
@@ -23,10 +23,15 @@ const useStyles = createStyles((theme) => ({
 
 const MainView = () => {
   const { classes } = useStyles();
-  const { setTracksLoaded, trackDetail } = useAppState();
-  const [ content, setContent ]          = React.useState(<OnBoarding />);
+  const { setTracksLoaded, trackDetail, closeDetail } = useAppState();
+  const [ content, setContent ] = React.useState(<OnBoarding />);
 
   const log = useLog();
+
+  const onCloseDetail = () => {
+    setContent(<TrackList />);
+    closeDetail();
+  };
 
   React.useEffect(() => {
     window.Main.on('tracks-updated', () => {
@@ -35,27 +40,27 @@ const MainView = () => {
       window.Main.GetAll();
       setContent(<TrackList />);
     });
-  }, [ setTracksLoaded ]);
+  }, [ ]);
 
   React.useEffect(() => {
     if (trackDetail !== null){
       log.info('have trackDetail', trackDetail);
       const track = window.Main.GetTrack(trackDetail);
-      setContent(<TrackDetail track={track} />);
+      setContent(<TrackDetail track={track}  close={onCloseDetail}/>);
 
       return () => setContent(<TrackList />);
     }
   }, [ trackDetail ]);
 
   return (
-    <PlayerContextProvider>
+    <AudioPlayerProvider>
       <div className={classes.main}>
         <div className={classes.header}>
           <AppHeader />
         </div>
         <div className={classes.content}>{content}</div>
       </div>
-    </PlayerContextProvider>
+    </AudioPlayerProvider>
   );
 };
 

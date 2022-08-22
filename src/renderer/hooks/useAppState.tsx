@@ -26,13 +26,13 @@ export default function useAppState(){
 
   const onFindArtwork = React.useCallback((trackId: TrackId) => window.Main.FindArtWork(trackId), []);
 
-  const updateTrackPlaying = (trackId: TrackId) => setTrackPlaying(trackId);
+  const playTrack = (track: Track) => setTrackPlaying(track);
 
   const updateTrackDetail = (trackId: TrackId) => setTrackDetail(trackId);
 
   return {
     trackPlaying,
-    updateTrackPlaying,
+    playTrack,
     trackDetail,
     updateTrackDetail,
     onFixTrack,

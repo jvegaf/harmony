@@ -2,10 +2,10 @@ import { Button } from '@mantine/core';
 import React from 'react';
 import useAppState from 'renderer/hooks/useAppState';
 import styled from 'styled-components';
-import usePlayer from '../hooks/usePlayer';
 import PauseButton from './PauseButton';
 import PlayButton from './PlayButton';
 import Player from './Player';
+import { useAudioPlayer } from 'react-use-audio-player';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Styles = styled.div`
@@ -24,6 +24,13 @@ const Styles = styled.div`
     justify-content: center;
     align-items: center;
   }
+
+  .center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   .right-container {
     margin-right: 30;
     display: flex;
@@ -33,9 +40,8 @@ const Styles = styled.div`
 `;
 
 const AppHeader: React.FC = () => {
+  const { togglePlayPause, playing }                   = useAudioPlayer();
   const { tracksLoaded, onFixAllTracks, onOpenFolder } = useAppState();
-
-  const { isPlaying, togglePlayPause } = usePlayer();
 
   const btnProps = {
     color:  '#EEEEEE',
@@ -46,7 +52,7 @@ const AppHeader: React.FC = () => {
   return (
     <Styles>
       <div className="left-container">
-        {isPlaying ? <PauseButton {...btnProps} /> : <PlayButton {...btnProps} />}
+        {playing ? <PauseButton {...btnProps} /> : <PlayButton {...btnProps} />}
       </div>
       <div className="center-container">
         <Player />

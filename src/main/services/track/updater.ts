@@ -1,8 +1,6 @@
 import type { ResultTag, Track } from '../../../shared/types/emusik';
 import { ParseDuration } from '../../../shared/utils';
-import PersistTrack from '../tag/nodeId3Saver';
 import FetchArtwork from '../artwork/fetcher';
-import { log } from '../log/log';
 
 const getArtwork = async(url?: string) => {
   if (!url) return undefined;
@@ -38,12 +36,17 @@ const Update = async(track: Track, tag: ResultTag): Promise<Track> => {
     genre:    tag.genre,
     artwork:  await art(),
   };
+  
+  
+  /**
+   persisting disabled for debugging
+  */
 
-  try {
-    await PersistTrack(newTrack);
-  } catch (error){
-    log.error(error);
-  }
+  // try {
+  //   await PersistTrack(newTrack);
+  // } catch (error){
+  //   log.error(error);
+  // }
 
   return newTrack;
 };

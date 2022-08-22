@@ -2,7 +2,8 @@
  * App models
  */
 
-export type TrackId = string | null;
+export type TrackId  = string | null;
+export type TrackSrc = string | null;
 
 export interface Artwork {
   mime?: string;
@@ -20,7 +21,7 @@ export interface Track {
   key?: string;
   duration?: number;
   time?: string;
-  filepath: string;
+  filepath: TrackSrc;
   title: string;
   year?: number;
   bitrate?: number;

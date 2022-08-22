@@ -11,14 +11,13 @@ import useAppState from '../hooks/useAppState';
 import Columns from './columns';
 import { ContextMenu } from './ContextMenu';
 import { Container } from './TrackList.styles';
-import usePlayer from './../hooks/usePlayer';
 
 interface TrackListProps {
   height: number;
   tracks: Track[];
   columns: [];
-  playingId: TrackId;
-  playTrack: (id: TrackId) => void;
+  trackPlaying: Track;
+  playTrack: (track: Track) => void;
   updateTrackDetail: (id: TrackId) => void;
 }
 
@@ -41,7 +40,7 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
   const {
     height,
     tracks: data,
-    playingId,
+    trackPlaying,
     playTrack,
     columns
   } = props;
@@ -152,7 +151,7 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
                   onDoubleClick={(e) => onDblClick(e, row)}
                   className={`tr 
               ${row.original.id === selected ? 'isSelected' : ''} 
-              ${row.original.id === playingId ? 'isPlaying' : ''}`}
+              ${row.original.id === trackPlaying?.id ? 'isPlaying' : ''}`}
                 >
                   {row.cells.map((cell) => {
                     return (
@@ -174,12 +173,11 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
 };
 
 export const TrackList: React.FC = () => {
-  const { tracksLoaded, updateTrackDetail } =
+  const { tracksLoaded, updateTrackDetail, playTrack, trackPlaying } =
     useAppState();
-  const { playingId, playTrack } = usePlayer();
-  const { height }               = useViewportSize();
-  const [ tracks, setTracks ]    = React.useState([]);
-  const columns                  = Columns();
+  const { height }            = useViewportSize();
+  const [ tracks, setTracks ] = React.useState([]);
+  const columns               = Columns();
 
   React.useEffect(() => {
     if (window.Main){
@@ -197,7 +195,7 @@ export const TrackList: React.FC = () => {
     height,
     tracks,
     columns,
-    playingId,
+    trackPlaying,
     playTrack,
     updateTrackDetail
   };
