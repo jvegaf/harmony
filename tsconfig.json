@@ -1,26 +1,21 @@
 {
   "compilerOptions": {
-    "target": "es2021",
-    "module": "commonjs",
-    "lib": ["dom", "esnext"],
-    "declaration": true,
-    "declarationMap": true,
-    "jsx": "react-jsx",
-    "strict": true,
-    "pretty": true,
-    "sourceMap": true,
-    "baseUrl": "./src",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noImplicitAny": false,
-    "noFallthroughCasesInSwitch": true,
+    "outDir": "dist/dump",
+    "target": "ESNext",
+    "module": "ESNext",
     "moduleResolution": "node",
+    "importHelpers": true,
+    "jsx": "preserve",
+    "isolatedModules": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "allowJs": true,
-    "outDir": "release/app/dist"
+    "sourceMap": true,
+    "baseUrl": "./",
+    "strict": true,
+    "paths": {},
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
   },
-  "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
+  "include": ["src/renderer", "src/shared"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -1,6 +1,6 @@
 import { Button } from '@mantine/core';
 import React from 'react';
-import useAppState from 'renderer/hooks/useAppState';
+import useAppState from '../hooks/useAppState.tsx';
 import styled from 'styled-components';
 
 const Styles = styled.div`

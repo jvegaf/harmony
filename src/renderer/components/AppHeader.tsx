@@ -1,6 +1,6 @@
 import { Button } from '@mantine/core';
 import React from 'react';
-import useAppState from 'renderer/hooks/useAppState';
+import useAppState from '../hooks/useAppState';
 import styled from 'styled-components';
 import PauseButton from './PauseButton';
 import PlayButton from './PlayButton';

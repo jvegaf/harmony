@@ -1,7 +1,8 @@
 import { createStyles } from '@mantine/core';
 import React from 'react';
 import { AudioPlayerProvider } from 'react-use-audio-player';
-import useAppState from 'renderer/hooks/useAppState';
+import useAppState from '../hooks/useAppState';
+
 import AppHeader from '../components/AppHeader';
 import OnBoarding from '../components/OnBoarding';
 import { TrackList } from '../components/TrackList';
