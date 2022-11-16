@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
 import { useAudioPlayer } from 'react-use-audio-player';
-import Player from './Player';
+import PlayerView from './Player';
 import PauseButton from './PauseButton';
 import PlayButton from './PlayButton';
 import useAppState from '../hooks/useAppState';
@@ -16,7 +16,6 @@ function AppHeader() {
         React.useEffect(() => {
                 if (trackPlaying) {
                         const t = tracks.find((tr) => tr.id === trackPlaying);
-                        console.log(t);
                         setPlayTrack(t);
                 }
         }, [trackPlaying]);
@@ -33,7 +32,7 @@ function AppHeader() {
                                 {playing ? <PauseButton {...btnProps} /> : <PlayButton {...btnProps} />}
                         </div>
                         <div className="flex justify-center items-center col-span-3">
-                                {playTrack && <Player track={playTrack as Track} />}
+                                {playTrack && <PlayerView track={playTrack as Track} />}
                         </div>
                         <div className="mr-8 flex justify-around items-center">
                                 {tracks.length > 0 && (

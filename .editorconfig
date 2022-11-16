@@ -5,7 +5,7 @@ indent_size = 2
 indent_style = space
 insert_final_newline = false
 max_line_length = 120
-tab_width = 2
+; tab_width = 2
 ij_continuation_indent_size = 8
 ij_formatter_off_tag = @formatter:off
 ij_formatter_on_tag = @formatter:on
@@ -132,7 +132,7 @@ ij_stylus_value_alignment = 0
 
 [*.vue]
 indent_size = 2
-tab_width = 2
+; tab_width = 2
 ij_continuation_indent_size = 4
 ij_vue_indent_children_of_top_level = template
 ij_vue_interpolation_new_line_after_start_delimiter = true
@@ -170,7 +170,7 @@ ij_xml_text_wrap = normal
 
 [{*.ats,*.cts,*.mts,*.ts}]
 indent_size = 2
-tab_width = 2
+; tab_width = 2
 ij_continuation_indent_size = 2
 ij_typescript_align_imports = false
 ij_typescript_align_multiline_array_initializer_expression = false
@@ -343,7 +343,7 @@ ij_typescript_wrap_comments = false
 
 [{*.bash,*.sh,*.zsh}]
 indent_size = 2
-tab_width = 2
+; tab_width = 2
 ij_shell_binary_ops_start_line = false
 ij_shell_keep_column_alignment_padding = false
 ij_shell_minify_program = false
@@ -520,7 +520,7 @@ ij_javascript_wrap_comments = true
 
 [{*.cjsx,*.coffee}]
 indent_size = 2
-tab_width = 2
+; tab_width = 2
 ij_continuation_indent_size = 2
 ij_coffeescript_align_function_body = false
 ij_coffeescript_align_imports = false
