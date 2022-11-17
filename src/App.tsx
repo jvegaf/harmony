@@ -7,14 +7,14 @@ import TrackList from './components/TrackList';
 import useAppState from './hooks/useAppState';
 
 function App() {
-  const { tracks, setTrackPlaying, setTrackDetail, trackDetail, onFixTrack, onFixSelectedTracks } = useAppState();
+  const { tracks, playTrack, setTrackDetail, trackDetail, onFixTrack, onFixSelectedTracks } = useAppState();
   const [content, setContent] = useState(<OnBoarding />);
 
   useEffect(() => {
     if (window.Main) {
       window.Main.on('view-detail-command', (trackId: TrackId) => setTrackDetail(trackId));
 
-      window.Main.on('play-command', (trackId: TrackId) => setTrackPlaying(trackId));
+      window.Main.on('play-command', (trackId: TrackId) => playTrack(trackId));
 
       window.Main.on('fix-track-command', (trackId: TrackId) => onFixTrack(trackId));
 

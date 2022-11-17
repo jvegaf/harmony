@@ -1,23 +1,24 @@
+/* eslint-disable react/jsx-no-constructed-context-values */
 import React, { useState } from 'react';
 import { Track, TrackId } from '../../electron/types/emusik';
-import { AppContextType } from '../@types/emusik';
+import { AppContextType } from '../@types/emusik.d';
+import AudioPlayer from '../lib/audioplayer';
 
 const AppContext = React.createContext({} as AppContextType);
 
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [trackPlaying, setTrackPlaying] = useState<TrackId>(null);
   const [trackDetail, setTrackDetail] = useState<TrackId>(null);
+  const audioplayer = new AudioPlayer();
 
   return (
     <AppContext.Provider
       value={{
         tracks,
         setTracks,
-        trackPlaying,
-        setTrackPlaying,
         trackDetail,
-        setTrackDetail
+        setTrackDetail,
+        audioplayer
       }}
     >
       {children}

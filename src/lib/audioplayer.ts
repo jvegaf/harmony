@@ -1,3 +1,5 @@
+import { Track } from '../../electron/types/emusik';
+
 interface PlayerOptions {
   playbackRate?: number;
   audioOutputDevice?: string;
@@ -5,9 +7,13 @@ interface PlayerOptions {
   muted?: boolean;
 }
 
-class Player {
+class AudioPlayer {
+  private track?: Track;
+
   private audio: HTMLAudioElement;
+
   private durationThresholdReached: boolean;
+
   public threshold: number;
 
   constructor(options?: PlayerOptions) {
@@ -33,7 +39,7 @@ class Player {
     this.durationThresholdReached = false;
   }
 
-  async play() {
+  async play(): Promise<void> {
     if (!this.audio.src) throw new Error('Trying to play a track but not audio.src is defined');
 
     await this.audio.play();
@@ -57,6 +63,10 @@ class Player {
 
   getAudio() {
     return this.audio;
+  }
+
+  getTrack() {
+    return this.track;
   }
 
   getCurrentTime() {
@@ -86,10 +96,11 @@ class Player {
     await this.audio.setSinkId(deviceId);
   }
 
-  setAudioSrc(src: string) {
+  setTrack(track: Track) {
     // When we change song, need to update the thresholdReached indicator.
     this.durationThresholdReached = false;
-    this.audio.src = src;
+    this.track = track;
+    this.audio.src = track.filepath;
   }
 
   setAudioCurrentTime(currentTime: number) {
@@ -113,11 +124,4 @@ class Player {
   }
 }
 
-// export default new Player({
-//   volume: app.config.get('audioVolume'),
-//   playbackRate: app.config.get('audioPlaybackRate'),
-//   audioOutputDevice: app.config.get('audioOutputDevice'),
-//   muted: app.config.get('audioMuted'),
-// });
-
-export default new Player();
+export default AudioPlayer;

@@ -3,9 +3,11 @@
 import React, { useContext } from 'react';
 import { Track, TrackId } from '../../electron/types/emusik';
 import AppContext from '../context/AppContext';
+import logger from '../../electron/services/logger';
 
 export default function useAppState() {
-  const { tracks, setTracks, trackPlaying, setTrackPlaying, trackDetail, setTrackDetail } = useContext(AppContext);
+  const { tracks, setTracks, trackDetail, setTrackDetail, audioplayer } = useContext(AppContext);
+  const [isPlaying, setIsPlaying] = React.useState(false);
 
   const onOpenFolder = React.useCallback(async () => {
     const newTracks = await window.Main.OpenFolder();
@@ -17,7 +19,7 @@ export default function useAppState() {
 
   const onFixTracks = React.useCallback(
     async (trks: Track[]) => {
-      console.log('tracks to fix:', trks);
+      logger.info('tracks to fix:', trks);
       const fixedTracks = await window.Main.FixTracks(trks);
       const updTracks = tracks.map((t) => {
         const fixedTrack = fixedTracks.find((ft) => ft.id === t.id);
@@ -37,7 +39,7 @@ export default function useAppState() {
 
   const saveChanges = React.useCallback(
     (track: Track) => {
-      console.log('track update', track);
+      logger.info('track update', track);
 
       window.Main.PersistTrack(track);
       const newTracks = tracks.map((t) => {
@@ -77,17 +79,38 @@ export default function useAppState() {
         selectedTracks.push(track);
       });
 
-      console.log('selectedTracks', selectedTracks);
+      logger.info('selectedTracks', selectedTracks);
 
       onFixTracks(selectedTracks);
     },
     [tracks, onFixTracks]
   );
 
+  const playTrack = React.useCallback(
+    (id: TrackId) => {
+      const track = tracks.find((t) => t.id === id);
+      audioplayer.setTrack(track);
+      audioplayer.play();
+      setIsPlaying(true);
+    },
+    [tracks, audioplayer]
+  );
+
+  const togglePlayPause = React.useCallback(() => {
+    if (audioplayer.isPaused()) {
+      audioplayer.play();
+      setIsPlaying(true);
+    }
+    audioplayer.pause();
+    setIsPlaying(false);
+  }, [audioplayer]);
+
   return {
     tracks,
-    trackPlaying,
-    setTrackPlaying,
+    audioplayer,
+    isPlaying,
+    playTrack,
+    togglePlayPause,
     trackDetail,
     setTrackDetail,
     onFixTrack,
