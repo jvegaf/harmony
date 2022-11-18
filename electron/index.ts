@@ -1,6 +1,4 @@
 // Native
-import { join } from 'path';
-
 // Packages
 import {
   app,
@@ -13,16 +11,24 @@ import {
   PopupOptions
 } from 'electron';
 import isDev from 'electron-is-dev';
+import { join } from 'path';
 import { GetFilesFrom } from './services/fileManager';
+import logger from './services/logger';
+import PersistTrack from './services/tag/nodeId3Saver';
 import FixTags, { FixTracks } from './services/tagger/Tagger';
 import { GetTracks } from './services/track/trackManager';
-import PersistTrack from './services/tag/nodeId3Saver';
-import { Track, TrackId } from './types/emusik';
+import { Track } from './types/emusik';
 
 const height = 600;
 const width = 800;
 
 let win: BrowserWindow | null = null;
+
+async function getTracksFrom(targetPath: string) {
+  const files = await GetFilesFrom(targetPath);
+  const tracks: Track[] = await GetTracks(files);
+  return tracks;
+}
 
 function createWindow() {
   // Create the browser window.
@@ -33,6 +39,7 @@ function createWindow() {
     resizable: true,
     fullscreenable: true,
     webPreferences: {
+      webSecurity: false,
       preload: join(__dirname, 'preload.js')
     }
   });
@@ -75,6 +82,8 @@ app.whenReady().then(() => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    // preload music only for development
+    getTracksFrom('$HOME/Music').then((devTracks) => ipcMain.emit('new-tracks-command', devTracks));
   });
 });
 
@@ -94,7 +103,7 @@ app.on('window-all-closed', () => {
 //   setTimeout(() => event.sender.send('message', 'hi from electron'), 500);
 // });
 
-ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
+ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
   const templateSingle = [
     {
       label: 'View Details',
@@ -105,6 +114,7 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
     {
       label: 'Play Track',
       click: () => {
+        logger.info('menu play track:', selected[0]);
         event.sender.send('play-command', selected[0]);
       }
     },
@@ -135,14 +145,13 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
 ipcMain.on('persist', (_, track) => PersistTrack(track));
 
 ipcMain.handle('open-folder', async () => {
-  const resultPath = await dialog.showOpenDialog(win as BrowserWindow, {
+  const result = await dialog.showOpenDialog(win as BrowserWindow, {
     properties: ['openDirectory']
   });
 
-  if (resultPath.canceled) return null;
+  if (result.canceled) return null;
 
-  const files = await GetFilesFrom(resultPath.filePaths[0]);
-  const tracks: Track[] = await GetTracks(files);
+  const tracks = await getTracksFrom(result.filePaths[0]);
   return tracks;
 });
 

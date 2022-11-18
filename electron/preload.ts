@@ -1,5 +1,5 @@
 import { ipcRenderer, contextBridge } from 'electron';
-import { Track, TrackId } from './types/emusik';
+import { Track } from './types/emusik';
 
 declare global {
   interface Window {
@@ -16,7 +16,7 @@ const api = {
    *
    * The function below can accessed using `window.Main.sayHello`
    */
-  ShowContextMenu: (selected: TrackId[]) => ipcRenderer.send('show-context-menu', selected),
+  ShowContextMenu: (selected: Track[]) => ipcRenderer.send('show-context-menu', selected),
   PersistTrack: (track: Track) => ipcRenderer.send('persist', track),
   OpenFolder: (): Promise<Track[]> => ipcRenderer.invoke('open-folder'),
   FixTrack: (track: Track): Promise<Track> => ipcRenderer.invoke('fix-track', track),

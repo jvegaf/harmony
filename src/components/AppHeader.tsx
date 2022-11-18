@@ -14,13 +14,20 @@ function AppHeader() {
     action: togglePlayPause
   };
 
+  const [playerBtn, setPlayerBtn] = React.useState(<PauseButton {...btnProps} />);
+
+  React.useEffect(() => {
+    if (isPlaying) setPlayerBtn(<PlayButton {...btnProps} />);
+    return () => {
+      setPlayerBtn(<PauseButton {...btnProps} />);
+    };
+  }, [isPlaying]);
+
   const playerViewProps = { player: audioplayer, isPlaying };
 
   return (
     <div className="h-20 bg-neutral-700 grid grid-rows-1 grid-cols-5">
-      <div className="flex justify-center items-center">
-        {isPlaying ? <PauseButton {...btnProps} /> : <PlayButton {...btnProps} />}
-      </div>
+      <div className="flex justify-center items-center">{playerBtn}</div>
       <div className="flex justify-center items-center col-span-3">
         <PlayerView {...playerViewProps} />
       </div>

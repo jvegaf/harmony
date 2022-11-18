@@ -66,7 +66,13 @@ export default function useAppState() {
     [tracks, saveChanges]
   );
 
-  const showCtxMenu = React.useCallback((selected: TrackId[]) => window.Main.ShowContextMenu(selected), []);
+  const showCtxMenu = React.useCallback(
+    (selected: Track[]) => {
+      logger.info('selected in hook:', selected);
+      window.Main.ShowContextMenu(selected);
+    },
+    [window]
+  );
 
   const onFixAllTracks = React.useCallback(() => onFixTracks(tracks), [onFixTracks, tracks]);
 
@@ -87,9 +93,9 @@ export default function useAppState() {
   );
 
   const playTrack = React.useCallback(
-    (id: TrackId) => {
-      const track = tracks.find((t) => t.id === id);
-      audioplayer.setTrack(track);
+    (t: Track) => {
+      logger.info('track to play:', t);
+      audioplayer.setTrack(t);
       audioplayer.play();
       setIsPlaying(true);
     },
@@ -107,6 +113,7 @@ export default function useAppState() {
 
   return {
     tracks,
+    setTracks, // TODO: FIXME
     audioplayer,
     isPlaying,
     playTrack,

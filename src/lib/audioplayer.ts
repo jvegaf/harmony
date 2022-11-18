@@ -1,3 +1,4 @@
+import logger from '../../electron/services/logger';
 import { Track } from '../../electron/types/emusik';
 
 interface PlayerOptions {
@@ -100,7 +101,7 @@ class AudioPlayer {
     // When we change song, need to update the thresholdReached indicator.
     this.durationThresholdReached = false;
     this.track = track;
-    this.audio.src = track.filepath;
+    this.audio.src = `file:///${track.filepath}`;
   }
 
   setAudioCurrentTime(currentTime: number) {

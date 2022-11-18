@@ -42,7 +42,6 @@ const TrackList = () => {
     };
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onFirstDataRendered = useCallback((params: FirstDataRenderedEvent) => {
     gridRef.current?.api.sizeColumnsToFit();
   }, []);
@@ -73,7 +72,7 @@ const TrackList = () => {
         event.node.setSelected(true, true);
       }
 
-      const selected = (event.api.getSelectedRows() as Track[]).map((t) => t.id);
+      const selected = event.api.getSelectedRows();
       showCtxMenu(selected);
     },
     [showCtxMenu]
