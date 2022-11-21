@@ -122,7 +122,9 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
     {
       label: 'Fix Track',
       click: () => {
-        event.sender.send('fix-track-command', selected[0]);
+        const fixed = await FixTags(selected[0]);
+
+        event.sender.send('track-fixed', fixed);
       }
     }
   ] as MenuItemConstructorOptions[];
@@ -130,8 +132,10 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
   const templateMultiple = [
     {
       label: `Fix this ${selected.length} Tracks`,
-      click: () => {
-        event.sender.send('fix-tracks-command', selected);
+      click: async () => {
+        const fixed = await FixTracks(selected);
+
+        event.sender.send('fix-tracks-command', fixed);
       }
     }
   ] as MenuItemConstructorOptions[];
@@ -155,12 +159,3 @@ ipcMain.handle('open-folder', async () => {
   return tracks;
 });
 
-ipcMain.handle('fix-track', async (_, track) => {
-  const updated = await FixTags(track);
-  return updated;
-});
-
-ipcMain.handle('fix-tracks', async (_, tracks) => {
-  const fixed = await FixTracks(tracks);
-  return fixed;
-});

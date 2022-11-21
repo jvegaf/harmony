@@ -9,6 +9,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { useTable, useResizeColumns, useFlexLayout, useRowSelect } from 'react-table';
 import { Track, TrackId } from '../../electron/types/emusik';
+import { logger } from '../../electron/services/logger'
+
+
 
 interface TrackListProps {
   tracks: Track[];
@@ -175,17 +178,17 @@ const TableView: React.FC<TableViewProps> = (props) => {
     const trackId = row.original.id;
     if (e.type === 'click') {
       setSelected(trackId);
-      console.log('selected', selected);
+      logger.info('selected', selected);
     }
 
     if (e.type === 'auxclick') {
       showCtxMenu(trackId);
-      console.log('trackId', trackId);
+      logger.info('trackId', trackId);
     }
 
     if (e.type === 'dblclick') {
       setTrackPlaying(trackId);
-      console.log('trackId', trackId);
+      logger.info('trackId', trackId);
     }
   };
 
