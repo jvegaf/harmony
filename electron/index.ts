@@ -19,7 +19,7 @@ import FixTags, { FixTracks } from './services/tagger/Tagger';
 import { GetTracks } from './services/track/trackManager';
 import { Track } from './types/emusik';
 
-const height = 600;
+const height = 1350;
 const width = 800;
 
 let win: BrowserWindow | null = null;
@@ -121,7 +121,7 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
     { type: 'separator' },
     {
       label: 'Fix Track',
-      click: () => {
+      click: async () => {
         const fixed = await FixTags(selected[0]);
 
         event.sender.send('track-fixed', fixed);
