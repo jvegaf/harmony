@@ -15,7 +15,7 @@ import { join } from 'path';
 import { GetFilesFrom } from './services/fileManager';
 import logger from './services/logger';
 import PersistTrack from './services/tag/nodeId3Saver';
-import FixTags, { FixTracks } from './services/tagger/Tagger';
+import { FixTracks } from './services/tagger/Tagger';
 import { GetTracks } from './services/track/trackManager';
 import { Track } from './types/emusik';
 
@@ -83,7 +83,7 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
     // preload music only for development
-    getTracksFrom('$HOME/Music').then((devTracks) => ipcMain.emit('new-tracks-command', devTracks));
+    getTracksFrom('C:\\Users\\josev\\Desktop\\NGET').then((devTracks) => ipcMain.emit('new-tracks-command', devTracks));
   });
 });
 
@@ -122,9 +122,9 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
     {
       label: 'Fix Track',
       click: async () => {
-        const fixed = await FixTags(selected[0]);
+        const fixed = await FixTracks(selected);
 
-        event.sender.send('track-fixed', fixed);
+        event.sender.send('tracks-fixed', fixed);
       }
     }
   ] as MenuItemConstructorOptions[];
@@ -135,7 +135,7 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: Track[]) => {
       click: async () => {
         const fixed = await FixTracks(selected);
 
-        event.sender.send('fix-tracks-command', fixed);
+        event.sender.send('tracks-fixed', fixed);
       }
     }
   ] as MenuItemConstructorOptions[];

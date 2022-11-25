@@ -1,11 +1,11 @@
 import { Dispatch, SetStateAction } from 'react';
-import { Track, TrackId } from '../../electron/types/emusik';
+import { Track } from '../../electron/types/emusik';
 import AudioPlayer from '../lib/audioplayer';
 
 export type AppContextType = {
-  tracks: Track[];
-  setTracks: Dispatch<SetStateAction<Track[]>>;
-  trackDetail: TrackId | null;
-  setTrackDetail: Dispatch<SetStateAction<TrackId>>;
+  collection: Track[];
+  setCollection: Dispatch<SetStateAction<Track[]>>;
+  trackDetail: Track;
+  setTrackDetail: Dispatch<SetStateAction<Track>>;
   player: AudioPlayer;
 };

@@ -14,7 +14,7 @@ import { Track, TrackId } from '../../electron/types/emusik';
 import useAppState from '../hooks/useAppState';
 
 const TrackList = () => {
-  const { tracks, setTrackDetail, showCtxMenu } = useAppState();
+  const { collection, setTrackDetail, showCtxMenu } = useAppState();
   const gridRef = useRef<AgGridReact>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [rowData, setRowData] = useState<Track[]>([]);
@@ -28,7 +28,7 @@ const TrackList = () => {
       { field: 'year', maxWidth: 70 },
       { field: 'bpm', maxWidth: 70 },
       { field: 'bitrate', maxWidth: 70 },
-      { field: 'key', maxWidth: 70 }
+      { field: 'key', maxWidth: 90 }
     ],
     []
   );
@@ -47,13 +47,13 @@ const TrackList = () => {
   }, []);
 
   useEffect(() => {
-    setRowData(tracks);
-  }, [tracks]);
+    setRowData(collection);
+  }, [collection]);
 
   const onGridReady = (params: GridReadyEvent) => {
     setGridApi(params.api);
 
-    setRowData(tracks);
+    setRowData(collection);
   };
 
   const onDblClick = useCallback(

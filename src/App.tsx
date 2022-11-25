@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Track, TrackId } from '../electron/types/emusik';
+import { Track } from '../electron/types/emusik';
 import AppHeader from './components/AppHeader';
 import OnBoarding from './components/OnBoarding';
 import TrackDetail from './components/TrackDetail';
@@ -7,31 +7,31 @@ import TrackList from './components/TrackList';
 import useAppState from './hooks/useAppState';
 
 function App() {
-  const { tracks, setTracks, playTrack, setTrackDetail, trackDetail, onFixTrack, onFixSelectedTracks } = useAppState();
+  const { collection, setCollection, playTrack, setTrackDetail, trackDetail, tracksFixedHandler } = useAppState();
   const [content, setContent] = useState(<OnBoarding />);
 
   useEffect(() => {
     if (window.Main) {
-      window.Main.on('view-detail-command', (trackId: TrackId) => setTrackDetail(trackId));
+      window.Main.on('view-detail-command', (track: Track) => setTrackDetail(track));
 
       window.Main.on('play-command', (track: Track) => playTrack(track));
 
-      window.Main.on('fix-track-command', (trackId: TrackId) => onFixTrack(trackId));
+      window.Main.on('tracks-fixed', (fxdTrks: Track[]) => tracksFixedHandler(fxdTrks));
 
-      window.Main.on('fix-tracks-command', (selected: TrackId[]) => onFixSelectedTracks(selected));
-
-      window.Main.on('new-tracks-command', (newtracks: Track[]) => setTracks(newtracks));
+      // only for development
+      window.Main.on('new-tracks-command', (newtracks: Track[]) => setCollection(newtracks));
     }
   }, [window]);
+
   useEffect(() => {
-    if (tracks.length > 0) {
+    if (collection.length > 0) {
       setContent(<TrackList />);
     }
 
     if (trackDetail) {
       setContent(<TrackDetail />);
     }
-  }, [tracks, trackDetail, setContent]);
+  }, [collection, trackDetail, setContent]);
 
   return (
     <div className="flex flex-col h-screen">

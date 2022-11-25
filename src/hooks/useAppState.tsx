@@ -6,31 +6,23 @@ import AppContext from '../context/AppContext';
 import logger from '../../electron/services/logger';
 
 export default function useAppState() {
-  const { tracks, setTracks, trackDetail, setTrackDetail, audioplayer } = useContext(AppContext);
+  const { collection, setCollection, trackDetail, setTrackDetail, audioplayer } = useContext(AppContext);
   const [isPlaying, setIsPlaying] = React.useState(false);
 
   const onOpenFolder = React.useCallback(async () => {
     const newTracks = await window.Main.OpenFolder();
 
     if (!newTracks) return;
+    logger.info('new tracks:', newTracks.length);
 
-    setTracks(newTracks);
-  }, [setTracks]);
+    setCollection(newTracks);
+  }, [setCollection]);
 
-  const onFixTracks = React.useCallback(
-    async (trks: Track[]) => {
-      logger.info('tracks to fix:', trks);
-      const fixedTracks = await window.Main.FixTracks(trks);
-      const updTracks = tracks.map((t) => {
-        const fixedTrack = fixedTracks.find((ft) => ft.id === t.id);
-        if (fixedTrack) {
-          return fixedTrack;
-        }
-        return t;
-      });
-      setTracks(updTracks);
-    },
-    [setTracks, tracks]
+  const onFixTracks = React.useCallback((trks: Track[]) => {
+    logger.info('tracks to fix:', trks);
+    window.Main.FixTracks(trks);
+  },
+    []
   );
 
   const closeDetail = React.useCallback(() => {
@@ -42,28 +34,23 @@ export default function useAppState() {
       logger.info('track update', track);
 
       window.Main.PersistTrack(track);
-      const newTracks = tracks.map((t) => {
-        if (t.id === track.id) {
-          return track;
-        }
-        return t;
-      });
-      setTracks(newTracks);
-      if (trackDetail === track.id) {
+      const filtered = collection.filter(t => t.id !== track.id);
+      const allTracks = [...filtered, track];
+      setCollection(allTracks);
+      if (trackDetail === track) {
         closeDetail();
       }
     },
-    [tracks, setTracks, trackDetail, closeDetail]
+    [collection, setCollection, trackDetail, closeDetail]
   );
 
-  const onFixTrack = React.useCallback(
-    async (id: TrackId) => {
-      const track = tracks.find((t) => t.id === id);
-
-      const updated = await window.Main.FixTrack(track);
-      saveChanges(updated);
+  const tracksFixedHandler = React.useCallback(
+    (fixedTracks: Track[]) => {
+      const filtered = collection.filter(t => fixedTracks.includes(t) === false);
+      const allTracks = filtered.concat(fixedTracks);
+      setCollection(allTracks);
     },
-    [tracks, saveChanges]
+    [collection]
   );
 
   const showCtxMenu = React.useCallback(
@@ -74,23 +61,7 @@ export default function useAppState() {
     [window]
   );
 
-  const onFixAllTracks = React.useCallback(() => onFixTracks(tracks), [onFixTracks, tracks]);
-
-  const onFixSelectedTracks = React.useCallback(
-    (selected: TrackId[]) => {
-      const selectedTracks = [];
-
-      selected.forEach((tId) => {
-        const track = tracks.find((t) => t.id === tId);
-        selectedTracks.push(track);
-      });
-
-      logger.info('selectedTracks', selectedTracks);
-
-      onFixTracks(selectedTracks);
-    },
-    [tracks, onFixTracks]
-  );
+  const onFixAllTracks = React.useCallback(() => window.Main.FixTracks(collection), [collection]);
 
   const playTrack = React.useCallback(
     (t: Track) => {
@@ -99,7 +70,7 @@ export default function useAppState() {
       audioplayer.play();
       setIsPlaying(true);
     },
-    [tracks, audioplayer]
+    [audioplayer]
   );
 
   const togglePlayPause = React.useCallback(() => {
@@ -112,17 +83,15 @@ export default function useAppState() {
   }, [audioplayer]);
 
   return {
-    tracks,
-    setTracks, // TODO: FIXME
+    collection,
+    setCollection, // TODO: FIXME
+    tracksFixedHandler,
     audioplayer,
     isPlaying,
     playTrack,
     togglePlayPause,
     trackDetail,
     setTrackDetail,
-    onFixTrack,
-    onFixTracks,
-    onFixSelectedTracks,
     onFixAllTracks,
     saveChanges,
     closeDetail,

@@ -19,8 +19,7 @@ const api = {
   ShowContextMenu: (selected: Track[]) => ipcRenderer.send('show-context-menu', selected),
   PersistTrack: (track: Track) => ipcRenderer.send('persist', track),
   OpenFolder: (): Promise<Track[]> => ipcRenderer.invoke('open-folder'),
-  FixTrack: (track: Track): Promise<Track> => ipcRenderer.invoke('fix-track', track),
-  FixTracks: (tracks: Track[]): Promise<Track[]> => ipcRenderer.invoke('fix-tracks', tracks),
+  FixTracks: (tracks: Track[]) => ipcRenderer.send('fix-tracks', tracks),
   /**
    * Provide an easier way to listen to events
    */
