@@ -14,7 +14,7 @@ import { Track, TrackId } from '../../electron/types/emusik';
 import useAppState from '../hooks/useAppState';
 
 const TrackList = () => {
-  const { collection, setTrackDetail, showCtxMenu } = useAppState();
+  const { collection, playTrack, showCtxMenu } = useAppState();
   const gridRef = useRef<AgGridReact>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [rowData, setRowData] = useState<Track[]>([]);
@@ -60,9 +60,9 @@ const TrackList = () => {
     (event: RowDoubleClickedEvent) => {
       event.event?.preventDefault();
       const { data } = event;
-      setTrackDetail(data.id as TrackId);
+      playTrack(data as Track);
     },
-    [setTrackDetail]
+    [playTrack]
   );
 
   const onShowCtxtMenu = useCallback(
