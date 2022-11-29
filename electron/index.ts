@@ -159,7 +159,7 @@ ipcMain.handle('open-folder', async () => {
   return tracks;
 });
 
-ipcMain.on('fix-tracks', async(event, tracks) => {
+ipcMain.on('fix-tracks', async (event, tracks) => {
   const fixed = await FixTracks(tracks);
   event.sender.send('tracks-fixed', fixed);
-})
+});
