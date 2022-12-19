@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Track } from '../electron/types/emusik';
 import AppHeader from './components/AppHeader';
 import OnBoarding from './components/OnBoarding';
-import TrackDetail from './components/TrackDetail';
+import TrackDetailView from './components/TrackDetail';
 import TrackList from './components/TrackList';
 import useAppState from './hooks/useAppState';
 
@@ -29,7 +29,7 @@ function App() {
     }
 
     if (trackDetail) {
-      setContent(<TrackDetail />);
+      setContent(<TrackDetailView />);
     }
   }, [collection, trackDetail, setContent]);
 

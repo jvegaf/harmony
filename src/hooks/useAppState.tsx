@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React, { useContext } from 'react';
-import { Track, TrackId } from '../../electron/types/emusik';
+import { Track } from '../../electron/types/emusik';
 import AppContext from '../context/AppContext';
 import logger from '../../electron/services/logger';
 
@@ -17,13 +17,6 @@ export default function useAppState() {
 
     setCollection(newTracks);
   }, [setCollection]);
-
-  const onFixTracks = React.useCallback((trks: Track[]) => {
-    logger.info('tracks to fix:', trks);
-    window.Main.FixTracks(trks);
-  },
-    []
-  );
 
   const closeDetail = React.useCallback(() => {
     setTrackDetail(undefined);

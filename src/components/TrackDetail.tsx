@@ -9,16 +9,15 @@ interface DetailedTrack extends Track {
   imgSrc: string;
 }
 
-function TrackDetail() {
-  const { tracks, trackDetail, closeDetail, saveChanges } = useAppState();
+function TrackDetailView() {
+  const { trackDetail, closeDetail, saveChanges } = useAppState();
   const { register, handleSubmit } = useForm();
   const [detailed, setDetailed] = React.useState<DetailedTrack | undefined>(undefined);
 
   React.useEffect(() => {
     if (trackDetail) {
-      const track = tracks.find((t) => t.id === trackDetail) as Track;
 
-      const { artwork } = track;
+      const { artwork } = trackDetail;
       let src = Placeholder;
       if (artwork) {
         const blob = new Blob([artwork.data], {
@@ -28,7 +27,7 @@ function TrackDetail() {
         src = URL.createObjectURL(blob);
       }
 
-      const det = { ...track, imgSrc: src };
+      const det = { ...trackDetail, imgSrc: src };
       setDetailed(det);
     }
   }, [trackDetail]);
@@ -37,8 +36,7 @@ function TrackDetail() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = (data: any) => {
-    const track = tracks.find((t) => t.id === detailed?.id);
-    const updated = { ...track, ...data };
+    const updated = { ...trackDetail, ...data };
     saveChanges(updated);
     closeDetail();
   };
@@ -134,4 +132,4 @@ function TrackDetail() {
   );
 }
 
-export default TrackDetail;
+export default TrackDetailView;
