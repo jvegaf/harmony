@@ -4,26 +4,30 @@ import { Track } from '../../electron/types/emusik';
 import { AppContextType } from '../@types/emusik.d';
 import AudioPlayer from '../lib/audioplayer';
 
-const AppContext = React.createContext({} as AppContextType);
+export const AppContext = React.createContext<AppContextType | null>(null);
 
-export function AppContextProvider({ children }: { children: React.ReactNode }) {
-  const [collection, setCollection] = useState<Track[]>([]);
-  const [trackDetail, setTrackDetail] = useState<Track>();
+const AppContextProvider = ({ children }) => {
+  const [tracksCollection, setTracksCollection] = useState<Track[]>([]);
   const audioplayer = new AudioPlayer();
+  const [trackDetail, setTrackDetail] = useState<Track | null>(null);
+
+  const setNewCollection = (col: Track[]) => setTracksCollection(col);
+
+  const setNewTrackDetail = (track: Track | null) => setTrackDetail(track);
 
   return (
     <AppContext.Provider
       value={{
-        collection,
-        setCollection,
+        tracksCollection,
+        setNewCollection,
         trackDetail,
-        setTrackDetail,
+        setNewTrackDetail,
         audioplayer
       }}
     >
       {children}
     </AppContext.Provider>
   );
-}
+};
 
-export default AppContext;
+export default AppContextProvider;

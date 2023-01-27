@@ -6,7 +6,7 @@ import PlayButton from './PlayButton';
 import useAppState from '../hooks/useAppState';
 
 function AppHeader() {
-  const { collection, isPlaying, togglePlayPause, audioplayer, onFixAllTracks, onOpenFolder } = useAppState();
+  const { tracksCollection, isPlaying, togglePlayPause, audioplayer, onFixAllTracks, onOpenFolder } = useAppState();
 
   const btnProps = {
     color: 'white',
@@ -32,7 +32,7 @@ function AppHeader() {
         <PlayerView {...playerViewProps} />
       </div>
       <div className="mr-8 flex justify-around items-center">
-        {collection.length > 0 && (
+        {tracksCollection.length && (
           <>
             <button
               onClick={() => onOpenFolder()}

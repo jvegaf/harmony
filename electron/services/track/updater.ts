@@ -1,6 +1,7 @@
 import { ResultTag, Track } from '../../types/emusik';
 import { ParseDuration } from '../../utils';
-import PersistTrack from '../tag/nodeId3Saver';
+import logger from '../logger';
+// import PersistTrack from '../tag/nodeId3Saver';
 import GetArtwork from './artFetcher';
 
 const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
@@ -20,12 +21,16 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     artwork: tag.artworkUrl ? await GetArtwork(tag.artworkUrl) : undefined
   };
 
-  try {
-    await PersistTrack(newTrack);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
-  }
+  // Commented for debug
+  //
+  // try {
+  //   await PersistTrack(newTrack);
+  // } catch (error) {
+  //   // eslint-disable-next-line no-console
+  //   console.error(error);
+  // }
+
+  logger.info('Update Track deactivated');
 
   return newTrack;
 };

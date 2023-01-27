@@ -2,11 +2,14 @@
 // @ts-nocheck
 import React, { useContext } from 'react';
 import { Track } from '../../electron/types/emusik';
-import AppContext from '../context/AppContext';
+import { AppContext } from '../context/AppContext';
 import logger from '../../electron/services/logger';
+import { AppContextType } from '../@types/emusik';
 
 export default function useAppState() {
-  const { collection, setCollection, trackDetail, setTrackDetail, audioplayer } = useContext(AppContext);
+  const { tracksCollection, setNewCollection, trackDetail, setNewTrackDetail, audioplayer } = useContext(
+    AppContext
+  ) as AppContextType;
   const [isPlaying, setIsPlaying] = React.useState(false);
 
   const onOpenFolder = React.useCallback(async () => {
@@ -15,35 +18,41 @@ export default function useAppState() {
     if (!newTracks) return;
     logger.info('new tracks:', newTracks.length);
 
-    setCollection(newTracks);
-  }, [setCollection]);
+    setNewCollection(newTracks);
+  }, [setNewCollection]);
 
   const closeDetail = React.useCallback(() => {
-    setTrackDetail(undefined);
-  }, [setTrackDetail]);
+    setNewTrackDetail(undefined);
+  }, [setNewTrackDetail]);
 
   const saveChanges = React.useCallback(
     (track: Track) => {
       logger.info('track update', track);
 
       window.Main.PersistTrack(track);
-      const filtered = collection.filter(t => t.id !== track.id);
+      const filtered = tracksCollection.filter((t) => t.id !== track.id);
       const allTracks = [...filtered, track];
-      setCollection(allTracks);
+      setNewCollection(allTracks);
       if (trackDetail === track) {
         closeDetail();
       }
     },
-    [collection, setCollection, trackDetail, closeDetail]
+    [tracksCollection, setNewCollection, trackDetail, closeDetail]
   );
 
   const tracksFixedHandler = React.useCallback(
     (fixedTracks: Track[]) => {
-      const filtered = collection.filter(t => fixedTracks.includes(t) === false);
+      console.log('tracksCollection length: ' + tracksCollection.length);
+
+      const filtered = tracksCollection.filter((t) => fixedTracks.includes(t) === false);
+      console.log('filtered tracksCollection length: ' + filtered.length);
+
       const allTracks = filtered.concat(fixedTracks);
-      setCollection(allTracks);
+      console.log('all tracksCollection length: ' + allTracks.length);
+
+      setNewCollection(allTracks);
     },
-    [collection]
+    [tracksCollection, setNewCollection]
   );
 
   const showCtxMenu = React.useCallback(
@@ -54,7 +63,7 @@ export default function useAppState() {
     [window]
   );
 
-  const onFixAllTracks = React.useCallback(() => window.Main.FixTracks(collection), [collection]);
+  const onFixAllTracks = React.useCallback(() => window.Main.FixTracks(tracksCollection), [tracksCollection]);
 
   const playTrack = React.useCallback(
     (t: Track) => {
@@ -76,15 +85,14 @@ export default function useAppState() {
   }, [audioplayer]);
 
   return {
-    collection,
-    setCollection, // TODO: FIXME
+    tracksCollection,
     tracksFixedHandler,
     audioplayer,
     isPlaying,
     playTrack,
     togglePlayPause,
     trackDetail,
-    setTrackDetail,
+    setNewTrackDetail,
     onFixAllTracks,
     saveChanges,
     closeDetail,
