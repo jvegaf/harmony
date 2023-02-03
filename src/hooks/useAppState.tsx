@@ -7,7 +7,7 @@ import logger from '../../electron/services/logger';
 import { AppContextType } from '../@types/emusik';
 
 export default function useAppState() {
-  const { tracksCollection, setNewCollection, trackDetail, setNewTrackDetail, audioplayer } = useContext(
+  const { tracksCollection, setNewCollection, trackDetail, setNewTrackDetail, player } = useContext(
     AppContext
   ) as AppContextType;
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -42,13 +42,13 @@ export default function useAppState() {
 
   const tracksFixedHandler = React.useCallback(
     (fixedTracks: Track[]) => {
-      console.log('tracksCollection length: ' + tracksCollection.length);
+      console.log(`tracksCollection length: ${tracksCollection.length}`);
 
       const filtered = tracksCollection.filter((t) => fixedTracks.includes(t) === false);
-      console.log('filtered tracksCollection length: ' + filtered.length);
+      console.log(`filtered tracksCollection length: ${filtered.length}`);
 
       const allTracks = filtered.concat(fixedTracks);
-      console.log('all tracksCollection length: ' + allTracks.length);
+      console.log(`all tracksCollection length: ${allTracks.length}`);
 
       setNewCollection(allTracks);
     },
@@ -68,26 +68,26 @@ export default function useAppState() {
   const playTrack = React.useCallback(
     (t: Track) => {
       logger.info('track to play:', t);
-      audioplayer.setTrack(t);
-      audioplayer.play();
+      player.setTrack(t);
+      player.play();
       setIsPlaying(true);
     },
-    [audioplayer]
+    [player]
   );
 
   const togglePlayPause = React.useCallback(() => {
-    if (audioplayer.isPaused()) {
-      audioplayer.play();
+    if (player.isPaused()) {
+      player.play();
       setIsPlaying(true);
     }
-    audioplayer.pause();
+    player.pause();
     setIsPlaying(false);
-  }, [audioplayer]);
+  }, [player]);
 
   return {
     tracksCollection,
     tracksFixedHandler,
-    audioplayer,
+    player,
     isPlaying,
     playTrack,
     togglePlayPause,

@@ -8,7 +8,7 @@ export const AppContext = React.createContext<AppContextType | null>(null);
 
 const AppContextProvider = ({ children }) => {
   const [tracksCollection, setTracksCollection] = useState<Track[]>([]);
-  const audioplayer = new AudioPlayer();
+  const player = new AudioPlayer();
   const [trackDetail, setTrackDetail] = useState<Track | null>(null);
 
   const setNewCollection = (col: Track[]) => setTracksCollection(col);
@@ -22,7 +22,7 @@ const AppContextProvider = ({ children }) => {
         setNewCollection,
         trackDetail,
         setNewTrackDetail,
-        audioplayer
+        player
       }}
     >
       {children}

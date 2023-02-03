@@ -55,6 +55,7 @@ function createWindow() {
   }
   // Open the DevTools.
   win.webContents.openDevTools();
+  win.maximize();
 
   // For AppBar
   // ipcMain.on('minimize', () => {
