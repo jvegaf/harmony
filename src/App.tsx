@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Track } from '../electron/types/emusik';
+import { AppContextType } from './@types/emusik';
 import AppHeader from './components/AppHeader';
 import OnBoarding from './components/OnBoarding';
 import TrackDetailView from './components/TrackDetail';
 import TrackList from './components/TrackList';
+import { AppContext } from './context/AppContext';
 import useAppState from './hooks/useAppState';
 
 function App() {
-  const { tracksCollection, playTrack, setNewTrackDetail, trackDetail, tracksFixedHandler } = useAppState();
+  const { playTrack, setNewTrackDetail, trackDetail, tracksFixedHandler } = useAppState();
+  const { tracksCollection } = useContext(AppContext) as AppContextType;
   const [content, setContent] = useState(<OnBoarding />);
 
   useEffect(() => {
