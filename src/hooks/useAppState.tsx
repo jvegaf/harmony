@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import React, { useContext } from 'react';
+import React from 'react';
 import { Track } from '../../electron/types/emusik';
-import { AppContext } from '../context/AppContext';
 import logger from '../../electron/services/logger';
-import { AppContextType } from '../@types/emusik';
+import { LibraryContext } from '../context/LibraryContext';
+import { LibraryContextType } from '../@types/library';
+import AudioPlayer from '../lib/audioplayer';
 
 export default function useAppState() {
-  const { tracksCollection, addTrack, updateTrack, trackDetail, setNewTrackDetail, player } = useContext(
-    AppContext
-  ) as AppContextType;
+  const { tracksCollection, addTracks, updateTrack } = React.useContext(LibraryContext) as LibraryContextType;
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const player = new AudioPlayer();
 
   const onOpenFolder = React.useCallback(async () => {
     const newTracks = await window.Main.OpenFolder();
@@ -18,12 +18,8 @@ export default function useAppState() {
     if (!newTracks) return;
     logger.info('new tracks:', newTracks.length);
 
-    newTracks.map((t) => addTrack(t));
-  }, [addTrack]);
-
-  const closeDetail = React.useCallback(() => {
-    setNewTrackDetail(undefined);
-  }, [setNewTrackDetail]);
+    addTracks(newTracks);
+  }, [addTracks]);
 
   const saveChanges = React.useCallback(
     (track: Track) => {
@@ -31,16 +27,13 @@ export default function useAppState() {
 
       window.Main.PersistTrack(track);
       updateTrack(track);
-      if (trackDetail === track) {
-        closeDetail();
-      }
     },
-    [updateTrack, trackDetail, closeDetail]
+    [updateTrack]
   );
 
   const tracksFixedHandler = React.useCallback(
     (fixedTracks: Track[]) => {
-      fixedTracks.map((t) => updateTrack(t));
+      fixedTracks.forEach((t) => updateTrack(t));
     },
     [updateTrack]
   );
@@ -75,17 +68,13 @@ export default function useAppState() {
   }, [player]);
 
   return {
-    tracksCollection,
     tracksFixedHandler,
     player,
     isPlaying,
     playTrack,
     togglePlayPause,
-    trackDetail,
-    setNewTrackDetail,
     onFixAllTracks,
     saveChanges,
-    closeDetail,
     onOpenFolder,
     showCtxMenu
   };

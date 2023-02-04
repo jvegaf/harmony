@@ -9,15 +9,17 @@ import {
   RowDoubleClickedEvent
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Track } from '../../electron/types/emusik';
 import useAppState from '../hooks/useAppState';
-import { AppContext } from '../context/AppContext';
-import { AppContextType } from '../@types/emusik';
 
-const TrackList = () => {
+interface TrackListProps {
+  tracks: Track[];
+}
+
+const TrackList = (props: TrackListProps) => {
   const { playTrack, showCtxMenu } = useAppState();
-  const { tracksCollection } = useContext(AppContext) as AppContextType;
+  const { tracks } = props;
   const gridRef = useRef<AgGridReact>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [rowData, setRowData] = useState<Track[]>([]);
@@ -50,13 +52,13 @@ const TrackList = () => {
   }, []);
 
   useEffect(() => {
-    setRowData(tracksCollection);
-  }, [tracksCollection]);
+    setRowData(tracks);
+  }, [tracks]);
 
   const onGridReady = (params: GridReadyEvent) => {
     setGridApi(params.api);
 
-    setRowData(tracksCollection);
+    setRowData(tracks);
   };
 
   const onDblClick = useCallback(

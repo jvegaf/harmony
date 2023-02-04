@@ -1,12 +1,15 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React from 'react';
+import React, { useContext } from 'react';
 import PlayerView from './PlayerView';
 import PauseButton from './PauseButton';
 import PlayButton from './PlayButton';
 import useAppState from '../hooks/useAppState';
+import { LibraryContext } from '../context/LibraryContext';
+import { LibraryContextType } from '../@types/library';
 
 function AppHeader() {
-  const { tracksCollection, isPlaying, togglePlayPause, audioplayer, onFixAllTracks, onOpenFolder } = useAppState();
+  const { isPlaying, togglePlayPause, player, onFixAllTracks, onOpenFolder } = useAppState();
+  const { tracksCollection } = useContext(LibraryContext) as LibraryContextType;
 
   const btnProps = {
     color: 'white',
@@ -23,7 +26,7 @@ function AppHeader() {
     };
   }, [isPlaying]);
 
-  const playerViewProps = { player: audioplayer, isPlaying };
+  const playerViewProps = { player, isPlaying };
 
   return (
     <div className="h-20 bg-neutral-700 grid grid-rows-1 grid-cols-5">
