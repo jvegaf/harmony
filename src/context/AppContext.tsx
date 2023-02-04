@@ -11,7 +11,12 @@ const AppContextProvider = ({ children }) => {
   const player = new AudioPlayer();
   const [trackDetail, setTrackDetail] = useState<Track | null>(null);
 
-  const setNewCollection = (col: Track[]) => setTracksCollection(col);
+  const addTrack = (track: Track) => setTracksCollection([...tracksCollection, track]);
+
+  const updateTrack = (track: Track) => {
+    const ntracks = tracksCollection.filter((t) => t.id !== track.id);
+    setTracksCollection([...ntracks, track]);
+  };
 
   const setNewTrackDetail = (track: Track | null) => setTrackDetail(track);
 
@@ -19,7 +24,8 @@ const AppContextProvider = ({ children }) => {
     <AppContext.Provider
       value={{
         tracksCollection,
-        setNewCollection,
+        addTrack,
+        updateTrack,
         trackDetail,
         setNewTrackDetail,
         player

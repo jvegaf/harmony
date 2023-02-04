@@ -7,7 +7,7 @@ import logger from '../../electron/services/logger';
 import { AppContextType } from '../@types/emusik';
 
 export default function useAppState() {
-  const { tracksCollection, setNewCollection, trackDetail, setNewTrackDetail, player } = useContext(
+  const { tracksCollection, addTrack, updateTrack, trackDetail, setNewTrackDetail, player } = useContext(
     AppContext
   ) as AppContextType;
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -18,8 +18,8 @@ export default function useAppState() {
     if (!newTracks) return;
     logger.info('new tracks:', newTracks.length);
 
-    setNewCollection(newTracks);
-  }, [setNewCollection]);
+    newTracks.map((t) => addTrack(t));
+  }, [addTrack]);
 
   const closeDetail = React.useCallback(() => {
     setNewTrackDetail(undefined);
@@ -30,29 +30,19 @@ export default function useAppState() {
       logger.info('track update', track);
 
       window.Main.PersistTrack(track);
-      const filtered = tracksCollection.filter((t) => t.id !== track.id);
-      const allTracks = [...filtered, track];
-      setNewCollection(allTracks);
+      updateTrack(track);
       if (trackDetail === track) {
         closeDetail();
       }
     },
-    [tracksCollection, setNewCollection, trackDetail, closeDetail]
+    [updateTrack, trackDetail, closeDetail]
   );
 
   const tracksFixedHandler = React.useCallback(
     (fixedTracks: Track[]) => {
-      console.log(`tracksCollection length: ${tracksCollection.length}`);
-
-      const filtered = tracksCollection.filter((t) => fixedTracks.includes(t) === false);
-      console.log(`filtered tracksCollection length: ${filtered.length}`);
-
-      const allTracks = filtered.concat(fixedTracks);
-      console.log(`all tracksCollection length: ${allTracks.length}`);
-
-      setNewCollection(allTracks);
+      fixedTracks.map((t) => updateTrack(t));
     },
-    [tracksCollection, setNewCollection]
+    [updateTrack]
   );
 
   const showCtxMenu = React.useCallback(
