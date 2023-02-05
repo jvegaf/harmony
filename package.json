@@ -37,6 +37,8 @@
     "format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
   },
   "dependencies": {
+    "@emotion/react": "11.10.5",
+    "@table-library/react-table-library": "4.0.24",
     "@vitejs/plugin-react": "1.2.0",
     "ag-grid-community": "25.3.0",
     "ag-grid-react": "25.3.0",

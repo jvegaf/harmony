@@ -1,105 +1,79 @@
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
-import {
-  CellContextMenuEvent,
-  ColDef,
-  FirstDataRenderedEvent,
-  GridApi,
-  GridReadyEvent,
-  RowDoubleClickedEvent
-} from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Track } from '../../electron/types/emusik';
-import useAppState from '../hooks/useAppState';
+import React from 'react';
+import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library';
+import { CellSelect, HeaderCellSelect, useRowSelect } from '@table-library/react-table-library/select';
+import { useTheme } from '@table-library/react-table-library/theme';
+import { LibraryContextType } from '../@types/library';
+import { LibraryContext } from '../context/LibraryContext';
+import logger from '../../electron/services/logger';
 
-interface TrackListProps {
-  tracks: Track[];
-}
+const TrackList = () => {
+  const { tracksCollection } = React.useContext(LibraryContext) as LibraryContextType;
+  const data = { nodes: tracksCollection };
 
-const TrackList = (props: TrackListProps) => {
-  const { playTrack, showCtxMenu } = useAppState();
-  const { tracks } = props;
-  const gridRef = useRef<AgGridReact>(null);
-  const [gridApi, setGridApi] = useState<GridApi | null>(null);
-  const [rowData, setRowData] = useState<Track[]>([]);
-  const columnDefs = useMemo<ColDef[]>(
-    () => [
-      { field: 'title', minWidth: 150 },
-      { field: 'artist', minWidth: 90 },
-      { field: 'time', maxWidth: 70 },
-      { field: 'album', minWidth: 90 },
-      { field: 'genre', minWidth: 70 },
-      { field: 'year', maxWidth: 70 },
-      { field: 'bpm', maxWidth: 70 },
-      { field: 'bitrate', maxWidth: 70 },
-      { field: 'key', maxWidth: 90 }
-    ],
-    []
-  );
-  const containerStyle = useMemo(() => ({ width: '100%', height: '100%' }), []);
-  const gridStyle = useMemo(() => ({ height: '100%', width: '100%' }), []);
+  function onSelectChange(action, state) {
+    logger.info(action, state);
+  }
 
-  const defaultColDef = useMemo<ColDef>(() => {
-    return {
-      resizable: true,
-      sortable: true
-    };
-  }, []);
+  const select = useRowSelect(data, {
+    onChange: onSelectChange
+  });
 
-  const onFirstDataRendered = useCallback((params: FirstDataRenderedEvent) => {
-    gridRef.current?.api.sizeColumnsToFit();
-  }, []);
+  const theme = useTheme({
+    HeaderRow: `
+        color: #eaf5fd;
+        background-color: #1c2a2e;
+      `,
+    Row: `
+        color: #eaf5fd;
 
-  useEffect(() => {
-    setRowData(tracks);
-  }, [tracks]);
+        &:nth-of-type(odd) {
+          background-color: #23292b;
+        }
 
-  const onGridReady = (params: GridReadyEvent) => {
-    setGridApi(params.api);
+        &:nth-of-type(even) {
+          background-color: #2e3436;
+        }
 
-    setRowData(tracks);
-  };
+        &:hover {
+          background-color: #6e6e6e;
 
-  const onDblClick = useCallback(
-    (event: RowDoubleClickedEvent) => {
-      event.event?.preventDefault();
-      const { data } = event;
-      playTrack(data as Track);
-    },
-    [playTrack]
-  );
-
-  const onShowCtxtMenu = useCallback(
-    (event: CellContextMenuEvent) => {
-      event.event?.preventDefault();
-      if (!event.node.isSelected()) {
-        event.node.setSelected(true, true);
-      }
-
-      const selected = event.api.getSelectedRows();
-      showCtxMenu(selected);
-    },
-    [showCtxMenu]
-  );
+        &:select {
+          background-color: #1793f8;
+        }
+    }
+      `
+  });
 
   return (
-    <div style={containerStyle}>
-      <div style={gridStyle} className="ag-theme-alpine">
-        <AgGridReact
-          ref={gridRef}
-          rowSelection="multiple"
-          rowData={rowData}
-          columnDefs={columnDefs}
-          defaultColDef={defaultColDef}
-          onGridReady={onGridReady}
-          onFirstDataRendered={onFirstDataRendered}
-          onRowDoubleClicked={(e) => onDblClick(e)}
-          onCellContextMenu={(e) => onShowCtxtMenu(e)}
-          suppressCellSelection
-        />
-      </div>
-    </div>
+    <Table data={data} select={select} theme={theme}>
+      {(tableList) => (
+        <>
+          <Header>
+            <HeaderRow>
+              <HeaderCellSelect />
+              <HeaderCell>Title</HeaderCell>
+              <HeaderCell>Artist</HeaderCell>
+              <HeaderCell>BPM</HeaderCell>
+              <HeaderCell>Album</HeaderCell>
+              <HeaderCell>Year</HeaderCell>
+            </HeaderRow>
+          </Header>
+
+          <Body>
+            {tableList.map((item) => (
+              <Row item={item} key={item.id}>
+                <CellSelect item={item} />
+                <Cell>{item.title}</Cell>
+                <Cell>{item.artist}</Cell>
+                <Cell>{item.bpm}</Cell>
+                <Cell>{item.album}</Cell>
+                <Cell>{item.year}</Cell>
+              </Row>
+            ))}
+          </Body>
+        </>
+      )}
+    </Table>
   );
 };
 
