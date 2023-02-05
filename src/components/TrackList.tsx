@@ -22,9 +22,14 @@ const TrackList = () => {
     HeaderRow: `
         color: #eaf5fd;
         background-color: #1c2a2e;
+        border-bottom: 1px solid #6e6e6e;
       `,
     Row: `
         color: #eaf5fd;
+       
+        &:not(:last-of-type) > .td {
+          border-bottom: 1px solid #6e6e6e;
+        } 
 
         &:nth-of-type(odd) {
           background-color: #23292b;
@@ -36,16 +41,16 @@ const TrackList = () => {
 
         &:hover {
           background-color: #6e6e6e;
-
-        &:select {
-          background-color: #1793f8;
         }
-    }
+
+        &.row-select-selected {
+              background-color: #055D85;
+            }
       `
   });
 
   return (
-    <Table data={data} select={select} theme={theme}>
+    <Table data={data} select={select} theme={theme} layout={{ fixedHeader: true }}>
       {(tableList) => (
         <>
           <Header>

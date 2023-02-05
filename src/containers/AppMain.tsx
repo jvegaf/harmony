@@ -26,9 +26,9 @@ const AppMain = () => {
   }, [tracksCollection]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       <AppHeader />
-      <div className="grow bg-neutral-800">{content}</div>
+      <div className="grow bg-neutral-800 overflow-y-auto">{content}</div>
     </div>
   );
 };
