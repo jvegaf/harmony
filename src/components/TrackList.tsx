@@ -5,10 +5,12 @@ import { useTheme } from '@table-library/react-table-library/theme';
 import { LibraryContextType } from '../@types/library';
 import { LibraryContext } from '../context/LibraryContext';
 import logger from '../../electron/services/logger';
+import useAppState from '../hooks/useAppState';
 
 const TrackList = () => {
   const { tracksCollection } = React.useContext(LibraryContext) as LibraryContextType;
   const data = { nodes: tracksCollection };
+  const { playTrack } = useAppState();
 
   function onSelectChange(action, state) {
     logger.info(action, state);
@@ -17,6 +19,10 @@ const TrackList = () => {
   const select = useRowSelect(data, {
     onChange: onSelectChange
   });
+
+  const clickHandler = (title) => logger.info(title);
+
+  const dblClickHandler = (item) => playTrack(item);
 
   const theme = useTheme({
     HeaderRow: `
@@ -66,7 +72,12 @@ const TrackList = () => {
 
           <Body>
             {tableList.map((item) => (
-              <Row item={item} key={item.id}>
+              <Row
+                item={item}
+                key={item.id}
+                onClick={() => clickHandler(item.title)}
+                onDoubleClick={() => dblClickHandler(item)}
+              >
                 <CellSelect item={item} />
                 <Cell>{item.title}</Cell>
                 <Cell>{item.artist}</Cell>

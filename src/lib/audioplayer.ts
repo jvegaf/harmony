@@ -17,6 +17,8 @@ class AudioPlayer {
 
   public threshold: number;
 
+  public isPlaying: boolean;
+
   constructor(options?: PlayerOptions) {
     const mergedOptions = {
       playbackRate: 1,
@@ -35,6 +37,7 @@ class AudioPlayer {
     this.audio.playbackRate = mergedOptions.playbackRate;
     this.audio.volume = mergedOptions.volume;
     this.audio.muted = mergedOptions.muted;
+    this.isPlaying = false;
 
     this.threshold = 0.75;
     this.durationThresholdReached = false;
@@ -42,16 +45,18 @@ class AudioPlayer {
 
   async play(): Promise<void> {
     if (!this.audio.src) throw new Error('Trying to play a track but not audio.src is defined');
-
+    this.isPlaying = true;
     await this.audio.play();
   }
 
   pause() {
     this.audio.pause();
+    this.isPlaying = false;
   }
 
   stop() {
     this.audio.pause();
+    this.isPlaying = false;
   }
 
   mute() {
@@ -97,11 +102,12 @@ class AudioPlayer {
     await this.audio.setSinkId(deviceId);
   }
 
-  setTrack(track: Track) {
+  playTrack(track: Track) {
     // When we change song, need to update the thresholdReached indicator.
     this.durationThresholdReached = false;
     this.track = track;
     this.audio.src = `file:///${track.filepath}`;
+    this.play();
   }
 
   setAudioCurrentTime(currentTime: number) {

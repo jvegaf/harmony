@@ -2,29 +2,13 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { Track } from '../../electron/types/emusik';
-import AudioPlayer from '../lib/audioplayer';
+import useAppState from '../hooks/useAppState';
 
-interface PlayerViewProps {
-  player: AudioPlayer;
-  isPlaying: boolean;
-}
-
-const PlayerView: React.FC<PlayerViewProps> = ({ player, isPlaying }) => {
+const PlayerView: React.FC = () => {
   const [barWidth, setBarWidth] = React.useState('0%');
   const [track, setTrack] = React.useState<Track>();
   const [duration, setDuration] = React.useState(0);
-
-  React.useEffect(() => {
-    if (isPlaying) {
-      const t = player.getTrack() as Track;
-      setTrack(t);
-      setDuration(t.duration);
-    }
-    return () => {
-      setDuration(0);
-      setBarWidth('0%');
-    };
-  }, []);
+  const { player } = useAppState();
 
   const seekBarElem = React.useRef<HTMLDivElement>(null);
 

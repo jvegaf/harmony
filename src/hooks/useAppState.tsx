@@ -9,7 +9,6 @@ import AudioPlayer from '../lib/audioplayer';
 
 export default function useAppState() {
   const { tracksCollection, addTracks, updateTrack } = React.useContext(LibraryContext) as LibraryContextType;
-  const [isPlaying, setIsPlaying] = React.useState(false);
   const player = new AudioPlayer();
 
   const onOpenFolder = React.useCallback(async () => {
@@ -51,9 +50,7 @@ export default function useAppState() {
   const playTrack = React.useCallback(
     (t: Track) => {
       logger.info('track to play:', t);
-      player.setTrack(t);
-      player.play();
-      setIsPlaying(true);
+      player.playTrack(t);
     },
     [player]
   );
@@ -61,16 +58,13 @@ export default function useAppState() {
   const togglePlayPause = React.useCallback(() => {
     if (player.isPaused()) {
       player.play();
-      setIsPlaying(true);
     }
     player.pause();
-    setIsPlaying(false);
   }, [player]);
 
   return {
     tracksFixedHandler,
     player,
-    isPlaying,
     playTrack,
     togglePlayPause,
     onFixAllTracks,
