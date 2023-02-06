@@ -5,11 +5,9 @@ import { Track } from '../../electron/types/emusik';
 import logger from '../../electron/services/logger';
 import { LibraryContext } from '../context/LibraryContext';
 import { LibraryContextType } from '../@types/library';
-import AudioPlayer from '../lib/audioplayer';
 
 export default function useAppState() {
   const { tracksCollection, addTracks, updateTrack } = React.useContext(LibraryContext) as LibraryContextType;
-  const player = new AudioPlayer();
 
   const onOpenFolder = React.useCallback(async () => {
     const newTracks = await window.Main.OpenFolder();
@@ -47,26 +45,8 @@ export default function useAppState() {
 
   const onFixAllTracks = React.useCallback(() => window.Main.FixTracks(tracksCollection), [tracksCollection]);
 
-  const playTrack = React.useCallback(
-    (t: Track) => {
-      logger.info('track to play:', t);
-      player.playTrack(t);
-    },
-    [player]
-  );
-
-  const togglePlayPause = React.useCallback(() => {
-    if (player.isPaused()) {
-      player.play();
-    }
-    player.pause();
-  }, [player]);
-
   return {
     tracksFixedHandler,
-    player,
-    playTrack,
-    togglePlayPause,
     onFixAllTracks,
     saveChanges,
     onOpenFolder,

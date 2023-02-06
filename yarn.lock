@@ -2883,6 +2883,11 @@ hosted-git-info@^4.0.2:
   dependencies:
     lru-cache "^6.0.0"
 
+howler@^2.2.1:
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/howler/-/howler-2.2.3.tgz#a2eff9b08b586798e7a2ee17a602a90df28715da"
+  integrity sha512-QM0FFkw0LRX1PR8pNzJVAY25JhIWvbKMBFM4gqk+QdV+kPXOhleWGCB6AiAF/goGjIHK2e/nIElplvjQwhr0jg==
+
 htmlparser2@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/htmlparser2/-/htmlparser2-6.1.0.tgz#c4d762b6c3371a05dbe65e94ae43a9f845fb8fb7"
@@ -4007,6 +4012,13 @@ react-refresh@^0.11.0:
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.11.0.tgz#77198b944733f0f1f1a90e791de4541f9f074046"
   integrity sha512-F27qZr8uUqwhWZboondsPx8tnC3Ct3SxZA3V5WyEvujRyyNv0VYPhoBg1gZ8/MV5tubQp76Trw8lTv9hzRBa+A==
+
+react-use-audio-player@1.2.6:
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/react-use-audio-player/-/react-use-audio-player-1.2.6.tgz#e50b6183029493c693c89e5822f8530b7648e864"
+  integrity sha512-ukFF5WOxsFYd44AaPXzFI4HltWaPD68+iJ9aDicn9FRBJ5poJUPO/WjFl5nk0tRYiyve3z711Oz79LYzCahhFQ==
+  dependencies:
+    howler "^2.2.1"
 
 react-virtualized-auto-sizer@1.0.6:
   version "1.0.6"

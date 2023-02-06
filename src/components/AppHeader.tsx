@@ -1,14 +1,17 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React, { useContext } from 'react';
+import { useAudioPlayer } from 'react-use-audio-player';
 import PlayerView from './PlayerView';
 import PlayButton from './PlayButton';
 import useAppState from '../hooks/useAppState';
 import { LibraryContext } from '../context/LibraryContext';
 import { LibraryContextType } from '../@types/library';
+import PauseButton from './PauseButton';
 
 function AppHeader() {
-  const { togglePlayPause, player, onFixAllTracks, onOpenFolder } = useAppState();
+  const { onFixAllTracks, onOpenFolder } = useAppState();
   const { tracksCollection } = useContext(LibraryContext) as LibraryContextType;
+  const { togglePlayPause, playing } = useAudioPlayer();
 
   const btnProps = {
     color: 'white',
@@ -19,7 +22,7 @@ function AppHeader() {
   return (
     <div className="h-20 bg-neutral-700 grid grid-rows-1 grid-cols-5">
       <div className="flex justify-center items-center">
-        <PlayButton {...btnProps} />
+        {playing ? <PauseButton {...btnProps} /> : <PlayButton {...btnProps} />}
       </div>
       <div className="flex justify-center items-center col-span-3">
         <PlayerView />
