@@ -16,7 +16,6 @@
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "jest",
     "test:clean": "jest --clearCache",
-    "prepare": "husky install",
     "stylelint": "prettier-eslint --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
     "format": "prettier-eslint --write \"src/**/*.[ts,tsx,js,jsx]\""
   },
