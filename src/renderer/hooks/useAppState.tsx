@@ -10,7 +10,7 @@ export default function useAppState() {
 
   const onOpenFolder = React.useCallback(() => window.Main.OpenFolder(), []);
 
-  const onFixTracks = React.useCallback((selected: TrackId[]) => window.Main.FixTracks(selected), []);
+  const onFixTracks = React.useCallback((selected: Track[]) => window.Main.FixTracks(selected), []);
 
   const closeDetail = React.useCallback(() => setTrackDetail(null), [setTrackDetail]);
 
