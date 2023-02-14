@@ -35,6 +35,11 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
     onFixTracks([track]);
   };
 
+  const playTrackHandler = (track) => {
+    console.log(track);
+    playTrack(track);
+  };
+
   return (
     <Box sx={{ height: height }}>
       <DataTable
@@ -53,7 +58,7 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
             {
               key: "play",
               color: "green",
-              onClick: () => playTrack(track),
+              onClick: () => playTrackHandler(track),
             },
             {
               key: "fixTags",
