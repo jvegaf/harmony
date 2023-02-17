@@ -73,9 +73,9 @@ export const Container = styled.div`
       }
 
       ${
-  '' /* In this example we use an absolutely position resizer,
+        '' /* In this example we use an absolutely position resizer,
      so this is required. */
-}
+      }
       position: relative;
 
       :last-child {

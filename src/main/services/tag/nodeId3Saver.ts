@@ -1,26 +1,25 @@
-import * as NodeId3 from 'node-id3';
-import type { Track } from '../../../shared/types/emusik';
-import { log } from './../log/log';
+import * as NodeId3 from "node-id3";
+import type { Track } from "../../../shared/types/emusik";
+import { log } from "../log/log";
 
 const PersistTrack = (track: Track) => {
   const { title, artist, album, year, genre, artwork, bpm, key } = track;
 
-
-  const beats   = bpm ? bpm.toString() : undefined;
+  const beats = bpm ? bpm.toString() : undefined;
   const yearStr = year ? year.toString() : undefined;
-  const tags    = {
+  const tags = {
     title,
     artist,
     album,
-    year:  yearStr,
+    year: yearStr,
     genre,
     image: artwork,
-    bpm:   beats,
+    bpm: beats,
     key,
   } as NodeId3.Tags;
 
   NodeId3.update(tags, track.filepath, (_: unknown, err: Error) => {
-    if (err){
+    if (err) {
       log.error(`Error persisting track: ${err}`);
     }
   });
