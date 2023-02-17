@@ -91,7 +91,7 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
                   key={item.id}
                   item={item}
                   className={item.id === playingId ? 'playing' : ''}
-                  onClick={(item, event) => console.log('Click Row', item, event)}
+                  onContextMenu={(item, event) => console.log('Click Row', item, event)}
                   onDoubleClick={(item) => playTrack(item)}
                 >
                   <Cell>{item.title}</Cell>
