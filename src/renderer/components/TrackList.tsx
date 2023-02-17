@@ -18,10 +18,6 @@ interface TrackListProps {
   onFixTracks: (tracks: Track[]) => void;
 }
 
-// const useStyles = createStyles(() => ({
-//   isPlaying: { backgroundColor: '#3C4F91' },
-// }));
-
 const theme = useTheme({
   BaseRow: `
         font-size: 16px;
@@ -50,6 +46,10 @@ const theme = useTheme({
 
         &.row-select-selected, &.row-select-single-selected {
           background-color: #43495e;
+        }
+
+        &.playing {
+          background-color: #3C4F91;
         } 
       `,
   BaseCell: `
@@ -87,7 +87,13 @@ const TrackListView: React.FC<TrackListProps> = (props) => {
 
             <Body>
               {tableList.map((item) => (
-                <Row key={item.id} item={item}>
+                <Row
+                  key={item.id}
+                  item={item}
+                  className={item.id === playingId ? 'playing' : ''}
+                  onClick={(item, event) => console.log('Click Row', item, event)}
+                  onDoubleClick={(item) => playTrack(item)}
+                >
                   <Cell>{item.title}</Cell>
                   <Cell>{item.artist}</Cell>
                   <Cell>{item.time}</Cell>
