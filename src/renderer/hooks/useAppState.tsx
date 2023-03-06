@@ -5,14 +5,12 @@ import type { Track, TrackId } from "../../shared/types/emusik";
 import AppContext from "../context/AppContext";
 
 export default function useAppState() {
-  const { trackDetail, setTrackDetail, tracksLoaded, setTracksLoaded } = React.useContext(AppContext);
+  const { tracksLoaded, setTracksLoaded } = React.useContext(AppContext);
   const { setTrackPlaying, setIsPlaying, setPlayingId } = React.useContext(PlayerContext) as PlayerContextType;
 
   const onOpenFolder = React.useCallback(() => window.Main.OpenFolder(), []);
 
   const onFixTracks = React.useCallback((selected: Track[]) => window.Main.FixTracks(selected), []);
-
-  const closeDetail = React.useCallback(() => setTrackDetail(null), [setTrackDetail]);
 
   const saveChanges = React.useCallback((track: Track) => window.Main.PersistTrack(track), []);
 
@@ -28,18 +26,13 @@ export default function useAppState() {
     setPlayingId(track.id);
   };
 
-  const updateTrackDetail = (track: Track) => setTrackDetail(track.id);
-
   return {
     playTrack,
-    trackDetail,
-    updateTrackDetail,
     onFixTrack,
     onFixTracks,
     onFixAllTracks,
     onFindArtwork,
     saveChanges,
-    closeDetail,
     onOpenFolder,
     tracksLoaded,
     setTracksLoaded,

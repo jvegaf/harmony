@@ -9,55 +9,54 @@ import {
   Stack,
   TextInput
 } from '@mantine/core';
-import { useForm } from '@mantine/hooks';
+import { useForm } from '@mantine/form';
 import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Placeholder from '../../../assets/placeholder.png';
 import type { Track } from '../../shared/types/emusik';
 import useAppState from '../hooks/useAppState';
-import styles from './TrackDetail.module.css';
+import styles from './TrackDetailView.module.css';
 interface TrackDetailProps {
   track: Track;
-  close: () => void;
 }
 
-const TrackDetail: React.FC<TrackDetailProps> = ({ track, close }) => {
+const TrackDetail: React.FC<TrackDetailProps> = ({ track }) => {
   const { saveChanges, onFindArtwork } = useAppState();
+  const navigate = useNavigate();
+
   const form = useForm({
     initialValues: {
-      title:   track.title,
-      artist:  track.artist,
-      album:   track.album,
-      genre:   track.genre,
-      bpm:     track.bpm,
-      key:     track.key,
-      year:    track.year,
+      title: track.title,
+      artist: track.artist,
+      album: track.album,
+      genre: track.genre,
+      bpm: track.bpm,
+      key: track.key,
+      year: track.year,
       artwork: track.artwork
     }
   });
-  const [ srcData, setSrcData ] = React.useState(Placeholder);
+  const [srcData, setSrcData] = React.useState(Placeholder);
 
   React.useEffect(() => {
     const { artwork } = track;
 
-    if (artwork){
-      const blob = new Blob([ artwork.imageBuffer ], { type: artwork.mime });
+    if (artwork) {
+      const blob = new Blob([artwork.imageBuffer], { type: artwork.mime });
 
       const src = URL.createObjectURL(blob);
       setSrcData(src);
     }
 
     return () => setSrcData(Placeholder);
-  }, [ track ]);
+  }, [track]);
 
-  const onCancel = React.useCallback(() => close(), [ close ]);
+  const onCancel = () => navigate('/');
 
-  const onSave = React.useCallback(
-    (values) => {
-      saveChanges({ ...track, ...values });
-      close();
-    },
-    [ close, saveChanges, track ]
-  );
+  const onSave = (values: Track) => {
+    saveChanges({ ...track, ...values });
+    navigate('/');
+  };
 
   const onFindArtworkListener = () => onFindArtwork(track);
 
@@ -137,4 +136,24 @@ const TrackDetail: React.FC<TrackDetailProps> = ({ track, close }) => {
   );
 };
 
-export default TrackDetail;
+const TrackDetailView = () => {
+  const { trackId } = useParams();
+  const [track, setTrack] = React.useState(null);
+
+  React.useEffect(() => {
+    if (trackId) {
+      const detailed = window.Main.GetTrack(trackId);
+      setTrack(detailed);
+    }
+
+    return () => setTrack(null);
+  }, [trackId])
+
+  return (
+    <>
+      {track && <TrackDetail track={track} />}
+    </>
+  );
+}
+
+export default TrackDetailView;
