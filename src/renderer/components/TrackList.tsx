@@ -1,142 +1,117 @@
+import 'ag-grid-community/dist/styles/ag-grid.css';
+import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
+import {
+  CellContextMenuEvent,
+  ColDef,
+  FirstDataRenderedEvent,
+  GridApi,
+  GridReadyEvent,
+  RowDoubleClickedEvent
+} from 'ag-grid-community';
+import { AgGridReact } from 'ag-grid-react';
 import React from 'react';
-import { Box, createStyles } from '@mantine/core';
-import { useRowSelect } from '@table-library/react-table-library/select';
-import { useViewportSize } from '@mantine/hooks';
-import type { Track, TrackId } from 'shared/types/emusik';
-import { useTheme } from '@table-library/react-table-library/theme';
 import useAppState from '../hooks/useAppState';
-import PlayerContext from 'renderer/context/PlayerContext';
-import { PlayerContextType } from 'renderer/@types/emusik';
-import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library';
+import { Track, TrackId } from 'shared/types/emusik';
 
-interface TrackListProps {
-  height: number;
-  tracks: Track[];
-  playingId?: TrackId;
-  playTrack: (track: Track) => void;
-  updateTrackDetail: (id: TrackId) => void;
-  onFixTracks: (tracks: Track[]) => void;
-}
-
-const theme = useTheme({
-  BaseRow: `
-        font-size: 16px;
-  `,
-  HeaderRow: `
-        background-color: #23292b;
-
-        .th {
-            border-bottom: 1px solid #a0a8ae;
-        }
-      `,
-  Row: `
-
-
-        &:nth-of-type(odd) {
-          background-color: #2D3538;
-        }
-
-        &:nth-of-type(even) {
-          background-color: #293133;
-        }
-
-        .td {
-          border-bottom: 1px solid #a0a8ae;
-        }
-
-        &.row-select-selected, &.row-select-single-selected {
-          background-color: #43495e;
-        }
-
-        &.playing {
-          background-color: #3C4F91;
-        } 
-      `,
-  BaseCell: `
-        padding: 10px 16px;
-      `,
-});
-
-const TrackListView: React.FC<TrackListProps> = (props) => {
-  const { height, columns, tracks, playTrack, playingId, updateTrackDetail, onFixTracks } = props;
-
-  const data = { nodes: tracks };
-
-  const onSelectionChange = (action, state) => console.log(action, state);
-
-  const select = useRowSelect(data, {
-    onChange: onSelectionChange,
-  });
-
-  return (
-    <Box sx={{ height }}>
-      <Table data={data} theme={theme} layout={{ fixedHeader: true }} select={select}>
-        {(tableList) => (
-          <>
-            <Header>
-              <HeaderRow>
-                <HeaderCell>Title</HeaderCell>
-                <HeaderCell>Artist</HeaderCell>
-                <HeaderCell>Time</HeaderCell>
-                <HeaderCell>Album</HeaderCell>
-                <HeaderCell>Bpm</HeaderCell>
-                <HeaderCell>Key</HeaderCell>
-                <HeaderCell>Year</HeaderCell>
-              </HeaderRow>
-            </Header>
-
-            <Body>
-              {tableList.map((item) => (
-                <Row
-                  key={item.id}
-                  item={item}
-                  className={item.id === playingId ? 'playing' : ''}
-                  onContextMenu={(item, event) => console.log('Click Row', item, event)}
-                  onDoubleClick={(item) => playTrack(item)}
-                >
-                  <Cell>{item.title}</Cell>
-                  <Cell>{item.artist}</Cell>
-                  <Cell>{item.time}</Cell>
-                  <Cell>{item.album}</Cell>
-                  <Cell>{item.bpm}</Cell>
-                  <Cell>{item.key}</Cell>
-                  <Cell>{item.year}</Cell>
-                </Row>
-              ))}
-            </Body>
-          </>
-        )}
-      </Table>
-    </Box>
+const TrackListView = ({ tracks }) => {
+  const { playTrack } = useAppState();
+  const gridRef = React.useRef<AgGridReact>(null);
+  const [gridApi, setGridApi] = React.useState<GridApi | null>(null);
+  const [rowData, setRowData] = React.useState<Track[]>([]);
+  const columnDefs = React.useMemo<ColDef[]>(
+    () => [
+      { field: 'title', minWidth: 150 },
+      { field: 'artist', minWidth: 90 },
+      { field: 'time', maxWidth: 70 },
+      { field: 'album', minWidth: 90 },
+      { field: 'genre', minWidth: 70 },
+      { field: 'year', maxWidth: 70 },
+      { field: 'bpm', maxWidth: 70 },
+      { field: 'bitrate', maxWidth: 70 },
+      { field: 'key', maxWidth: 70 }
+    ],
+    []
   );
-};
+  const containerStyle = React.useMemo(() => ({ width: '100%', height: '100%' }), []);
+  const gridStyle = React.useMemo(() => ({ height: '100%', width: '100%' }), []);
 
-export const TrackList: React.FC = () => {
-  const { tracksLoaded, updateTrackDetail, playTrack, onFixTracks } = useAppState();
-  const { playingId } = React.useContext(PlayerContext) as PlayerContextType;
-  const { height } = useViewportSize();
-  const [tracks, setTracks] = React.useState([]);
+  const defaultColDef = React.useMemo<ColDef>(() => {
+    return {
+      resizable: true,
+      sortable: true
+    };
+  }, []);
 
-  React.useEffect(() => {
-    if (window.Main) {
-      window.Main.on('all-tracks', (updatedTracks) => setTracks(updatedTracks));
-    }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const onFirstDataRendered = React.useCallback((params: FirstDataRenderedEvent) => {
+    gridRef.current?.api.sizeColumnsToFit();
   }, []);
 
   React.useEffect(() => {
-    if (tracksLoaded) {
-      window.Main.GetAll();
-    }
-  }, [tracksLoaded]);
+    setRowData(tracks);
+  }, [tracks]);
 
-  const tableprops = {
-    height,
-    tracks,
-    playingId,
-    playTrack,
-    updateTrackDetail,
-    onFixTracks,
+  const onGridReady = (params: GridReadyEvent) => {
+    setGridApi(params.api);
+
+    setRowData(tracks);
   };
 
-  return <TrackListView {...tableprops} />;
+  const onDblClick = React.useCallback(
+    (event: RowDoubleClickedEvent) => {
+      event.event?.preventDefault();
+      const { data } = event;
+      playTrack(data.id as TrackId);
+    },
+    [playTrack]
+  );
+
+  const onShowCtxtMenu = React.useCallback(
+    (event: CellContextMenuEvent) => {
+      event.event?.preventDefault();
+      if (!event.node.isSelected()) {
+        event.node.setSelected(true, true);
+      }
+
+      const selected = (event.api.getSelectedRows() as Track[]).map((t) => t.id);
+      window.Main.ShowContextMenu(selected);
+    },
+    []
+  );
+
+  return (
+    <div style={containerStyle}>
+      <div style={gridStyle} className='ag-theme-alpine'>
+        <AgGridReact
+          ref={gridRef}
+          rowSelection='multiple'
+          rowData={rowData}
+          columnDefs={columnDefs}
+          defaultColDef={defaultColDef}
+          onGridReady={onGridReady}
+          onFirstDataRendered={onFirstDataRendered}
+          onRowDoubleClicked={(e) => onDblClick(e)}
+          onCellContextMenu={(e) => onShowCtxtMenu(e)}
+          suppressCellSelection
+        />
+      </div>
+    </div>
+  );
 };
+
+const TrackList = () => {
+  const [tracks, setTracks] = React.useState([]);
+
+  React.useEffect(() => {
+    window.Main.on('all-tracks', (_, allTracks) => setTracks(allTracks));
+  });
+
+  return (
+    <>
+      {tracks.length && <TrackListView tracks={tracks} />}
+    </>
+  );
+};
+
+export default TrackList;
+

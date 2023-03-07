@@ -1,5 +1,5 @@
-import { contextBridge, ipcRenderer } from "electron";
-import type { Track, TrackId } from "shared/types/emusik";
+import { contextBridge, ipcRenderer } from 'electron';
+import type { Track, TrackId } from 'shared/types/emusik';
 
 declare global {
   interface Window {
@@ -8,17 +8,18 @@ declare global {
   }
 }
 const api = {
-  OpenFolder: () => ipcRenderer.send("open-folder"),
-  FixTrack: (trackId: TrackId) => ipcRenderer.send("fix-track", trackId),
-  FixTracks: (tracks: Track[]) => ipcRenderer.send("fix-tracks", tracks),
-  PersistTrack: (track: Track) => ipcRenderer.send("persist", track),
-  FixAll: () => ipcRenderer.send("fix-all"),
-  GetTrack: (trackId: TrackId) => ipcRenderer.sendSync("get-track", trackId),
-  GetAll: () => ipcRenderer.send("get-all"),
+  ShowContextMenu: (selected: TrackId[]) => ipcRenderer.send('show-context-menu', selected),
+  OpenFolder: () => ipcRenderer.send('open-folder'),
+  FixTrack: (trackId: TrackId) => ipcRenderer.send('fix-track', trackId),
+  FixTracks: (tracks: TrackId[]) => ipcRenderer.send('fix-tracks', tracks),
+  PersistTrack: (track: Track) => ipcRenderer.send('persist', track),
+  FixAll: () => ipcRenderer.send('fix-all'),
+  GetTrack: (trackId: TrackId) => ipcRenderer.sendSync('get-track', trackId),
+  GetAll: () => ipcRenderer.send('get-all'),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Log: (...args: any[]) => ipcRenderer.send("log", ...args),
-  FindArtWork: (track: Track) => ipcRenderer.send("find-artwork", track),
-  SaveArtWork: (artTrack) => ipcRenderer.send("save-artwork", artTrack),
+  Log: (...args: any[]) => ipcRenderer.send('log', ...args),
+  FindArtWork: (track: Track) => ipcRenderer.send('find-artwork', track),
+  SaveArtWork: (artTrack) => ipcRenderer.send('save-artwork', artTrack),
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(channel: string, func: (...args: any[]) => void) {
@@ -30,6 +31,6 @@ const api = {
   },
 };
 
-contextBridge.exposeInMainWorld("Main", api);
+contextBridge.exposeInMainWorld('Main', api);
 
-contextBridge.exposeInMainWorld("ipcRenderer", ipcRenderer);
+contextBridge.exposeInMainWorld('ipcRenderer', ipcRenderer);

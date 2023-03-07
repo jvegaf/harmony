@@ -1,7 +1,9 @@
 import { createStyles } from '@mantine/core';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AudioPlayerProvider } from 'react-use-audio-player';
 import useAppState from 'renderer/hooks/useAppState';
+import { TrackId } from 'shared/types/emusik';
 import AppHeader from '../components/AppHeader';
 import OnBoarding from '../components/OnBoarding';
 import { TrackList } from '../components/TrackList';
@@ -23,7 +25,8 @@ const useStyles = createStyles((theme) => ({
 
 const MainView = () => {
   const { classes } = useStyles();
-  const { setTracksLoaded, tracksLoaded } = useAppState();
+  const { setTracksLoaded, tracksLoaded, playTrack } = useAppState();
+  const navigate = useNavigate();
 
   const log = useLog();
 
@@ -33,6 +36,14 @@ const MainView = () => {
       setTracksLoaded(true);
       window.Main.GetAll();
     });
+
+    window.Main.on('view-detail-command', (trackId: TrackId) => navigate(`/detail/${trackId}`));
+
+    window.Main.on('play-command', (trackId: TrackId) => playTrack(trackId));
+
+    window.Main.on('fix-track-command', (trackId: TrackId) => window.Main.FixTrack(trackId));
+
+    window.Main.on('fix-tracks-command', (selected: TrackId[]) => window.Main.FixTracks(selected));
   }, []);
 
   return (

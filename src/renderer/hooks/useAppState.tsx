@@ -1,8 +1,8 @@
-import React from "react";
-import { PlayerContextType } from "renderer/@types/emusik";
-import PlayerContext from "renderer/context/PlayerContext";
-import type { Track, TrackId } from "../../shared/types/emusik";
-import AppContext from "../context/AppContext";
+import React from 'react';
+import { PlayerContextType } from 'renderer/@types/emusik';
+import PlayerContext from 'renderer/context/PlayerContext';
+import type { Track, TrackId } from '../../shared/types/emusik';
+import AppContext from '../context/AppContext';
 
 export default function useAppState() {
   const { tracksLoaded, setTracksLoaded } = React.useContext(AppContext);
@@ -20,10 +20,11 @@ export default function useAppState() {
 
   const onFindArtwork = React.useCallback((track: Track) => window.Main.FindArtWork(track), []);
 
-  const playTrack = (track: Track) => {
+  const playTrack = (trackId: TrackId) => {
+    const track = window.Main.GetTrack(trackId);
     setTrackPlaying(track);
     setIsPlaying(true);
-    setPlayingId(track.id);
+    setPlayingId(trackId);
   };
 
   return {

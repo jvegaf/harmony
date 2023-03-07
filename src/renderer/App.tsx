@@ -3,6 +3,7 @@ import { MemoryRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
 import { AppContextProvider } from './context/AppContext';
 import { PlayerContextProvider } from './context/PlayerContext';
+import ArtsFinderView from './views/ArtsFinderView';
 import MainView from './views/MainView';
 import TrackDetailView from './views/TrackDetailView';
 
@@ -15,6 +16,7 @@ export default function App() {
             <Routes>
               <Route path='/' element={<MainView />} />
               <Route path='/detail/:trackId' element={<TrackDetailView />} />
+              <Route path='/arts' element={<ArtsFinderView />} />
             </Routes>
           </Router>
         </MantineProvider>
