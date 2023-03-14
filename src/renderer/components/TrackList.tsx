@@ -1,12 +1,12 @@
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {
   CellContextMenuEvent,
   ColDef,
   FirstDataRenderedEvent,
   GridApi,
   GridReadyEvent,
-  RowDoubleClickedEvent
+  RowDoubleClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import React from 'react';
@@ -28,7 +28,7 @@ const TrackListView = ({ tracks }) => {
       { field: 'year', maxWidth: 70 },
       { field: 'bpm', maxWidth: 70 },
       { field: 'bitrate', maxWidth: 70 },
-      { field: 'key', maxWidth: 70 }
+      { field: 'key', maxWidth: 70 },
     ],
     []
   );
@@ -38,7 +38,7 @@ const TrackListView = ({ tracks }) => {
   const defaultColDef = React.useMemo<ColDef>(() => {
     return {
       resizable: true,
-      sortable: true
+      sortable: true,
     };
   }, []);
 
@@ -66,18 +66,15 @@ const TrackListView = ({ tracks }) => {
     [playTrack]
   );
 
-  const onShowCtxtMenu = React.useCallback(
-    (event: CellContextMenuEvent) => {
-      event.event?.preventDefault();
-      if (!event.node.isSelected()) {
-        event.node.setSelected(true, true);
-      }
+  const onShowCtxtMenu = React.useCallback((event: CellContextMenuEvent) => {
+    event.event?.preventDefault();
+    if (!event.node.isSelected()) {
+      event.node.setSelected(true, true);
+    }
 
-      const selected = (event.api.getSelectedRows() as Track[]).map((t) => t.id);
-      window.Main.ShowContextMenu(selected);
-    },
-    []
-  );
+    const selected = (event.api.getSelectedRows() as Track[]).map((t) => t.id);
+    window.Main.ShowContextMenu(selected);
+  }, []);
 
   return (
     <div style={containerStyle}>
@@ -106,12 +103,7 @@ const TrackList = () => {
     window.Main.on('all-tracks', (_, allTracks) => setTracks(allTracks));
   });
 
-  return (
-    <>
-      {tracks.length && <TrackListView tracks={tracks} />}
-    </>
-  );
+  return <>{tracks.length && <TrackListView tracks={tracks} />}</>;
 };
 
 export default TrackList;
-
