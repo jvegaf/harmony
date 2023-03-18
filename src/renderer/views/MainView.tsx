@@ -2,13 +2,11 @@ import { createStyles } from '@mantine/core';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AudioPlayerProvider } from 'react-use-audio-player';
+import Tracklist from '../components/Tracklist';
 import useAppState from 'renderer/hooks/useAppState';
 import { TrackId } from 'shared/types/emusik';
 import AppHeader from '../components/AppHeader';
 import OnBoarding from '../components/OnBoarding';
-import { TrackList } from '../components/TrackList';
-import useLog from './../hooks/useLog';
-import TrackDetail from './TrackDetail';
 
 const useStyles = createStyles((theme) => ({
   main: {
@@ -25,16 +23,15 @@ const useStyles = createStyles((theme) => ({
 
 const MainView = () => {
   const { classes } = useStyles();
-  const { setTracksLoaded, tracksLoaded, playTrack } = useAppState();
+  const { setTracksLoaded,  playTrack } = useAppState();
   const navigate = useNavigate();
+  const [content,  setContent] = React.useState(<OnBoarding />);
 
-  const log = useLog();
 
   React.useEffect(() => {
     window.Main.on('tracks-updated', () => {
-      log.info('have tracks');
       setTracksLoaded(true);
-      window.Main.GetAll();
+      setContent(<Tracklist />);
     });
 
     window.Main.on('view-detail-command', (trackId: TrackId) => navigate(`/detail/${trackId}`));
@@ -46,6 +43,7 @@ const MainView = () => {
     window.Main.on('fix-tracks-command', (selected: TrackId[]) => window.Main.FixTracks(selected));
   }, []);
 
+  
   return (
     <AudioPlayerProvider>
       <div className={classes.main}>
@@ -53,7 +51,7 @@ const MainView = () => {
           <AppHeader />
         </div>
         <div className={classes.content}>
-          {tracksLoaded ? <TrackList /> : <OnBoarding />}
+          {content}
         </div>
       </div>
     </AudioPlayerProvider>

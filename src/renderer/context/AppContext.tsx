@@ -1,5 +1,4 @@
 import React from 'react';
-import type { Track, TrackId } from '../../shared/types/emusik';
 import type { AppContextType } from '../@types/emusik';
 
 const AppContext = React.createContext({} as AppContextType);

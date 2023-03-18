@@ -214,10 +214,7 @@ ipcMain.on('open-folder', async (event) => {
   event.sender.send('tracks-updated');
 });
 
-ipcMain.on('get-all', (event) => {
-  const tracks = trackRepository?.all();
-  event.sender.send('all-tracks', tracks);
-});
+ipcMain.on('get-all', (event) => (event.returnValue = trackRepository?.all()));
 
 ipcMain.on('get-track', (event, trackId) => (event.returnValue = trackRepository?.getTrack(trackId)));
 

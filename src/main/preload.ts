@@ -15,7 +15,7 @@ const api = {
   PersistTrack: (track: Track) => ipcRenderer.send('persist', track),
   FixAll: () => ipcRenderer.send('fix-all'),
   GetTrack: (trackId: TrackId) => ipcRenderer.sendSync('get-track', trackId),
-  GetAll: () => ipcRenderer.send('get-all'),
+  GetAll: () => ipcRenderer.sendSync('get-all'),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Log: (...args: any[]) => ipcRenderer.send('log', ...args),
   FindArtWork: (track: Track) => ipcRenderer.send('find-artwork', track),

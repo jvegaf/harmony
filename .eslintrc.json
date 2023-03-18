@@ -32,8 +32,6 @@
     "semi": ["warn", "always"],
     "space-before-function-paren": "off",
     "no-multiple-empty-lines": "off",
-    "quotes": ["warn", "single"],
-    "jsx-quotes": ["warn", "prefer-single"],
     "eol-last": "off"
   }
 }

@@ -14,9 +14,9 @@ export default function App() {
         <MantineProvider theme={{ colorScheme: 'dark' }}>
           <Router>
             <Routes>
-              <Route path='/' element={<MainView />} />
-              <Route path='/detail/:trackId' element={<TrackDetailView />} />
-              <Route path='/arts' element={<ArtsFinderView />} />
+              <Route path="/detail/:trackId" element={<TrackDetailView />} />
+              <Route path="/arts" element={<ArtsFinderView />} />
+              <Route path="/" element={<MainView />} />
             </Routes>
           </Router>
         </MantineProvider>

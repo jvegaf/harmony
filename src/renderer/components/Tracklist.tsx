@@ -12,6 +12,7 @@ import { AgGridReact } from 'ag-grid-react';
 import React from 'react';
 import useAppState from '../hooks/useAppState';
 import { Track, TrackId } from 'shared/types/emusik';
+import useLog from 'renderer/hooks/useLog';
 
 const TrackListView = ({ tracks }) => {
   const { playTrack } = useAppState();
@@ -78,7 +79,7 @@ const TrackListView = ({ tracks }) => {
 
   return (
     <div style={containerStyle}>
-      <div style={gridStyle} className='ag-theme-alpine'>
+      <div style={gridStyle} className='ag-theme-alpine-dark'>
         <AgGridReact
           ref={gridRef}
           rowSelection='multiple'
@@ -89,21 +90,36 @@ const TrackListView = ({ tracks }) => {
           onFirstDataRendered={onFirstDataRendered}
           onRowDoubleClicked={(e) => onDblClick(e)}
           onCellContextMenu={(e) => onShowCtxtMenu(e)}
-          suppressCellSelection
+          suppressCellFocus
         />
       </div>
     </div>
   );
 };
 
-const TrackList = () => {
-  const [tracks, setTracks] = React.useState([]);
+const Tracklist = () => {
+  const [collection, setCollection] = React.useState<Track[]>([]);
+
+  const log = useLog();
 
   React.useEffect(() => {
-    window.Main.on('all-tracks', (_, allTracks) => setTracks(allTracks));
-  });
+    log.info('have tracks renderer');
+    const tracks = window.Main.GetAll();
+    log.info(tracks.length);
 
-  return <>{tracks.length && <TrackListView tracks={tracks} />}</>;
+    setCollection(tracks);
+
+  }, []);
+
+  React.useEffect(() => {
+
+    window.Main.on('tracks-updated', () => {
+      const newTracks = window.Main.GetAll();
+      setCollection(newTracks);
+    });
+  }, []);
+
+  return <>{collection.length && <TrackListView tracks={collection} />}</>;
 };
 
-export default TrackList;
+export default Tracklist;
