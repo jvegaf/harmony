@@ -1,15 +1,16 @@
 import gis from 'async-g-i-s';
+import { Track } from 'shared/types/emusik';
 import { log } from '../log/log';
 import { BuildGoogleArtworkQuery } from './querybuilder';
 
-const FindArtwork = async(track: Track): Promise<string[]> => {
+const FindArtwork = async (track: Track): Promise<string[]> => {
   const { title, artist } = track;
   let result;
   const query = BuildGoogleArtworkQuery(title, artist);
   try {
     const images = await gis(query);
-    result       = images.filter((i) => i.height === i.width);
-  } catch (error){
+    result = images.filter((i) => i.height === i.width);
+  } catch (error) {
     log.error('error finding artwork', error);
   }
 

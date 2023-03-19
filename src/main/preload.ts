@@ -18,7 +18,7 @@ const api = {
   GetAll: () => ipcRenderer.sendSync('get-all'),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Log: (...args: any[]) => ipcRenderer.send('log', ...args),
-  FindArtWork: (track: Track) => ipcRenderer.send('find-artwork', track),
+  FindArtWork: async (track: Track) => ipcRenderer.invoke('find-artwork', track),
   SaveArtWork: (artTrack) => ipcRenderer.send('save-artwork', artTrack),
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

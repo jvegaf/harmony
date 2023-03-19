@@ -7,11 +7,21 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import { app, BrowserWindow, dialog, ipcMain, IpcMainEvent, Menu, MenuItemConstructorOptions, PopupOptions, shell } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  IpcMainEvent,
+  Menu,
+  MenuItemConstructorOptions,
+  PopupOptions,
+  shell,
+} from 'electron';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import path from 'path';
-import type { ArtsTrackDTO, Track, TrackId } from '../shared/types/emusik';
+import type { Track, TrackId } from '../shared/types/emusik';
 import { LogCategory } from '../shared/types/emusik';
 import { GetFilesFrom } from './services/fileManager';
 import PersistTrack from './services/tag/nodeId3Saver';
@@ -34,7 +44,6 @@ process.on('warning', (e) => console.warn(e.stack));
 
 let trackRepository: TrackRepository | null = null;
 let mainWindow: BrowserWindow | null = null;
-let artsWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -116,52 +125,6 @@ const createMainWindow = async () => {
   new AppUpdater();
 };
 
-const createArtsWindow = async (artsDTO) => {
-  const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
-
-  const getAssetPath = (...paths: string[]): string => {
-    return path.join(RESOURCES_PATH, ...paths);
-  };
-
-  artsWindow = new BrowserWindow({
-    show: false,
-    width: 1300,
-    height: 900,
-    icon: getAssetPath('icon.png'),
-    webPreferences: {
-      contextIsolation: true,
-      preload: app.isPackaged ? path.join(__dirname, 'preload.js') : path.join(__dirname, '../../.erb/dll/preload.js'),
-    },
-  });
-  log.info('artath', resolveHtmlPath('artworks.html'));
-  artsWindow.loadURL(resolveHtmlPath('artworks.html'));
-
-  artsWindow.on('ready-to-show', () => {
-    if (!artsWindow) {
-      throw new Error('artsWindow is not defined');
-    }
-    if (process.env.START_MINIMIZED) {
-      artsWindow.minimize();
-    } else {
-      artsWindow.maximize();
-      artsWindow.show();
-      artsWindow.webContents.send('dto', artsDTO);
-    }
-  });
-
-  artsWindow.on('closed', () => {
-    artsWindow = null;
-  });
-
-  // Open urls in the user's browser
-  artsWindow.webContents.setWindowOpenHandler((edata) => {
-    shell.openExternal(edata.url);
-    return { action: 'deny' };
-  });
-};
-
 /**
  * Add event listeners...
  */
@@ -189,15 +152,9 @@ app
 
 ipcMain.on('persist', (_, track) => PersistTrack(track));
 
-ipcMain.on('find-artwork', async (_, track: Track) => {
+ipcMain.handle('find-artwork', async (_, track: Track) => {
   const results = await FindArtwork(track);
-  if (results.length) {
-    const artsDto: ArtsTrackDTO = {
-      reqTrack: track,
-      artsUrls: results,
-    };
-    createArtsWindow(artsDto);
-  }
+  return results;
 });
 
 ipcMain.on('open-folder', async (event) => {
@@ -250,8 +207,7 @@ ipcMain.on('fix-tracks', async (event, tracks: TrackId[]) => {
 ipcMain.on('save-artwork', async (_, artTrack) => {
   const newTrack = await UpdateArtwork(artTrack);
   trackRepository?.update(newTrack);
-  mainWindow?.webContents.send('tracks-updated');
-  artsWindow?.close();
+  mainWindow?.webContents.send('artwork-saved');
 });
 
 ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
@@ -260,21 +216,21 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
       label: 'View Details',
       click: () => {
         event.sender.send('view-detail-command', selected[0]);
-      }
+      },
     },
     {
       label: 'Play Track',
       click: () => {
         event.sender.send('play-command', selected[0]);
-      }
+      },
     },
     { type: 'separator' },
     {
       label: 'Fix Track',
       click: () => {
         event.sender.send('fix-track-command', selected[0]);
-      }
-    }
+      },
+    },
   ] as MenuItemConstructorOptions[];
 
   const templateMultiple = [
@@ -282,8 +238,8 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
       label: `Fix this ${selected.length} Tracks`,
       click: () => {
         event.sender.send('fix-tracks-command', selected);
-      }
-    }
+      },
+    },
   ] as MenuItemConstructorOptions[];
 
   const template = selected.length > 1 ? templateMultiple : templateSingle;

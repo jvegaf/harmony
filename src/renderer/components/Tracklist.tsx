@@ -17,6 +17,7 @@ import useLog from 'renderer/hooks/useLog';
 const TrackListView = ({ tracks }) => {
   const { playTrack } = useAppState();
   const gridRef = React.useRef<AgGridReact>(null);
+  // eslint-disable-next-line no-unused-vars
   const [gridApi, setGridApi] = React.useState<GridApi | null>(null);
   const [rowData, setRowData] = React.useState<Track[]>([]);
   const columnDefs = React.useMemo<ColDef[]>(
@@ -79,10 +80,10 @@ const TrackListView = ({ tracks }) => {
 
   return (
     <div style={containerStyle}>
-      <div style={gridStyle} className='ag-theme-alpine-dark'>
+      <div style={gridStyle} className="ag-theme-alpine-dark">
         <AgGridReact
           ref={gridRef}
-          rowSelection='multiple'
+          rowSelection="multiple"
           rowData={rowData}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
@@ -108,11 +109,9 @@ const Tracklist = () => {
     log.info(tracks.length);
 
     setCollection(tracks);
-
   }, []);
 
   React.useEffect(() => {
-
     window.Main.on('tracks-updated', () => {
       const newTracks = window.Main.GetAll();
       setCollection(newTracks);

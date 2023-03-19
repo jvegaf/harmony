@@ -1,12 +1,12 @@
-import type { ResultTag, Track } from "../../../shared/types/emusik";
-import { ParseDuration } from "../../../shared/utils";
-import FetchArtwork from "../artwork/fetcher";
-import { log } from "../log/log";
-import PersistTrack from "../tag/nodeId3Saver";
+import type { ResultTag, Track } from '../../../shared/types/emusik';
+import { ParseDuration } from '../../../shared/utils';
+import FetchArtwork from '../artwork/fetcher';
+import { log } from '../log/log';
+// import PersistTrack from "../tag/nodeId3Saver";
 
 const getArtwork = async (url?: string) => {
   if (!url) return undefined;
-  const fixedUrl = url.replace(/[0-9]{3,}x[0-9]{3,}/, "500x500");
+  const fixedUrl = url.replace(/[0-9]{3,}x[0-9]{3,}/, '500x500');
   const art = await FetchArtwork(fixedUrl);
   if (art === null) return undefined;
   return art;
@@ -39,11 +39,12 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     artwork: await art(),
   };
 
-  try {
-    await PersistTrack(newTrack);
-  } catch (error) {
-    log.error(error);
-  }
+  log.info('persist changes dissabled');
+  // try {
+  //   await PersistTrack(newTrack);
+  // } catch (error) {
+  //   log.error(error);
+  // }
 
   return newTrack;
 };
