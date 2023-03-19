@@ -23,9 +23,9 @@ const useStyles = createStyles((theme) => ({
 
 const MainView = () => {
   const { classes } = useStyles();
-  const { setTracksLoaded,  playTrack } = useAppState();
+  const { setTracksLoaded, tracksLoaded, playTrack } = useAppState();
   const navigate = useNavigate();
-  const [content,  setContent] = React.useState(<OnBoarding />);
+  const [content, setContent] = React.useState(<OnBoarding />);
 
 
   React.useEffect(() => {
@@ -43,7 +43,14 @@ const MainView = () => {
     window.Main.on('fix-tracks-command', (selected: TrackId[]) => window.Main.FixTracks(selected));
   }, []);
 
-  
+  React.useEffect(() => {
+    if (tracksLoaded) {
+      setContent(<Tracklist />);
+    }
+
+    return () => setContent(<OnBoarding />);
+  }, [tracksLoaded]);
+
   return (
     <AudioPlayerProvider>
       <div className={classes.main}>
