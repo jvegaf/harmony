@@ -1,42 +1,34 @@
 const Columns = () => [
   {
-    Header:   'Title',
-    accessor: 'title'
+    accessor: "title",
   },
   {
-    Header:   'Artist',
-    accessor: 'artist'
+    accessor: "artist",
   },
   {
-    Header:   'Time',
-    accessor: 'time',
-    width:    25,
-    align:    'center'
+    accessor: "time",
+    width: 35,
+    align: "center",
   },
   {
-    Header:   'Album',
-    accessor: 'album'
+    accessor: "album",
   },
   {
-    Header:   'Rate',
-    accessor: 'bitrate',
-    width:    25
+    accessor: "bitrate",
+    width: 35,
   },
   {
-    Header:   'BPM',
-    accessor: 'bpm',
-    width:    25
+    accessor: "bpm",
+    width: 35,
   },
   {
-    Header:   'Key',
-    accessor: 'key',
-    width:    25
+    accessor: "key",
+    width: 35,
   },
   {
-    Header:   'Year',
-    accessor: 'year',
-    width:    25
-  }
+    accessor: "year",
+    width: 35,
+  },
 ];
 
 export default Columns;

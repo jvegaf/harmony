@@ -1,11 +1,11 @@
-import { Button } from '@mantine/core';
-import React from 'react';
-import useAppState from '../hooks/useAppState';
-import styled from 'styled-components';
-import PauseButton from './PauseButton';
-import PlayButton from './PlayButton';
-import Player from './Player';
-import { useAudioPlayer } from 'react-use-audio-player';
+import { Button } from "@mantine/core";
+import React from "react";
+import useAppState from "renderer/hooks/useAppState";
+import styled from "styled-components";
+import PauseButton from "./PauseButton";
+import PlayButton from "./PlayButton";
+import Player from "./Player";
+import { useAudioPlayer } from "react-use-audio-player";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Styles = styled.div`
@@ -40,25 +40,23 @@ const Styles = styled.div`
 `;
 
 const AppHeader: React.FC = () => {
-  const { togglePlayPause, playing }                   = useAudioPlayer();
+  const { togglePlayPause, playing } = useAudioPlayer();
   const { tracksLoaded, onFixAllTracks, onOpenFolder } = useAppState();
 
   const btnProps = {
-    color:  '#EEEEEE',
-    size:   40,
+    color: "#EEEEEE",
+    size: 40,
     action: togglePlayPause,
   };
 
   return (
     <Styles>
-      <div className="left-container">
-        {playing ? <PauseButton {...btnProps} /> : <PlayButton {...btnProps} />}
-      </div>
+      <div className="left-container">{playing ? <PauseButton {...btnProps} /> : <PlayButton {...btnProps} />}</div>
       <div className="center-container">
         <Player />
       </div>
       <div className="right-container">
-        {tracksLoaded > 0 && (
+        {tracksLoaded && (
           <>
             <Button onClick={onOpenFolder} size="sm">
               Open Folder

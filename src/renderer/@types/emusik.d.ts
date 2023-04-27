@@ -1,12 +1,10 @@
-import type { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from "react";
+import { Track, TrackId } from "shared/types/emusik";
 
 export type AppContextType = {
-  trackDetail: TrackId | null;
-  setTrackDetail: Dispatch<SetStateAction<TrackId | null>>;
   tracksLoaded: boolean;
   setTracksLoaded: Dispatch<SetStateAction<boolean>>;
 };
-
 
 export type PlayerContextType = {
   trackPlaying: Track | null;
@@ -16,4 +14,3 @@ export type PlayerContextType = {
   playingId: TrackId | null;
   setPlayingId: Dispatch<SetStateAction<TrackId | null>>;
 };
-

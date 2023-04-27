@@ -8,26 +8,27 @@ declare global {
   }
 }
 const api = {
-  OpenFolder:   () => ipcRenderer.send('open-folder'),
-  FixTrack:     (trackId: TrackId) => ipcRenderer.send('fix-track', trackId),
-  FixTracks:    (trackIds: TrackId[]) => ipcRenderer.send('fix-tracks', trackIds),
+  ShowContextMenu: (selected: TrackId[]) => ipcRenderer.send('show-context-menu', selected),
+  OpenFolder: () => ipcRenderer.send('open-folder'),
+  FixTrack: (trackId: TrackId) => ipcRenderer.send('fix-track', trackId),
+  FixTracks: (tracks: TrackId[]) => ipcRenderer.send('fix-tracks', tracks),
   PersistTrack: (track: Track) => ipcRenderer.send('persist', track),
-  FixAll:       () => ipcRenderer.send('fix-all'),
-  GetTrack:     (trackId: TrackId) => ipcRenderer.sendSync('get-track', trackId),
-  GetAll:       () => ipcRenderer.send('get-all'),
+  FixAll: () => ipcRenderer.send('fix-all'),
+  GetTrack: (trackId: TrackId) => ipcRenderer.sendSync('get-track', trackId),
+  GetAll: () => ipcRenderer.sendSync('get-all'),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Log:          (...args: any[]) => ipcRenderer.send('log', ...args),
-  FindArtWork:  (track: Track) => ipcRenderer.send('find-artwork', track),
-  SaveArtWork:  (artTrack) => ipcRenderer.send('save-artwork', artTrack),
+  Log: (...args: any[]) => ipcRenderer.send('log', ...args),
+  FindArtWork: async (track: Track) => ipcRenderer.invoke('find-artwork', track),
+  SaveArtWork: (artTrack) => ipcRenderer.send('save-artwork', artTrack),
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  on(channel: string, func: (...args: any[]) => void){
+  on(channel: string, func: (...args: any[]) => void) {
     ipcRenderer.on(channel, (_event, ...args) => func(...args));
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  once(channel: string, func: (...args: any[]) => void){
+  once(channel: string, func: (...args: any[]) => void) {
     ipcRenderer.once(channel, (_event, ...args) => func(...args));
-  }
+  },
 };
 
 contextBridge.exposeInMainWorld('Main', api);
