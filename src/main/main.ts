@@ -1,12 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-/**
- * This module executes inside of electron's main process. You can start
- * electron renderer process from here and communicate with the other processes
- * through IPC.
- *
- * When running `npm run build` or `npm run build:main`, this file is compiled to
- * `./src/main.js` using webpack. This gives us some performance wins.
- */
+// eslint-disable-next-line import/no-extraneous-dependencies
 import {
   app,
   BrowserWindow,
@@ -18,137 +10,95 @@ import {
   PopupOptions,
   shell,
 } from 'electron';
-import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
-import path from 'path';
-import type { Track, TrackId } from '../shared/types/emusik';
-import { LogCategory } from '../shared/types/emusik';
-import { GetFilesFrom } from './services/fileManager';
+import Store from 'electron-store';
+import { isDebug, getAssetsPath, getHtmlPath, getPreloadPath, installExtensions } from './utils';
+import menu from './menu';
+import './updater';
+import { Track, TrackId } from 'src/shared/types/emusik';
 import PersistTrack from './services/tag/nodeId3Saver';
+import FindArtwork from './services/tagger/artworkFinder';
+import UpdateArtwork from './services/artwork/updater';
+import { GetFilesFrom } from './services/fileManager';
 import FixTags from './services/tagger/Tagger';
 import CreateTracks from './services/track/creator';
 import { TrackRepository } from './services/track/repository';
-import { resolveHtmlPath } from './util';
-import FindArtwork from './services/tagger/artworkFinder';
-import UpdateArtwork from './services/artwork/updater';
-
-export default class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
-  }
-}
-
-process.on('warning', (e) => console.warn(e.stack));
 
 let trackRepository: TrackRepository | null = null;
+
 let mainWindow: BrowserWindow | null = null;
 
-if (process.env.NODE_ENV === 'production') {
-  const sourceMapSupport = require('source-map-support');
-  sourceMapSupport.install();
-}
-
-const isDevelopment = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
-
-if (isDevelopment) {
-  require('electron-debug')();
-}
-
-const installExtensions = async () => {
-  const installer = require('electron-devtools-installer');
-  const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS'];
-
-  return installer
-    .default(
-      extensions.map((name) => installer[name]),
-      forceDownload
-    )
-    .catch(console.log);
-};
-
-const createMainWindow = async () => {
-  if (isDevelopment) {
-    await installExtensions();
-  }
-
-  const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
-
-  const getAssetPath = (...paths: string[]): string => {
-    return path.join(RESOURCES_PATH, ...paths);
-  };
-
+function createWindow() {
   mainWindow = new BrowserWindow({
-    show: false,
-    width: 1300,
-    height: 900,
-    icon: getAssetPath('icon.png'),
+    icon: getAssetsPath('icon.ico'),
+    width: 1100,
+    height: 750,
     webPreferences: {
-      webSecurity: false,
-      contextIsolation: true,
-      preload: app.isPackaged ? path.join(__dirname, 'preload.js') : path.join(__dirname, '../../.erb/dll/preload.js'),
+      devTools: isDebug,
+      preload: getPreloadPath('preload.js'), // 👈 Don't USE PRELOAD.JS IF YOUR USING NODE IN RENDERER PROCESS
+      // nodeIntegration: true, // 👈 NODE.JS WILL AVAILABLE IN RENDERER
+      // contextIsolation: false, // 👈 ENABLE THIS FOR NODE INTEGRATION IN RENDERER
     },
   });
 
-  mainWindow.menuBarVisible = false;
+  mainWindow.loadURL(getHtmlPath('index.html'));
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  /* MENU BUILDER */
+  Menu.setApplicationMenu(menu);
 
-  mainWindow.on('ready-to-show', () => {
-    if (!mainWindow) {
-      throw new Error('"mainWindow" is not defined');
-    }
-    if (process.env.START_MINIMIZED) {
-      mainWindow.minimize();
-    } else {
-      mainWindow.maximize();
-      mainWindow.show();
-    }
-  });
+  /* AUTO UPDATER INVOKE */
+  autoUpdater.checkForUpdatesAndNotify();
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
+  /* DEBUG DEVTOOLS */
+  if (isDebug) {
+    mainWindow.webContents.openDevTools(); // ELECTRON DEVTOOLS
+    installExtensions(); // REACT DEVTOOLS INSTALLER
+  }
 
-  // Open urls in the user's browser
-  mainWindow.webContents.setWindowOpenHandler((edata) => {
-    shell.openExternal(edata.url);
+  /* URLs OPEN IN DEFAULT BROWSER */
+  mainWindow.webContents.setWindowOpenHandler((data) => {
+    shell.openExternal(data.url);
     return { action: 'deny' };
   });
+}
 
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
-};
+/* IPC EVENTS EXAMPLE */
+ipcMain.on('message', (event, arg) => {
+  // eslint-disable-next-line no-console
+  console.log(`IPC Example: ${arg}`);
+  event.reply('reply', 'Ipc Example:  pong 🏓');
+});
 
-/**
- * Add event listeners...
+/** ELECTRON STORE EXAMPLE
+ *  NOTE: LOCAL STORAGE FOR YOUR APPLICATION
  */
+const store = new Store();
+ipcMain.on('set', (_event, key, val) => {
+  // eslint-disable-next-line no-console
+  console.log(`Electron Store Example: key: ${key}, value: ${val}`);
+  store.set(key, val);
+});
+ipcMain.on('get', (event, val) => {
+  // eslint-disable-next-line no-param-reassign
+  event.returnValue = store.get(val);
+});
+
+app.whenReady().then(() => {
+  trackRepository = new TrackRepository();
+  createWindow();
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
 
 app.on('window-all-closed', () => {
-  // Respect the OSX convention of having the application in memory even
-  // after all windows have been closed
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
-
-app
-  .whenReady()
-  .then(() => {
-    trackRepository = new TrackRepository();
-    createMainWindow();
-    app.on('activate', () => {
-      // On macOS it's common to re-create a window in the app when the
-      // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) createMainWindow();
-    });
-  })
-  .catch((e) => log.error(e));
 
 ipcMain.on('persist', (_, track) => PersistTrack(track));
 
@@ -248,28 +198,28 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
   menu.popup(BrowserWindow.fromWebContents(event.sender) as PopupOptions);
 });
 
-ipcMain.on('log', (_, ...props) => {
-  const [category, ...params] = props;
-
-  switch (category) {
-    case LogCategory.Info:
-      log.info(...params);
-      break;
-
-    case LogCategory.Error:
-      log.error(params);
-      break;
-
-    case LogCategory.Debug:
-      log.debug(params);
-      break;
-
-    case LogCategory.Warn:
-      log.warn(params);
-      break;
-
-    case LogCategory.Verbose:
-      log.verbose(params);
-      break;
-  }
-});
+// ipcMain.on('log', (_, ...props) => {
+//   const [category, ...params] = props;
+//
+//   switch (category) {
+//     case LogCategory.Info:
+//       log.info(...params);
+//       break;
+//
+//     case LogCategory.Error:
+//       log.error(params);
+//       break;
+//
+//     case LogCategory.Debug:
+//       log.debug(params);
+//       break;
+//
+//     case LogCategory.Warn:
+//       log.warn(params);
+//       break;
+//
+//     case LogCategory.Verbose:
+//       log.verbose(params);
+//       break;
+//   }
+// });

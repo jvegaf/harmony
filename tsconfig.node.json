@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "types": ["vite-plugin-electron/electron-env"]
+    "baseUrl": ".",
+    "paths": {
+      "@Assets/*": ["./assets/*"],
+      "@Components/*": ["./src/renderer/Components/*"]
+    }
   },
-  "include": ["vite.config.ts", "src/main", "src/preload"]
+  "include": ["assets", "configs", "src"],
+  "exclude": ["app/dist", "release/build"]
 }

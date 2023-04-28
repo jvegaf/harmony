@@ -2,7 +2,7 @@
  * App models
  */
 
-export type TrackId  = string | null;
+export type TrackId = string | null;
 export type TrackSrc = string | null;
 
 export interface Artwork {
@@ -68,5 +68,5 @@ export const enum LogCategory {
   Warn,
   Debug,
   Error,
-  Verbose
+  Verbose,
 }

@@ -1,21 +1,20 @@
 {
   "compilerOptions": {
-    "outDir": "dist/dump",
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "jsx": "preserve",
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "sourceMap": true,
-    "baseUrl": "./",
-    "strict": true,
-    "paths": {},
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2021"
   },
-  "include": ["src/renderer", "src/shared"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "extends": "./tsconfig.node.json"
 }
