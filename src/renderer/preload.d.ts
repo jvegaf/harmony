@@ -7,6 +7,16 @@ declare global {
       /* ELECTRON IPC TYPES */
       set: (key: string, val: unknown) => void;
       get: (key: string) => unknown;
+      openFolder: () => void;
+      showContextMenu: (selected: TrackId[]) => void;
+      fixTracks: (tracks: TrackId[]) => void;
+      persistTrack: (track: Track) => void;
+      fixAll: () => void;
+      getTrack: (trackId: TrackId) => Track;
+      getAll: () => Track[];
+      log: (...args: any[]) => void;
+      findArtWork: (track: Track) => void;
+      saveArtWork: (artTrack: any) => void;
     };
   }
 }

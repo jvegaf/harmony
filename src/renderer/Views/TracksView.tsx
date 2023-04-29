@@ -1,9 +1,22 @@
+import AppHeader from '@Components/AppHeader';
+import TrackList from '@Components/TrackList';
 import React from 'react';
+import { Track } from 'src/shared/types/emusik';
 
-type Props = {};
+const TracksView = () => {
+  const [collection, setCollection] = React.useState<Track[]>([]);
 
-const TracksView = (props: Props) => {
-  return <div>TracksView</div>;
+  React.useEffect(() => {
+    const tracks = window.ipc.getAll();
+    setCollection(tracks);
+  }, []);
+
+  return (
+    <div>
+      <AppHeader />
+      {collection.length > 0 && <TrackList collection={collection} />}
+    </div>
+  );
 };
 
 export default TracksView;

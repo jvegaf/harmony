@@ -70,3 +70,8 @@ export const enum LogCategory {
   Error,
   Verbose,
 }
+
+export interface ProcessFiles {
+  done: number;
+  total: number;
+}

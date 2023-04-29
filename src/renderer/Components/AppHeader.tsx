@@ -1,12 +1,11 @@
-import { Menu, Header, Button } from 'grommet';
 import React from 'react';
+import './AppHeader.scss';
 
 const AppHeader = () => {
   return (
-    <Header background="brand">
-      <Button hoverIndicator />
-      <Menu label="account" items={[{ label: 'logout' }]} />
-    </Header>
+    <div className="appheader">
+      <h1>eMusik</h1>
+    </div>
   );
 };
 

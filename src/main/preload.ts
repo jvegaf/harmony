@@ -12,40 +12,18 @@ contextBridge.exposeInMainWorld('ipc', {
       callBack(...args);
     });
   },
-  ShowContextMenu(selected: TrackId[]) {
-    ipcRenderer.send('show-context-menu', selected);
-  },
-  OpenFolder() {
-    ipcRenderer.send('open-folder');
-  },
-  FixTrack(trackId: TrackId) {
-    ipcRenderer.send('fix-track', trackId);
-  },
-  FixTracks(tracks: TrackId[]) {
-    ipcRenderer.send('fix-tracks', tracks);
-  },
-  PersistTrack(track: Track) {
-    ipcRenderer.send('persist', track);
-  },
-  FixAll() {
-    ipcRenderer.send('fix-all');
-  },
-  GetTrack(trackId: TrackId) {
-    ipcRenderer.sendSync('get-track', trackId);
-  },
-  GetAll() {
-    ipcRenderer.sendSync('get-all');
-  },
+  showContextMenu: (selected: TrackId[]) => ipcRenderer.send('show-context-menu', selected),
+  openFolder: () => ipcRenderer.send('open-folder'),
+  fixTrack: (trackId: TrackId) => ipcRenderer.send('fix-track', trackId),
+  fixTracks: (tracks: TrackId[]) => ipcRenderer.send('fix-tracks', tracks),
+  persistTrack: (track: Track) => ipcRenderer.send('persist', track),
+  fixAll: () => ipcRenderer.send('fix-all'),
+  getTrack: (trackId: TrackId) => ipcRenderer.sendSync('get-track', trackId),
+  getAll: () => ipcRenderer.sendSync('get-all'),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Log(...args: any[]) {
-    ipcRenderer.send('log', ...args);
-  },
-  async FindArtWork(track: Track) {
-    ipcRenderer.invoke('find-artwork', track);
-  },
-  SaveArtWork(artTrack: any) {
-    ipcRenderer.send('save-artwork', artTrack);
-  },
+  log: (...args: any[]) => ipcRenderer.send('log', ...args),
+  findArtWork: async (track: Track) => ipcRenderer.invoke('find-artwork', track),
+  saveArtWork: (artTrack: any) => ipcRenderer.send('save-artwork', artTrack),
   /* ELECTRON STORE APIs */
   set(key: string, val: unknown) {
     ipcRenderer.send('set', key, val);
