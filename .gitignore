@@ -31,3 +31,5 @@ npm-debug.log.*
 
 .tmp
 /.vscode
+
+app/dist
