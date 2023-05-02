@@ -23,6 +23,7 @@ import { GetFilesFrom } from './services/fileManager';
 import FixTags from './services/tagger/Tagger';
 import CreateTracks from './services/track/creator';
 import { TrackRepository } from './services/track/repository';
+import { FILE_DONE, TOTAL_FILES } from 'src/shared/types/channels';
 
 let trackRepository: TrackRepository | null = null;
 
@@ -114,8 +115,11 @@ ipcMain.on('open-folder', async (event) => {
 
   // trackRepository.removeAll();
 
+  const callBack = () => event.sender.send(FILE_DONE);
+
   const files = await GetFilesFrom(resultPath.filePaths[0]);
-  const tracks: Track[] = await CreateTracks(files);
+  event.sender.send(TOTAL_FILES, files.length);
+  const tracks: Track[] = await CreateTracks(callBack, files);
   trackRepository?.addAll(tracks);
 
   event.sender.send('tracks-updated');

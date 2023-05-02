@@ -7,8 +7,12 @@ const TracksView = () => {
   const [collection, setCollection] = React.useState<Track[]>([]);
 
   React.useEffect(() => {
-    const tracks = window.ipc.getAll();
-    setCollection(tracks);
+    (async () => {
+      const tracks = window.ipc.getAll();
+      setCollection(tracks);
+    })();
+
+    return () => { }
   }, []);
 
   return (

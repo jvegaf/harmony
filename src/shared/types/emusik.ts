@@ -71,7 +71,7 @@ export const enum LogCategory {
   Verbose,
 }
 
-export interface ProcessFiles {
+export interface FilesInfo {
   done: number;
   total: number;
 }

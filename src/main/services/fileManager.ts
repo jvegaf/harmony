@@ -1,10 +1,11 @@
-import readdirGlob from 'readdir-glob';
 import fs from 'fs';
+import recursiveReadDir from 'recursive-readdir';
 import type { Track } from '../../shared/types/emusik';
 import { log } from './log/log';
 
 export const GetFilesFrom = async (filePath: string) => {
-  return readdirGlob(filePath, { pattern: '**/*.mp3' });
+  const files = await recursiveReadDir(filePath);
+  return files.filter((file) => file.endsWith('.mp3'));
 };
 
 export const ExtractToFile = (jsonObj: unknown, filename: string) => {

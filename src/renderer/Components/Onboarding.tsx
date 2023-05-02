@@ -1,4 +1,4 @@
-import { Button } from 'grommet';
+import { Button } from '@geist-ui/core';
 import React from 'react';
 import useMain from '../Hooks/useMain';
 import './OnBoarding.scss';
@@ -11,7 +11,7 @@ const OnBoarding: React.FC = () => {
   return (
     <div className="onboarding">
       <div className="upload-container">
-        <Button onClick={openHandler} size="sm">
+        <Button onClick={openHandler}>
           Open Folder
         </Button>
       </div>
