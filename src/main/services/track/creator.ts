@@ -1,4 +1,5 @@
 import path from 'path';
+import { FILE_DONE } from 'src/shared/types/channels';
 import { v4 as uuid } from 'uuid';
 import type { Track } from '../../../shared/types/emusik';
 import { ParseDuration, Sanitize } from '../../../shared/utils';
@@ -22,9 +23,9 @@ const GetTrackTitle = (title: string | undefined, filepath: string) => {
   return sanitizeFilename(filename);
 };
 
-const CreateTrack = async (file: string): Promise<Track | null> => {
+export const CreateTrack = async (file: string): Promise<Track | null> => {
   const tags = await LoadTagsFromFile(file);
-  if (!tags) {
+  if (tags == null) {
     log.warn(`can not create track of ${file}`);
     return null;
   }
@@ -47,7 +48,7 @@ const CreateTrack = async (file: string): Promise<Track | null> => {
   return track;
 };
 
-const CreateTracks = async (callback: () => void, files: string[]) => {
+const CreateTracks = async (event: Electron.IpcMainEvent, files: string[]) => {
   const tracks: Track[] = [];
 
   await Promise.all(
@@ -55,8 +56,8 @@ const CreateTracks = async (callback: () => void, files: string[]) => {
       const track = await CreateTrack(file);
       if (track !== null) {
         tracks.push(track);
+        event.sender.send(FILE_DONE);
       }
-      callback();
     })
   );
 

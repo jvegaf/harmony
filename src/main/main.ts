@@ -21,9 +21,9 @@ import FindArtwork from './services/tagger/artworkFinder';
 import UpdateArtwork from './services/artwork/updater';
 import { GetFilesFrom } from './services/fileManager';
 import FixTags from './services/tagger/Tagger';
-import CreateTracks from './services/track/creator';
+import { CreateTrack } from './services/track/creator';
 import { TrackRepository } from './services/track/repository';
-import { FILE_DONE, TOTAL_FILES } from 'src/shared/types/channels';
+import { TOTAL_FILES } from 'src/shared/types/channels';
 
 let trackRepository: TrackRepository | null = null;
 
@@ -115,14 +115,20 @@ ipcMain.on('open-folder', async (event) => {
 
   // trackRepository.removeAll();
 
-  const callBack = () => event.sender.send(FILE_DONE);
-
   const files = await GetFilesFrom(resultPath.filePaths[0]);
+
   event.sender.send(TOTAL_FILES, files.length);
-  const tracks: Track[] = await CreateTracks(callBack, files);
+
+  const tracks: Track[] = [];
+  for (const file of files) {
+    const track = await CreateTrack(file);
+    if (track !== null) tracks.push(track);
+  }
+  // event.sender.send(FILE_DONE);
+
   trackRepository?.addAll(tracks);
 
-  event.sender.send('tracks-updated');
+  // event.sender.send('tracks-updated');
 });
 
 ipcMain.on('get-all', (event) => (event.returnValue = trackRepository?.all()));
