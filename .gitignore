@@ -33,3 +33,4 @@ npm-debug.log.*
 /.vscode
 
 app/dist
+app/dist/main
