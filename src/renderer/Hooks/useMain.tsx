@@ -15,7 +15,7 @@ export default function useMain() {
     log.info(`founded ${total} music files`);
   }, []);
 
-  const addTrack = React.useCallback((track: Track) => {
+  const fileDone = React.useCallback(() => {
     const updatedDone = doneFiles + 1;
     setDoneFiles(updatedDone);
     log.info(`done ${updatedDone} of ${totalFiles} music files`);
@@ -25,6 +25,8 @@ export default function useMain() {
     onOpenFolder,
     onFixTracks,
     filesToProcess,
-    addTrack
+    fileDone,
+    totalFiles,
+    doneFiles,
   };
 }

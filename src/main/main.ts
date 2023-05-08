@@ -21,9 +21,9 @@ import FindArtwork from './services/tagger/artworkFinder';
 import UpdateArtwork from './services/artwork/updater';
 import { GetFilesFrom } from './services/fileManager';
 import FixTags from './services/tagger/Tagger';
-import { CreateTrack } from './services/track/creator';
 import { TrackRepository } from './services/track/repository';
-import { TOTAL_FILES } from 'src/shared/types/channels';
+import { NEW_TRACK, TOTAL_FILES } from 'src/shared/types/channels';
+import CreateTrack from './services/track/creator';
 
 let trackRepository: TrackRepository | null = null;
 
@@ -119,19 +119,10 @@ ipcMain.on('open-folder', async (event) => {
 
   event.sender.send(TOTAL_FILES, files.length);
 
-  const tracks: Track[] = [];
-  // for (const file of files) {
-  //   const track = await CreateTrack(file);
-  //   if (track !== null) tracks.push(track);
-  // }
-  // event.sender.send(FILE_DONE);
-
   files.forEach(async (file) => {
     const track = await CreateTrack(file);
     if (track !== null) event.sender.send(NEW_TRACK, track);
-  })
-
-  trackRepository?.addAll(tracks);
+  });
 
   // event.sender.send('tracks-updated');
 });

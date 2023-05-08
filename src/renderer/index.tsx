@@ -11,7 +11,7 @@ root.render(
     <GeistProvider themeType="dark">
       <CssBaseline />
       <Provider store={store}>
-      <App />
+        <App />
       </Provider>
     </GeistProvider>
   </React.StrictMode>
