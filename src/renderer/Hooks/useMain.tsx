@@ -1,4 +1,5 @@
 import React from 'react';
+import { log } from 'src/main/services/log/log';
 import { Track } from 'src/shared/types/emusik';
 
 export default function useMain() {
@@ -11,19 +12,19 @@ export default function useMain() {
 
   const filesToProcess = React.useCallback((total: number) => {
     setTotalFiles(total);
-    console.log(`founded ${total} music files`);
+    log.info(`founded ${total} music files`);
   }, []);
 
-  const fileDone = React.useCallback(() => {
+  const addTrack = React.useCallback((track: Track) => {
     const updatedDone = doneFiles + 1;
     setDoneFiles(updatedDone);
-    console.log(`done ${updatedDone} of ${totalFiles} music files`);
+    log.info(`done ${updatedDone} of ${totalFiles} music files`);
   }, [doneFiles, totalFiles]);
 
   return {
     onOpenFolder,
     onFixTracks,
     filesToProcess,
-    fileDone,
+    addTrack
   };
 }

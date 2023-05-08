@@ -1,2 +1,2 @@
 export const TOTAL_FILES = 'TOTAL_FILES';
-export const FILE_DONE = 'FILE_DONE';
+export const NEW_TRACK = 'NEW_TRACK';

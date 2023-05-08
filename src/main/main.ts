@@ -120,11 +120,16 @@ ipcMain.on('open-folder', async (event) => {
   event.sender.send(TOTAL_FILES, files.length);
 
   const tracks: Track[] = [];
-  for (const file of files) {
-    const track = await CreateTrack(file);
-    if (track !== null) tracks.push(track);
-  }
+  // for (const file of files) {
+  //   const track = await CreateTrack(file);
+  //   if (track !== null) tracks.push(track);
+  // }
   // event.sender.send(FILE_DONE);
+
+  files.forEach(async (file) => {
+    const track = await CreateTrack(file);
+    if (track !== null) event.sender.send(NEW_TRACK, track);
+  })
 
   trackRepository?.addAll(tracks);
 
