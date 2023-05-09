@@ -22,7 +22,7 @@ import UpdateArtwork from './services/artwork/updater';
 import { GetFilesFrom } from './services/fileManager';
 import FixTags from './services/tagger/Tagger';
 import { TrackRepository } from './services/track/repository';
-import { NEW_TRACK, TOTAL_FILES } from 'src/shared/types/channels';
+import { CREATE_TRACKS, FIX_COMMAND, FIX_TRACKS, NEW_TRACK, OPEN_FOLDER, PLAY_COMMAND, SAVE_ARTWORK, TOTAL_FILES, VIEW_DETAIL_COMMAND } from 'src/shared/types/channels';
 import CreateTrack from './services/track/creator';
 
 let trackRepository: TrackRepository | null = null;
@@ -85,7 +85,6 @@ ipcMain.on('get', (event, val) => {
 });
 
 app.whenReady().then(() => {
-  trackRepository = new TrackRepository();
   createWindow();
 
   app.on('activate', () => {
@@ -108,7 +107,7 @@ ipcMain.handle('find-artwork', async (_, track: Track) => {
   return results;
 });
 
-ipcMain.on('open-folder', async (event) => {
+ipcMain.on(OPEN_FOLDER, async (event) => {
   const resultPath = await dialog.showOpenDialog({ properties: ['openDirectory'] });
 
   if (resultPath.canceled) return;
@@ -127,29 +126,14 @@ ipcMain.on('open-folder', async (event) => {
   // event.sender.send('tracks-updated');
 });
 
-ipcMain.on('get-all', (event) => (event.returnValue = trackRepository?.all()));
+ipcMain.on(CREATE_TRACKS, async (event, files: string[]) => {
+  files.forEach(async (file) => {
+    const track = await CreateTrack(file);
+    if (track !== null) event.sender.send(NEW_TRACK, track);
+  })
 
-ipcMain.on('get-track', (event, trackId) => (event.returnValue = trackRepository?.getTrack(trackId)));
-
-ipcMain.on('fix-all', async (event) => {
-  const tracks = trackRepository?.all();
-  await Promise.all(
-    (tracks as Track[]).map(async (track) => {
-      const updated = await FixTags(track);
-      trackRepository?.update(updated);
-    })
-  );
-  event.sender.send('tracks-updated');
 });
-
-ipcMain.on('fix-track', async (event, trackId) => {
-  const track = trackRepository?.getTrack(trackId);
-  const updated = await FixTags(track as Track);
-  trackRepository?.update(updated);
-  event.sender.send('tracks-updated');
-});
-
-ipcMain.on('fix-tracks', async (event, tracks: TrackId[]) => {
+ipcMain.on(FIX_TRACKS, async (event, tracks: TrackId[]) => {
   await Promise.all(
     tracks.map(async (trackId) => {
       const track = trackRepository?.getTrack(trackId);
@@ -160,7 +144,7 @@ ipcMain.on('fix-tracks', async (event, tracks: TrackId[]) => {
   event.sender.send('tracks-updated');
 });
 
-ipcMain.on('save-artwork', async (_, artTrack) => {
+ipcMain.on(SAVE_ARTWORK, async (_, artTrack) => {
   const newTrack = await UpdateArtwork(artTrack);
   trackRepository?.update(newTrack);
   mainWindow?.webContents.send('artwork-saved');
@@ -171,20 +155,20 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
     {
       label: 'View Details',
       click: () => {
-        event.sender.send('view-detail-command', selected[0]);
+        event.sender.send(VIEW_DETAIL_COMMAND, selected[0]);
       },
     },
     {
       label: 'Play Track',
       click: () => {
-        event.sender.send('play-command', selected[0]);
+        event.sender.send(PLAY_COMMAND, selected[0]);
       },
     },
     { type: 'separator' },
     {
       label: 'Fix Track',
       click: () => {
-        event.sender.send('fix-track-command', selected[0]);
+        event.sender.send(FIX_COMMAND, selected[0]);
       },
     },
   ] as MenuItemConstructorOptions[];
@@ -193,7 +177,7 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
     {
       label: `Fix this ${selected.length} Tracks`,
       click: () => {
-        event.sender.send('fix-tracks-command', selected);
+        event.sender.send(FIX_COMMAND, selected);
       },
     },
   ] as MenuItemConstructorOptions[];
@@ -203,29 +187,3 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
   const menu = Menu.buildFromTemplate(template);
   menu.popup(BrowserWindow.fromWebContents(event.sender) as PopupOptions);
 });
-
-// ipcMain.on('log', (_, ...props) => {
-//   const [category, ...params] = props;
-//
-//   switch (category) {
-//     case LogCategory.Info:
-//       log.info(...params);
-//       break;
-//
-//     case LogCategory.Error:
-//       log.error(params);
-//       break;
-//
-//     case LogCategory.Debug:
-//       log.debug(params);
-//       break;
-//
-//     case LogCategory.Warn:
-//       log.warn(params);
-//       break;
-//
-//     case LogCategory.Verbose:
-//       log.verbose(params);
-//       break;
-//   }
-// });
