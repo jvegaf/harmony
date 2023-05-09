@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Track, TrackId } from '../../shared/types/emusik';
+import { Track, TrackId } from 'shared/types/emusik';
 import type { PlayerContextType } from '../@types/emusik';
 
 const PlayerContext = React.createContext({} as PlayerContextType);

@@ -6,6 +6,7 @@ import { PlayerContextProvider } from './context/PlayerContext';
 import ArtsFinderView from './views/ArtsFinderView';
 import MainView from './views/MainView';
 import TrackDetailView from './views/TrackDetailView';
+import WelcomeView from './views/WelcomeView';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
             <Routes>
               <Route path="/detail/:trackId" element={<TrackDetailView />} />
               <Route path="/arts" element={<ArtsFinderView />} />
+              <Route path="/welcome" element={<WelcomeView />} />
               <Route path="/" element={<MainView />} />
             </Routes>
           </Router>

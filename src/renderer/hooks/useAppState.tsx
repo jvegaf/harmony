@@ -1,8 +1,8 @@
 import React from 'react';
 import { PlayerContextType } from 'renderer/@types/emusik';
+import AppContext from 'renderer/context/AppContext';
 import PlayerContext from 'renderer/context/PlayerContext';
-import { ArtsTrackDTO, Track, TrackId } from '../../shared/types/emusik';
-import AppContext from '../context/AppContext';
+import { ArtsTrackDTO, Track, TrackId } from 'shared/types/emusik';
 
 export default function useAppState() {
   const { tracksLoaded, setTracksLoaded } = React.useContext(AppContext);

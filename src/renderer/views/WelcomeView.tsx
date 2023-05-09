@@ -1,10 +1,10 @@
+
 import { createStyles } from '@mantine/core';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AudioPlayerProvider } from 'react-use-audio-player';
-import Tracklist from '../components/Tracklist';
-import AppHeader from '../components/AppHeader';
 import { useAppSelector } from 'renderer/hooks';
+import AppHeader from '../components/AppHeader';
+import OnBoarding from '../components/OnBoarding';
 
 const useStyles = createStyles((theme) => ({
   main: {
@@ -19,32 +19,27 @@ const useStyles = createStyles((theme) => ({
   content: { flexGrow: 1 }
 }));
 
-const MainView = () => {
+const WelcomeView = () => {
   const { classes } = useStyles();
   const navigate = useNavigate();
-
   const tracks = useAppSelector((state) => state.collection.tracks);
 
-
   React.useEffect(() => {
-    if (!tracks.length) {
-      navigate('/welcome');
+    if (tracks.length ) {
+      navigate('/');
     }
-
   }, [tracks]);
 
   return (
-    <AudioPlayerProvider>
-      <div className={classes.main}>
+    <>
         <div className={classes.header}>
           <AppHeader />
         </div>
         <div className={classes.content}>
-          <Tracklist />
+          <OnBoarding />
         </div>
-      </div>
-    </AudioPlayerProvider>
+    </>
   );
 };
 
-export default MainView;
+export default WelcomeView;

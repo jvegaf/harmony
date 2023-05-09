@@ -1,10 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { RootState } from './store';
 import { Track } from 'shared/types/emusik';
 
 // Define a type for the slice state
-interface CollectionState {
+export interface CollectionState {
   tracks: Track[];
 }
 
@@ -14,7 +13,7 @@ const initialState: CollectionState = {
 };
 
 export const collectionSlice = createSlice({
-  name: 'tracks',
+  name: 'collection',
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
@@ -26,8 +25,5 @@ export const collectionSlice = createSlice({
 });
 
 export const { addNewTrack } = collectionSlice.actions;
-
-// Other code such as selectors can use the imported `RootState` type
-export const selectCollection = (state: RootState) => state.collection.tracks;
 
 export default collectionSlice.reducer;

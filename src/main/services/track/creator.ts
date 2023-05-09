@@ -33,8 +33,9 @@ const CreateTrack = async(file: string): Promise<Track | null> => {
     return null;
   }
 
+  const trackId = uuid();
   const track: Track = {
-    id:       uuid(),
+    id:       trackId,
     album:    tags.album,
     artist:   tags.artist,
     bpm:      tags.bpm,

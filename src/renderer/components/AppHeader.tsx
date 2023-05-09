@@ -1,4 +1,3 @@
-import { Button } from "@mantine/core";
 import React from "react";
 import useAppState from "renderer/hooks/useAppState";
 import styled from "styled-components";
@@ -6,6 +5,7 @@ import PauseButton from "./PauseButton";
 import PlayButton from "./PlayButton";
 import Player from "./Player";
 import { useAudioPlayer } from "react-use-audio-player";
+import { Button } from "@mantine/core";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Styles = styled.div`
