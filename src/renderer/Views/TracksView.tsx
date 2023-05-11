@@ -1,24 +1,23 @@
 import AppHeader from '@Components/AppHeader';
 import TrackList from '@Components/TrackList';
 import React from 'react';
-import { Track } from 'src/shared/types/emusik';
+import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '../hooks';
 
 const TracksView = () => {
-  const [collection, setCollection] = React.useState<Track[]>([]);
+  const tracks = useAppSelector(state => state.collection.tracks);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
-    (async () => {
-      const tracks = window.ipc.getAll();
-      setCollection(tracks);
-    })();
-
-    return () => { }
-  }, []);
+    if (!tracks.length) {
+      navigate('/welcome');
+    }
+  }, [tracks]);
 
   return (
     <div>
       <AppHeader />
-      {collection.length > 0 && <TrackList collection={collection} />}
+      <TrackList tracks={tracks} />
     </div>
   );
 };
