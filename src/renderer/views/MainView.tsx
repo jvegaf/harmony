@@ -1,7 +1,6 @@
 import { createStyles } from '@mantine/core';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AudioPlayerProvider } from 'react-use-audio-player';
 import Tracklist from '../components/Tracklist';
 import AppHeader from '../components/AppHeader';
 import { useAppSelector } from 'renderer/hooks';
@@ -12,11 +11,10 @@ const useStyles = createStyles((theme) => ({
     height: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor:
-      theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
   },
   header: { height: 70 },
-  content: { flexGrow: 1 }
+  content: { flexGrow: 1 },
 }));
 
 const MainView = () => {
@@ -25,25 +23,21 @@ const MainView = () => {
 
   const tracks = useAppSelector((state) => state.collection.tracks);
 
-
   React.useEffect(() => {
     if (!tracks.length) {
       navigate('/welcome');
     }
-
   }, [tracks]);
 
   return (
-    <AudioPlayerProvider>
-      <div className={classes.main}>
-        <div className={classes.header}>
-          <AppHeader />
-        </div>
-        <div className={classes.content}>
-          <Tracklist />
-        </div>
+    <div className={classes.main}>
+      <div className={classes.header}>
+        <AppHeader />
       </div>
-    </AudioPlayerProvider>
+      <div className={classes.content}>
+        <Tracklist />
+      </div>
+    </div>
   );
 };
 

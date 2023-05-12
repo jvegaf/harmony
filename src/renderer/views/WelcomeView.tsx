@@ -1,4 +1,3 @@
-
 import { createStyles } from '@mantine/core';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -12,11 +11,10 @@ const useStyles = createStyles((theme) => ({
     height: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor:
-      theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
   },
   header: { height: 70 },
-  content: { flexGrow: 1 }
+  content: { flexGrow: 1 },
 }));
 
 const WelcomeView = () => {
@@ -25,20 +23,20 @@ const WelcomeView = () => {
   const tracks = useAppSelector((state) => state.collection.tracks);
 
   React.useEffect(() => {
-    if (tracks.length ) {
+    if (tracks.length) {
       navigate('/');
     }
   }, [tracks]);
 
   return (
-    <>
-        <div className={classes.header}>
-          <AppHeader />
-        </div>
-        <div className={classes.content}>
-          <OnBoarding />
-        </div>
-    </>
+    <div className={classes.main}>
+      <div className={classes.header}>
+        <AppHeader />
+      </div>
+      <div className={classes.content}>
+        <OnBoarding />
+      </div>
+    </div>
   );
 };
 
