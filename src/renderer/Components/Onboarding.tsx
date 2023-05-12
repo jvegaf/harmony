@@ -1,12 +1,10 @@
 import { Button } from '@geist-ui/core';
 import React from 'react';
-import useMain from '../Hooks/useMain';
 import './OnBoarding.scss';
 
 const OnBoarding: React.FC = () => {
-  const { onOpenFolder } = useMain();
 
-  const openHandler = () => onOpenFolder();
+  const openHandler = () => window.Main.OpenFolder();
 
   return (
     <div className="onboarding">
