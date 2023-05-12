@@ -1,5 +1,4 @@
 import { Table } from '@geist-ui/core';
-import React from 'react';
 import { Track } from 'src/shared/types/emusik';
 
 type Props = {

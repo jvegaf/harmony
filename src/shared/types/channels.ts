@@ -9,3 +9,4 @@ export const PLAY_COMMAND = 'PLAY_COMMAND';
 export const FIX_COMMAND = 'FIX_COMMAND';
 export const SAVE_ARTWORK = 'SAVE_ARTWORK';
 export const CREATE_TRACKS = 'CREATE_TRACKS';
+export const SHOW_CONTEXT_MENU = 'SHOW_CONTEXT_MENU';

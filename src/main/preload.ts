@@ -1,5 +1,13 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { contextBridge, ipcRenderer } from 'electron';
+import {
+  FIND_ARTWORK,
+  FIX_TRACKS,
+  OPEN_FOLDER,
+  PERSIST,
+  SAVE_ARTWORK,
+  SHOW_CONTEXT_MENU,
+} from 'src/shared/types/channels';
 import { Track, TrackId } from 'src/shared/types/emusik';
 
 contextBridge.exposeInMainWorld('ipc', {
@@ -12,18 +20,12 @@ contextBridge.exposeInMainWorld('ipc', {
       callBack(...args);
     });
   },
-  showContextMenu: (selected: TrackId[]) => ipcRenderer.send('show-context-menu', selected),
-  openFolder: () => ipcRenderer.send('open-folder'),
-  fixTrack: (trackId: TrackId) => ipcRenderer.send('fix-track', trackId),
-  fixTracks: (tracks: TrackId[]) => ipcRenderer.send('fix-tracks', tracks),
-  persistTrack: (track: Track) => ipcRenderer.send('persist', track),
-  fixAll: () => ipcRenderer.send('fix-all'),
-  getTrack: (trackId: TrackId) => ipcRenderer.sendSync('get-track', trackId),
-  getAll: () => ipcRenderer.sendSync('get-all'),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  log: (...args: any[]) => ipcRenderer.send('log', ...args),
-  findArtWork: async (track: Track) => ipcRenderer.invoke('find-artwork', track),
-  saveArtWork: (artTrack: any) => ipcRenderer.send('save-artwork', artTrack),
+  showContextMenu: (selected: TrackId[]) => ipcRenderer.send(SHOW_CONTEXT_MENU, selected),
+  openFolder: () => ipcRenderer.send(OPEN_FOLDER),
+  fixTracks: (tracks: TrackId[]) => ipcRenderer.send(FIX_TRACKS, tracks),
+  persistTrack: (track: Track) => ipcRenderer.send(PERSIST, track),
+  findArtWork: async (track: Track) => ipcRenderer.invoke(FIND_ARTWORK, track),
+  saveArtWork: (artTrack: any) => ipcRenderer.send(SAVE_ARTWORK, artTrack),
   /* ELECTRON STORE APIs */
   set(key: string, val: unknown) {
     ipcRenderer.send('set', key, val);

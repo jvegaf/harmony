@@ -22,7 +22,19 @@ import UpdateArtwork from './services/artwork/updater';
 import { GetFilesFrom } from './services/fileManager';
 import FixTags from './services/tagger/Tagger';
 import { TrackRepository } from './services/track/repository';
-import { CREATE_TRACKS, FIX_COMMAND, FIX_TRACKS, NEW_TRACK, OPEN_FOLDER, PLAY_COMMAND, SAVE_ARTWORK, TOTAL_FILES, VIEW_DETAIL_COMMAND } from 'src/shared/types/channels';
+import {
+  CREATE_TRACKS,
+  FIND_ARTWORK,
+  FIX_COMMAND,
+  FIX_TRACKS,
+  NEW_TRACK,
+  OPEN_FOLDER,
+  PERSIST,
+  PLAY_COMMAND,
+  SAVE_ARTWORK,
+  TOTAL_FILES,
+  VIEW_DETAIL_COMMAND,
+} from 'src/shared/types/channels';
 import CreateTrack from './services/track/creator';
 
 let trackRepository: TrackRepository | null = null;
@@ -100,9 +112,9 @@ app.on('window-all-closed', () => {
   }
 });
 
-ipcMain.on('persist', (_, track) => PersistTrack(track));
+ipcMain.on(PERSIST, (_, track) => PersistTrack(track));
 
-ipcMain.handle('find-artwork', async (_, track: Track) => {
+ipcMain.handle(FIND_ARTWORK, async (_, track: Track) => {
   const results = await FindArtwork(track);
   return results;
 });
