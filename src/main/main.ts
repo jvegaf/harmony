@@ -26,6 +26,7 @@ import {
   FIND_ARTWORK,
   FIX_COMMAND,
   FIX_TRACK,
+  GET_ARTWORK,
   NEW_TRACK,
   OPEN_FOLDER,
   PERSIST,
@@ -36,6 +37,7 @@ import {
   VIEW_DETAIL_COMMAND,
 } from '../shared/types/channels';
 import CreateTrack from './services/track/creator';
+import { LoadArtworkFromFile } from './services/artwork/loader';
 
 export default class AppUpdater {
   constructor() {
@@ -185,6 +187,11 @@ ipcMain.on(FIX_TRACK, async (event: IpcMainEvent, track: Track) => {
 ipcMain.on(SAVE_ARTWORK, async (event, artTrack) => {
   const newTrack = await UpdateArtwork(artTrack);
   event.sender.send(ARTWORK_UPDATED, newTrack);
+});
+
+ipcMain.handle(GET_ARTWORK, async (_, file: string) => {
+  const artwork = await LoadArtworkFromFile(file);
+  return artwork;
 });
 
 ipcMain.on(SHOW_CONTEXT_MENU, (event: IpcMainEvent, selected: Track[]) => {

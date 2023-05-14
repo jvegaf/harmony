@@ -4,7 +4,6 @@ import type { Track } from '../../../shared/types/emusik';
 import { ParseDuration, Sanitize } from '../../../shared/utils';
 import { log } from '../log/log';
 import LoadTagsFromFile from '../tag/mmLoader';
-import LoadArtworkFromFile from '../tag/nId3ArtLoader';
 
 const getFilename = (filepath: string) => {
   return path.basename(filepath, '.mp3');
@@ -42,25 +41,10 @@ const CreateTrack = async (file: string): Promise<Track | null> => {
     filepath: file,
     title: GetTrackTitle(tags.title, file),
     year: tags.year,
-    artwork: await LoadArtworkFromFile(file),
     bitrate: tags.bitrate ? tags.bitrate / 1000 : undefined,
   };
   return track;
 };
 
-// const CreateTracks = async(files: string[]) => {
-//   const tracks: Track[] = [];
-//
-//   await Promise.all(
-//     files.map(async file => {
-//       const track = await CreateTrack(file);
-//       if (track !== null){
-//         tracks.push(track);
-//       }
-//     })
-//   );
-//
-//   return tracks;
-// };
 
 export default CreateTrack;

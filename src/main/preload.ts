@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { contextBridge, ipcRenderer } from 'electron';
-import { FIX_TRACK, OPEN_FOLDER, PERSIST, SHOW_CONTEXT_MENU } from 'shared/types/channels';
-import type { Track } from 'shared/types/emusik';
+import { FIX_TRACK, GET_ARTWORK, OPEN_FOLDER, PERSIST, SHOW_CONTEXT_MENU } from '../shared/types/channels';
+import { ArtTrack, Artwork, Track } from '../shared/types/emusik';
 
 declare global {
   interface Window {
@@ -15,7 +16,8 @@ const api = {
   PersistTrack: (track: Track) => ipcRenderer.send(PERSIST, track),
   Log: (...args: any[]) => ipcRenderer.send('log', ...args),
   FindArtWork: async (track: Track) => ipcRenderer.invoke('find-artwork', track),
-  SaveArtWork: (artTrack: any) => ipcRenderer.send('save-artwork', artTrack),
+  SaveArtWork: (artTrack: ArtTrack) => ipcRenderer.send('save-artwork', artTrack),
+  GetArtWork: (file: string): Promise<Artwork | null> => ipcRenderer.invoke(GET_ARTWORK, file),
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(channel: string, func: (...args: any[]) => void) {

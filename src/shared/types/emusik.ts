@@ -2,7 +2,7 @@
  * App models
  */
 
-export type TrackId  = string | null;
+export type TrackId = string | null;
 export type TrackSrc = string | null;
 
 export interface Artwork {
@@ -25,7 +25,6 @@ export interface Track {
   title: string;
   year?: number;
   bitrate?: number;
-  artwork?: Artwork;
 }
 
 export interface ResultTag {
