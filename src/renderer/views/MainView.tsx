@@ -25,6 +25,7 @@ const MainView = () => {
 
   React.useEffect(() => {
     if (!tracks.length) {
+      console.log('no tracks go to welcome');
       navigate('/welcome');
     }
   }, [tracks]);

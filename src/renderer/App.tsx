@@ -1,15 +1,26 @@
 import { MantineProvider } from '@mantine/core';
+import React from 'react';
 import { MemoryRouter as Router, Route, Routes } from 'react-router-dom';
 import { AudioPlayerProvider } from 'react-use-audio-player';
+import { Track } from 'shared/types/emusik';
+import { NEW_TRACK } from '../../app/dist/main/channels.a333f31d';
 import './App.css';
 import { AppContextProvider } from './context/AppContext';
 import { PlayerContextProvider } from './context/PlayerContext';
+import { addNewTrack } from './features/collection/collectionSlice';
+import { useAppDispatch } from './hooks';
 import ArtsFinderView from './views/ArtsFinderView';
 import MainView from './views/MainView';
 import TrackDetailView from './views/TrackDetailView';
 import WelcomeView from './views/WelcomeView';
 
 export default function App() {
+  const dispatch = useAppDispatch();
+
+  React.useEffect(() => {
+    window.Main.on(NEW_TRACK, (track: Track) => dispatch(addNewTrack(track)));
+  }, []);
+
   return (
     <AudioPlayerProvider>
       <AppContextProvider>
