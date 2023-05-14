@@ -1,12 +1,4 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-/**
- * This module executes inside of electron's main process. You can start
- * electron renderer process from here and communicate with the other processes
- * through IPC.
- *
- * When running `npm run build` or `npm run build:main`, this file is compiled to
- * `./src/main.js` using webpack. This gives us some performance wins.
- */
 import {
   app,
   BrowserWindow,
@@ -21,16 +13,29 @@ import {
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import path from 'path';
-import type { Track, TrackId } from '../shared/types/emusik';
+import type { Track } from '../shared/types/emusik';
 import { LogCategory } from '../shared/types/emusik';
 import { GetFilesFrom } from './services/fileManager';
 import PersistTrack from './services/tag/nodeId3Saver';
 import FixTags from './services/tagger/Tagger';
-import CreateTracks from './services/track/creator';
-import { TrackRepository } from './services/track/repository';
 import { resolveHtmlPath } from './util';
 import FindArtwork from './services/tagger/artworkFinder';
 import UpdateArtwork from './services/artwork/updater';
+import {
+  ARTWORK_UPDATED,
+  FIND_ARTWORK,
+  FIX_COMMAND,
+  FIX_TRACK,
+  NEW_TRACK,
+  OPEN_FOLDER,
+  PERSIST,
+  PLAY_COMMAND,
+  SAVE_ARTWORK,
+  SHOW_CONTEXT_MENU,
+  TRACK_UPDATED,
+  VIEW_DETAIL_COMMAND,
+} from '../shared/types/channels';
+import CreateTrack from './services/track/creator';
 
 export default class AppUpdater {
   constructor() {
@@ -42,7 +47,6 @@ export default class AppUpdater {
 
 process.on('warning', (e) => console.warn(e.stack));
 
-let trackRepository: TrackRepository | null = null;
 let mainWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
@@ -140,7 +144,6 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
-    trackRepository = new TrackRepository();
     createMainWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
@@ -150,85 +153,59 @@ app
   })
   .catch((e) => log.error(e));
 
-ipcMain.on('persist', (_, track) => PersistTrack(track));
+ipcMain.on(PERSIST, (_, track) => PersistTrack(track));
 
-ipcMain.handle('find-artwork', async (_, track: Track) => {
+ipcMain.handle(FIND_ARTWORK, async (_, track: Track) => {
   const results = await FindArtwork(track);
   return results;
 });
 
-ipcMain.on('open-folder', async (event) => {
+ipcMain.on(OPEN_FOLDER, async (event) => {
   const resultPath = await dialog.showOpenDialog({ properties: ['openDirectory'] });
 
   if (resultPath.canceled) return;
 
-  // trackRepository.removeAll();
-
   const files = await GetFilesFrom(resultPath.filePaths[0]);
-  const tracks: Track[] = await CreateTracks(files);
-  trackRepository?.addAll(tracks);
 
-  event.sender.send('tracks-updated');
+  files.forEach(async (file) => {
+    const track = await CreateTrack(file);
+
+    if (track !== null) {
+      log.info(`Track created: ${track.title}`);
+      event.sender.send(NEW_TRACK, track);
+    }
+  });
 });
 
-ipcMain.on('get-all', (event) => (event.returnValue = trackRepository?.all()));
-
-ipcMain.on('get-track', (event, trackId) => (event.returnValue = trackRepository?.getTrack(trackId)));
-
-ipcMain.on('fix-all', async (event) => {
-  const tracks = trackRepository?.all();
-  await Promise.all(
-    (tracks as Track[]).map(async (track) => {
-      const updated = await FixTags(track);
-      trackRepository?.update(updated);
-    })
-  );
-  event.sender.send('tracks-updated');
+ipcMain.on(FIX_TRACK, async (event: IpcMainEvent, track: Track) => {
+  const updated = await FixTags(track);
+  event.sender.send(TRACK_UPDATED, updated);
 });
 
-ipcMain.on('fix-track', async (event, trackId) => {
-  const track = trackRepository?.getTrack(trackId);
-  const updated = await FixTags(track as Track);
-  trackRepository?.update(updated);
-  event.sender.send('tracks-updated');
-});
-
-ipcMain.on('fix-tracks', async (event, tracks: TrackId[]) => {
-  await Promise.all(
-    tracks.map(async (trackId) => {
-      const track = trackRepository?.getTrack(trackId);
-      const updated = await FixTags(track as Track);
-      trackRepository?.update(updated);
-    })
-  );
-  event.sender.send('tracks-updated');
-});
-
-ipcMain.on('save-artwork', async (_, artTrack) => {
+ipcMain.on(SAVE_ARTWORK, async (event, artTrack) => {
   const newTrack = await UpdateArtwork(artTrack);
-  trackRepository?.update(newTrack);
-  mainWindow?.webContents.send('artwork-saved');
+  event.sender.send(ARTWORK_UPDATED, newTrack);
 });
 
-ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
+ipcMain.on(SHOW_CONTEXT_MENU, (event: IpcMainEvent, selected: Track[]) => {
   const templateSingle = [
     {
       label: 'View Details',
       click: () => {
-        event.sender.send('view-detail-command', selected[0]);
+        event.sender.send(VIEW_DETAIL_COMMAND, selected[0]);
       },
     },
     {
       label: 'Play Track',
       click: () => {
-        event.sender.send('play-command', selected[0]);
+        event.sender.send(PLAY_COMMAND, selected[0]);
       },
     },
     { type: 'separator' },
     {
       label: 'Fix Track',
       click: () => {
-        event.sender.send('fix-track-command', selected[0]);
+        event.sender.send(FIX_COMMAND, selected);
       },
     },
   ] as MenuItemConstructorOptions[];
@@ -237,7 +214,7 @@ ipcMain.on('show-context-menu', (event: IpcMainEvent, selected: TrackId[]) => {
     {
       label: `Fix this ${selected.length} Tracks`,
       click: () => {
-        event.sender.send('fix-tracks-command', selected);
+        event.sender.send(FIX_COMMAND, selected);
       },
     },
   ] as MenuItemConstructorOptions[];

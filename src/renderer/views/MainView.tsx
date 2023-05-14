@@ -36,7 +36,7 @@ const MainView = () => {
         <AppHeader />
       </div>
       <div className={classes.content}>
-        <Tracklist />
+        <Tracklist tracks={tracks} />
       </div>
     </div>
   );

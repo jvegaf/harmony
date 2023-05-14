@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {
@@ -12,12 +13,14 @@ import { AgGridReact } from 'ag-grid-react';
 import React from 'react';
 import useAppState from '../hooks/useAppState';
 import { Track, TrackId } from 'shared/types/emusik';
-import useLog from 'renderer/hooks/useLog';
 
-const TrackListView = ({ tracks }) => {
+export interface TrackListProps {
+  tracks: Track[];
+}
+
+const TrackList: React.FC<TrackListProps> = ({ tracks }) => {
   const { playTrack } = useAppState();
   const gridRef = React.useRef<AgGridReact>(null);
-  // eslint-disable-next-line no-unused-vars
   const [gridApi, setGridApi] = React.useState<GridApi | null>(null);
   const [rowData, setRowData] = React.useState<Track[]>([]);
   const columnDefs = React.useMemo<ColDef[]>(
@@ -74,7 +77,7 @@ const TrackListView = ({ tracks }) => {
       event.node.setSelected(true, true);
     }
 
-    const selected = (event.api.getSelectedRows() as Track[]).map((t) => t.id);
+    const selected = event.api.getSelectedRows() as Track[];
     window.Main.ShowContextMenu(selected);
   }, []);
 
@@ -98,27 +101,4 @@ const TrackListView = ({ tracks }) => {
   );
 };
 
-const Tracklist = () => {
-  const [collection, setCollection] = React.useState<Track[]>([]);
-
-  const log = useLog();
-
-  React.useEffect(() => {
-    log.info('have tracks renderer');
-    const tracks = window.Main.GetAll();
-    log.info(tracks.length);
-
-    setCollection(tracks);
-  }, []);
-
-  React.useEffect(() => {
-    window.Main.on('tracks-updated', () => {
-      const newTracks = window.Main.GetAll();
-      setCollection(newTracks);
-    });
-  }, []);
-
-  return <>{collection.length && <TrackListView tracks={collection} />}</>;
-};
-
-export default Tracklist;
+export default TrackList;

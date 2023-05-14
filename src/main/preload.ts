@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { Track, TrackId } from 'shared/types/emusik';
+import { FIX_TRACK, OPEN_FOLDER, PERSIST, SHOW_CONTEXT_MENU } from 'shared/types/channels';
+import type { Track } from 'shared/types/emusik';
 
 declare global {
   interface Window {
@@ -8,18 +9,13 @@ declare global {
   }
 }
 const api = {
-  ShowContextMenu: (selected: TrackId[]) => ipcRenderer.send('show-context-menu', selected),
-  OpenFolder: () => ipcRenderer.send('open-folder'),
-  FixTrack: (trackId: TrackId) => ipcRenderer.send('fix-track', trackId),
-  FixTracks: (tracks: TrackId[]) => ipcRenderer.send('fix-tracks', tracks),
-  PersistTrack: (track: Track) => ipcRenderer.send('persist', track),
-  FixAll: () => ipcRenderer.send('fix-all'),
-  GetTrack: (trackId: TrackId) => ipcRenderer.sendSync('get-track', trackId),
-  GetAll: () => ipcRenderer.sendSync('get-all'),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ShowContextMenu: (selected: Track[]) => ipcRenderer.send(SHOW_CONTEXT_MENU, selected),
+  OpenFolder: () => ipcRenderer.send(OPEN_FOLDER),
+  FixTrack: (track: Track) => ipcRenderer.send(FIX_TRACK, track),
+  PersistTrack: (track: Track) => ipcRenderer.send(PERSIST, track),
   Log: (...args: any[]) => ipcRenderer.send('log', ...args),
   FindArtWork: async (track: Track) => ipcRenderer.invoke('find-artwork', track),
-  SaveArtWork: (artTrack) => ipcRenderer.send('save-artwork', artTrack),
+  SaveArtWork: (artTrack: any) => ipcRenderer.send('save-artwork', artTrack),
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(channel: string, func: (...args: any[]) => void) {
