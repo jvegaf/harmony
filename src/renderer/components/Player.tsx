@@ -1,16 +1,14 @@
-import { createStyles, Image, Text } from "@mantine/core";
-import React from "react";
-import { useAudioPlayer, useAudioPosition } from "react-use-audio-player";
-import { PlayerContextType } from "renderer/@types/emusik";
-import PlayerContext from "renderer/context/PlayerContext";
-import Placeholder from "../../../assets/placeholder.png";
-import useAppState from "./../hooks/useAppState";
+import { createStyles, Image, Text } from '@mantine/core';
+import React from 'react';
+import { useAudioPlayer, useAudioPosition } from 'react-use-audio-player';
+import { Track, TrackSrc } from 'shared/types/emusik';
+import Placeholder from '../../../assets/placeholder.png';
 
 const useStyles = createStyles((theme) => ({
   playerContainer: {
     height: 70,
     width: 370,
-    display: "flex",
+    display: 'flex',
     backgroundColor: theme.colors.dark[4],
   },
 
@@ -20,58 +18,65 @@ const useStyles = createStyles((theme) => ({
   },
 
   player: {
-    display: "flex",
-    height: "100%",
+    display: 'flex',
+    height: '100%',
     width: 300,
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   seekbar: {
-    width: "100%",
+    width: '100%',
     height: 10,
-    cursor: "pointer",
-    backgroundColor: "#989da8",
-    overflow: "hidden",
+    cursor: 'pointer',
+    backgroundColor: '#989da8',
+    overflow: 'hidden',
   },
   tick: {
-    backgroundColor: "#6e7179",
-    height: "100%",
+    backgroundColor: '#6e7179',
+    height: '100%',
   },
   title: { paddingTop: 5 },
 }));
 
-const Player: React.FC = () => {
-  const { trackPlaying } = React.useContext(PlayerContext) as PlayerContextType;
+export interface PlayerProps {
+  trackPlaying: Track | null;
+}
+
+const Player: React.FC<PlayerProps> = ({ trackPlaying }) => {
   const [artSrc, setArtSrc] = React.useState(Placeholder);
   const { classes } = useStyles();
   const player = useAudioPlayer();
 
   const { duration, seek, percentComplete } = useAudioPosition({ highRefreshRate: true });
-  const [barWidth, setBarWidth] = React.useState("0%");
+  const [barWidth, setBarWidth] = React.useState('0%');
 
   const seekBarElem = React.useRef<HTMLDivElement>(null);
+
+  const getArt = async (filepath: TrackSrc) => {
+    const art = await window.Main.GetArtWork(filepath);
+    if (art === null) {
+      setArtSrc(Placeholder);
+      return;
+    }
+
+    // eslint-disable-next-line no-undef
+    const blob = new Blob([art.imageBuffer], { type: art.mime });
+
+    const src = URL.createObjectURL(blob);
+    setArtSrc(src);
+  };
 
   React.useEffect(() => {
     if (trackPlaying) {
       player.load({
         src: trackPlaying.filepath,
         html5: true,
-        format: "mp3",
+        format: 'mp3',
         autoplay: true,
       });
+      getArt(trackPlaying.filepath);
     }
-  }, [trackPlaying]);
-
-  React.useEffect(() => {
-    if (trackPlaying?.artwork) {
-      const blob = new Blob([trackPlaying.artwork.imageBuffer], { type: trackPlaying.artwork.mime });
-
-      const src = URL.createObjectURL(blob);
-      setArtSrc(src);
-    }
-
-    return () => setArtSrc(Placeholder);
   }, [trackPlaying]);
 
   React.useEffect(() => {

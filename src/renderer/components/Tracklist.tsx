@@ -11,16 +11,18 @@ import {
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import React from 'react';
-import useAppState from '../hooks/useAppState';
 import { Track, TrackId } from 'shared/types/emusik';
+import { useAppDispatch } from 'renderer/hooks';
+import { playTrack } from 'renderer/features/player/playerSlice';
 
 export interface TrackListProps {
   tracks: Track[];
 }
 
 const TrackList: React.FC<TrackListProps> = ({ tracks }) => {
-  const { playTrack } = useAppState();
+  const dispatch = useAppDispatch();
   const gridRef = React.useRef<AgGridReact>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [gridApi, setGridApi] = React.useState<GridApi | null>(null);
   const [rowData, setRowData] = React.useState<Track[]>([]);
   const columnDefs = React.useMemo<ColDef[]>(
@@ -66,7 +68,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks }) => {
     (event: RowDoubleClickedEvent) => {
       event.event?.preventDefault();
       const { data } = event;
-      playTrack(data.id as TrackId);
+      dispatch(playTrack(data as Track));
     },
     [playTrack]
   );

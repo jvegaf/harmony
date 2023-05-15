@@ -1,12 +1,12 @@
-import React from "react";
-import useAppState from "renderer/hooks/useAppState";
-import styled from "styled-components";
-import PauseButton from "./PauseButton";
-import PlayButton from "./PlayButton";
-import Player from "./Player";
-import { useAudioPlayer } from "react-use-audio-player";
-import { Button } from "@mantine/core";
-import { useAppSelector } from "renderer/hooks";
+import React from 'react';
+import useAppState from 'renderer/hooks/useAppState';
+import styled from 'styled-components';
+import PauseButton from './PauseButton';
+import PlayButton from './PlayButton';
+import Player from './Player';
+import { useAudioPlayer } from 'react-use-audio-player';
+import { Button } from '@mantine/core';
+import { useAppSelector } from 'renderer/hooks';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Styles = styled.div`
@@ -44,10 +44,10 @@ const AppHeader: React.FC = () => {
   const { togglePlayPause, playing } = useAudioPlayer();
   const { onFixAllTracks, onOpenFolder } = useAppState();
   const tracks = useAppSelector((state) => state.collection.tracks);
-  const trackPlaying = useAppSelector((state) => state.collection.trackPlaying);
+  const trackPlaying = useAppSelector((state) => state.player.trackPlaying);
 
   const btnProps = {
-    color: "#EEEEEE",
+    color: '#EEEEEE',
     size: 40,
     action: togglePlayPause,
   };
@@ -56,7 +56,7 @@ const AppHeader: React.FC = () => {
     <Styles>
       <div className="left-container">{playing ? <PauseButton {...btnProps} /> : <PlayButton {...btnProps} />}</div>
       <div className="center-container">
-        <Player track={trackPlaying} />
+        <Player trackPlaying={trackPlaying} />
       </div>
       <div className="right-container">
         {tracks.length && (
