@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { Track } from 'src/shared/types/emusik';
+import { Track } from '../../../shared/types/emusik';
 
 export interface CollectionState {
   tracks: Track[];
@@ -14,7 +14,7 @@ export const collectionSlice = createSlice({
   name: 'collection',
   initialState,
   reducers: {
-    addTrack: (state, action: PayloadAction<Track>) => {
+    addTrack: (state: CollectionState, action: PayloadAction<Track>) => {
       state.tracks.push(action.payload);
     },
   },

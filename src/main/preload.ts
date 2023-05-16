@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { FIND_ARTWORK, FIX_TRACKS, OPEN_FOLDER, PERSIST, SAVE_ARTWORK, SHOW_CONTEXT_MENU } from 'src/shared/types/channels';
-import { TrackId, Track } from 'src/shared/types/emusik';
+import { FIND_ARTWORK, FIX_TRACKS, OPEN_FOLDER, PERSIST, SAVE_ARTWORK, SHOW_CONTEXT_MENU } from '../shared/types/channels';
+import { TrackId, Track } from '../shared/types/emusik';
 
 declare global {
   interface Window {
@@ -29,8 +29,6 @@ const api = {
 contextBridge.exposeInMainWorld('Main', api);
 
 contextBridge.exposeInMainWorld('ipcRenderer', ipcRenderer);
-
-
 
 
 

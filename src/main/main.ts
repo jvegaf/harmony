@@ -15,7 +15,7 @@ import Store from 'electron-store';
 import { isDebug, getAssetsPath, getHtmlPath, getPreloadPath, installExtensions } from './utils';
 import menu from './menu';
 import './updater';
-import { Track, TrackId } from 'src/shared/types/emusik';
+import { Track, TrackId } from '../shared/types/emusik';
 import PersistTrack from './services/tag/nodeId3Saver';
 import FindArtwork from './services/tagger/artworkFinder';
 import UpdateArtwork from './services/artwork/updater';
@@ -32,9 +32,8 @@ import {
   PERSIST,
   PLAY_COMMAND,
   SAVE_ARTWORK,
-  TOTAL_FILES,
   VIEW_DETAIL_COMMAND,
-} from 'src/shared/types/channels';
+} from '../shared/types/channels';
 import CreateTrack from './services/track/creator';
 
 let trackRepository: TrackRepository | null = null;
@@ -119,16 +118,13 @@ ipcMain.handle(FIND_ARTWORK, async (_, track: Track) => {
   return results;
 });
 
-ipcMain.on(OPEN_FOLDER, async (event) => {
+ipcMain.on(OPEN_FOLDER, async (event: IpcMainEvent) => {
   const resultPath = await dialog.showOpenDialog({ properties: ['openDirectory'] });
 
   if (resultPath.canceled) return;
 
-  // trackRepository.removeAll();
 
   const files = await GetFilesFrom(resultPath.filePaths[0]);
-
-  event.sender.send(TOTAL_FILES, files.length);
 
   files.forEach(async (file) => {
     const track = await CreateTrack(file);
