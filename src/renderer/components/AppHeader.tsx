@@ -4,7 +4,9 @@ import './AppHeader.scss';
 const AppHeader = () => {
   return (
     <div className="appheader">
-      <h1>eMusik</h1>
+      <div className="left-container">Left</div>
+      <div className="center-container">Center</div>
+      <div className="right-container">Right</div>
     </div>
   );
 };
