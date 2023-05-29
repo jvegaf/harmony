@@ -1,11 +1,10 @@
 import React from 'react';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import { NEW_TRACK } from '../shared/types/channels';
-import { Track } from '../shared/types/emusik';
 import { addTrack } from './features/collection/collectionSlice';
 import { useAppDispatch } from './hooks';
-import HomeView from './Views/HomeView';
-import TracksView from './Views/TracksView';
+import HomeView from './views/HomeView';
+import TracksView from './views/TracksView';
 import './App.css';
 
 function App() {
