@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "paths": {
       "@Assets/*": ["./assets/*"],
-      "@Components/*": ["./src/renderer/components/*"]
+      "@Components/*": ["./src/renderer/components/*"],
+      "@Shared/*": ["./src/shared/*"]
     }
   },
   "include": ["assets", "configs", "src"],

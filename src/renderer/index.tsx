@@ -8,11 +8,11 @@ import { store } from './store';
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
+    <Provider store={store}>
     <GeistProvider themeType="dark">
-      <CssBaseline />
-      <Provider store={store}>
+        <CssBaseline />
         <App />
-      </Provider>
     </GeistProvider>
+    </Provider>
   </React.StrictMode>
 );

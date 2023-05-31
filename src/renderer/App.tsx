@@ -1,6 +1,6 @@
 import React from 'react';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
-import { NEW_TRACK } from '../shared/types/channels';
+import { NEW_TRACK } from '@Shared/types/channels';
 import { addTrack } from './features/collection/collectionSlice';
 import { useAppDispatch } from './hooks';
 import HomeView from './views/HomeView';
@@ -13,7 +13,7 @@ function App() {
 
   React.useEffect(() => {
     window.Main.on(NEW_TRACK, (track) => dispatch(addTrack(track)));
-  });
+  },[window]);
 
   return (
     <Router>

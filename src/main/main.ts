@@ -33,7 +33,7 @@ import {
   PLAY_COMMAND,
   SAVE_ARTWORK,
   VIEW_DETAIL_COMMAND,
-} from '../shared/types/channels';
+} from '@Shared/types/channels';
 import CreateTrack from './services/track/creator';
 
 let trackRepository: TrackRepository | null = null;
