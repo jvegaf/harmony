@@ -180,6 +180,7 @@ ipcMain.on(OPEN_FOLDER, async (event) => {
 });
 
 ipcMain.on(FIX_TRACK, async (event: IpcMainEvent, track: Track) => {
+  log.info("track to fix: ", track.title);
   const updated = await FixTags(track);
   event.sender.send(TRACK_UPDATED, updated);
 });

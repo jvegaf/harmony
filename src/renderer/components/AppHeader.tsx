@@ -59,7 +59,7 @@ const AppHeader: React.FC = () => {
         <Player trackPlaying={trackPlaying} />
       </div>
       <div className="right-container">
-        {tracks.length && (
+        {tracks && tracks.length && (
           <>
             <Button onClick={onOpenFolder} size="sm">
               Open Folder

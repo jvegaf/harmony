@@ -2,12 +2,12 @@ import { MantineProvider } from '@mantine/core';
 import React from 'react';
 import { MemoryRouter as Router, Route, Routes } from 'react-router-dom';
 import { AudioPlayerProvider } from 'react-use-audio-player';
-import { NEW_TRACK } from 'shared/types/channels';
+import { FIX_COMMAND, NEW_TRACK, TRACK_UPDATED } from 'shared/types/channels';
 import { Track } from 'shared/types/emusik';
 import './App.css';
 import { AppContextProvider } from './context/AppContext';
 import { PlayerContextProvider } from './context/PlayerContext';
-import { addNewTrack } from './features/collection/collectionSlice';
+import { addNewTrack, updateTrack } from './features/collection/collectionSlice';
 import { useAppDispatch } from './hooks';
 import ArtsFinderView from './views/ArtsFinderView';
 import MainView from './views/MainView';
@@ -19,6 +19,9 @@ export default function App() {
 
   React.useEffect(() => {
     window.Main.on(NEW_TRACK, (track: Track) => dispatch(addNewTrack(track)));
+    window.Main.on(FIX_COMMAND, (selected: Track[]) => selected.forEach(t => window.Main.FixTrack(t)));
+    window.Main.on(TRACK_UPDATED, (updated: Track) => dispatch(updateTrack(updated)));
+
   }, []);
 
   return (

@@ -20,10 +20,14 @@ export const collectionSlice = createSlice({
     addNewTrack: (state, action: PayloadAction<Track>) => {
       state.tracks.push(action.payload);
     },
+    updateTrack: (state, action: PayloadAction<Track>) => {
+      const { id, ...track } = action.payload;
+      return state.tracks.map(t => t.id !== id ? t : action.payload);
+    }
     // Use the PayloadAction type to declare the contents of `action.payload`
   },
 });
 
-export const { addNewTrack } = collectionSlice.actions;
+export const { addNewTrack, updateTrack } = collectionSlice.actions;
 
 export default collectionSlice.reducer;
