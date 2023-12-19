@@ -1,470 +1,301 @@
-<img src="https://user-images.githubusercontent.com/114384910/202768806-c7f8065f-113c-4762-8c10-ff57ff8ef72c.jpg"/>
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct-single.svg)](https://stand-with-ukraine.pp.ua)
 
-<h1 align="center">Welcome to Vite Electron React Boilerplate 👋</h1>
+---
 
-<p align="center">
-   <a href="https://github.com/stackoutput-com/vite-electron-react-boilerplate#readme" target="_blank">
-    <img alt="Documentation" src="https://img.shields.io/badge/Documentation-yes-brightgreen.svg" />
-  </a>
-   <img alt="Version" src="https://img.shields.io/badge/Version-1.0.0-blue.svg?cacheSeconds=2592000" />
-   <a href="https://github.com/prettier/prettier" target="_blank">
-    <img alt="prettier" src="https://img.shields.io/badge/Code_style-prettier-ff69b4.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/stackoutput-com/vite-electron-react-boilerplate/blob/main/LICENSE" target="_blank">
-    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
-  </a>
-</p>
+# Vite Electron Builder Boilerplate
 
-Develop your Desktop Apps **Blazingly Fast🔥** with **Vite**, **Electron + Vitejs + React + Typescript = Awesome❤️**
+This is a template for secure electron applications. Written following the latest safety requirements, recommendations
+and best practices.
 
-**Vite Electron React Boilerplate** is help you to build multi-platform desktop apps easier. **Don't worry about the configuration 🔨** this template will take care of that, focus on your codes⌨️ million dollar projects and project ideas 💡. The idea is to solve the common issues with connecting those frameworks, build a robust Template to support daily development needs, and help developers use better practices while working with popular JavaScript components.
+Under the hood is [Vite] — A next-generation blazing fast bundler, and [electron-builder] for packaging.
 
-## 📚 Before You Begin
+## Get started
 
-Before you begin we recommend you read about the basic building blocks that assemble a **Vite Electron React Boilerplate**:
+Follow these steps to get started with the template:
 
-- **Node.js** - Start by going through [Node.js Official Website](http://nodejs.org/) and this [StackOverflow Thread](http://stackoverflow.com/questions/2353818/how-do-i-get-started-with-node-js), which should get you going with the Node.js platform in no time.
+1. Click the **[Use this template](https://github.com/cawa-93/vite-electron-builder/generate)** button (you must be
+   logged in) or just clone this repo.
+2. If you want to use another package manager you may need to edit [`.github/workflows`](/.github/workflows) — [it
+   uses `npm` by default](https://github.com/search?q=npm+repo%3Acawa-93%2Fvite-electron-builder+path%3A.github%2Fworkflows&type=Code&ref=advsearch&l=&l=).
+3. If you like this template, don't forget to give a github star or send support! ⭐♥
 
-- **Electron.js** - The best way to understand Electron is through its [Official Website](https://www.electronjs.org/), which has a [Getting Started](https://www.electronjs.org/docs/latest) guide, You can also go through this [TutorialsPoint Guide](https://www.tutorialspoint.com/electron/index.htm) for more resources.
+That's all you need. 😉
 
-- **React.js** - React's [Official Website](https://reactjs.org/) is a great starting point. You can also use [W3Schools Popular Guide](https://www.w3schools.com/REACT/DEFAULT.ASP), and [Egghead Videos](https://egghead.io/).
+> **Note**:
+> This template uses npm v7 feature — [**Installing Peer Dependencies
+Automatically**](https://github.com/npm/rfcs/blob/latest/implemented/0025-install-peer-deps.md). If you are using a
+different package manager, you may need to install some peerDependencies manually.
 
-- **Vite.js** - Vite's [Official Website](https://vitejs.dev/) is a great starting point. If your facing bugs and issues checkout the [Issue](https://github.com/vitejs/vite/issues) page.
+## Features
 
-- **TypeScript** - Go through [TypeScript Official Website](https://www.typescriptlang.org/) and proceed to their [Official Manual](https://www.typescriptlang.org/docs/), which should help you understand TypeScript better.
+### Electron [![Electron version](https://img.shields.io/github/package-json/dependency-version/cawa-93/vite-electron-builder/dev/electron?label=%20)][electron]
 
-## 🖥️ Prerequisites
+- This template uses the latest electron version with all the latest security patches.
+- The architecture of the application is built according to the
+  security [guides](https://www.electronjs.org/docs/tutorial/security) and best practices.
+- The latest version of the [electron-builder] is used to package the application.
 
-Make sure you have installed all of the following prerequisites on your development machine:
+### Vite [![Vite version](https://img.shields.io/github/package-json/dependency-version/cawa-93/vite-electron-builder/dev/vite?label=%20)][vite]
 
-- **Git** - [Download & Install Git](https://git-scm.com/downloads). OSX and Linux machines typically have this already installed.
-- **Node.js** - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager. If you encounter any problems, you can also use this [GitHub Gist](https://gist.github.com/isaacs/579814) to install Node.js.
+- [Vite] is used to bundle all source codes. It's an extremely fast bundler, that has a vast array of amazing features.
+  You can learn more about how it is arranged in [this](https://www.youtube.com/watch?v=xXrhg26VCSc) video.
+- Vite [supports](https://vitejs.dev/guide/env-and-mode.html) reading `.env` files. You can also specify the types of
+  your environment variables in [`types/env.d.ts`](types/env.d.ts).
+- Automatic hot-reloads for the `Main` and `Renderer` processes.
 
-NOTE: This project requires NodeJS (version 14 or later) and NPM.
-[Node](http://nodejs.org/) and [NPM](https://npmjs.org/) are really easy to install.
+Vite provides many useful features, such as: `TypeScript`, `TSX/JSX`, `CSS/JSON Importing`, `CSS Modules`
+, `Web Assembly` and much more.
 
-## ⏩ Table of contents
+> [See all Vite features](https://vitejs.dev/guide/features.html).
 
-- [Before You Begin](#-before-you-begin)
-- [Prerequisites](#%EF%B8%8F-prerequisites)
-- [Table of contents](#-table-of-contents)
-- [Features](#-features)
-- [Getting Started](#%EF%B8%8F-getting-started)
-- [Directory Structure](#-directory-structure)
-- [Quick Start](#-quick-start)
-  - [Cloning The GitHub Repository](#-cloning-the-github-repository)
-  - [Downloading The Repository Zip File](#%EF%B8%8F-downloading-the-repository-zip-file)
-  - [Quick Install](#-quick-install)
-- [Starting Development](#-starting-development)
-  - [Running Your Application](#-running-your-application)
-  - [Change Port Number](#-change-port-number)
-  - [Vscode Debugging](#-vscode-debugging)
-  - [Clean Cache](#-clean-cache)
-  - [Style your Code](#-style-your-code)
-  - [Git Commits](#%EF%B8%8F-git-commits)
-- [Packaging for Production](#-packaging-for-production)
-  - [Running in Production mode](#%EF%B8%8F-running-in-production-mode)
-  - [Debugging in Production mode](#-debugging-in-production-mode)
-  - [Debugging in Release Build](#-debugging-in-release-build)
-- [Release a Distribution Version](#-release-a-distribution-version)
-  - [Build for Windows](#%EF%B8%8F-build-for-windows)
-  - [Build for macOS](#-build-for-macos)
-  - [Build for Linux](#-build-for-linux)
-- [Tech Used](#%EF%B8%8F-tech-used)
-- [Contributing](#-contributing)
-- [Credits](#-credits)
-- [Show your support](#-show-your-support)
-- [Donate](#-donate)
-- [Authors](#%EF%B8%8F-author)
-- [License](#%EF%B8%8F-license)
+### TypeScript [![TypeScript version](https://img.shields.io/github/package-json/dependency-version/cawa-93/vite-electron-builder/dev/typescript?label=%20)][typescript] (optional)
 
-<!-- ### 🏠 [Homepage](https://github.com/AjayKanniyappan/react-electron-template) -->
+- The latest version of TypeScript is used for all the source code.
+- **Vite** supports TypeScript out of the box. However, it does not support type checking.
+- Code formatting rules follow the latest TypeScript recommendations and best practices thanks
+  to [@typescript-eslint/eslint-plugin](https://www.npmjs.com/package/@typescript-eslint/eslint-plugin).
 
-## 🔍 Features
+> [Guide to disable typescript and remove dependencies](https://github.com/cawa-93/vite-electron-builder/discussions/339) 
 
-- 🐞 Vscode debugging
-- ✨ **HMR** Using Vite
-- 🔥 Hot Reload
-- 📦 Packaging for Production
-- 🎯 Make Development simple
-- 💪 Eslint, Prettier and Airbnb make your code stronger
-- 💽 local Storage using **Electron-Store** and Auto updater using **Electron-Updater**
-- 🖥 Build your application for multi-platform
+### Vue [![Vue version](https://img.shields.io/github/package-json/dependency-version/cawa-93/vite-electron-builder/dev/vue?label=%20&)][vue] (optional)
 
-## 🏃‍♂️ Getting Started
+- By default, web pages are built using [Vue]. However, you can easily change that. Or not use additional frameworks at
+  all.
+- Code formatting rules follow the latest Vue recommendations and best practices thanks to [eslint-plugin-vue].
 
-These instructions will get you a copy of the project and running on your local machine for development and testing purposes. See Distribution for notes on how to Package the Application for Desktop.
+> [Find more forks 🔱 for others frameworks or setups](https://github.com/cawa-93/vite-electron-builder/discussions/categories/forks)
 
-## 📂 Directory Structure
+### Continuous Integration
 
-**Vite Electron React Boilerplate** files and folder structure.
+- The configured workflow will check the types for each push and PR.
+- The configured workflow will check the code style for each push and PR.
+- **Automatic tests**
+  used [Vitest ![Vitest version](https://img.shields.io/github/package-json/dependency-version/cawa-93/vite-electron-builder/dev/vitest?label=%20&color=yellow)][vitest]
+  -- A blazing fast test framework powered by Vite.
+  - Unit tests are placed within each package and are ran separately.
+  - End-to-end tests are placed in the root [`tests`](tests) directory and use [playwright].
 
-```diff
-+├── .husky                       Automate your git commits
-+├── .vscode                      vscode debug folder and extension support
-+├── app                          Your application Build folder
- │   ├── dist                     Your generated source code folder
-+│   └── package.json             Your runnable application package.json (If you want native node module you need to add here)
- │
-+├── assets                       Project assets folder
- │   ├── icons                    Icon sets folder
- │   │  └── NxN.png               Different pixel png's
- │   ├── icon.icns                Icon for the application on macOS and Linux
- │   └── icon.ico                 Icon for the application
- │
-+├── configs                      configuration folder
-+│   └── vite.config.ts           Vite Configurations
- │
-+├── release                      your application release folder
-+│   └── build                    Generated after production build, contains executables
- │       ├── {os}-unpacked        Contains unpacked application executable
- │       └── Setup.{ext}          Installer for the application
- │
-+├── src                          Source code folder
-+│   ├── main                     Electron related code
- │   │   ├── main.ts              Main process source code
- │   │   └── preload.ts           Preload scripts source code
- │   │
-+│   └── renderer                 Renderer source code, your React application
- │       ├── Components           Your Components here
- │       │   └── Home.tsx         Edit and Save to test HMR
- │       ├── App.tsx              React router source code
- │       └── index.tsx            React index source code
- │
- ├── .editorconfig                Editor configuration
- ├── .eslintrc.json               Eslint configuration
- ├── .prettierrc                  prettier code formatter
-+├── DevConfig.json               React development port
-+├── electron-builder.yml         Electron builder configuration
-+├── package.json                 Package.json for development
- ├── tsconfig.json                TypeScript Configuration
-+└── tsconfig.node.json           TypeScript paths
+![Workflow graph](https://user-images.githubusercontent.com/1662812/213429323-ef4bcc87-c273-4f2f-b77f-c04cf6dbc36d.png)
+
+
+### Publishing
+
+- Each time you push changes to the `main` branch, the [`release`](.github/workflows/release.yml) workflow starts, which creates a new draft release. For each next commit will be created and replaced artifacts. That way you will always have draft with latest artifacts, and the release can be published once it is ready. 
+  - Code signing supported. See [`release` workflow](.github/workflows/release.yml).
+  - **Auto-update is supported**. After the release is published, all client applications will download the new version
+  and install updates silently.
+  
+> **Note**:
+> This template **configured only for GitHub public repository**, but electron-builder also supports other update distribution servers. Find more in [electron-builder docs](https://www.electron.build/configuration/publish).
+
+## How it works
+
+The template requires a minimum amount [dependencies](package.json). Only **Vite** is used for building, nothing more.
+
+### Project Structure
+
+The structure of this template is very similar to a monorepo. The entire source code of the project is divided into three modules (packages) that are each bundled independently:
+
+- [`packages/renderer`](packages/renderer). Responsible for the contents of the application window. In fact, it is a
+  regular web application. In developer mode, you can even open it in a browser. The development and build process is
+  the same as for classic web applications. Access to low-level API electrons or Node.js is done through the _preload_
+  layer.
+- [`packages/preload`](packages/preload). Contain Electron [**preload scripts**](https://www.electronjs.org/docs/latest/tutorial/tutorial-preload). Acts as an intermediate bridge between the _renderer_ process and the API
+  exposed by electron and Node.js. Runs in an _isolated browser context_, but has direct access to the full Node.js
+  functionality.
+- [`packages/main`](packages/main)
+  Contain Electron [**main script**](https://www.electronjs.org/docs/tutorial/quick-start#create-the-main-script-file). This is
+  the main process that powers the application. It manages creating and handling the spawned BrowserWindow, setting and
+  enforcing secure permissions and request handlers. You can also configure it to do much more as per your need, such
+  as: logging, reporting statistics and health status among others.
+
+Schematically, the structure of the application and the method of communication between packages can be depicted as follows:
+```mermaid
+flowchart TB;
+
+packages/preload <-. IPC Messages .-> packages/main
+
+    subgraph packages/main["packages/main (Shared beatween all windows)"]
+    M[index.ts] --> EM[Electron Main Process Modules]
+    M --> N2[Node.js API]
+    end
+
+subgraph Window["Browser Window"]
+    subgraph packages/preload["packages/preload (Works in isolated context)"]
+    P[index.ts] --> N[Node.js API]
+    P --> ED[External dependencies]
+    P --> ER[Electron Renderer Process Modules]
+    end
+
+
+    subgraph packages/renderer
+    R[index.html] --> W[Web API]
+    R --> BD[Bundled dependencies]
+    R --> F[Web Frameforks]
+    end
+    end
+
+packages/renderer -- Call Exposed API --> P
+```
+### Build web resources
+
+The `main` and `preload` packages are built in [library mode](https://vitejs.dev/guide/build.html#library-mode) as it is
+simple javascript.
+The `renderer` package builds as a regular web app.
+
+### Compile App
+
+The next step is to package a ready to distribute Electron app for macOS, Windows and Linux with "auto update" support
+out of the box.
+
+To do this, use [electron-builder]:
+
+- Using the npm script `compile`: This script is configured to compile the application as quickly as possible. It is not
+  ready for distribution, it is compiled only for the current platform and is used for debugging.
+- Using GitHub Actions: The application is compiled for any platform and ready-to-distribute files are automatically
+  added as a draft to the GitHub releases page.
+
+### Working with dependencies
+
+Because the `renderer` works and builds like a _regular web application_, you can only use dependencies that support the
+browser or compile to a browser-friendly format.
+
+This means that in the `renderer` you are free to use any frontend dependencies such as Vue, React, lodash, axios and so
+on. However, you _CANNOT_ use any native Node.js APIs, such as, `systeminformation`. These APIs are _only_ available in
+a Node.js runtime environment and will cause your application to crash if used in the `renderer` layer. Instead, if you
+need access to Node.js runtime APIs in your frontend, export a function form the `preload` package.
+
+All dependencies that require Node.js api can be used in
+the [`preload` script](https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts).
+
+#### Expose in main world
+Here is an example. Let's say you need to read some data from the file system or database in the renderer.
+
+In the preload context, create a function that reads and returns data. To make the function announced in the preload
+available in the render, you usually need to call
+the [`electron.contextBridge.exposeInMainWorld`](https://www.electronjs.org/ru/docs/latest/api/context-bridge). However,
+this template uses the [unplugin-auto-expose](https://github.com/cawa-93/unplugin-auto-expose) plugin, so you just need
+to export the method from the preload. The `exposeInMainWorld` will be called automatically.
+
+```ts
+// preload/index.ts
+import { readFile } from 'node:fs/promises';
+
+// Encapsulate types if you use typescript
+interface UserData {
+  prop: string
+}
+
+// Encapsulate all node.js api
+// Everything you exported from preload/index.ts may be called in renderer
+export function getUserData(): Promise<UserData> {
+  return readFile('/path/to/file/in/user/filesystem.json', {encoding:'utf8'}).then(JSON.parse);
+}
 ```
 
-## 🛫 Quick Start
+Now you can import and call the method in renderer
 
-There are several ways you can get the **Vite Electron React Boilerplate**:
-
-### 🌀 Cloning The GitHub Repository
-
-The recommended way to get **Vite Electron React Boilerplate** is to use git to directly clone the repository:
-
-```bash
-# Clone the project
-git clone https://github.com/stackoutput-com/vite-electron-react-boilerplate.git <your-project-name>
-
-# Enter the project directory
-cd <your-project-name>
+```ts
+// renderer/anywere/component.ts
+import { getUserData } from '#preload'
+const userData = await getUserData()
 ```
 
-This will clone the latest version of the Vite Electron React Boilerplate repository to a **your-project-name** folder.
+> Find more in [Context Isolation tutorial](https://www.electronjs.org/docs/tutorial/context-isolation#security-considerations).
 
-### 🗃️ Downloading The Repository Zip File
+### Working with Electron API
 
-Another way to use the **Vite Electron React Boilerplate** is to download a zip copy from the [main branch on GitHub](https://github.com/stackoutput-com/vite-electron-react-boilerplate/archive/refs/heads/main.zip). You can also do this using the `wget` command:
+Although the preload has access to all of Node.js's API, it **still runs in the BrowserWindow context**, so a limited
+electron modules are available in it. Check the [electron docs](https://www.electronjs.org/ru/docs/latest/api/clipboard)
+for full list of available methods.
 
-```sh
-wget https://github.com/stackoutput-com/vite-electron-react-boilerplate/archive/refs/heads/main.zip -O vite-electron-react-boilerplate-main.zip; unzip vite-electron-react-boilerplate-main.zip; rm vite-electron-react-boilerplate-main.zip
+All other electron methods can be invoked in the `main`.
+
+As a result, the architecture of interaction between all modules is as follows:
+
+```mermaid
+sequenceDiagram
+renderer->>+preload: Read data from file system
+preload->>-renderer: Data
+renderer->>preload: Maximize window
+activate preload
+preload-->>main: Invoke IPC command
+activate main
+main-->>preload: IPC response
+deactivate main
+preload->>renderer: Window maximized
+deactivate preload
 ```
 
-Don't forget to rename **vite-electron-react-boilerplate-main** after your project name.
+> Find more in [Inter-Process Communication tutorial](https://www.electronjs.org/docs/latest/tutorial/ipc).
 
-### 🧰 Quick Install
+### Modes and Environment Variables
 
-Once you've downloaded the Template and installed all the prerequisites, you're just a few steps away from starting to develop your Vite, Electron, React application.
+All environment variables are set as part of the `import.meta`, so you can access them vie the following
+way: `import.meta.env`.
 
-The Template comes pre-bundled with a `package.json` file that contain the list of modules you need to start your application.
+> **Note**:
+> If you are using TypeScript and want to get code completion you must add all the environment variables to
+the [`ImportMetaEnv` in `types/env.d.ts`](types/env.d.ts).
 
-To install the dependencies, run this in the application folder from the command-line:
+The mode option is used to specify the value of `import.meta.env.MODE` and the corresponding environment variables files
+that need to be loaded.
 
-```bash
-# Install dependency
-npm install
+By default, there are two modes:
+
+- `production` is used by default
+- `development` is used by `npm run watch` script
+
+When running the build script, the environment variables are loaded from the following files in your project root:
+
+```
+.env                # loaded in all cases
+.env.local          # loaded in all cases, ignored by git
+.env.[mode]         # only loaded in specified env mode
+.env.[mode].local   # only loaded in specified env mode, ignored by git
 ```
 
-Or if you prefer using Yarn:
+> **Warning**: 
+> To prevent accidentally leaking env variables to the client, only variables prefixed with `VITE_` are exposed to your
+Vite-processed code.
 
-```bash
-# Install dependency
-yarn install
+For example let's take the following `.env` file:
+
+```
+DB_PASSWORD=foobar
+VITE_SOME_KEY=123
 ```
 
-This command does a few things:
+Only `VITE_SOME_KEY` will be exposed as `import.meta.env.VITE_SOME_KEY` to your client source code, but `DB_PASSWORD`
+will not.
 
-- First it will install the dependencies needed for the application to run.
-- If you're running in a development environment, it will then also install development dependencies needed for testing and running your application.
+You can change that prefix or add another. See [`envPrefix`](https://vitejs.dev/config/shared-options.html#envprefix)
 
-## 👨‍💻 Starting Development
+## Contribution
 
-Use your favorite JavaScript Package Managers **npm** or **yarn** or **pnpm**
+See [Contributing Guide](contributing.md).
 
-### 🏃 Running Your Application
 
-**Run your application using npm:**
+[vite]: https://github.com/vitejs/vite/
 
-```sh
-npm start
-```
+[electron]: https://github.com/electron/electron
 
-Or if you prefer using Yarn:
+[electron-builder]: https://github.com/electron-userland/electron-builder
 
-```sh
-yarn start
-```
+[vue]: https://github.com/vuejs/vue-next
 
-![image](https://user-images.githubusercontent.com/114384910/202861777-c1f849e1-f91a-4f3e-97b5-1300c08e7358.png)
+[vue-router]: https://github.com/vuejs/vue-router-next/
 
-Your **React** application should run on default port http://localhost:7070 on top of **Electron** with the development environment configuration.
+[typescript]: https://github.com/microsoft/TypeScript/
 
-Explore **configs/vite.config.ts** for development environment configuration options.
+[playwright]: https://playwright.dev
 
-### 🛬 Change Port Number
+[vitest]: https://vitest.dev
 
-If the localhost 7070 port number already in use! or if you like to change your **React application number.**
+[vue-tsc]: https://github.com/johnsoncodehk/vue-tsc
 
-Go to 👉 DevConfig.json and change the port number 7070 to **your-port-number**
+[eslint-plugin-vue]: https://github.com/vuejs/eslint-plugin-vue
 
-![Port](https://user-images.githubusercontent.com/114384910/202861348-6d8cd264-e3a4-4229-a1a3-d408c32d902a.png)
+[cawa-93-github]: https://github.com/cawa-93/
 
-### 🆚 Vscode Debugging
-
-This guide goes over how to start **VSCode debugging** your **React, Electron** Project.
-
-you can easily debug this [Vite Electron React Boilerplate](https://github.com/stackoutput-com/vite-electron-react-boilerplate).
-
-To bring up the Run and Debug view, select the Run and Debug icon in the Activity Bar on the side of VS Code. You can also use the keyboard shortcut `Ctrl+Shift+D`.
-
-![Untitled-3](https://user-images.githubusercontent.com/114384910/201532224-1cbf49e6-5511-4d42-82f0-319198ac0e5c.png)
-
-Click the button or press `F5` to start debugging
-
-**Electron main process Debugging**
-
-NOTE: **Currently** Electron main process **(VScode)** debugging feature is not available, It will be added soon.
-
-**Electron renderer process Debugging**
-
-If you want to debug your **ReactJS** also called renderer code in Vscode, Go to Run and debug section or use the keyboard shortcut `Ctrl+Shift+D`.
-
-- Add break 🚧 points 🛑 in your code or files.
-- Change the **Electron:main** to **Electron:renderer** to debug the renderer process.
-- Click green button to run debug or press `F5` to start debugging.
-
-![Renderer](https://user-images.githubusercontent.com/114384910/202862623-e49275f5-2c70-41ee-a604-b0f5f62fbeba.png)
-
-NOTE: First run **Electron:main** then only you can debug the **Electron:renderer** process.
-
-### 🧹 Clean Cache
-
-If you want clean the cache files and node_modules cache run this below command 👇:
-
-```sh
-npm run clean
-```
-
-NOTE: It will remove your **node_module** folder, **build** files and **package-lock.json** files.
-
-Or if you prefer to clean only build files and folder run this below command 👇:
-
-```sh
-npm run clean:build
-```
-
-Or if you prefer to clean only dist files and folder run this below command 👇:
-
-```sh
-npm run clean:dist
-```
-
-### 💈 Style your Code
-
-The [Vite Electron React Boilerplate](https://github.com/stackoutput-com/vite-electron-react-boilerplate) has [Eslint](https://eslint.org/), [Prettier](https://prettier.io/) and [Airbnb](https://airbnb.io/javascript/react/) Configurations, this will help you to Style your code and syntax check and more.
-
-[Eslint](https://eslint.org/) will check syntax, find problems, and enforce code style of your code.
-
-[Prettier](https://prettier.io/) will format your code style.
-
-All you have to do is run this below command 👇:
-
-```sh
-npm run lint
-```
-
-NOTE: This command show you the warnings and errors in your code.
-
-### 🛰️ Git Commits
-
-Automate your [Git](https://git-scm.com/) commits using Husky, and don't commit or push the bad code in git.
-
-Husky improves your commits and more, You can use it to lint your commit messages, run tests, lint code, etc... when you commit or push. Husky supports [all Git hooks](https://git-scm.com/docs/githooks).
-
-Run below command 👇 to prepare Husky:
-
-```sh
-npm run prepare
-```
-
-See docs and more about [Husky](https://typicode.github.io/husky/#/?id=features).
-
-That's it! Your application should be running. To proceed with your development, check the other sections in this documentation. If you encounter any problems, Feel free to check [issues page](https://github.com/stackoutput-com/vite-electron-react-boilerplate/issues).
-
-## ⚡ Packaging for Production
-
-This documentation will teach you how to move your **Code** on **Production**.
-
-### 🏃‍♂️ Running in Production mode
-
-To run your code on production mode run this command 👇:
-
-```sh
-npm run prod
-```
-
-NOTE: It will run both **Electron**, **React** code in production mode.
-
-### 🐞 Debugging in Production mode
-
-If you need to debug your application on production mode run this 👇 command and it will show you the Electron **DevTools** for debugging.
-
-```sh
-npm run prod:debug
-```
-
-NOTE: Its only for testing purpose.
-
-### 🐞 Debugging in Release Build
-
-If you want to test your executable or installer application, just run this 👇 command and it will show you the Electron **DevTools** for debugging.
-
-```sh
-npm run build:debug
-```
-
-NOTE: This is testing build only, don't move it for **Distribution**.
-
-## 📦 Release a Distribution Version
-
-This guide will teach you how to build and distribute your application for **multi-platform**, It time to release your million dollar projects.
-
-**NOTE:** To avoid **Unknown publisher** error's you need to [Code Signing](https://www.venafi.com/education-center/code-signing/what-is-code-signing) on your project for more read this [Documentation .](https://www.electronjs.org/docs/latest/tutorial/distribution-overview)
-
-### 🖥️ Build for Windows
-
-Once your app is ready for production or you completed a development process, To package and distribute your application for **Windows** Platform, you need to re-brand it. To do this below 👇:
-
-- Go to [electron-builder.yml](https://github.com/stackoutput-com/vite-electron-react-boilerplate/blob/main/electron-builder.yml) change the name, appID, icon and what are the configuration you want.
-
-- Also change the [package.json](https://github.com/stackoutput-com/vite-electron-react-boilerplate/blob/main/package.json) name, version and your what needs.
-
-- All you finish the process, you need to run this command 👇 it will make you the build for distribution file for Windows:
-
-```sh
-npm run make:win
-```
-
-NOTE: If you want to publish your application in [Windows Store](https://apps.microsoft.com/store/apps) kindly read this 🙏 [Documentation .](https://www.electronjs.org/docs/latest/tutorial/windows-store-guide)
-
-### 🍎 Build for macOS
-
-Once your app is ready for production or you completed a development process, To package and distribute your application for **macOS** Platform, you need to re-brand it. To do this below 👇:
-
-- Go to [electron-builder.yml](https://github.com/stackoutput-com/vite-electron-react-boilerplate/blob/main/electron-builder.yml) change the name, appID, icon and what are the configuration you want.
-
-- Also change the [package.json](https://github.com/stackoutput-com/vite-electron-react-boilerplate/blob/main/package.json) name, version and your what needs.
-
-- All you finish the process, you need to run this command 👇 it will make you the build for distribution file for macOS:
-
-```sh
-npm run make:mac
-```
-
-NOTE: If you want to publish your application in [Mac App Store](https://www.apple.com/in/app-store/) kindly read this 🙏 [Documentation .](https://www.electronjs.org/docs/latest/tutorial/mac-app-store-submission-guide)
-
-### 🐧 Build for Linux
-
-Once your app is ready for production or you completed a development process, To package and distribute your application for **Linux** Platform, you need to re-brand it. To do this below 👇:
-
-- Go to [electron-builder.yml](https://github.com/stackoutput-com/vite-electron-react-boilerplate/blob/main/electron-builder.yml) change the name, appID, icon and what are the configuration you want.
-
-- Also change the [package.json](https://github.com/stackoutput-com/vite-electron-react-boilerplate/blob/main/package.json) name, version and your what needs.
-
-- All you finish the process, you need to run this command 👇 it will make you the build for distribution file for Linux:
-
-```sh
-npm run make:linux
-```
-
-NOTE: If you want to publish your application in [Snapcraft](https://snapcraft.io/) kindly read this 🙏 [Documentation .](https://www.electronjs.org/docs/latest/tutorial/snapcraft)
-
-## 🏗️ Tech Used
-
-**Vite Electron React Boilerplate** Built With
-
-- <img src="https://img.shields.io/badge/React%20-%2361DAFB.svg?&style=for-the-badge&logo=React&logoColor=white"/>
-  <br/>
-- <img src="https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white"/>
-  <br/>
-- <img src="https://img.shields.io/badge/React_Router%20-%23CA4245.svg?&style=for-the-badge&logo=React%20Router&logoColor=white"/> 
-  <br/>
-- <img src="https://img.shields.io/badge/Electron%20-%2347848F.svg?&style=for-the-badge&logo=Electron&logoColor=white"/>
-  <br/>
-- <img src="https://img.shields.io/badge/JavaScript%20-%23F7DF1E.svg?&style=for-the-badge&logo=JavaScript&logoColor=white"/>
-  <br/>
-- <img src="https://img.shields.io/badge/TypeScript%20-%233178C6.svg?&style=for-the-badge&logo=TypeScript&logoColor=white"/> 
-  <br/>
-- <img src="https://img.shields.io/badge/HTML5%20-%23E34F26.svg?&style=for-the-badge&logo=HTML5&logoColor=white"/>   
-  <br/>
-- <img src="https://img.shields.io/badge/CSS3%20-%231572B6.svg?&style=for-the-badge&logo=CSS3&logoColor=white"/>
-  <br/>
-- <img src="https://img.shields.io/badge/Sass%20-%23CC6699.svg?&style=for-the-badge&logo=Sass&logoColor=white"/>
-  <br/>
-- <img src="https://img.shields.io/badge/Node.js%20-%23339933.svg?&style=for-the-badge&logo=Node.js&logoColor=white"/> 
-  <br/>
-- <img src="https://img.shields.io/badge/Prettier%20-%23F7B93E.svg?&style=for-the-badge&logo=Prettier&logoColor=white"/> 
-  <br/>
-- <img src="https://img.shields.io/badge/ESLint%20-%234B32C3.svg?&style=for-the-badge&logo=ESLint&logoColor=white"/>
-  <br/>
-- <img src="https://img.shields.io/badge/Airbnb%20-%23FF5A5F.svg?&style=for-the-badge&logo=Airbnb&logoColor=white"/>
-
-## 🤝 Contributing
-
-Contributions, issues and feature requests are welcome! Just be sure to read the [contributing](https://github.com/stackoutput-com/vite-electron-react-boilerplate/blob/main/CONTRIBUTING.md) document to get started. Feel free to check [issues page](https://github.com/stackoutput-com/vite-electron-react-boilerplate/issues).
-
-## 💳 Credits
-
-This project is Inspired by the great work of [Ajay Kanniyappan](https://github.com/AjayKanniyappan/react-electron-template).
-
-## 💖 Show your support
-
-**I hope 🙏 it will helped you! Give a ⭐️ to support this project!**
-
-If you like 💗 the project, there is other way to support us
-
-- Tweet about it
-- Refer this project in your project's readme
-- Mention the project at local meetups and tell your friends/colleagues
-
-## ☕ Donate
-
-Donations will help us to ensure the following:
-
-- ⚡ Quick responses to issues, bug reports and help requests
-- ➕ Adding new features
-- ⚒️ Long term maintenance of the project
-
-<a href="https://www.buymeacoffee.com/ajaykanniyappan">
-<img height="40" width="150" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png">
-</a>
-
-## 🛠️ Author
-
-👨‍💻 **Ajay Kanniyappan**
-
-- Website: https://ajaykanniyappan.com
-- Twitter: [@AjayKanniyappan](https://twitter.com/AjayKanniyappan)
-- Github: [AjayKanniyappan](https://github.com/AjayKanniyappan)
-- LinkedIn: [AjayKanniyappan](https://in.linkedin.com/in/AjayKanniyappan)
-
-## ©️ License
-
-[MIT License](https://github.com/stackoutput-com/vite-electron-react-boilerplate/blob/main/LICENSE) © Ajay Kanniyappan
+[cawa-93-sponsor]: https://www.patreon.com/Kozack/
