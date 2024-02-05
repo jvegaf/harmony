@@ -1,103 +1,124 @@
-/* eslint-disable no-unused-vars */
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {
-  CellContextMenuEvent,
-  ColDef,
-  FirstDataRenderedEvent,
-  GridApi,
-  GridReadyEvent,
-  RowDoubleClickedEvent,
-} from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
-import React from 'react';
-import { Track } from '../../electron/types';
+  createColumnHelper,
+  getCoreRowModel,
+  useReactTable,
+  flexRender,
+} from "@tanstack/react-table";
+import { Track } from "../../electron/types";
+import { useState } from "react";
 
 export interface TrackListProps {
   tracks: Track[];
-  playTrack: (track: Track) => void;
+  playTrack: (id: string) => void;
 }
 
-const TrackList: React.FC<TrackListProps> = ({ tracks, playTrack }) => {
-  const gridRef = React.useRef<AgGridReact>(null);
-  const [gridApi, setGridApi] = React.useState<GridApi | null>(null);
-  const [rowData, setRowData] = React.useState<Track[]>([]);
-  const columnDefs = React.useMemo<ColDef[]>(
-    () => [
-      { field: 'title', minWidth: 150 },
-      { field: 'artist', minWidth: 90 },
-      { field: 'time', maxWidth: 70 },
-      { field: 'album', minWidth: 90 },
-      { field: 'genre', minWidth: 70 },
-      { field: 'year', maxWidth: 70 },
-      { field: 'bpm', maxWidth: 70 },
-      { field: 'bitrate', maxWidth: 70 },
-      { field: 'key', maxWidth: 70 },
-    ],
-    []
-  );
-  const containerStyle = React.useMemo(() => ({ width: '100%', height: '100%' }), []);
-  const gridStyle = React.useMemo(() => ({ height: '100%', width: '100%' }), []);
+export function TrackList({ tracks, playTrack }: TrackListProps) {
+  // const data = useLibraryStore((state) => state.tracks);
+  const data = tracks;
+  const [rowSelection, setRowSelection] = useState({});
 
-  const defaultColDef = React.useMemo<ColDef>(() => {
-    return {
-      resizable: true,
-      sortable: true,
-    };
-  }, []);
+  const columnHelper = createColumnHelper<Track>();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onFirstDataRendered = React.useCallback((params: FirstDataRenderedEvent) => {
-    gridRef.current?.api.sizeColumnsToFit();
-  }, []);
+  const columns = [
+    columnHelper.accessor("title", {
+      cell: (info) => info.getValue(),
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor((row) => row.artist, {
+      id: "artist",
+      cell: (info) => <i>{info.getValue()}</i>,
+      header: () => <span>Last Name</span>,
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("album", {
+      header: () => "Album",
+      cell: (info) => info.renderValue(),
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("bpm", {
+      header: () => <span>Visits</span>,
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("year", {
+      header: "Year",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("genre", {
+      header: "Genre",
+      footer: (info) => info.column.id,
+    }),
+  ];
 
-  // React.useEffect(() => {
-  //   setRowData(tracks);
-  // }, [tracks]);
-
-  const onGridReady = (params: GridReadyEvent) => {
-    setGridApi(params.api);
-
-    setRowData(tracks);
-  };
-
-  const onDblClick = React.useCallback(
-    (event: RowDoubleClickedEvent) => {
-      event.event?.preventDefault();
-      const { data } = event;
-      playTrack(data as Track);
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      rowSelection,
     },
-    [playTrack]
-  );
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    getCoreRowModel: getCoreRowModel(),
+    debugTable: true,
+  });
 
-  const onShowCtxtMenu = React.useCallback((event: CellContextMenuEvent) => {
-    event.event?.preventDefault();
-    if (!event.node.isSelected()) {
-      event.node.setSelected(true, true);
-    }
-
-    const selected = event.api.getSelectedRows() as Track[];
-    window.Main.ShowContextMenu(selected);
-  }, []);
+  const playTrackHandler = (event: any) => console.log(event);
 
   return (
-    <div style={containerStyle}>
-      <div style={gridStyle} className="ag-theme-alpine-dark">
-        <AgGridReact
-          ref={gridRef}
-          rowSelection="multiple"
-          rowData={rowData}
-          columnDefs={columnDefs}
-          defaultColDef={defaultColDef}
-          onGridReady={onGridReady}
-          onFirstDataRendered={onFirstDataRendered}
-          onRowDoubleClicked={(e) => onDblClick(e)}
-          onCellContextMenu={(e) => onShowCtxtMenu(e)}
-          suppressCellFocus
-        />
-      </div>
+    <div>
+      <table>
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <th key={header.id} colSpan={header.colSpan}>
+                    {header.isPlaceholder ? null : (
+                      <>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                      </>
+                    )}
+                  </th>
+                );
+              })}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => {
+            return (
+              <tr key={row.id} onDoubleClick={playTrackHandler}>
+                {row.getVisibleCells().map((cell) => {
+                  return (
+                    <td key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td className="p-1">
+              {/* <IndeterminateCheckbox */}
+              {/*   {...{ */}
+              {/*     checked: table.getIsAllPageRowsSelected(), */}
+              {/*     indeterminate: table.getIsSomePageRowsSelected(), */}
+              {/*     onChange: table.getToggleAllPageRowsSelectedHandler(), */}
+              {/*   }} */}
+              {/* /> */}
+            </td>
+            <td colSpan={20}>Page Rows ({table.getRowModel().rows.length})</td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
   );
-};
-
-export default TrackList;
+}

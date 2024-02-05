@@ -1,15 +1,14 @@
-import { create } from 'zustand'
-import { Track } from '../../electron/types'
+import { create } from "zustand";
+import { TrackId } from "../../electron/types";
 
 type PlayerState = {
-  playingTrack: Track | null
-  playTrack: (track: Track | null) => void
-}
-
+  playingTrack: TrackId | null;
+  playTrack: (trackId: TrackId) => void;
+};
 
 const usePlayerStore = create<PlayerState>((set) => ({
   playingTrack: null,
-  playTrack: (track) => set({ playingTrack: track }),
-}))
+  playTrack: (trackId: TrackId) => set({ playingTrack: trackId }),
+}));
 
-export default usePlayerStore
+export default usePlayerStore;
