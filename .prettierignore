@@ -1,0 +1,11 @@
+**/node_modules
+**/dist
+**/dist-electron
+**/*.svg
+
+package.json
+package-lock.json
+.electron-vendors.cache.json
+
+.github
+.idea

@@ -1,16 +1,26 @@
-import { contextBridge, ipcRenderer } from 'electron';
-import { FIX_TRACK, GET_ARTWORK, OPEN_FOLDER, PERSIST, SHOW_CONTEXT_MENU } from './lib/ipc/channels';
-import { ArtTrack, Artwork, Track, TrackSrc } from './types';
+import { contextBridge, ipcRenderer } from "electron";
+import {
+  FIX_TRACK,
+  GET_ARTWORK,
+  OPEN_FOLDER,
+  PERSIST,
+  SHOW_CONTEXT_MENU,
+} from "./lib/ipc/channels";
+import { ArtTrack, Artwork, Track, TrackSrc } from "./types";
 
 const api = {
-  ShowContextMenu: (selected: Track[]) => ipcRenderer.send(SHOW_CONTEXT_MENU, selected),
-  OpenFolder: () => ipcRenderer.send(OPEN_FOLDER),
+  ShowContextMenu: (selected: Track[]) =>
+    ipcRenderer.send(SHOW_CONTEXT_MENU, selected),
+  OpenFolder: async () => ipcRenderer.invoke(OPEN_FOLDER),
   FixTrack: (track: Track) => ipcRenderer.send(FIX_TRACK, track),
   PersistTrack: (track: Track) => ipcRenderer.send(PERSIST, track),
-  Log: (...args: unknown[]) => ipcRenderer.send('log', ...args),
-  FindArtWork: async (track: Track) => ipcRenderer.invoke('find-artwork', track),
-  SaveArtWork: (artTrack: ArtTrack) => ipcRenderer.send('save-artwork', artTrack),
-  GetArtWork: (filepath: TrackSrc): Promise<Artwork | null> => ipcRenderer.invoke(GET_ARTWORK, filepath),
+  Log: (...args: unknown[]) => ipcRenderer.send("log", ...args),
+  FindArtWork: async (track: Track) =>
+    ipcRenderer.invoke("find-artwork", track),
+  SaveArtWork: (artTrack: ArtTrack) =>
+    ipcRenderer.send("save-artwork", artTrack),
+  GetArtWork: (filepath: TrackSrc): Promise<Artwork | null> =>
+    ipcRenderer.invoke(GET_ARTWORK, filepath),
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(channel: string, func: (...args: any[]) => void) {
@@ -25,9 +35,9 @@ const api = {
 export type Main = typeof api;
 
 // --------- Expose some API to the Renderer process ---------
-contextBridge.exposeInMainWorld('ipcRenderer', withPrototype(ipcRenderer));
+contextBridge.exposeInMainWorld("ipcRenderer", withPrototype(ipcRenderer));
 
-contextBridge.exposeInMainWorld('Main', api);
+contextBridge.exposeInMainWorld("Main", api);
 
 // `exposeInMainWorld` can't detect attributes and methods of `prototype`, manually patching it.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,7 +47,7 @@ function withPrototype(obj: Record<string, any>) {
   for (const [key, value] of Object.entries(protos)) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) continue;
 
-    if (typeof value === 'function') {
+    if (typeof value === "function") {
       // Some native APIs, like `NodeJS.EventEmitter['on']`, don't work in the Renderer process. Wrapping them into a function.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       obj[key] = function (...args: any) {
@@ -51,12 +61,14 @@ function withPrototype(obj: Record<string, any>) {
 }
 
 // --------- Preload scripts loading ---------
-function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
+function domReady(
+  condition: DocumentReadyState[] = ["complete", "interactive"],
+) {
   return new Promise((resolve) => {
     if (condition.includes(document.readyState)) {
       resolve(true);
     } else {
-      document.addEventListener('readystatechange', () => {
+      document.addEventListener("readystatechange", () => {
         if (condition.includes(document.readyState)) {
           resolve(true);
         }
@@ -113,12 +125,12 @@ function useLoading() {
   z-index: 9;
 }
     `;
-  const oStyle = document.createElement('style');
-  const oDiv = document.createElement('div');
+  const oStyle = document.createElement("style");
+  const oDiv = document.createElement("div");
 
-  oStyle.id = 'app-loading-style';
+  oStyle.id = "app-loading-style";
   oStyle.innerHTML = styleContent;
-  oDiv.className = 'app-loading-wrap';
+  oDiv.className = "app-loading-wrap";
   oDiv.innerHTML = `<div class="${className}"><div></div></div>`;
 
   return {
@@ -140,7 +152,7 @@ const { appendLoading, removeLoading } = useLoading();
 domReady().then(appendLoading);
 
 window.onmessage = (ev) => {
-  ev.data.payload === 'removeLoading' && removeLoading();
+  ev.data.payload === "removeLoading" && removeLoading();
 };
 
 setTimeout(removeLoading, 4999);

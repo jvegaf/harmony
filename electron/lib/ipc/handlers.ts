@@ -1,12 +1,19 @@
-import { BrowserWindow, dialog, ipcMain, IpcMainEvent, Menu, MenuItemConstructorOptions, PopupOptions } from 'electron';
-import log from 'electron-log/main';
+import {
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  IpcMainEvent,
+  Menu,
+  MenuItemConstructorOptions,
+  PopupOptions,
+} from "electron";
+import log from "electron-log/main";
 import {
   ARTWORK_UPDATED,
   FIND_ARTWORK,
   FIX_COMMAND,
   FIX_TRACK,
   GET_ARTWORK,
-  NEW_TRACK,
   OPEN_FOLDER,
   PERSIST,
   PLAY_COMMAND,
@@ -14,18 +21,18 @@ import {
   SHOW_CONTEXT_MENU,
   TRACK_UPDATED,
   VIEW_DETAIL_COMMAND,
-} from './channels';
-import { Track } from '../../types';
-import FindArtwork from '../tagger/artwork-finder';
-import { GetFilesFrom } from '../io/get-files';
-import CreateTrack from '../track/creator';
-import UpdateArtwork from '../artwork/updater';
-import { LoadArtworkFromFile } from '../artwork/loader';
-import FixTags from '../tagger/Tagger';
-import PersistTrack from '../tag/saver';
+} from "./channels";
+import { Track } from "../../types";
+import FindArtwork from "../tagger/artwork-finder";
+import { GetFilesFrom } from "../io/get-files";
+import CreateTrack from "../track/creator";
+import UpdateArtwork from "../artwork/updater";
+import { LoadArtworkFromFile } from "../artwork/loader";
+import FixTags from "../tagger/Tagger";
+import PersistTrack from "../tag/saver";
 
 export async function InitIpc(): Promise<void> {
-  log.info('ipc initialized');
+  log.info("ipc initialized");
 
   ipcMain.on(PERSIST, (_, track) => PersistTrack(track));
 
@@ -34,24 +41,26 @@ export async function InitIpc(): Promise<void> {
     return results;
   });
 
-  ipcMain.on(OPEN_FOLDER, async (event) => {
-    const resultPath = await dialog.showOpenDialog({ properties: ['openDirectory'] });
+  ipcMain.handle(OPEN_FOLDER, async () => {
+    const resultPath = await dialog.showOpenDialog({
+      properties: ["openDirectory"],
+    });
 
     if (resultPath.canceled) return;
 
     const files = await GetFilesFrom(resultPath.filePaths[0]);
 
-    files.forEach(async (file) => {
-      const track = await CreateTrack(file);
+    const tracks = await Promise.all(
+      files.map(async (file) => CreateTrack(file)),
+    );
 
-      if (track !== null) {
-        event.sender.send(NEW_TRACK, track);
-      }
-    });
+    log.info(" total tracks created: ", tracks.length);
+
+    return tracks;
   });
 
   ipcMain.on(FIX_TRACK, async (event: IpcMainEvent, track: Track) => {
-    log.info('track to fix: ', track.title);
+    log.info("track to fix: ", track.title);
     const updated = await FixTags(track);
     event.sender.send(TRACK_UPDATED, updated);
   });
@@ -69,20 +78,20 @@ export async function InitIpc(): Promise<void> {
   ipcMain.on(SHOW_CONTEXT_MENU, (event: IpcMainEvent, selected: Track[]) => {
     const templateSingle = [
       {
-        label: 'View Details',
+        label: "View Details",
         click: () => {
           event.sender.send(VIEW_DETAIL_COMMAND, selected[0]);
         },
       },
       {
-        label: 'Play Track',
+        label: "Play Track",
         click: () => {
           event.sender.send(PLAY_COMMAND, selected[0]);
         },
       },
-      { type: 'separator' },
+      { type: "separator" },
       {
-        label: 'Fix Track',
+        label: "Fix Track",
         click: () => {
           event.sender.send(FIX_COMMAND, selected);
         },
