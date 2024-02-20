@@ -1,24 +1,24 @@
 import '@mantine/core/styles.css';
-import '@mantine/dates/styles.css'; //if using mantine component features
-import 'mantine-react-table/styles.css'; //make sure MRT styles were imported in your app root (once)
+import '@mantine/dates/styles.css';
+import 'mantine-react-table/styles.css';
 import type {Track} from '../../electron/types';
 import {useState, useEffect, useMemo} from 'react';
 import log from 'electron-log/renderer';
+import useLibraryStore from '../stores/useLibraryStore';
+import usePlayerStore from '../stores/usePlayerStore';
 import {
   MantineReactTable,
   useMantineReactTable,
   type MRT_ColumnDef,
   type MRT_RowSelectionState,
 } from 'mantine-react-table';
+import useAppStore from '../stores/useAppStore';
 
-export interface TrackListProps {
-  tracks: Track[];
-  playTrack: (id: string) => void;
-}
-
-export function TrackList({tracks}: TrackListProps) {
-  // const data = useLibraryStore((state) => state.tracks);
-  const data = tracks;
+export function TrackList() {
+  const data = useLibraryStore(state => state.tracks);
+  const libHeight = useAppStore(state => state.libHeight);
+  const playTrack = usePlayerStore(state => state.playTrack);
+  const playingTrack = usePlayerStore(state => state.playingTrack);
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
 
   const columns = useMemo<MRT_ColumnDef<Track>[]>(
@@ -38,20 +38,26 @@ export function TrackList({tracks}: TrackListProps) {
       {
         accessorKey: 'bpm',
         header: 'BPM',
+        size: 10,
       },
       {
         accessorKey: 'year',
         header: 'Year',
+        size: 10,
       },
       {
         accessorKey: 'genre',
         header: 'Genre',
+        size: 50,
       },
     ],
     [],
   );
 
-  const playTrackHandler = row => console.log('playTrackHandler', row);
+  const playTrackHandler = row => {
+    setRowSelection({});
+    playTrack(row.id);
+  };
 
   const handleSelection = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row) => {
     if (event.detail > 1) {
@@ -60,7 +66,7 @@ export function TrackList({tracks}: TrackListProps) {
     }
 
     if (event.ctrlKey) {
-      console.log('selectionHandlerEventShiftKey');
+      console.log('selectionHandlerEventCtrlKey', event);
       setRowSelection(prev => ({
         ...prev,
         [row.id]: !prev[row.id],
@@ -90,6 +96,14 @@ export function TrackList({tracks}: TrackListProps) {
     return () => document.removeEventListener('keydown', e => handleKeyPress(e));
   }, []);
 
+  useEffect(() => {
+    console.log('trackList: playingTrack', playingTrack);
+  }, [playingTrack]);
+
+  useEffect(() => {
+    log.info('libHeight: ', libHeight);
+  }, [libHeight]);
+
   const table = useMantineReactTable({
     columns,
     data,
@@ -98,19 +112,21 @@ export function TrackList({tracks}: TrackListProps) {
     enableTopToolbar: false,
     enableBottomToolbar: false,
     enableColumnActions: false,
+    enableStickyHeader: true,
+    mantineTableContainerProps: {style: {height: libHeight}},
 
     getRowId: row => row.id,
     mantineTableBodyRowProps: ({row}) => ({
-      //implement row selection click events manually
       onClick: (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => handleSelection(event, row),
       selected: rowSelection[row.id],
       sx: {
         cursor: 'pointer',
       },
     }),
-    mantineTableBodyCellProps: () => ({
+    mantineTableBodyCellProps: ({row}) => ({
       style: {
         userSelect: 'none',
+        backgroundColor: playingTrack && row.id === playingTrack ? 'var(--mantine-color-default-border)' : '',
       },
     }),
     state: {rowSelection},

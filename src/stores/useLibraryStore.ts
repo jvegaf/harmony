@@ -1,7 +1,7 @@
-import { create } from "zustand";
-import { Track } from "../../electron/types";
-import { OPEN_FOLDER } from "../../electron/lib/ipc/channels";
-import log from "electron-log/renderer";
+import {create} from 'zustand';
+import type {Track} from '../../electron/types';
+import {OPEN_FOLDER} from '../../electron/lib/ipc/channels';
+import log from 'electron-log/renderer';
 
 interface LibraryState {
   tracks: Track[];
@@ -9,13 +9,13 @@ interface LibraryState {
   onOpen: () => void;
 }
 
-const useLibraryStore = create<LibraryState>((set) => ({
+const useLibraryStore = create<LibraryState>(set => ({
   tracks: [],
-  addTrack: (track) => set((state) => ({ tracks: [...state.tracks, track] })),
+  addTrack: track => set(state => ({tracks: [...state.tracks, track]})),
   onOpen: async () => {
     const newTracks = await window.ipcRenderer.invoke(OPEN_FOLDER);
-    log.info("total tracks", newTracks.length);
-    set({ tracks: newTracks });
+    log.info('total tracks', newTracks.length);
+    set({tracks: newTracks});
   },
 }));
 
