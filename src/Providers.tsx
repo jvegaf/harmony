@@ -36,8 +36,8 @@ export default function Providers({ children }: any) {
       <ColorSchemeScript defaultColorScheme="auto" />
       <MantineProvider defaultColorScheme="auto" theme={theme} withCssVariables>
         <ModalsProvider>
-            <Notifications />
-            {children}
+          <Notifications />
+          {children}
         </ModalsProvider>
       </MantineProvider>
     </>

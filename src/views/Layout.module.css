@@ -1,16 +1,19 @@
 .rlayout {
   height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   width: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.rlayout__main {
+.main_container {
   height: 100%;
-  flex-grow: 1;
   width: 100%;
 }
 
-.rlayout__topbar {
-  height: rem(56px);
+.topbar {
+  height: 80px;
+  width: 100%;
 }

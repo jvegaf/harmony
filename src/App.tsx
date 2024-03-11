@@ -1,10 +1,11 @@
-import {RouterProvider, createBrowserRouter} from 'react-router-dom';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import Providers from './Providers';
-import {DetailView, HomeView, RootLayout, WelcomeView, detailLoader} from './views';
-import {useEffect} from 'react';
-import {FIX_COMMAND} from '../electron/lib/ipc/channels';
-import type {Track} from '../electron/types';
+import { DetailView, HomeView, RootLayout, WelcomeView, detailLoader } from './views';
+import { useEffect } from 'react';
+import { FIX_COMMAND } from '../electron/lib/ipc/channels';
+import type { Track } from '../electron/types';
 import useLibraryStore from './stores/useLibraryStore';
+import './App.css';
 
 export default function App() {
   const tracks = useLibraryStore(state => state.tracks);

@@ -2,7 +2,7 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import 'mantine-react-table/styles.css';
 import type {Track} from '../../electron/types';
-import {useState, useEffect, useMemo} from 'react';
+import {useState, useEffect, useMemo, useRef} from 'react';
 import log from 'electron-log/renderer';
 import useLibraryStore from '../stores/useLibraryStore';
 import usePlayerStore from '../stores/usePlayerStore';
@@ -12,14 +12,15 @@ import {
   type MRT_ColumnDef,
   type MRT_RowSelectionState,
 } from 'mantine-react-table';
-import useAppStore from '../stores/useAppStore';
+import classes from './TrackList.module.css';
+import {useResizeObserver} from '@mantine/hooks';
 
 export function TrackList() {
   const data = useLibraryStore(state => state.tracks);
-  const libHeight = useAppStore(state => state.libHeight);
   const playTrack = usePlayerStore(state => state.playTrack);
   const playingTrack = usePlayerStore(state => state.playingTrack);
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
+  const [ref, rect] = useResizeObserver();
 
   const columns = useMemo<MRT_ColumnDef<Track>[]>(
     () => [
@@ -100,10 +101,6 @@ export function TrackList() {
     console.log('trackList: playingTrack', playingTrack);
   }, [playingTrack]);
 
-  useEffect(() => {
-    log.info('libHeight: ', libHeight);
-  }, [libHeight]);
-
   const table = useMantineReactTable({
     columns,
     data,
@@ -112,8 +109,9 @@ export function TrackList() {
     enableTopToolbar: false,
     enableBottomToolbar: false,
     enableColumnActions: false,
-    enableStickyHeader: true,
-    mantineTableContainerProps: {style: {height: libHeight}},
+    enableRowVirtualization: true,
+    enableSorting: false,
+    mantineTableContainerProps: {style: {height: rect.height}},
 
     getRowId: row => row.id,
     mantineTableBodyRowProps: ({row}) => ({
@@ -132,5 +130,10 @@ export function TrackList() {
     state: {rowSelection},
   });
 
-  return <MantineReactTable table={table} />;
+  return (
+    <MantineReactTable
+      ref={ref}
+      table={table}
+    />
+  );
 }
