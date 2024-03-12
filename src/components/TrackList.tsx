@@ -2,7 +2,7 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import 'mantine-react-table/styles.css';
 import type {Track} from '../../electron/types';
-import {useState, useEffect, useMemo, useRef} from 'react';
+import {useState, useEffect, useMemo} from 'react';
 import log from 'electron-log/renderer';
 import useLibraryStore from '../stores/useLibraryStore';
 import usePlayerStore from '../stores/usePlayerStore';
@@ -13,14 +13,14 @@ import {
   type MRT_RowSelectionState,
 } from 'mantine-react-table';
 import classes from './TrackList.module.css';
-import {useResizeObserver} from '@mantine/hooks';
+import useAppStore from '../stores/useAppStore';
 
 export function TrackList() {
   const data = useLibraryStore(state => state.tracks);
   const playTrack = usePlayerStore(state => state.playTrack);
   const playingTrack = usePlayerStore(state => state.playingTrack);
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
-  const [ref, rect] = useResizeObserver();
+  const contentHeight = useAppStore(state => state.contentHeight);
 
   const columns = useMemo<MRT_ColumnDef<Track>[]>(
     () => [
@@ -110,8 +110,8 @@ export function TrackList() {
     enableBottomToolbar: false,
     enableColumnActions: false,
     enableRowVirtualization: true,
-    enableSorting: false,
-    mantineTableContainerProps: {style: {height: rect.height}},
+    enableSorting: true,
+    mantineTableContainerProps: {style: {height: contentHeight}},
 
     getRowId: row => row.id,
     mantineTableBodyRowProps: ({row}) => ({
@@ -131,9 +131,8 @@ export function TrackList() {
   });
 
   return (
-    <MantineReactTable
-      ref={ref}
-      table={table}
-    />
+    <div className={classes.trackList}>
+      <MantineReactTable table={table} />
+    </div>
   );
 }

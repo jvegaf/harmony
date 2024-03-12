@@ -1,13 +1,17 @@
 import {create} from 'zustand';
 
 interface AppState {
-  libHeight: number;
+  appBarHeight: number;
+  contentHeight: number;
   updateHeight: (height: number) => void;
 }
 
+const APPBAR_HEIGHT = 80;
+
 const useAppStore = create<AppState>(set => ({
-  libHeight: 0,
-  updateHeight: (height: number) => set({libHeight: height}),
+  appBarHeight: APPBAR_HEIGHT,
+  contentHeight: 100,
+  updateHeight: (height: number) => set({contentHeight: height - APPBAR_HEIGHT}),
 }));
 
 export default useAppStore;

@@ -1,12 +1,13 @@
 .onboardingRoot {
-  display: grid;
-  height: 100vh;
+  height: 90vh;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .uploadContainer {
-  place-self: center;
-  min-height: 80%;
+  height: 80%;
   width: 80%;
   border: 1px solid #92b0b3;
   border-radius: 4px;
