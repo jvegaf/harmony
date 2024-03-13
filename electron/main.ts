@@ -1,6 +1,6 @@
-import { app, BrowserWindow } from 'electron';
+import {app, BrowserWindow} from 'electron';
 import path from 'node:path';
-import { InitIpc } from './lib/ipc/handlers';
+import {InitIpc} from './lib/ipc/handlers';
 import log from 'electron-log/main';
 
 // The built directory structure
@@ -25,6 +25,7 @@ function createWindow() {
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      webSecurity: false,
     },
   });
 
