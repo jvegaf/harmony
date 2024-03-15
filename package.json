@@ -30,7 +30,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.3",
-    "react-use-audio-player": "^2.2.0",
     "react-window": "^1.8.10",
     "recursive-readdir": "^2.2.3",
     "youtube-music-api": "^1.0.6",

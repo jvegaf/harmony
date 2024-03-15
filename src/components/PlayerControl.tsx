@@ -1,22 +1,21 @@
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import usePlayerStore from '../stores/usePlayerStore';
 import useLibraryStore from '../stores/useLibraryStore';
-import type {Track} from '../../electron/types';
-import {useGlobalAudioPlayer} from 'react-use-audio-player';
-import classes from './Player.module.css';
+import { PlayerStatus, type Track } from '../../electron/types';
+import classes from './PlayerControl.module.css';
 
-export function Player() {
+export function PlayerControl() {
   const getTrackFromId = useLibraryStore(state => state.getTrackFromId);
   const playingTrack = usePlayerStore(state => state.playingTrack);
+  const playerStatus = usePlayerStore(state => state.playerStatus);
+  const togglePlayPause = usePlayerStore(state => state.api.togglePlayPause);
   const [trackPlaying, setTrackPlaying] = useState<Track | null>(null);
-  const {load, togglePlayPause, playing} = useGlobalAudioPlayer();
 
   useEffect(() => {
     if (playingTrack) {
       const track = getTrackFromId(playingTrack);
       if (!track) return;
       setTrackPlaying(track);
-      load(`file://${track.path}`, {autoplay: true});
     }
   }, [playingTrack]);
 
@@ -28,7 +27,7 @@ export function Player() {
           onClick={() => togglePlayPause()}
           disabled={!playingTrack}
         >
-          {playing ? 'Pause' : 'Play'}
+          {playerStatus === PlayerStatus.PLAY ? 'Pause' : 'Play'}
         </button>
       </div>
 

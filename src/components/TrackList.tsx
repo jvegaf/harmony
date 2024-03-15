@@ -1,8 +1,8 @@
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import 'mantine-react-table/styles.css';
-import type {Track} from '../../electron/types';
-import {useState, useEffect, useMemo} from 'react';
+import type { Track } from '../../electron/types';
+import { useState, useEffect, useMemo } from 'react';
 import log from 'electron-log/renderer';
 import useLibraryStore from '../stores/useLibraryStore';
 import usePlayerStore from '../stores/usePlayerStore';
@@ -17,7 +17,7 @@ import useAppStore from '../stores/useAppStore';
 
 export function TrackList() {
   const data = useLibraryStore(state => state.tracks);
-  const playTrack = usePlayerStore(state => state.playTrack);
+  const start = usePlayerStore(state => state.api.start);
   const playingTrack = usePlayerStore(state => state.playingTrack);
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const contentHeight = useAppStore(state => state.contentHeight);
@@ -57,7 +57,7 @@ export function TrackList() {
 
   const playTrackHandler = row => {
     setRowSelection({});
-    playTrack(row.id);
+    start(row.id);
   };
 
   const handleSelection = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>, row) => {
@@ -111,23 +111,23 @@ export function TrackList() {
     enableColumnActions: false,
     enableRowVirtualization: true,
     enableSorting: true,
-    mantineTableContainerProps: {style: {height: contentHeight}},
+    mantineTableContainerProps: { style: { height: contentHeight } },
 
     getRowId: row => row.id,
-    mantineTableBodyRowProps: ({row}) => ({
+    mantineTableBodyRowProps: ({ row }) => ({
       onClick: (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => handleSelection(event, row),
       selected: rowSelection[row.id],
       sx: {
         cursor: 'pointer',
       },
     }),
-    mantineTableBodyCellProps: ({row}) => ({
+    mantineTableBodyCellProps: ({ row }) => ({
       style: {
         userSelect: 'none',
         backgroundColor: playingTrack && row.id === playingTrack ? 'var(--mantine-color-default-border)' : '',
       },
     }),
-    state: {rowSelection},
+    state: { rowSelection },
   });
 
   return (
