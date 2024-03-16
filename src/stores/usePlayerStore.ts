@@ -39,23 +39,18 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
 
 
         set({
+          playingTrack: id,
           playerStatus: PlayerStatus.PLAY,
         });
       }
     },
 
-    /**
-     * Play/resume audio
-     */
     play: async () => {
       await player.play();
 
       set({ playerStatus: PlayerStatus.PLAY });
     },
 
-    /**
-     * Pause audio
-     */
     pause: (): void => {
       player.pause();
 
@@ -74,9 +69,6 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       }
     },
 
-    /**
-     * Stop the player
-     */
     stop: (): void => {
       player.stop();
 
@@ -85,16 +77,10 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       });
     },
 
-    /**
-     * Set volume
-     */
     setVolume: (volume) => {
       player.setVolume(volume);
     },
 
-    /**
-     * Mute/unmute the audio
-     */
     setMuted: async (muted = false) => {
       if (muted) player.mute();
       else player.unmute();

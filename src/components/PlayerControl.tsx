@@ -1,8 +1,12 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
 import usePlayerStore from '../stores/usePlayerStore';
 import useLibraryStore from '../stores/useLibraryStore';
-import { PlayerStatus, type Track } from '../../electron/types';
+import {PlayerStatus, type Track} from '../../electron/types';
 import classes from './PlayerControl.module.css';
+import {PlayIcon} from '../elements/PlayIcon';
+import {PauseIcon} from '../elements/PauseIcon';
+import {PrevIcon} from '../elements/PrevIcon';
+import {NextIcon} from '../elements/NextIcon';
 
 export function PlayerControl() {
   const getTrackFromId = useLibraryStore(state => state.getTrackFromId);
@@ -12,7 +16,7 @@ export function PlayerControl() {
   const [trackPlaying, setTrackPlaying] = useState<Track | null>(null);
 
   useEffect(() => {
-    if (playingTrack) {
+    if (playingTrack.length) {
       const track = getTrackFromId(playingTrack);
       if (!track) return;
       setTrackPlaying(track);
@@ -24,16 +28,32 @@ export function PlayerControl() {
       <div className={classes.playerControls}>
         <button
           className={classes.playerButton}
-          onClick={() => togglePlayPause()}
-          disabled={!playingTrack}
+          // onClick={() => togglePlayPause()}
+          disabled={playerStatus === PlayerStatus.STOP}
         >
-          {playerStatus === PlayerStatus.PLAY ? 'Pause' : 'Play'}
+          <PrevIcon />
+        </button>
+        <button
+          className={classes.playerButton}
+          onClick={() => togglePlayPause()}
+          disabled={playerStatus === PlayerStatus.STOP}
+        >
+          {playerStatus === PlayerStatus.PLAY ? <PauseIcon /> : <PlayIcon />}
+        </button>
+        <button
+          className={classes.playerButton}
+          // onClick={() => togglePlayPause()}
+          disabled={playerStatus === PlayerStatus.STOP}
+        >
+          <NextIcon />
         </button>
       </div>
 
       <div className={classes.playerInfo}>
-        <div className={classes.playerInfoTitle}>{trackPlaying?.title}</div>
-        <div className={classes.playerInfoArtist}>{trackPlaying?.artist}</div>
+        <div className={classes.infoBox}>
+          <div className={classes.playerInfoTitle}>{trackPlaying?.title}</div>
+          <div className={classes.playerInfoArtist}>{trackPlaying?.artist}</div>
+        </div>
       </div>
       <div className={classes.playerSearch}>Search</div>
     </div>
