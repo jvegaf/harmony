@@ -16,6 +16,7 @@
     "@mantine/hooks": "^7.5.3",
     "@mantine/modals": "^7.5.0",
     "@mantine/notifications": "^7.5.0",
+    "@radix-ui/react-slider": "^1.1.2",
     "@tabler/icons-react": "^2.47.0",
     "async-g-i-s": "^1.5.1",
     "axios": "^1.6.7",

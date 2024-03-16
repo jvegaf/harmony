@@ -1,9 +1,9 @@
-import { create } from 'zustand';
+import {create} from 'zustand';
 
 import player from '../lib/player';
 
 import useLibraryStore from './useLibraryStore';
-import { PlayerStatus } from '../../electron/types';
+import {PlayerStatus} from '../../electron/types';
 
 type PlayerState = {
   playerStatus: PlayerStatus;
@@ -16,9 +16,9 @@ type PlayerState = {
     stop: () => void;
     setVolume: (volume: number) => void;
     setMuted: (muted: boolean) => void;
+    jumpTo: (to: number) => void;
   };
 };
-
 
 const usePlayerStore = create<PlayerState>((set, get) => ({
   playerStatus: PlayerStatus.STOP,
@@ -26,17 +26,13 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
 
   api: {
     start: async (id): Promise<void> => {
-
       const state = get();
-
-
 
       if (state.playingTrack !== id) {
         const track = useLibraryStore.getState().getTrackFromId(id);
 
         player.setTrack(track);
         await player.play();
-
 
         set({
           playingTrack: id,
@@ -48,19 +44,19 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
     play: async () => {
       await player.play();
 
-      set({ playerStatus: PlayerStatus.PLAY });
+      set({playerStatus: PlayerStatus.PLAY});
     },
 
     pause: (): void => {
       player.pause();
 
-      set({ playerStatus: PlayerStatus.PAUSE });
+      set({playerStatus: PlayerStatus.PAUSE});
     },
 
     togglePlayPause: async () => {
       const playerAPI = get().api;
-      const { playingTrack } = get();
-      const { paused } = player.getAudio();
+      const {playingTrack} = get();
+      const {paused} = player.getAudio();
 
       if (paused && playingTrack.length) {
         playerAPI.play();
@@ -77,7 +73,7 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       });
     },
 
-    setVolume: (volume) => {
+    setVolume: volume => {
       player.setVolume(volume);
     },
 
@@ -85,12 +81,15 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       if (muted) player.mute();
       else player.unmute();
     },
+
+    jumpTo: to => {
+      player.setCurrentTime(to);
+    },
   },
 }));
 
 export default usePlayerStore;
 
 export function usePlayerAPI() {
-  return usePlayerStore((state) => state.api);
+  return usePlayerStore(state => state.api);
 }
-

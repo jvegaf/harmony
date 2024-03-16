@@ -49,6 +49,11 @@
   justify-content: center;
 }
 
+.playerProgress {
+  width: 100%;
+  height: 20%;
+}
+
 .playerSearch {
   width: 100%;
   height: 100%;

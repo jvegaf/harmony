@@ -7,6 +7,7 @@ import {PlayIcon} from '../elements/PlayIcon';
 import {PauseIcon} from '../elements/PauseIcon';
 import {PrevIcon} from '../elements/PrevIcon';
 import {NextIcon} from '../elements/NextIcon';
+import TrackProgress from './TrackProgress';
 
 export function PlayerControl() {
   const getTrackFromId = useLibraryStore(state => state.getTrackFromId);
@@ -51,8 +52,15 @@ export function PlayerControl() {
 
       <div className={classes.playerInfo}>
         <div className={classes.infoBox}>
-          <div className={classes.playerInfoTitle}>{trackPlaying?.title}</div>
-          <div className={classes.playerInfoArtist}>{trackPlaying?.artist}</div>
+          {trackPlaying && (
+            <>
+              <div className={classes.playerInfoTitle}>{trackPlaying.title}</div>
+              <div className={classes.playerInfoArtist}>{trackPlaying?.artist}</div>
+              <div className={classes.playerProgress}>
+                <TrackProgress trackPlaying={trackPlaying} />
+              </div>
+            </>
+          )}
         </div>
       </div>
       <div className={classes.playerSearch}>Search</div>
