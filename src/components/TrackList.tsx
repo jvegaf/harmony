@@ -1,8 +1,8 @@
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import 'mantine-react-table/styles.css';
-import type { Track } from '../../electron/types';
-import { useState, useEffect, useMemo } from 'react';
+import type {Track} from '../../electron/types';
+import {useState, useEffect, useMemo} from 'react';
 import log from 'electron-log/renderer';
 import useLibraryStore from '../stores/useLibraryStore';
 import usePlayerStore from '../stores/usePlayerStore';
@@ -14,6 +14,11 @@ import {
 } from 'mantine-react-table';
 import classes from './TrackList.module.css';
 import useAppStore from '../stores/useAppStore';
+import {Menu, Item, Separator, Submenu, useContextMenu} from 'react-contexify';
+
+import 'react-contexify/dist/ReactContexify.css';
+
+const MENU_ID = 'menu-id';
 
 export function TrackList() {
   const data = useLibraryStore(state => state.tracks);
@@ -88,6 +93,16 @@ export function TrackList() {
     }
   };
 
+  const {show} = useContextMenu({
+    id: MENU_ID,
+  });
+
+  const displayMenu = event => {
+    show({
+      event,
+    });
+  };
+
   useEffect(() => {
     log.info('selected:', rowSelection);
   }, [rowSelection]);
@@ -111,28 +126,43 @@ export function TrackList() {
     enableColumnActions: false,
     enableRowVirtualization: true,
     enableSorting: true,
-    mantineTableContainerProps: { style: { height: contentHeight } },
+    mantineTableContainerProps: {style: {height: contentHeight}},
 
     getRowId: row => row.id,
-    mantineTableBodyRowProps: ({ row }) => ({
+    mantineTableBodyRowProps: ({row}) => ({
       onClick: (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => handleSelection(event, row),
       selected: rowSelection[row.id],
       sx: {
         cursor: 'pointer',
       },
     }),
-    mantineTableBodyCellProps: ({ row }) => ({
+    mantineTableBodyCellProps: ({row}) => ({
       style: {
         userSelect: 'none',
         backgroundColor: playingTrack && row.id === playingTrack ? 'var(--mantine-color-default-border)' : '',
       },
+      onContextMenu: (event: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => {
+        // event.preventDefault();
+        displayMenu(event);
+      },
     }),
-    state: { rowSelection },
+    state: {rowSelection},
   });
 
   return (
     <div className={classes.trackList}>
       <MantineReactTable table={table} />
+      <Menu id={MENU_ID}>
+        <Item onClick={playTrackHandler}>Item 1</Item>
+        <Item onClick={playTrackHandler}>Item 2</Item>
+        <Separator />
+        <Item disabled>Disabled</Item>
+        <Separator />
+        <Submenu label="Submenu">
+          <Item onClick={playTrackHandler}>Sub Item 1</Item>
+          <Item onClick={playTrackHandler}>Sub Item 2</Item>
+        </Submenu>
+      </Menu>
     </div>
   );
 }
