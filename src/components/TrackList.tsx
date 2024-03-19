@@ -2,6 +2,7 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import 'mantine-react-table/styles.css';
 import type {Track} from '../../electron/types';
+import type {MouseEvent} from 'react';
 import {useState, useEffect, useMemo} from 'react';
 import log from 'electron-log/renderer';
 import useLibraryStore from '../stores/useLibraryStore';
@@ -97,7 +98,7 @@ export function TrackList() {
     id: MENU_ID,
   });
 
-  const displayMenu = event => {
+  const displayMenu = (event: MouseEvent) => {
     show({
       event,
     });
@@ -141,7 +142,7 @@ export function TrackList() {
         userSelect: 'none',
         backgroundColor: playingTrack && row.id === playingTrack ? 'var(--mantine-color-default-border)' : '',
       },
-      onContextMenu: (event: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => {
+      onContextMenu: (event: MouseEvent) => {
         // event.preventDefault();
         displayMenu(event);
       },
