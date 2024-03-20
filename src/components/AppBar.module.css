@@ -1,9 +1,0 @@
-.header {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  margin: 0;
-  padding: 0;
-  background-color: var(--mantine-color-body);
-  border-bottom: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-}
