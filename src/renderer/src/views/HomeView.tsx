@@ -1,9 +1,8 @@
-import {TrackList} from '../components/TrackList';
-import classes from './HomeView.module.css';
+import { TrackList } from '@renderer/components/TrackList';
 
 export function HomeView() {
   return (
-    <div className={classes.homeview_container}>
+    <div className="w-full h-full">
       <TrackList />
     </div>
   );

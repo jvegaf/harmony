@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { handleResponse, handleError } from '../../response';
 import BeatportToken from './BeaportToken';
 import { BuildBeatportQuery } from './query-builder';
 import GetTagResults from './bpTagMapper';
-import type { ResultTag } from '../../types';
 import log from 'electron-log/main';
+import { ResultTag } from '@preload/emusik';
+import { handleError, handleResponse } from '@preload/reponse';
 
 const URI_BASE = 'https://api.beatport.com/v4/catalog/search/?q=';
 

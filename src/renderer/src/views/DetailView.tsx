@@ -1,4 +1,4 @@
-import { Track } from "../types";
+import { Track } from "@preload/emusik";
 
 export interface DetailLoaderData {
   tracks: Track[];

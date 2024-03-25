@@ -1,5 +1,5 @@
+import { Button } from "@nextui-org/react";
 import { FC } from "react";
-import { Button } from "./ui/button";
 
 export interface OnboardingProps {
   openHandler: () => void;

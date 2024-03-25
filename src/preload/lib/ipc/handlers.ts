@@ -21,8 +21,7 @@ import {
   SHOW_CONTEXT_MENU,
   TRACK_UPDATED,
   VIEW_DETAIL_COMMAND,
-} from "./channels";
-import { Track } from "../../types";
+} from "../../channels";
 import FindArtwork from "../tagger/artwork-finder";
 import { GetFilesFrom } from "../io/get-files";
 import CreateTrack from "../track/creator";
@@ -30,6 +29,7 @@ import UpdateArtwork from "../artwork/updater";
 import { LoadArtworkFromFile } from "../artwork/loader";
 import FixTags from "../tagger/Tagger";
 import PersistTrack from "../tag/saver";
+import { Track } from "@preload/emusik";
 
 export async function InitIpc(): Promise<void> {
   log.info("ipc initialized");

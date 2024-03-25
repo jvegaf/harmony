@@ -1,9 +1,9 @@
-import type { MatchResult, ResultTag, Track } from '../../types';
-import { GetStringTokens } from '../../utils';
 import log from 'electron-log/main';
 import Update from '../track/updater';
 // import SearchYtTags from './youtube';
 import { SearchTags } from './beatport';
+import { MatchResult, ResultTag, Track } from '@preload/emusik';
+import { GetStringTokens } from '@preload/utils';
 // import SearchTrackInfo from './google';
 
 // const SearchTagsYt = (track: Track) => {
