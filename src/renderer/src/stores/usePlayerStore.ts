@@ -1,9 +1,9 @@
-import {create} from 'zustand';
+import { create } from 'zustand';
 
 import player from '../lib/player';
 
 import useLibraryStore from './useLibraryStore';
-import {PlayerStatus} from '../../electron/types';
+import { PlayerStatus } from '@preload/emusik';
 
 type PlayerState = {
   playerStatus: PlayerStatus;
@@ -44,19 +44,19 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
     play: async () => {
       await player.play();
 
-      set({playerStatus: PlayerStatus.PLAY});
+      set({ playerStatus: PlayerStatus.PLAY });
     },
 
     pause: (): void => {
       player.pause();
 
-      set({playerStatus: PlayerStatus.PAUSE});
+      set({ playerStatus: PlayerStatus.PAUSE });
     },
 
     togglePlayPause: async () => {
       const playerAPI = get().api;
-      const {playingTrack} = get();
-      const {paused} = player.getAudio();
+      const { playingTrack } = get();
+      const { paused } = player.getAudio();
 
       if (paused && playingTrack.length) {
         playerAPI.play();
