@@ -71,8 +71,3 @@ export const enum LogCategory {
   Verbose,
 }
 
-export enum PlayerStatus {
-  PLAY = 'play',
-  PAUSE = 'pause',
-  STOP = 'stop',
-}

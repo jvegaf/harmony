@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import player from '../lib/player';
 
 import useLibraryStore from './useLibraryStore';
-import { PlayerStatus } from '@preload/emusik';
+import { PlayerStatus } from 'src/preload/emusik-player';
 
 type PlayerState = {
   playerStatus: PlayerStatus;
