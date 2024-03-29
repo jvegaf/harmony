@@ -4,6 +4,9 @@ import { Track, TrackId } from 'src/preload/emusik';
 
 interface LibraryState {
   tracks: Track[];
+  sorted: Track[];
+  isSorted: boolean;
+  setSorted: (tracks: Track[]) => void;
   addTrack: (track: Track) => void;
   onOpen: () => void;
   getTrackFromId: (id: TrackId) => Track | undefined;
@@ -11,6 +14,9 @@ interface LibraryState {
 
 const useLibraryStore = create<LibraryState>(set => ({
   tracks: [],
+  sorted: [],
+  isSorted: false,
+  setSorted: sorted => set({ sorted, isSorted: true }),
   addTrack: track => set(state => ({ tracks: [...state.tracks, track] })),
   onOpen: async () => {
     const newTracks = await window.Main.openFolder();

@@ -1,68 +1,199 @@
-import { FC, useState } from "react"
-import useAppStore from '../stores/useAppStore';
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import 'mantine-react-table/styles.css';
+import type {Track} from '../../electron/types';
+import type {MouseEvent} from 'react';
+import {useState, useEffect, useMemo} from 'react';
 import useLibraryStore from '../stores/useLibraryStore';
 import usePlayerStore from '../stores/usePlayerStore';
-import { Track } from '@preload/emusik';
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, getKeyValue } from "@nextui-org/table";
+import {
+  MantineReactTable,
+  useMantineReactTable,
+  type MRT_ColumnDef,
+  type MRT_RowSelectionState,
+} from 'mantine-react-table';
+import classes from './TrackList.module.css';
+import useAppStore from '../stores/useAppStore';
+import {Menu, Item, Separator, Submenu, useContextMenu} from 'react-contexify';
 
-export const TrackList: FC = () => {
-  const rows: Track[] = useLibraryStore(state => state.tracks);
+import 'react-contexify/dist/ReactContexify.css';
+
+const MENU_ID = 'menu-id';
+
+export function TrackList() {
+  const data = useLibraryStore(state => state.tracks);
+  const setSorted = useLibraryStore(state => state.setSorted);
+  const isSorted = useLibraryStore(state => state.isSorted);
+  const sorted = useLibraryStore(state => state.sorted);
   const start = usePlayerStore(state => state.api.start);
   const playingTrack = usePlayerStore(state => state.playingTrack);
+  const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const contentHeight = useAppStore(state => state.contentHeight);
-  const [selectedKeys, setSelectedKeys] = useState(new Set([]));
-  const columns = [
-    {
-      key: "title",
-      label: "TITLE",
-    },
-    {
-      key: "artist",
-      label: "ARTIST",
-    },
-    {
-      key: "album",
-      label: "ALBUM",
-    },
-    {
-      key: "year",
-      label: "YEAR",
-    },
-    {
-      key: "genre",
-      label: "GENRE",
-    },
-    {
-      key: "bpm",
-      label: "BPM",
-    }
-  ];
 
-  const playTrackHandler = key => {
-    setSelectedKeys(new Set([]));
-    start(key);
+  const columns = useMemo<MRT_ColumnDef<Track>[]>(
+    () => [
+      {
+        accessorKey: 'title', //access nested data with dot notation
+        header: 'Title',
+      },
+      {
+        accessorKey: 'artist',
+        header: 'Artist',
+      },
+      {
+        accessorKey: 'bpm',
+        header: 'BPM',
+        size: 10,
+      },
+      {
+        accessorKey: 'time',
+        header: 'Time',
+        size: 10,
+      },
+      {
+        accessorKey: 'year',
+        header: 'Year',
+        size: 10,
+      },
+      {
+        accessorKey: 'album', //normal accessorKey
+        header: 'Album',
+      },
+      {
+        accessorKey: 'genre',
+        header: 'Genre',
+        size: 50,
+      },
+    ],
+    [],
+  );
+
+  const playTrackHandler = row => {
+    setRowSelection({});
+    start(row.id);
   };
 
+  const handleSelection = (event, row) => {
+    if (event.detail > 1) {
+      playTrackHandler(row);
+      return;
+    }
+
+    if (event.ctrlKey) {
+      console.log('selectionHandlerEventCtrlKey', event);
+      setRowSelection(prev => ({
+        ...prev,
+        [row.id]: !prev[row.id],
+      }));
+      return;
+    }
+
+    console.log('selectionHandlerRow', row);
+    console.log('table', table.getSortedRowModel().rows);
+    setRowSelection(prev => ({
+      [row.id]: !prev[row.id],
+    }));
+  };
+
+  const handleKeyPress = (e: globalThis.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setRowSelection({});
+    }
+  };
+
+  const {show} = useContextMenu({
+    id: MENU_ID,
+  });
+
+  const displayMenu = (event: MouseEvent, props) => {
+    show({
+      event,
+      props,
+    });
+  };
+
+  useEffect(() => {
+    // log.info('selected:', rowSelection);
+    console.log('selected:', rowSelection);
+  }, [rowSelection]);
+
+  useEffect(() => {
+    console.log('isSorted', isSorted);
+    if (isSorted) {
+      console.log('first track', sorted[0].original.title);
+    }
+  }, [isSorted, sorted]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', e => handleKeyPress(e));
+    return () => document.removeEventListener('keydown', e => handleKeyPress(e));
+  }, []);
+
+  useEffect(() => {
+    console.log('trackList: playingTrack', playingTrack);
+  }, [playingTrack]);
+
+  const isPlayable = Object.keys(rowSelection).length < 2;
+
+  const table = useMantineReactTable({
+    columns,
+    data,
+    enableFilters: false,
+    enablePagination: false,
+    enableTopToolbar: false,
+    enableBottomToolbar: false,
+    enableColumnActions: false,
+    enableRowVirtualization: true,
+    enableSorting: true,
+    mantineTableContainerProps: {style: {height: contentHeight}},
+
+    getRowId: row => row.id,
+    mantineTableBodyRowProps: ({row}) => ({
+      onClick: event => handleSelection(event, row),
+      onContextMenu: (event: MouseEvent) => {
+        // event.preventDefault();
+        displayMenu(event, {row});
+      },
+      selected: rowSelection[row.id],
+      style: {
+        backgroundColor:
+          playingTrack && row.id === playingTrack
+            ? 'color-mix(in srgb, var(--mantine-color-teal-9), var(--mantine-color-dark-9) 49.999999999999996%)'
+            : '',
+      },
+    }),
+    mantineTableHeadRowProps: {style: {backgroundColor: 'var(--mantine-color-dark-4)'}},
+    mantineTableHeadCellProps: {style: {backgroundColor: 'transparent', padding: 0}},
+    mantineTableBodyCellProps: {style: {userSelect: 'none', backgroundColor: 'transparent'}},
+    state: {
+      rowSelection,
+      density: 'xs',
+    },
+  });
+
+  useEffect(() => {
+    setSorted(table.getSortedRowModel().rows);
+  }, [table.getSortedRowModel().rows]);
+
   return (
-    <Table
-      isStriped
-      selectionMode="multiple"
-      selectionBehavior="replace"
-      selectedKeys={selectedKeys}
-      onSelectionChange={setSelectedKeys}
-      onRowAction={(key) => playTrackHandler(key)}
-      aria-label="Example table with dynamic content"
-    >
-      <TableHeader columns={columns}>
-        {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-      </TableHeader>
-      <TableBody items={rows}>
-        {(item) => (
-          <TableRow key={item.id}>
-            {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
-  )
+    <div className={classes.trackListContainer}>
+      <MantineReactTable table={table} />
+      <Menu id={MENU_ID}>
+        <Item
+          disabled={!isPlayable}
+          onClick={({props}) => playTrackHandler(props.row)}
+        >
+          Play Track
+        </Item>
+        <Item onClick={playTrackHandler}>Item 2</Item>
+        <Separator />
+        <Item disabled>Disabled</Item>
+        <Separator />
+        <Submenu label="Submenu">
+          <Item onClick={playTrackHandler}>Sub Item 1</Item>
+          <Item onClick={playTrackHandler}>Sub Item 2</Item>
+        </Submenu>
+      </Menu>
+    </div>
+  );
 }

@@ -1,10 +1,11 @@
-import { FC, useEffect } from 'react'
-import useLibraryStore from '@renderer/stores/useLibraryStore'
+import { FC, useEffect } from 'react';
+import useLibraryStore from '@renderer/stores/useLibraryStore';
 import { Track } from 'src/preload/emusik';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { RootLayout } from './views/RootLayout';
 import { DetailView, HomeView, WelcomeView, detailLoader } from './views';
 import { FIX_COMMAND } from '../../preload/channels';
+import './App.css';
 
 const App: FC = () => {
   const tracks = useLibraryStore(state => state.tracks);
@@ -37,7 +38,6 @@ const App: FC = () => {
       <RouterProvider router={router} />
     </>
   );
+};
 
-}
-
-export default App
+export default App;

@@ -1,10 +1,10 @@
-import { FC } from "react";
+import classes from './AppBar.module.css';
+import { PlayerControl } from './PlayerControl';
 
-export const AppBar: FC = () => {
+export default function AppBar() {
   return (
-    <header className="w-full ">
-      {/* <PlayerControl /> */}
-      PlayerControls
+    <header className={classes.header}>
+      <PlayerControl />
     </header>
   );
 }

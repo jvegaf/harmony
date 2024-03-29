@@ -4,3 +4,15 @@ pnpm-lock.yaml
 LICENSE.md
 tsconfig.json
 tsconfig.*.json
+
+
+**/node_modules
+**/*.svg
+
+package.json
+package-lock.json
+yarn.lock
+.electron-vendors.cache.json
+
+.github
+.idea
