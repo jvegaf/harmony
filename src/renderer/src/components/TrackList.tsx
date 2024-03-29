@@ -1,9 +1,8 @@
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import 'mantine-react-table/styles.css';
-import type {Track} from '../../electron/types';
-import type {MouseEvent} from 'react';
-import {useState, useEffect, useMemo} from 'react';
+import type { MouseEvent } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import useLibraryStore from '../stores/useLibraryStore';
 import usePlayerStore from '../stores/usePlayerStore';
 import {
@@ -13,8 +12,9 @@ import {
   type MRT_RowSelectionState,
 } from 'mantine-react-table';
 import classes from './TrackList.module.css';
+import { Track } from '@preload/emusik';
 import useAppStore from '../stores/useAppStore';
-import {Menu, Item, Separator, Submenu, useContextMenu} from 'react-contexify';
+import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify';
 
 import 'react-contexify/dist/ReactContexify.css';
 
@@ -25,6 +25,7 @@ export function TrackList() {
   const setSorted = useLibraryStore(state => state.setSorted);
   const isSorted = useLibraryStore(state => state.isSorted);
   const sorted = useLibraryStore(state => state.sorted);
+  const fixTracks = useLibraryStore(state => state.fixTracks);
   const start = usePlayerStore(state => state.api.start);
   const playingTrack = usePlayerStore(state => state.playingTrack);
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
@@ -101,7 +102,7 @@ export function TrackList() {
     }
   };
 
-  const {show} = useContextMenu({
+  const { show } = useContextMenu({
     id: MENU_ID,
   });
 
@@ -110,6 +111,11 @@ export function TrackList() {
       event,
       props,
     });
+  };
+
+  const fixTracksHandler = () => {
+    const ids = Object.keys(rowSelection);
+    fixTracks(ids);
   };
 
   useEffect(() => {
@@ -145,14 +151,14 @@ export function TrackList() {
     enableColumnActions: false,
     enableRowVirtualization: true,
     enableSorting: true,
-    mantineTableContainerProps: {style: {height: contentHeight}},
+    mantineTableContainerProps: { style: { height: contentHeight } },
 
     getRowId: row => row.id,
-    mantineTableBodyRowProps: ({row}) => ({
+    mantineTableBodyRowProps: ({ row }) => ({
       onClick: event => handleSelection(event, row),
       onContextMenu: (event: MouseEvent) => {
         // event.preventDefault();
-        displayMenu(event, {row});
+        displayMenu(event, { row });
       },
       selected: rowSelection[row.id],
       style: {
@@ -162,9 +168,9 @@ export function TrackList() {
             : '',
       },
     }),
-    mantineTableHeadRowProps: {style: {backgroundColor: 'var(--mantine-color-dark-4)'}},
-    mantineTableHeadCellProps: {style: {backgroundColor: 'transparent', padding: 0}},
-    mantineTableBodyCellProps: {style: {userSelect: 'none', backgroundColor: 'transparent'}},
+    mantineTableHeadRowProps: { style: { backgroundColor: 'var(--mantine-color-dark-4)' } },
+    mantineTableHeadCellProps: { style: { backgroundColor: 'transparent', padding: 0 } },
+    mantineTableBodyCellProps: { style: { userSelect: 'none', backgroundColor: 'transparent' } },
     state: {
       rowSelection,
       density: 'xs',
@@ -181,18 +187,18 @@ export function TrackList() {
       <Menu id={MENU_ID}>
         <Item
           disabled={!isPlayable}
-          onClick={({props}) => playTrackHandler(props.row)}
+          onClick={({ props }) => playTrackHandler(props.row)}
         >
           Play Track
         </Item>
-        <Item onClick={playTrackHandler}>Item 2</Item>
         <Separator />
-        <Item disabled>Disabled</Item>
+        <Item
+          disabled={Object.keys(rowSelection).length < 1}
+          onClick={fixTracksHandler}
+        >
+          Fix Tags
+        </Item>
         <Separator />
-        <Submenu label="Submenu">
-          <Item onClick={playTrackHandler}>Sub Item 1</Item>
-          <Item onClick={playTrackHandler}>Sub Item 2</Item>
-        </Submenu>
       </Menu>
     </div>
   );

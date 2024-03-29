@@ -1,4 +1,3 @@
-
 /**
  * App models
  */
@@ -70,4 +69,3 @@ export const enum LogCategory {
   Error,
   Verbose,
 }
-

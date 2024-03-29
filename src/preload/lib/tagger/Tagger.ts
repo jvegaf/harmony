@@ -15,9 +15,9 @@ import { GetStringTokens } from '@preload/utils';
 // };
 
 const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
-  const tagMatches: MatchResult[] = tags.map((tag) => {
+  const tagMatches: MatchResult[] = tags.map(tag => {
     let tokensFounded = 0;
-    trackTokens.forEach((token) => {
+    trackTokens.forEach(token => {
       if (tag.tokens.indexOf(token) > -1) {
         tokensFounded += 1;
       }
@@ -51,7 +51,7 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
   }
   const durRounded = Math.round(duration);
   const resultsFiltered = bpResults.filter(
-    (result) => result.duration >= durRounded - 10 && result.duration <= durRounded + 10
+    result => result.duration >= durRounded - 10 && result.duration <= durRounded + 10,
   );
   if (resultsFiltered.length < 2) {
     return {
@@ -98,7 +98,7 @@ const FixTags = async (track: Track): Promise<Track> => {
 
 export const FixTracks = async (tracks: Track[]) => {
   const updated: Array<Promise<Track>> = [];
-  tracks.forEach((track) => {
+  tracks.forEach(track => {
     updated.push(FixTags(track));
   });
   return Promise.all(updated);

@@ -1,4 +1,4 @@
-import type { ResultTag, Track } from '../../types';
+import { ResultTag, Track } from '@preload/emusik';
 import { ParseDuration } from '../../utils';
 import FetchArtwork from '../artwork/fetcher';
 import log from 'electron-log/main';
