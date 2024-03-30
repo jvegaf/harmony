@@ -14,7 +14,7 @@ import {
 import classes from './TrackList.module.css';
 import { Track } from '@preload/emusik';
 import useAppStore from '../stores/useAppStore';
-import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify';
+import { Menu, Item, Separator, useContextMenu } from 'react-contexify';
 
 import 'react-contexify/dist/ReactContexify.css';
 
@@ -30,6 +30,7 @@ export function TrackList() {
   const playingTrack = usePlayerStore(state => state.playingTrack);
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const contentHeight = useAppStore(state => state.contentHeight);
+  const [sortedIndex, setSortedIndex] = useState<number>(0);
 
   const columns = useMemo<MRT_ColumnDef<Track>[]>(
     () => [
@@ -89,11 +90,29 @@ export function TrackList() {
       return;
     }
 
+    if (event.shiftKey && Object.keys(rowSelection).length > 0) {
+      const shiftedIndex = sorted.findIndex(r => r.id === row.id);
+      const order = [sortedIndex, shiftedIndex].sort((a, b) => a - b);
+      const sortedIds = sorted.map(r => r.id).splice(order[0], order[1] - order[0] + 1);
+      sortedIds.map(id => {
+        setRowSelection(prev => ({
+          ...prev,
+          [id]: true,
+        }));
+      });
+
+      return;
+    }
+
     console.log('selectionHandlerRow', row);
-    console.log('table', table.getSortedRowModel().rows);
     setRowSelection(prev => ({
       [row.id]: !prev[row.id],
     }));
+    if (isSorted) {
+      const index = sorted.findIndex(r => r.id === row.id);
+      setSortedIndex(index);
+      console.log('sortedIndex', index);
+    }
   };
 
   const handleKeyPress = (e: globalThis.KeyboardEvent) => {
@@ -119,11 +138,6 @@ export function TrackList() {
   };
 
   useEffect(() => {
-    // log.info('selected:', rowSelection);
-    console.log('selected:', rowSelection);
-  }, [rowSelection]);
-
-  useEffect(() => {
     console.log('isSorted', isSorted);
     if (isSorted) {
       console.log('first track', sorted[0].original.title);
@@ -134,10 +148,6 @@ export function TrackList() {
     document.addEventListener('keydown', e => handleKeyPress(e));
     return () => document.removeEventListener('keydown', e => handleKeyPress(e));
   }, []);
-
-  useEffect(() => {
-    console.log('trackList: playingTrack', playingTrack);
-  }, [playingTrack]);
 
   const isPlayable = Object.keys(rowSelection).length < 2;
 
