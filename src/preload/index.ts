@@ -18,7 +18,7 @@ const api = {
   log: (...args: any[]) => ipcRenderer.send('log', ...args),
   findArtWork: async (track: Track) => ipcRenderer.invoke('find-artwork', track),
   saveArtWork: (artTrack: ArtTrack) => ipcRenderer.send('save-artwork', artTrack),
-  getArtWork: (filepath: TrackSrc): Promise<Artwork | null> => ipcRenderer.invoke(GET_ARTWORK, filepath),
+  getArtWork: async (filepath: TrackSrc): Promise<Artwork | null> => ipcRenderer.invoke(GET_ARTWORK, filepath),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(channel: string, func: (...args: any[]) => void) {
     ipcRenderer.on(channel, (_event, ...args) => func(...args));

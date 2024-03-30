@@ -9,19 +9,38 @@ import { NextIcon } from '../elements/NextIcon';
 import TrackProgress from './TrackProgress';
 import { Track } from '@preload/emusik';
 import { PlayerStatus } from '@preload/emusik-player';
+import { Image } from '@mantine/core';
+import useAppStore from '@renderer/stores/useAppStore';
+import PlaceHolder from '../assets/placeholder.png';
 
 export function PlayerControl() {
   const getTrackFromId = useLibraryStore(state => state.getTrackFromId);
   const playingTrack = usePlayerStore(state => state.playingTrack);
   const playerStatus = usePlayerStore(state => state.playerStatus);
   const togglePlayPause = usePlayerStore(state => state.api.togglePlayPause);
+  const appBarHeight = useAppStore(state => state.appBarHeight);
+  const getArtImage = useAppStore(state => state.getArtImage);
   const [trackPlaying, setTrackPlaying] = useState<Track | null>(null);
+  const [artSrc, setArtSrc] = useState<string | null>(null);
+
+  const setArtwork = async (track: Track) => {
+    const artImage = await getArtImage(track);
+    if (artImage === null) {
+      setArtSrc(null);
+      return;
+    }
+    const blob = new Blob([artImage.imageBuffer], { type: artImage.mime });
+
+    const src = URL.createObjectURL(blob);
+    setArtSrc(src);
+  };
 
   useEffect(() => {
     if (playingTrack.length) {
       const track = getTrackFromId(playingTrack);
       if (!track) return;
       setTrackPlaying(track);
+      setArtwork(track);
     }
   }, [playingTrack]);
 
@@ -52,6 +71,12 @@ export function PlayerControl() {
       </div>
 
       <div className={classes.playerInfo}>
+        <Image
+          src={artSrc}
+          radius='sm'
+          h={appBarHeight}
+          fallbackSrc={PlaceHolder}
+        />
         <div className={classes.infoBox}>
           {trackPlaying && (
             <>
