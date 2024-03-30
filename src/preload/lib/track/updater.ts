@@ -2,7 +2,7 @@ import { ResultTag, Track } from '@preload/emusik';
 import { ParseDuration } from '../../utils';
 import FetchArtwork from '../artwork/fetcher';
 import log from 'electron-log/main';
-// import PersistTrack from "../tag/nodeId3Saver";
+import PersistTrack from '../tag/saver';
 
 const getArtwork = async (url?: string) => {
   if (!url) return undefined;
@@ -39,12 +39,11 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     artwork: await art(),
   };
 
-  log.info('persist changes dissabled');
-  // try {
-  //   await PersistTrack(newTrack);
-  // } catch (error) {
-  //   log.error(error);
-  // }
+  try {
+    PersistTrack(newTrack);
+  } catch (error) {
+    log.error(error);
+  }
 
   return newTrack;
 };

@@ -1,6 +1,6 @@
-import { Artwork } from '../../types';
 import log from 'electron-log/main';
 import axios from 'axios';
+import { Artwork } from '@preload/emusik';
 
 export default async function FetchArtwork(url: string): Promise<Artwork | null> {
   let artwork: Artwork | null = null;
