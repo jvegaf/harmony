@@ -15,12 +15,14 @@ import classes from './TrackList.module.css';
 import { Track } from '@preload/emusik';
 import useAppStore from '../stores/useAppStore';
 import { Menu, Item, Separator, useContextMenu } from 'react-contexify';
+import { useNavigate } from 'react-router-dom';
 
 import 'react-contexify/dist/ReactContexify.css';
 
 const MENU_ID = 'menu-id';
 
 export function TrackList() {
+  const navigate = useNavigate();
   const data = useLibraryStore(state => state.tracks);
   const setSorted = useLibraryStore(state => state.setSorted);
   const isSorted = useLibraryStore(state => state.isSorted);
@@ -137,6 +139,10 @@ export function TrackList() {
     fixTracks(ids);
   };
 
+  const handleDetailAction = row => {
+    navigate(`detail/${row.id}`);
+  };
+
   useEffect(() => {
     console.log('isSorted', isSorted);
     if (isSorted) {
@@ -167,7 +173,10 @@ export function TrackList() {
     mantineTableBodyRowProps: ({ row }) => ({
       onClick: event => handleSelection(event, row),
       onContextMenu: (event: MouseEvent) => {
-        // event.preventDefault();
+        if (Object.keys(rowSelection).length < 2)
+          setRowSelection(prev => ({
+            [row.id]: !prev[row.id],
+          }));
         displayMenu(event, { row });
       },
       selected: rowSelection[row.id],
@@ -201,7 +210,6 @@ export function TrackList() {
         >
           Play Track
         </Item>
-        <Separator />
         <Item
           disabled={Object.keys(rowSelection).length < 1}
           onClick={fixTracksHandler}
@@ -209,6 +217,12 @@ export function TrackList() {
           Fix Tags
         </Item>
         <Separator />
+        <Item
+          disabled={Object.keys(rowSelection).length !== 1}
+          onClick={({ props }) => handleDetailAction(props.row)}
+        >
+          View Detail
+        </Item>
       </Menu>
     </div>
   );
