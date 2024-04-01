@@ -3,7 +3,7 @@ import useLibraryStore from '@renderer/stores/useLibraryStore';
 import { Track } from 'src/preload/emusik';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { RootLayout } from './views/RootLayout';
-import { DetailView, HomeView, WelcomeView, detailLoader } from './views';
+import { DetailView, HomeView, WelcomeView } from './views';
 import { TRACK_UPDATED } from '../../preload/channels';
 import './App.css';
 
@@ -26,8 +26,7 @@ const App: FC = () => {
           Component: tracks.length ? HomeView : WelcomeView,
         },
         {
-          path: 'detail/:id',
-          loader: detailLoader,
+          path: 'detail/:trackId',
           Component: DetailView,
         },
       ],

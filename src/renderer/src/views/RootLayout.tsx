@@ -18,7 +18,7 @@ export function RootLayout() {
       <div className={classes.topbar}>
         <AppBar />
       </div>
-      <main className={classes.outler_container}>
+      <main className={classes.mainContainer}>
         <Outlet />
       </main>
     </div>
