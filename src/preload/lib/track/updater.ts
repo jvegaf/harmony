@@ -1,5 +1,4 @@
 import { ResultTag, Track } from '@preload/emusik';
-import { ParseDuration } from '../../utils';
 import FetchArtwork from '../artwork/fetcher';
 import log from 'electron-log/main';
 import PersistTrack from '../tag/saver';
@@ -30,8 +29,6 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     title: tag.title,
     artist: tag.artist,
     album: tag.album,
-    duration: tag.duration,
-    time: ParseDuration(tag.duration),
     year: tag.year ? Number(tag.year) : undefined,
     bpm: tag.bpm,
     key: tag.key,

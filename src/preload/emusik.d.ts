@@ -19,7 +19,7 @@ export interface Track {
   bpm?: number;
   genre?: string;
   key?: string;
-  duration: number;
+  duration?: number;
   time?: string;
   path: TrackSrc;
   title: string;

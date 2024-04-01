@@ -1,9 +1,9 @@
 import path from 'path';
 import { randomUUID } from 'node:crypto';
 import LoadTagsFromFile from '../tag/mm-loader';
-import type { Track } from '../../types';
 import log from 'electron-log/main';
 import { ParseDuration, Sanitize } from '../../utils';
+import { Track } from '@preload/emusik';
 
 const getFilename = (filepath: string) => {
   return path.basename(filepath, '.mp3');

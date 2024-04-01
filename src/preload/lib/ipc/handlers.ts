@@ -42,7 +42,7 @@ export async function InitIpc(): Promise<void> {
 
     const files = await GetFilesFrom(resultPath.filePaths[0]);
 
-    const tracks = await Promise.all(files.map(async file => CreateTrack(file)));
+    const tracks = await Promise.all(files.map(async file => CreateTrack(file)).filter(t => t !== null));
 
     log.info(' total tracks created: ', tracks.length);
 
