@@ -1,7 +1,7 @@
 import FetchArtwork from './fetcher';
 import log from 'electron-log/main';
-import { ArtTrack } from '../../types';
 import PersistTrack from '../tag/saver';
+import { ArtTrack } from '@preload/emusik';
 
 const UpdateArtwork = async (artTrack: ArtTrack): Promise<void> => {
   const { reqTrack, selectedArtUrl } = artTrack;

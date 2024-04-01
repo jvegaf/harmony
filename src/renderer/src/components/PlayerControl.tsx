@@ -29,6 +29,8 @@ export function PlayerControl() {
       setArtSrc(null);
       return;
     }
+    console.log(artImage.mime);
+    console.log(artImage.imageBuffer.length);
     const blob = new Blob([artImage.imageBuffer], { type: artImage.mime });
 
     const src = URL.createObjectURL(blob);

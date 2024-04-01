@@ -7,7 +7,7 @@ export type TrackSrc = string;
 
 export interface Artwork {
   mime: string;
-  type: { id: number; name: string };
+  type: { id: number };
   description?: string;
   imageBuffer: Buffer;
 }

@@ -2,7 +2,6 @@ import axios from 'axios';
 import BeatportToken from './BeaportToken';
 import { BuildBeatportQuery } from './query-builder';
 import GetTagResults from './bpTagMapper';
-import log from 'electron-log/main';
 import { ResultTag } from '@preload/emusik';
 import { handleError, handleResponse } from '@preload/reponse';
 
@@ -27,15 +26,13 @@ const getToken = async () => {
 export const SearchTags = async (
   title: string,
   // duration: number,
-  artist: string | null = null
+  artist: string | null = null,
 ): Promise<ResultTag[]> => {
   const token = await getToken();
 
   const query = BuildBeatportQuery(title, artist);
-  log.info(`query: ${query}`);
 
   const uri = `${URI_BASE}${query}`;
-  log.info(`URI: ${uri}`);
 
   const config = {
     headers: {

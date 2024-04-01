@@ -33,11 +33,12 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     bpm: tag.bpm,
     key: tag.key,
     genre: tag.genre,
-    artwork: await art(),
   };
 
+  const artwork = await art();
+
   try {
-    PersistTrack(newTrack);
+    PersistTrack(newTrack, artwork);
   } catch (error) {
     log.error(error);
   }

@@ -1,6 +1,6 @@
 import * as NodeId3 from 'node-id3';
-import { Artwork, Track } from '../../types';
 import log from 'electron-log/main';
+import { Artwork, Track } from '@preload/emusik';
 
 const PersistTrack = (track: Track, artwork?: Artwork) => {
   const { title, artist, album, year, genre, bpm, key } = track;
@@ -18,13 +18,9 @@ const PersistTrack = (track: Track, artwork?: Artwork) => {
     key,
   } as NodeId3.Tags;
 
-  NodeId3.update(tags, track.path as string, (_: unknown, err: Error) => {
-    if (err) {
-      log.error(`Error persisting track: ${err}`);
-    }
-  });
-
-  log.info(`track persisted: ${track.title}`);
+  NodeId3.Promise.update(tags, track.path)
+    .then(() => log.info(`track persisted: ${track.title}`))
+    .catch(reason => log.error('track persist error', reason));
 };
 
 export default PersistTrack;

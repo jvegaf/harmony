@@ -1,4 +1,4 @@
-import type { ResultTag } from '../../types';
+import { ResultTag } from '@preload/emusik';
 import { GetStringTokens } from '../../utils';
 
 interface Result {
@@ -41,7 +41,7 @@ const CreateTagResult = (result: Result): ResultTag => {
 };
 
 const GetTagResults = (result: Result[]): ResultTag[] => {
-  return result.map((track) => CreateTagResult(track));
+  return result.map(track => CreateTagResult(track));
 };
 
 export default GetTagResults;
