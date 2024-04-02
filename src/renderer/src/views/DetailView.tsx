@@ -24,6 +24,8 @@ export const DetailView: FC = () => {
       genre: '',
       bpm: '',
       key: '',
+      bitrate: '',
+      time: '',
     },
   });
 
@@ -63,7 +65,7 @@ export const DetailView: FC = () => {
         <Image
           src={artSrc}
           radius='lg'
-          h={250}
+          h={300}
           fallbackSrc={PlaceHolder}
         />
       </div>
@@ -94,6 +96,11 @@ export const DetailView: FC = () => {
               placeholder='Year'
               {...form.getInputProps('year')}
             />
+            <TextInput
+              label='Time'
+              placeholder='Time'
+              {...form.getInputProps('time')}
+            />
           </div>
           <div className={classes.rowGenre}>
             <TextInput
@@ -111,15 +118,29 @@ export const DetailView: FC = () => {
               placeholder='Key'
               {...form.getInputProps('key')}
             />
+            <TextInput
+              label='Bitrate'
+              placeholder='Bitrate'
+              {...form.getInputProps('bitrate')}
+            />
           </div>
           <div className={classes.buttonsRow}>
             <Button
+              size='md'
+              variant='outline'
+              color='red'
               component={Link}
               to='/'
             >
               Cancel
             </Button>
-            <Button type='submit'>Save</Button>
+            <Button
+              size='md'
+              variant='outline'
+              type='submit'
+            >
+              Save
+            </Button>
           </div>
         </form>
       </div>

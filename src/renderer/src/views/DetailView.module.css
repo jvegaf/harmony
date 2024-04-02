@@ -1,13 +1,14 @@
 .detailRoot {
   display: flex;
-  width: 100%;
+  width: 80%;
   align-items: center;
   justify-content: center;
 }
 
 .detailImage {
-  width: 20%;
-  margin: 2rem;
+  width: 30%;
+  height: 100%;
+  margin: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,26 +20,29 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1rem;
+  gap: 5rem;
   align-items: center;
 }
 
 .rowComposed {
   width: 100%;
+  margin-top: 1rem;
   display: grid;
   column-gap: 2rem;
-  grid-template-columns: 9fr 3fr;
+  grid-template-columns: 8fr 2fr 2fr;
 }
 
 .rowGenre {
+  margin-top: 1rem;
   width: 100%;
   display: grid;
   column-gap: 2rem;
-  grid-template-columns: 6fr 3fr 3fr;
+  grid-template-columns: 6fr 2fr 2fr 2fr;
 }
 
 .fullRow {
   width: 100%;
+  margin-top: 1rem;
 }
 
 .buttonsRow {

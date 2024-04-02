@@ -36,9 +36,9 @@ export default function Providers({ children }: any) {
 
   return (
     <>
-      <ColorSchemeScript defaultColorScheme='dark' />
+      <ColorSchemeScript defaultColorScheme='auto' />
       <MantineProvider
-        defaultColorScheme='dark'
+        defaultColorScheme='auto'
         theme={theme}
         withCssVariables
       >
