@@ -5,8 +5,16 @@
   justify-content: center;
 }
 
+.detailImage {
+  width: 20%;
+  margin: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .detailForm {
-  width: 50%;
+  width: 40%;
   height: 100%;
   display: flex;
   flex-direction: column;
