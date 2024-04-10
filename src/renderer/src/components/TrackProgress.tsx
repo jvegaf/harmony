@@ -27,7 +27,7 @@ export default function TrackProgress(props: Props) {
   );
 
   useEffect(() => {
-    const remain = Math.round(trackPlaying.duration - elapsed);
+    const remain = Math.round(trackPlaying.duration! - elapsed);
     if (remain < 1) playerAPI.stop();
   }, [elapsed]);
 
@@ -41,7 +41,7 @@ export default function TrackProgress(props: Props) {
 
       const percent = (offsetX / barWidth) * 100;
 
-      const time = (percent * trackPlaying.duration) / 100;
+      const time = (percent * trackPlaying.duration!) / 100;
 
       setTooltipTargetTime(time);
       setTooltipX(percent);

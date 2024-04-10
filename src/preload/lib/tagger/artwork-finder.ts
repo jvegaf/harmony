@@ -1,11 +1,11 @@
-import gis from 'async-g-i-s';
+import gis, { Result } from 'async-g-i-s';
 import { BuildGoogleArtworkQuery } from './query-builder';
 import log from 'electron-log/main';
 import { Track } from '@preload/emusik';
 
 const FindArtwork = async (track: Track): Promise<string[]> => {
   const { title, artist } = track;
-  const result = [];
+  const result: Result[] = [];
   const query = BuildGoogleArtworkQuery(title, artist);
   try {
     const images = await gis(query);
