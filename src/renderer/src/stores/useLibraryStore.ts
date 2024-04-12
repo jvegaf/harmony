@@ -12,8 +12,8 @@ interface LibraryState {
   onOpen: () => void;
   getTrackFromId: (id: TrackId) => Track | undefined;
   fixTracks: (trackIds: TrackId[]) => void;
-
   updateTags: (track: Track) => void;
+  removeTracks: (trackIds: TrackId[]) => void;
 }
 
 const useLibraryStore = create<LibraryState>(set => ({
@@ -43,6 +43,14 @@ const useLibraryStore = create<LibraryState>(set => ({
     window.Main.persistTrack(track);
 
     set({ tracks: useLibraryStore.getState().tracks.map(t => (t.id === track.id ? track : t)) });
+  },
+  removeTracks: trackIds => {
+    trackIds.forEach(id => {
+      const track = useLibraryStore.getState().getTrackFromId(id);
+      if (!track) return;
+      set(state => ({ tracks: state.tracks.filter(t => t.id !== id) }));
+      window.Main.removeTrack(track);
+    });
   },
 }));
 

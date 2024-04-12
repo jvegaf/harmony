@@ -18,6 +18,8 @@ import { Menu, Item, Separator, useContextMenu } from 'react-contexify';
 import { useNavigate } from 'react-router-dom';
 
 import 'react-contexify/dist/ReactContexify.css';
+import { modals } from '@mantine/modals';
+import { Text } from '@mantine/core';
 
 const MENU_ID = 'menu-id';
 
@@ -28,6 +30,7 @@ export function TrackList() {
   const isSorted = useLibraryStore(state => state.isSorted);
   const sorted = useLibraryStore(state => state.sorted);
   const fixTracks = useLibraryStore(state => state.fixTracks);
+  const removeTracks = useLibraryStore(state => state.removeTracks);
   const start = usePlayerStore(state => state.api.start);
   const playingTrack = usePlayerStore(state => state.playingTrack);
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
@@ -206,6 +209,26 @@ export function TrackList() {
     setSorted(table.getSortedRowModel().rows);
   }, [table.getSortedRowModel().rows]);
 
+  const getConfirmMessage = () => {
+    if (Object.keys(rowSelection).length > 1)
+      return `Are you sure you want to delete these ${Object.keys(rowSelection).length} tracks?`;
+    return 'Are you sure you want to delete this track?';
+  };
+
+  const deleteTracksHandler = () => {
+    modals.openConfirmModal({
+      title: 'Confirm',
+      centered: true,
+      children: <Text size='sm'>{getConfirmMessage()}</Text>,
+      labels: { confirm: 'Delete', cancel: 'Cancel' },
+      confirmProps: { color: 'red' },
+      onConfirm: () => {
+        const ids = Object.keys(rowSelection);
+        removeTracks(ids);
+      },
+    });
+  };
+
   return (
     <div className={classes.trackListContainer}>
       <MantineReactTable table={table} />
@@ -217,6 +240,13 @@ export function TrackList() {
           Play Track
         </Item>
         <Item
+          disabled={Object.keys(rowSelection).length !== 1}
+          onClick={({ props }) => handleDetailAction(props.row)}
+        >
+          View Detail
+        </Item>
+        <Separator />
+        <Item
           disabled={Object.keys(rowSelection).length < 1}
           onClick={fixTracksHandler}
         >
@@ -224,10 +254,10 @@ export function TrackList() {
         </Item>
         <Separator />
         <Item
-          disabled={Object.keys(rowSelection).length !== 1}
-          onClick={({ props }) => handleDetailAction(props.row)}
+          disabled={Object.keys(rowSelection).length < 1}
+          onClick={deleteTracksHandler}
         >
-          View Detail
+          Delete
         </Item>
       </Menu>
     </div>

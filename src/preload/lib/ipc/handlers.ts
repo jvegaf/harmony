@@ -9,6 +9,7 @@ import {
   OPEN_FOLDER,
   PERSIST,
   PLAY_COMMAND,
+  REMOVE_TRACK,
   SAVE_ARTWORK,
   SHOW_CONTEXT_MENU,
   TRACK_UPDATED,
@@ -22,6 +23,7 @@ import { LoadArtworkFromFile } from '../artwork/loader';
 import FixTags from '../tagger/Tagger';
 import PersistTrack from '../tag/saver';
 import { Track } from '@preload/emusik';
+import { removeFile } from '../io/remover';
 
 export async function InitIpc(): Promise<void> {
   log.info('ipc initialized');
@@ -101,5 +103,9 @@ export async function InitIpc(): Promise<void> {
 
     const menu = Menu.buildFromTemplate(template);
     menu.popup(BrowserWindow.fromWebContents(event.sender) as PopupOptions);
+  });
+
+  ipcMain.on(REMOVE_TRACK, (_, track: Track) => {
+    removeFile(track.path);
   });
 }
