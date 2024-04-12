@@ -57,93 +57,95 @@ export const DetailView: FC = () => {
   }, [trackId]);
 
   return (
-    <div
-      className={classes.detailRoot}
-      style={{ height: contentHeight }}
-    >
-      <div className={classes.detailImage}>
-        <Image
-          src={artSrc}
-          radius='lg'
-          h={300}
-          fallbackSrc={PlaceHolder}
-        />
+    <form onSubmit={form.onSubmit(values => console.log(values))}>
+      <div
+        style={{ height: contentHeight }}
+        className={classes.detailRoot}
+      >
+        <div className={classes.detailBody}>
+          <div className={classes.detailImage}>
+            <Image
+              src={artSrc}
+              radius='lg'
+              h={300}
+              fallbackSrc={PlaceHolder}
+            />
+          </div>
+          <div className={classes.detailForm}>
+            <div className={classes.fullRow}>
+              <TextInput
+                label='Title'
+                placeholder='Title'
+                {...form.getInputProps('title')}
+              />
+            </div>
+            <div className={classes.fullRow}>
+              <TextInput
+                label='Artist'
+                placeholder='Artist'
+                {...form.getInputProps('artist')}
+              />
+            </div>
+            <div className={classes.rowComposed}>
+              <TextInput
+                label='Album'
+                placeholder='Album'
+                {...form.getInputProps('album')}
+              />
+              <TextInput
+                label='Year'
+                placeholder='Year'
+                {...form.getInputProps('year')}
+              />
+              <TextInput
+                label='Time'
+                placeholder='Time'
+                {...form.getInputProps('time')}
+              />
+            </div>
+            <div className={classes.rowGenre}>
+              <TextInput
+                label='Genre'
+                placeholder='Genre'
+                {...form.getInputProps('genre')}
+              />
+              <TextInput
+                label='BPM'
+                placeholder='BPM'
+                {...form.getInputProps('bpm')}
+              />
+              <TextInput
+                label='Key'
+                placeholder='Key'
+                {...form.getInputProps('key')}
+              />
+              <TextInput
+                label='Bitrate'
+                placeholder='Bitrate'
+                {...form.getInputProps('bitrate')}
+              />
+            </div>
+          </div>
+        </div>
+        <div className={classes.buttonsRow}>
+          <Button
+            size='md'
+            variant='light'
+            color='red'
+            component={Link}
+            to='/'
+          >
+            Cancel
+          </Button>
+          <Button
+            size='md'
+            variant='light'
+            type='submit'
+          >
+            Save
+          </Button>
+        </div>
       </div>
-      <div className={classes.detailForm}>
-        <form onSubmit={form.onSubmit(values => console.log(values))}>
-          <div className={classes.fullRow}>
-            <TextInput
-              label='Title'
-              placeholder='Title'
-              {...form.getInputProps('title')}
-            />
-          </div>
-          <div className={classes.fullRow}>
-            <TextInput
-              label='Artist'
-              placeholder='Artist'
-              {...form.getInputProps('artist')}
-            />
-          </div>
-          <div className={classes.rowComposed}>
-            <TextInput
-              label='Album'
-              placeholder='Album'
-              {...form.getInputProps('album')}
-            />
-            <TextInput
-              label='Year'
-              placeholder='Year'
-              {...form.getInputProps('year')}
-            />
-            <TextInput
-              label='Time'
-              placeholder='Time'
-              {...form.getInputProps('time')}
-            />
-          </div>
-          <div className={classes.rowGenre}>
-            <TextInput
-              label='Genre'
-              placeholder='Genre'
-              {...form.getInputProps('genre')}
-            />
-            <TextInput
-              label='BPM'
-              placeholder='BPM'
-              {...form.getInputProps('bpm')}
-            />
-            <TextInput
-              label='Key'
-              placeholder='Key'
-              {...form.getInputProps('key')}
-            />
-            <TextInput
-              label='Bitrate'
-              placeholder='Bitrate'
-              {...form.getInputProps('bitrate')}
-            />
-          </div>
-          <div className={classes.buttonsRow}>
-            <Button
-              size='md'
-              variant='outline'
-              color='red'
-              component={Link}
-              to='/'
-            >
-              Cancel
-            </Button>
-            <Button
-              size='md'
-              variant='outline'
-              type='submit'
-            >
-              Save
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+    </form>
   );
 };

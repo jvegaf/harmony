@@ -3,8 +3,9 @@
   height: 100%;
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
+
   @mixin light {
-    background-color: var(--mantine-color-gray-3);
+    background-color: var(--appbar-bg-light);
   }
 }
 
@@ -28,9 +29,11 @@
   width: 60%;
   height: 100%;
   background-color: var(--mantine-color-dark-0);
+
   @mixin dark {
     background-color: var(--mantine-color-dark-9);
   }
+
   display: flex;
   flex-direction: column;
   align-items: center;
