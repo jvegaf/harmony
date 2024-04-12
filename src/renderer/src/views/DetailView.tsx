@@ -1,7 +1,7 @@
 import useLibraryStore from '@renderer/stores/useLibraryStore';
 import useAppStore from '@renderer/stores/useAppStore';
 import { FC, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from '@mantine/form';
 import { TextInput, Button, Image } from '@mantine/core';
 import PlaceHolder from '../assets/placeholder.png';
@@ -12,8 +12,11 @@ export const DetailView: FC = () => {
   const contentHeight = useAppStore(state => state.contentHeight);
   const { trackId } = useParams();
   const getTrackFromId = useLibraryStore(state => state.getTrackFromId);
+  const updateTags = useLibraryStore(state => state.updateTags);
   const getArtImage = useAppStore(state => state.getArtImage);
   const [artSrc, setArtSrc] = useState<string | null>(null);
+  const [originalValues, setOriginalValues] = useState<Track | null>(null);
+  const navigate = useNavigate();
 
   const form = useForm({
     initialValues: {
@@ -43,6 +46,21 @@ export const DetailView: FC = () => {
     setArtSrc(src);
   };
 
+  const updateValues = values => {
+    if (!originalValues) return;
+    const updatedValues = {};
+    Object.keys(values).forEach(key => {
+      if (values[key] !== originalValues[key]) {
+        updatedValues[key] = values[key];
+      }
+    });
+    if (Object.keys(updatedValues).length > 0) {
+      const updatedTrack = { ...originalValues, ...updatedValues };
+      updateTags(updatedTrack);
+    }
+    navigate('/');
+  };
+
   useEffect(() => {
     console.log(trackId);
     const track = getTrackFromId(trackId);
@@ -50,14 +68,16 @@ export const DetailView: FC = () => {
     form.setInitialValues(track);
     form.setValues(track);
     setArtwork(track);
+    setOriginalValues(track);
 
     return () => {
       form.reset();
+      setOriginalValues(null);
     };
   }, [trackId]);
 
   return (
-    <form onSubmit={form.onSubmit(values => console.log(values))}>
+    <form onSubmit={form.onSubmit(values => updateValues(values))}>
       <div
         style={{ height: contentHeight }}
         className={classes.detailRoot}

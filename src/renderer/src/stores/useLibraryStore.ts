@@ -12,6 +12,8 @@ interface LibraryState {
   onOpen: () => void;
   getTrackFromId: (id: TrackId) => Track | undefined;
   fixTracks: (trackIds: TrackId[]) => void;
+
+  updateTags: (track: Track) => void;
 }
 
 const useLibraryStore = create<LibraryState>(set => ({
@@ -35,6 +37,12 @@ const useLibraryStore = create<LibraryState>(set => ({
       if (!track) return;
       window.Main.fixTrack(track);
     });
+  },
+
+  updateTags: track => {
+    window.Main.persistTrack(track);
+
+    set({ tracks: useLibraryStore.getState().tracks.map(t => (t.id === track.id ? track : t)) });
   },
 }));
 
