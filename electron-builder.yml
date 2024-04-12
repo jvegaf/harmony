@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: '-'
+appId: com.github.jvegaf.emusik
+productName: 'eMusik'
 directories:
   buildResources: build
 files:
@@ -7,12 +7,12 @@ files:
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{.env,.env.*,.npmrc,yarn.lock}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
 win:
-  executableName: '-'
+  executableName: ${productName}
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -33,7 +33,7 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: josevega234@gmail.com
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
