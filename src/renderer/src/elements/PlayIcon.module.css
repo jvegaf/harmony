@@ -6,10 +6,10 @@
   scale: 1.5;
 
   & svg path {
-    fill: var(--mantine-color-dark-1);
+    fill: light-dark(var(--mantine-color-dark-2), var(--mantine-color-dark-1));
 
     &:hover {
-      fill: var(--mantine-color-dark-0);
+      fill: light-dark(var(--mantine-color-dark-8) var(--mantine-color-dark-0));
     }
   }
 }

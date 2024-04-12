@@ -31,13 +31,7 @@
   --contexify-activeArrow-color: #fff;
 
   --table-vertical-spacing: 0.5rem;
-}
 
-/* body { */
-/*   margin: 0; */
-/*   padding: 0; */
-/*   box-sizing: border-box; */
-/*   display: flex; */
-/*   place-items: center; */
-/*   height: 100vh; */
-/* } */
+  --appbar-bg-light: rgb(244, 244, 244);
+  --appbar-color-light: #555555;
+}

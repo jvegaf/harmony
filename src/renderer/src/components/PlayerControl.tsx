@@ -75,7 +75,6 @@ export function PlayerControl() {
       <div className={classes.playerInfo}>
         <Image
           src={artSrc}
-          radius='sm'
           h={appBarHeight}
           fallbackSrc={PlaceHolder}
         />

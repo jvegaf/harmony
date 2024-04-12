@@ -33,6 +33,7 @@ export function TrackList() {
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const contentHeight = useAppStore(state => state.contentHeight);
   const [sortedIndex, setSortedIndex] = useState<number>(0);
+  const colorScheme = document.querySelector('html')!.getAttribute('data-mantine-color-scheme');
 
   const columns = useMemo<MRT_ColumnDef<Track>[]>(
     () => [
@@ -155,7 +156,17 @@ export function TrackList() {
     return () => document.removeEventListener('keydown', e => handleKeyPress(e));
   }, []);
 
+  useEffect(() => {
+    console.log('colorScheme:', colorScheme);
+  }, [colorScheme]);
+
   const isPlayable = Object.keys(rowSelection).length < 2;
+
+  const isPlaying = (rowId: string) => {
+    if (playingTrack !== rowId) return '';
+    if (colorScheme === 'light') return '#d0fbdb';
+    return '#087f5b';
+  };
 
   const table = useMantineReactTable({
     columns,
@@ -181,14 +192,9 @@ export function TrackList() {
       },
       selected: rowSelection[row.id],
       style: {
-        backgroundColor:
-          playingTrack && row.id === playingTrack
-            ? 'color-mix(in srgb, var(--mantine-color-teal-9), var(--mantine-color-dark-9) 49.999999999999996%)'
-            : '',
+        backgroundColor: isPlaying(row.id),
       },
     }),
-    mantineTableHeadRowProps: { style: { backgroundColor: 'var(--mantine-color-dark-4)' } },
-    mantineTableHeadCellProps: { style: { backgroundColor: 'transparent', padding: 0 } },
     mantineTableBodyCellProps: { style: { userSelect: 'none', backgroundColor: 'transparent' } },
     state: {
       rowSelection,
