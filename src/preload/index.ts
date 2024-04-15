@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { electronAPI } from '@electron-toolkit/preload';
-import { OPEN_FOLDER, FIX_TRACK, PERSIST, GET_ARTWORK, REMOVE_TRACK } from './channels';
+import { OPEN_FOLDER, FIX_TRACK, PERSIST, GET_ARTWORK, REMOVE_TRACK, OPEN_FILES } from './channels';
 import { ArtTrack, Artwork, Track, TrackSrc } from './emusik';
 
 declare global {
@@ -13,6 +13,7 @@ declare global {
 // Custom APIs for renderer
 const api = {
   openFolder: async () => ipcRenderer.invoke(OPEN_FOLDER),
+  openFiles: async (files: TrackSrc[]) => ipcRenderer.invoke(OPEN_FILES, files),
   fixTrack: (track: Track) => ipcRenderer.send(FIX_TRACK, track),
   persistTrack: (track: Track) => ipcRenderer.send(PERSIST, track),
   log: (...args: any[]) => ipcRenderer.send('log', ...args),

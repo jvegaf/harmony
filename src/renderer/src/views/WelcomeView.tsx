@@ -4,10 +4,14 @@ import useLibraryStore from '../stores/useLibraryStore';
 
 export function WelcomeView() {
   const onOpen = useLibraryStore(state => state.onOpen);
+  const onDrag = useLibraryStore(state => state.onDrag);
 
   return (
     <div className={classes.welcomeRoot}>
-      <Onboarding openHandler={onOpen} />
+      <Onboarding
+        openHandler={onOpen}
+        dragHandler={onDrag}
+      />
     </div>
   );
 }

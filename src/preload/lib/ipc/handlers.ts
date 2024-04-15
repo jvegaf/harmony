@@ -6,6 +6,7 @@ import {
   FIX_COMMAND,
   FIX_TRACK,
   GET_ARTWORK,
+  OPEN_FILES,
   OPEN_FOLDER,
   PERSIST,
   PLAY_COMMAND,
@@ -44,6 +45,14 @@ export async function InitIpc(): Promise<void> {
 
     const files = await GetFilesFrom(resultPath.filePaths[0]);
 
+    const tracks = await Promise.all(files.map(async file => CreateTrack(file)).filter(t => t !== null));
+
+    log.info(' total tracks created: ', tracks.length);
+
+    return tracks;
+  });
+
+  ipcMain.handle(OPEN_FILES, async (_, files: string[]) => {
     const tracks = await Promise.all(files.map(async file => CreateTrack(file)).filter(t => t !== null));
 
     log.info(' total tracks created: ', tracks.length);

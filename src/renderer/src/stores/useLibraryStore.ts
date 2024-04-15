@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import log from 'electron-log/renderer';
 import { Track, TrackId } from 'src/preload/emusik';
+import { FileWithPath } from '@mantine/dropzone';
 
 interface LibraryState {
   tracks: Track[];
@@ -10,6 +11,7 @@ interface LibraryState {
   addTrack: (track: Track) => void;
   updateTrack: (track: Track) => void;
   onOpen: () => void;
+  onDrag: (files: FileWithPath[]) => void;
   getTrackFromId: (id: TrackId) => Track | undefined;
   fixTracks: (trackIds: TrackId[]) => void;
   updateTags: (track: Track) => void;
@@ -25,6 +27,11 @@ const useLibraryStore = create<LibraryState>(set => ({
   updateTrack: track => set(state => ({ tracks: state.tracks.map(t => (t.id === track.id ? track : t)) })),
   onOpen: async () => {
     const newTracks = await window.Main.openFolder();
+    log.info('total tracks', newTracks.length);
+    set({ tracks: newTracks });
+  },
+  onDrag: async files => {
+    const newTracks = await window.Main.openFiles(files.map(f => f.path!));
     log.info('total tracks', newTracks.length);
     set({ tracks: newTracks });
   },

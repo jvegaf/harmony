@@ -1,6 +1,7 @@
 export const TOTAL_FILES = 'TOTAL_FILES';
 export const NEW_TRACK = 'NEW_TRACK';
 export const OPEN_FOLDER = 'OPEN_FOLDER';
+export const OPEN_FILES = 'OPEN_FILES';
 export const FIX_TRACK = 'FIX_TRACK';
 export const FIND_ARTWORK = 'FIND_ARTWORK';
 export const SAVE_ARTWORK = 'SAVE_ARTWORK';
