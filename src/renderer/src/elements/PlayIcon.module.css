@@ -1,0 +1,15 @@
+.iconRoot {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scale: 1.5;
+
+  & svg path {
+    fill: light-dark(var(--mantine-color-dark-2), var(--mantine-color-dark-1));
+
+    &:hover {
+      fill: light-dark(var(--mantine-color-dark-8) var(--mantine-color-dark-0));
+    }
+  }
+}

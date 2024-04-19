@@ -1,0 +1,21 @@
+.onboardingRoot {
+  height: 90vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uploadContainer {
+  height: 80%;
+  width: 80%;
+  border: 1px solid #92b0b3;
+  border-radius: 4px;
+  background: light-dark(#999999, #666666);
+  outline: 2px dashed #92b0b3;
+  outline-offset: -10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

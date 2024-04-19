@@ -1,0 +1,82 @@
+.playerRoot {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+
+  @mixin light {
+    background-color: var(--appbar-bg-light);
+  }
+}
+
+.playerControls {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playerInfo {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.infoBox {
+  width: 60%;
+  height: 100%;
+  background-color: var(--mantine-color-dark-0);
+
+  @mixin dark {
+    background-color: var(--mantine-color-dark-9);
+  }
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.playerInfoTitle {
+  width: 90%;
+  font-size: 1.3rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.playerInfoArtist {
+  width: 100%;
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.playerProgress {
+  width: 100%;
+  height: 11%;
+}
+
+.playerSearch {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playerButton {
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+}
