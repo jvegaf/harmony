@@ -31,10 +31,10 @@ dmg:
 linux:
   target:
     - AppImage
-    - snap
+    - rpm
     - deb
   maintainer: josevega234@gmail.com
-  category: Utility
+  category: Audio
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
