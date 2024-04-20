@@ -31,7 +31,7 @@ linux:
     - AppImage
     - rpm
     - deb
-  mimeTypes: audio/mpeg
+  mimeTypes: [audio/mpeg]
   maintainer: josevega234@gmail.com
   category: Audio
 appImage:
