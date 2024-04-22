@@ -1,6 +1,6 @@
 {
   "name": "emusik",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Music manager for old-school DJs",
   "main": "./out/main/index.js",
   "author": "Jose Vega",
@@ -39,6 +39,7 @@
     "axios": "^1.6.8",
     "clsx": "^2.1.0",
     "dayjs": "^1.11.10",
+    "electron-context-menu": "^3.6.1",
     "googlethis": "^1.8.0",
     "mantine-react-table": "^2.0.0-alpha.17",
     "music-metadata": "^7.14.0",

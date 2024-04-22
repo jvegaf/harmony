@@ -212,7 +212,8 @@ export function TrackList() {
   const getConfirmMessage = () => {
     if (Object.keys(rowSelection).length > 1)
       return `Are you sure you want to delete these ${Object.keys(rowSelection).length} tracks?`;
-    return 'Are you sure you want to delete this track?';
+    const track = data.find(t => t.id === Object.keys(rowSelection)[0]);
+    return `Are you sure you want to delete "${track?.artist} - ${track?.title}" ?`;
   };
 
   const deleteTracksHandler = () => {

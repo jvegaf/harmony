@@ -4,8 +4,20 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import { InitIpc } from '@preload/lib/ipc/handlers';
 import log from 'electron-log/main';
+import contextMenu from 'electron-context-menu';
 
 log.initialize();
+
+// Add context menu
+contextMenu({
+  showSearchWithGoogle: false,
+  showInspectElement: false,
+  showLookUpSelection: false,
+  showLearnSpelling: false,
+  shouldShowMenu: (_event, params) => {
+    return params.isEditable;
+  },
+});
 
 function createWindow(): void {
   // Create the browser window.

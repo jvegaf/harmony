@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import log from 'electron-log/renderer';
 import { Track, TrackId } from 'src/preload/emusik';
 import { FileWithPath } from '@mantine/dropzone';
+import useAppStore from './useAppStore';
 
 interface LibraryState {
   tracks: Track[];
@@ -24,7 +25,11 @@ const useLibraryStore = create<LibraryState>(set => ({
   isSorted: false,
   setSorted: sorted => set({ sorted, isSorted: true }),
   addTrack: track => set(state => ({ tracks: [...state.tracks, track] })),
-  updateTrack: track => set(state => ({ tracks: state.tracks.map(t => (t.id === track.id ? track : t)) })),
+  updateTrack: track => {
+    set(state => ({ tracks: state.tracks.map(t => (t.id === track.id ? track : t)) }));
+    const updateMessage = useAppStore.getState().updateMessage;
+    updateMessage(`Track updated:      ${track.artist} - ${track.title} `);
+  },
   onOpen: async () => {
     const newTracks = await window.Main.openFolder();
     log.info('total tracks', newTracks.length);

@@ -1,9 +1,10 @@
 import AppBar from '../components/AppBar';
 import { Outlet } from 'react-router-dom';
-import classes from './Layout.module.css';
+import classes from './RootLayout.module.css';
 import { useViewportSize } from '@mantine/hooks';
 import { useEffect } from 'react';
 import useAppStore from '../stores/useAppStore';
+import { StatusBar } from '@renderer/components/StatusBar';
 
 export function RootLayout() {
   const { height } = useViewportSize();
@@ -21,6 +22,9 @@ export function RootLayout() {
       <main className={classes.mainContainer}>
         <Outlet />
       </main>
+      <div className={classes.footer}>
+        <StatusBar />
+      </div>
     </div>
   );
 }

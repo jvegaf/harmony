@@ -13,5 +13,6 @@ export const FIX_COMMAND = 'FIX_COMMAND';
 export const CREATE_TRACKS = 'CREATE_TRACKS';
 export const SHOW_CONTEXT_MENU = 'SHOW_CONTEXT_MENU';
 export const TRACK_UPDATED = 'TRACK_UPDATED';
+export const UPDATE_MSG = 'UPDATE_MSG';
 export const ARTWORK_UPDATED = 'ARTWORK_UPDATED';
 export const REMOVE_TRACK = 'REMOVE_TRACK';
