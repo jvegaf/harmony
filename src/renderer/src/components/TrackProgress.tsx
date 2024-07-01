@@ -28,7 +28,7 @@ export default function TrackProgress(props: Props) {
 
   useEffect(() => {
     const remain = Math.round(trackPlaying.duration! - elapsed);
-    if (remain < 1) playerAPI.stop();
+    if (remain < 1) playerAPI.playNext();
   }, [elapsed]);
 
   const [tooltipTargetTime, setTooltipTargetTime] = useState<null | number>(null);

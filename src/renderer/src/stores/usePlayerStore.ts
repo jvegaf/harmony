@@ -14,6 +14,7 @@ type PlayerState = {
     pause: () => void;
     togglePlayPause: () => Promise<void>;
     stop: () => void;
+    playNext: () => void;
     setVolume: (volume: number) => void;
     setMuted: (muted: boolean) => void;
     jumpTo: (to: number) => void;
@@ -71,6 +72,17 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       set({
         playerStatus: PlayerStatus.STOP,
       });
+    },
+
+    playNext: (): void => {
+      const playingTrack = get().playingTrack;
+      const api = get().api;
+      const { nextTrack } = useLibraryStore.getState();
+      const newTrackId = nextTrack(playingTrack);
+
+      api.stop();
+
+      api.start(newTrackId);
     },
 
     setVolume: volume => {
