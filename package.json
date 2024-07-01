@@ -1,6 +1,6 @@
 {
-  "name": "emusik",
-  "version": "0.6.3",
+  "name": "eMusik",
+  "version": "0.6.4",
   "description": "Music manager for old-school DJs",
   "main": "./out/main/index.js",
   "author": "Jose Vega",
@@ -19,6 +19,7 @@
     "postinstall": "electron-builder install-app-deps",
     "build:win": "npm run build && electron-builder --win --config",
     "build:mac": "electron-vite build && electron-builder --mac --config",
+    "build:macsilicon": "electron-vite build && electron-builder --mac --arm64 --config",
     "build:linux": "electron-vite build && electron-builder --linux --config",
     "release": "electron-builder"
   },
@@ -47,6 +48,7 @@
     "react-contexify": "^6.0.0",
     "react-window": "^1.8.10",
     "recursive-readdir": "^2.2.3",
+    "styled-components": "^6.1.11",
     "youtube-music-api": "^1.0.6",
     "zustand": "^4.5.0"
   },

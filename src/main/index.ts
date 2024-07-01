@@ -1,10 +1,11 @@
-import { app, shell, BrowserWindow } from 'electron';
+import { app, shell, BrowserWindow, Menu } from 'electron';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import { InitIpc } from '@preload/lib/ipc/handlers';
 import log from 'electron-log/main';
 import contextMenu from 'electron-context-menu';
+import AppMenu from './menu';
 
 log.initialize();
 
@@ -36,6 +37,7 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show();
+    if (process.platform === 'darwin') Menu.setApplicationMenu(AppMenu);
     mainWindow.maximize();
   });
 
