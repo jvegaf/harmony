@@ -31,7 +31,10 @@ const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
     };
   });
 
-  return tagMatches.sort((a, b) => b.matches - a.matches)[0];
+  const matchResult = tagMatches.sort((a, b) => b.matches - a.matches)[0];
+  log.info(matchResult);
+
+  return matchResult;
 };
 
 const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
@@ -78,7 +81,7 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
 // };
 
 const FixTags = async (track: Track): Promise<Track> => {
-  let fixedTrack;
+  let fixedTrack: Track | PromiseLike<Track>;
   try {
     const result = await SearchOnBeatport(track);
     if (!result) {
