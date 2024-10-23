@@ -18,6 +18,7 @@ interface LibraryState {
   updateTags: (track: Track) => void;
   removeTracks: (trackIds: TrackId[]) => void;
   nextTrack: (prevId: TrackId) => TrackId;
+  previousTrack: (prevId: TrackId) => TrackId;
 }
 
 const useLibraryStore = create<LibraryState>(set => ({
@@ -70,6 +71,12 @@ const useLibraryStore = create<LibraryState>(set => ({
     const idx = tracks.findIndex(t => t.id === id);
     if (tracks.length <= idx + 1) return tracks[0].id;
     return tracks[idx + 1].id;
+  },
+  previousTrack: id => {
+    const tracks = useLibraryStore.getState().tracks;
+    const idx = tracks.findIndex(t => t.id === id);
+    if (idx === 0) return tracks[tracks.length - 1].id;
+    return tracks[idx - 1].id;
   },
 }));
 

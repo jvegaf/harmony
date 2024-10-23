@@ -17,6 +17,8 @@ export function PlayerControl() {
   const getTrackFromId = useLibraryStore(state => state.getTrackFromId);
   const playingTrack = usePlayerStore(state => state.playingTrack);
   const playerStatus = usePlayerStore(state => state.playerStatus);
+  const nextTrack = usePlayerStore(state => state.api.playNext);
+  const prevTrack = usePlayerStore(state => state.api.playPrev);
   const togglePlayPause = usePlayerStore(state => state.api.togglePlayPause);
   const appBarHeight = useAppStore(state => state.appBarHeight);
   const getArtImage = useAppStore(state => state.getArtImage);
@@ -51,7 +53,7 @@ export function PlayerControl() {
       <div className={classes.playerControls}>
         <button
           className={classes.playerButton}
-          // onClick={() => togglePlayPause()}
+          onClick={() => prevTrack()}
           disabled={playerStatus === PlayerStatus.STOP}
         >
           <PrevIcon />
@@ -65,7 +67,7 @@ export function PlayerControl() {
         </button>
         <button
           className={classes.playerButton}
-          // onClick={() => togglePlayPause()}
+          onClick={() => nextTrack()}
           disabled={playerStatus === PlayerStatus.STOP}
         >
           <NextIcon />
