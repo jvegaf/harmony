@@ -4,6 +4,8 @@ import Update from '../track/updater';
 import { SearchTags } from './beatport';
 import { MatchResult, ResultTag, Track } from '@preload/emusik';
 import { GetStringTokens } from '@preload/utils';
+import { BandcampSearchResult, search } from './bandcamp';
+import { getResultTag } from './bandcampMapper';
 // import SearchTrackInfo from './google';
 
 // const SearchTagsYt = (track: Track) => {
@@ -31,10 +33,21 @@ const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
     };
   });
 
+  // log.info(matchResult);
   const matchResult = tagMatches.sort((a, b) => b.matches - a.matches)[0];
-  log.info(matchResult);
 
   return matchResult;
+};
+
+const searchOnBandCamp = async (track: Track): Promise<BandcampSearchResult[]> => {
+  const { title, artist } = track;
+  const reqAggregate: string[] = [title];
+  if (artist) {
+    reqAggregate.push(artist);
+  }
+
+  const result = await search(reqAggregate.join(' '));
+  return result;
 };
 
 const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
@@ -86,7 +99,16 @@ const FixTags = async (track: Track): Promise<Track> => {
     const result = await SearchOnBeatport(track);
     if (!result) {
       // GetWebTrackInfo(track);
-      log.warn(`no match for ${track.title}`);
+      log.warn(`Beatport no match for ${track.title}`);
+      const bcampresult = await searchOnBandCamp(track);
+      if (bcampresult.length && bcampresult[0].type === 'track') {
+        log.info('Bandcamp result: ', bcampresult[0]);
+        const resultTag = getResultTag(bcampresult[0]);
+        fixedTrack = Update(track, resultTag);
+        return fixedTrack;
+      }
+      log.warn(`Bandcamp no match for ${track.title}`);
+
       fixedTrack = track;
     } else {
       fixedTrack = Update(track, result.tag);

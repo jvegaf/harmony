@@ -28,16 +28,16 @@ export interface Track {
 }
 
 export interface ResultTag {
-  id: string;
+  id?: string;
   album?: string;
   artist?: string;
   bpm?: number;
   genre?: string;
-  duration: number;
+  duration?: number;
   title: string;
   year?: string;
   artworkUrl?: string;
-  tokens: string[];
+  tokens?: string[];
 }
 
 export interface Playlist {
