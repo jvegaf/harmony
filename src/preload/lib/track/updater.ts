@@ -31,7 +31,7 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     album: tag.album,
     year: tag.year ? Number(tag.year) : undefined,
     bpm: tag.bpm,
-    key: tag.key,
+    // key: tag.key,
     genre: tag.genre,
   };
 

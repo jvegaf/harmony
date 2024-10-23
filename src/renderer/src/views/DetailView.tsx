@@ -20,6 +20,7 @@ export const DetailView: FC = () => {
 
   const form = useForm({
     initialValues: {
+      path: '',
       title: '',
       artist: '',
       album: '',
@@ -92,6 +93,13 @@ export const DetailView: FC = () => {
             />
           </div>
           <div className={classes.detailForm}>
+            <div className={classes.fullRow}>
+              <TextInput
+                label='Path'
+                placeholder='Path'
+                {...form.getInputProps('path')}
+              />
+            </div>
             <div className={classes.fullRow}>
               <TextInput
                 label='Title'

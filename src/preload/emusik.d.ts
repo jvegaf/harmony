@@ -33,7 +33,6 @@ export interface ResultTag {
   artist?: string;
   bpm?: number;
   genre?: string;
-  key?: string;
   duration: number;
   title: string;
   year?: string;

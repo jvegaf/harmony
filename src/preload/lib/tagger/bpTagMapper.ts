@@ -6,7 +6,6 @@ interface Result {
   name: string;
   artists: [{ name: string }];
   id: string;
-  key: { camelot_number: string; camelot_letter: string };
   release: { name: string; image: { uri: string } };
   publish_date: string;
   genre: { name: string };
@@ -28,7 +27,6 @@ const CreateTagResult = (result: Result): ResultTag => {
   return {
     id: result.id,
     title: tagTrackTitle,
-    key: `${result.key.camelot_number}${result.key.camelot_letter}`,
     artist: tagTrackArtists.join(', '),
     album: result.release.name,
     year: result.publish_date.substring(0, 4),
