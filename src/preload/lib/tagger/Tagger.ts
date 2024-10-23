@@ -6,6 +6,8 @@ import { MatchResult, ResultTag, Track } from '@preload/emusik';
 import { GetStringTokens } from '@preload/utils';
 import { BandcampSearchResult, search } from './bandcamp';
 import { getResultTag } from './bandcampMapper';
+import { SoundcloudTrack } from 'soundcloud.ts';
+import { soundcloudSearch } from './soundcloudProvider';
 // import SearchTrackInfo from './google';
 
 // const SearchTagsYt = (track: Track) => {
@@ -20,7 +22,7 @@ const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
   const tagMatches: MatchResult[] = tags.map(tag => {
     let tokensFounded = 0;
     trackTokens.forEach(token => {
-      if (tag.tokens.indexOf(token) > -1) {
+      if (tag.tokens!.indexOf(token) > -1) {
         tokensFounded += 1;
       }
     });
@@ -50,6 +52,17 @@ const searchOnBandCamp = async (track: Track): Promise<BandcampSearchResult[]> =
   return result;
 };
 
+const searchOnSoundCloud = async (track: Track): Promise<ResultTag[]> => {
+  const { title, artist } = track;
+  const reqAggregate: string[] = [title];
+  if (artist) {
+    reqAggregate.push(artist);
+  }
+
+  const result = await soundcloudSearch(reqAggregate.join(' '));
+  return result;
+};
+
 const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
   const { title, artist, duration } = track;
   const reqAggregate: string[] = [title];
@@ -67,7 +80,7 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
   }
   const durRounded = Math.round(duration);
   const resultsFiltered = bpResults.filter(
-    result => result.duration >= durRounded - 10 && result.duration <= durRounded + 10,
+    result => result.duration! >= durRounded - 10 && result.duration! <= durRounded + 10,
   );
   if (resultsFiltered.length < 2) {
     return {
@@ -108,6 +121,15 @@ const FixTags = async (track: Track): Promise<Track> => {
         return fixedTrack;
       }
       log.warn(`Bandcamp no match for ${track.title}`);
+
+      const scresult = await searchOnSoundCloud(track);
+      if (scresult.length) {
+        log.info('Soundcloud results count: ', scresult.length);
+        log.info('Soundcloud result: ', scresult[0]);
+        fixedTrack = Update(track, scresult[0]);
+        return fixedTrack;
+      }
+      log.warn(`Soundcloud no match for ${track.title}`);
 
       fixedTrack = track;
     } else {

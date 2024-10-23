@@ -14,7 +14,8 @@ export default function Providers({ children }: any) {
   const theme = createTheme({
     // Added Segoe UI Variable Text (Win11) to https://mantine.dev/theming/typography/#system-fonts
     fontFamily:
-      '-apple-system, BlinkMacSystemFont, Segoe UI Variable Text, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji',
+      // '-apple-system, BlinkMacSystemFont, Segoe UI Variable Text, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji',
+      'Verdana,  Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji',
     // added source-code-pro and SFMono-Regular
     fontFamilyMonospace:
       'source-code-pro, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
