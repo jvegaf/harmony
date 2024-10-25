@@ -1,5 +1,5 @@
 import { ResultTag } from '@preload/emusik';
-import { GetStringTokens } from '../../utils';
+import { GetStringTokens } from '@preload/utils';
 
 interface Result {
   mix_name: string;

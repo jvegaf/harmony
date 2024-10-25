@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import 'react-contexify/dist/ReactContexify.css';
 import { modals } from '@mantine/modals';
 import { Text } from '@mantine/core';
+import { useHotkeys } from '@mantine/hooks';
 
 const MENU_ID = 'menu-id';
 
@@ -229,6 +230,21 @@ export function TrackList() {
       },
     });
   };
+
+  useHotkeys([
+    [
+      'Escape',
+      () => {
+        setRowSelection({});
+      },
+    ],
+    [
+      'Ctrl+A',
+      () => {
+        table.toggleAllRowsSelected();
+      },
+    ],
+  ]);
 
   return (
     <div className={classes.trackListContainer}>

@@ -1,13 +1,12 @@
 import log from 'electron-log/main';
 import Update from '../track/updater';
 // import SearchYtTags from './youtube';
-import { SearchTags } from './beatport';
+import { SearchTags } from './beatport/beatport';
 import { MatchResult, ResultTag, Track } from '@preload/emusik';
 import { GetStringTokens } from '@preload/utils';
-import { BandcampSearchResult, search } from './bandcamp';
-import { getResultTag } from './bandcampMapper';
-import { SoundcloudTrack } from 'soundcloud.ts';
-import { soundcloudSearch } from './soundcloudProvider';
+import { BandcampSearchResult, search } from './bandcamp/bandcamp';
+import { getResultTag } from './bandcamp/bandcampMapper';
+import { soundcloudSearch } from './soundcloud/soundcloudProvider';
 // import SearchTrackInfo from './google';
 
 // const SearchTagsYt = (track: Track) => {
@@ -60,6 +59,9 @@ const searchOnSoundCloud = async (track: Track): Promise<ResultTag[]> => {
   }
 
   const result = await soundcloudSearch(reqAggregate.join(' '));
+
+  log.info('Soundcloud results count: ', result.length);
+  log.info('Soundcloud result: ', result[0]);
   return result;
 };
 
@@ -124,8 +126,6 @@ const FixTags = async (track: Track): Promise<Track> => {
 
       const scresult = await searchOnSoundCloud(track);
       if (scresult.length) {
-        log.info('Soundcloud results count: ', scresult.length);
-        log.info('Soundcloud result: ', scresult[0]);
         fixedTrack = Update(track, scresult[0]);
         return fixedTrack;
       }

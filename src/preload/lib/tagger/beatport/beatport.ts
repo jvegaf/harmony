@@ -1,6 +1,6 @@
 import axios from 'axios';
 import BeatportToken from './BeaportToken';
-import { BuildBeatportQuery } from './query-builder';
+import { BuildBeatportQuery } from '../query-builder';
 import GetTagResults from './bpTagMapper';
 import { ResultTag } from '@preload/emusik';
 import { handleError, handleResponse } from '@preload/reponse';
