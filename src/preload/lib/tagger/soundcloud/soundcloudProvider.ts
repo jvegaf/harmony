@@ -14,5 +14,6 @@ const toResultTag = (sctrack: SoundcloudTrack): ResultTag => {
     title: sctrack.title,
     year: sctrack.release_date?.slice(-4),
     artworkUrl: sctrack.artwork_url,
+    tokens: sctrack.title.split(' '),
   };
 };

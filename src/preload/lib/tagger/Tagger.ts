@@ -51,18 +51,22 @@ const searchOnBandCamp = async (track: Track): Promise<BandcampSearchResult[]> =
   return result;
 };
 
-const searchOnSoundCloud = async (track: Track): Promise<ResultTag[]> => {
+const searchOnSoundCloud = async (track: Track): Promise<MatchResult | null> => {
   const { title, artist } = track;
   const reqAggregate: string[] = [title];
   if (artist) {
     reqAggregate.push(artist);
   }
 
+  const trackTokens = GetStringTokens(reqAggregate);
   const result = await soundcloudSearch(reqAggregate.join(' '));
 
   log.info('Soundcloud results count: ', result.length);
+  log.info('tokens: ', trackTokens);
   log.info('Soundcloud result: ', result[0]);
-  return result;
+  const match = Match(trackTokens, result);
+
+  return match;
 };
 
 const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
@@ -115,6 +119,13 @@ const FixTags = async (track: Track): Promise<Track> => {
     if (!result) {
       // GetWebTrackInfo(track);
       log.warn(`Beatport no match for ${track.title}`);
+      const scresult = await searchOnSoundCloud(track);
+      if (scresult) {
+        fixedTrack = Update(track, scresult.tag);
+        return fixedTrack;
+      }
+      log.warn(`Soundcloud no match for ${track.title}`);
+
       const bcampresult = await searchOnBandCamp(track);
       if (bcampresult.length && bcampresult[0].type === 'track') {
         log.info('Bandcamp result: ', bcampresult[0]);
@@ -123,13 +134,6 @@ const FixTags = async (track: Track): Promise<Track> => {
         return fixedTrack;
       }
       log.warn(`Bandcamp no match for ${track.title}`);
-
-      const scresult = await searchOnSoundCloud(track);
-      if (scresult.length) {
-        fixedTrack = Update(track, scresult[0]);
-        return fixedTrack;
-      }
-      log.warn(`Soundcloud no match for ${track.title}`);
 
       fixedTrack = track;
     } else {
