@@ -1,4 +1,4 @@
-import { Track } from '@preload/emusik';
+import { Track } from '../../../preload/types/emusik';
 
 interface PlayerOptions {
   playbackRate?: number;
@@ -7,6 +7,14 @@ interface PlayerOptions {
   muted?: boolean;
 }
 
+/**
+ * Library in charge of playing audio. Currently uses HTMLAudioElement.
+ *
+ * Open questions:
+ *   - Should it emit IPC events itself? Or expose events?
+ *   - Should it hold the concepts of queue/random/etc? (in other words, should
+ *     we merge player actions here?)
+ */
 class Player {
   private audio: HTMLAudioElement;
   private durationThresholdReached: boolean;
@@ -92,7 +100,7 @@ class Player {
 
   setTrack(track: Track) {
     this.track = track;
-    this.audio.src = `file://${track.path}`;
+    this.audio.src = window.Main.library.parseUri(track.path);
 
     // When we change song, need to update the thresholdReached indicator.
     this.durationThresholdReached = false;
@@ -126,7 +134,6 @@ class Player {
 
 export default new Player({
   volume: 1,
-  playbackRate: 1,
   audioOutputDevice: 'default',
   muted: false,
 });

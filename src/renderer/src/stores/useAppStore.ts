@@ -1,31 +1,37 @@
-import { Artwork, Track } from '@preload/emusik';
-import { create } from 'zustand';
+import { logger } from '../../shared/lib';
 
-interface AppState {
+import { createStore } from './store-helpers';
+
+type AppState = {
   appBarHeight: number;
+  contentWidth: number;
   contentHeight: number;
-  statusBarMessage: string;
-  updateMessage: (message: string) => void;
-  updateHeight: (height: number) => void;
-  getArtImage: (track: Track) => Promise<Artwork | null>;
-}
+  api: {
+    updateSize: (width: number, height: number) => void;
+  };
+};
 
-const APPBAR_HEIGHT = 80;
+const APPBAR_HEIGHT = 50;
 const STATUSBAR_HEIGHT = 30;
 
-const useAppStore = create<AppState>(set => ({
+const useAppStore = createStore<AppState>((set) => ({
   appBarHeight: APPBAR_HEIGHT,
+  contentWidth: 100,
   contentHeight: 100,
-  statusBarMessage: '',
-  updateMessage: (message: string) => {
-    set({ statusBarMessage: message });
-    setTimeout(() => set({ statusBarMessage: '' }), 5000);
-  },
-  updateHeight: (height: number) => set({ contentHeight: height - (APPBAR_HEIGHT + STATUSBAR_HEIGHT) }),
-  getArtImage: async (track: Track) => {
-    const art = await window.Main.getArtWork(track.path);
-    return art;
+  api: {
+    updateSize: (width: number, height: number) => {
+      // eslint-disable-next-line import/namespace, no-console
+      console.log('updating app size', width, height);
+      set({
+        contentWidth: width,
+        contentHeight: height - (APPBAR_HEIGHT + STATUSBAR_HEIGHT),
+      });
+    },
   },
 }));
 
 export default useAppStore;
+
+export function useAppAPI() {
+  return useAppStore((state) => state.api);
+}

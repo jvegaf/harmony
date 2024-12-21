@@ -1,33 +1,59 @@
-import { contextBridge, ipcRenderer } from 'electron';
-import { electronAPI } from '@electron-toolkit/preload';
-import { OPEN_FOLDER, FIX_TRACK, PERSIST, GET_ARTWORK, REMOVE_TRACK, OPEN_FILES } from './channels';
-import { ArtTrack, Artwork, Track, TrackSrc } from './emusik';
+import { app, contextBridge, ipcRenderer, shell } from 'electron';
+import { ElectronAPI, electronAPI } from '@electron-toolkit/preload';
+import channels from './lib/ipc-channels';
+import { Track, Playlist, LogLevel, TrackId } from './types/emusik';
+import parseUri from './lib/utils-uri';
 
-declare global {
-  interface Window {
-    Main: typeof api;
-    ipcRenderer: typeof ipcRenderer;
-  }
-}
-
-// Custom APIs for renderer
 const api = {
-  openFolder: async () => ipcRenderer.invoke(OPEN_FOLDER),
-  openFiles: async (files: TrackSrc[]) => ipcRenderer.invoke(OPEN_FILES, files),
-  fixTrack: (track: Track) => ipcRenderer.send(FIX_TRACK, track),
-  persistTrack: (track: Track) => ipcRenderer.send(PERSIST, track),
-  log: (...args: any[]) => ipcRenderer.send('log', ...args),
-  findArtWork: async (track: Track) => ipcRenderer.invoke('find-artwork', track),
-  saveArtWork: (artTrack: ArtTrack) => ipcRenderer.send('save-artwork', artTrack),
-  getArtWork: async (filepath: TrackSrc): Promise<Artwork | null> => ipcRenderer.invoke(GET_ARTWORK, filepath),
-  removeTrack: (filepath: TrackSrc) => ipcRenderer.send(REMOVE_TRACK, filepath),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  on(channel: string, func: (...args: any[]) => void) {
-    ipcRenderer.on(channel, (_event, ...args) => func(...args));
+  app: {
+    ready: () => ipcRenderer.send(channels.APP_READY),
+    restart: () => ipcRenderer.send(channels.APP_RESTART),
+    clone: () => ipcRenderer.send(channels.APP_CLOSE),
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  once(channel: string, func: (...args: any[]) => void) {
-    ipcRenderer.once(channel, (_event, ...args) => func(...args));
+  db: {
+    tracks: {
+      getAll: () => ipcRenderer.invoke(channels.TRACK_ALL),
+      insertMultiple: (tracks: Track[]) => ipcRenderer.invoke(channels.TRACKS_ADD, tracks),
+      update: (track: Track) => ipcRenderer.invoke(channels.TRACK_UPDATE, track),
+      remove: (trackIDs: TrackId[]) => ipcRenderer.invoke(channels.TRACKS_REMOVE, trackIDs),
+      findByID: (tracksIDs: string[]) => ipcRenderer.invoke(channels.TRACKS_BY_ID, tracksIDs),
+      findByPath: (paths: string[]) => ipcRenderer.invoke(channels.TRACKS_BY_PATH, paths),
+      findOnlyByID: (trackID: string) => ipcRenderer.invoke(channels.TRACK_BY_ID, trackID),
+    },
+    playlists: {
+      getAll: () => ipcRenderer.invoke(channels.PLAYLIST_ALL),
+      insert: (playlist: Playlist) => ipcRenderer.invoke(channels.PLAYLIST_ADD, playlist),
+      rename: (playlistID: string, name: string) => ipcRenderer.invoke(channels.PLAYLIST_RENAME, playlistID, name),
+      remove: (playlistID: string) => ipcRenderer.invoke(channels.PLAYLIST_REMOVE, playlistID),
+      findByID: (playlistIDs: string[]) => ipcRenderer.invoke(channels.PLAYLISTS_BY_ID, playlistIDs),
+      findOnlyByID: (playlistID: string) => ipcRenderer.invoke(channels.PLAYLIST_BY_ID, playlistID),
+      setTracks: (playlistID: string, tracks: Track[]) =>
+        ipcRenderer.invoke(channels.PLAYLIST_SET_TRACKS, playlistID, tracks),
+    },
+    reset: () => ipcRenderer.invoke(channels.DB_RESET),
+  },
+  library: {
+    parseUri,
+    fixTags: async (track: Track) => ipcRenderer.invoke(channels.FIX_TAGS, track),
+    scanPaths: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_LOOKUP, paths),
+    importTracks: async (tracks: Track[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, tracks),
+  },
+  dialog: {
+    open: async (opts: Electron.OpenDialogOptions) => ipcRenderer.invoke(channels.DIALOG_OPEN, opts),
+    msgbox: async (opts: Electron.MessageBoxOptions) => ipcRenderer.invoke(channels.DIALOG_MESSAGE_BOX, opts),
+  },
+  covers: {
+    getCoverAsBase64: (track: Track) => ipcRenderer.invoke(channels.COVER_GET, track.path),
+  },
+  logger: {
+    info: (message: string | any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.INFO, message }),
+    warn: (message: string | any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.WARN, message }),
+    error: (message: string | any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.ERROR, message }),
+    debug: (message: string | any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.DEBUG, message }),
+  },
+  shell: {
+    openExternal: shell.openExternal,
+    openUserDataDirectory: () => shell.openPath(app.getPath('userData')),
   },
 };
 
@@ -36,14 +62,21 @@ const api = {
 // just add to the DOM global.
 if (process.contextIsolated) {
   try {
-    contextBridge.exposeInMainWorld('ipcRenderer', electronAPI);
+    contextBridge.exposeInMainWorld('ElectronAPI', electronAPI);
     contextBridge.exposeInMainWorld('Main', api);
   } catch (error) {
     console.error(error);
   }
 } else {
   // @ts-ignore (define in dts)
-  window.ipcRenderer = electronAPI;
+  window.ElectronAPI = electronAPI;
   // @ts-ignore (define in dts)
   window.Main = api;
+}
+
+declare global {
+  interface Window {
+    ElectronAPI: ElectronAPI;
+    Main: typeof api;
+  }
 }

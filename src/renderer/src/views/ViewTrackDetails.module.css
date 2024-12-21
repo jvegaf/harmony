@@ -1,0 +1,30 @@
+.viewDetails {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+
+  h1 {
+    align-self: center;
+    padding-bottom: 20px;
+  }
+}
+
+.detailsForm {
+  width: 600px;
+  padding: 10px 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.detailsCover {
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.detailsActions {
+  display: flex;
+  justify-content: space-between;
+}

@@ -1,44 +1,81 @@
-import { app, shell, BrowserWindow, Menu } from 'electron';
+import { app, shell, BrowserWindow } from 'electron';
+import { installExtension, REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
-import { InitIpc } from '@preload/lib/ipc/handlers';
-import log from 'electron-log/main';
-import contextMenu from 'electron-context-menu';
-import AppMenu from './menu';
+import { mainLogger } from './lib/log/logger';
+import ApplicationMenuModule from './modules/ApplicationMenuModule';
+import PowerModule from './modules/PowerMonitorModule';
+import ThumbarModule from './modules/ThumbarModule';
+import DockMenuModule from './modules/DockMenuDarwinModule';
+import SleepBlockerModule from './modules/SleepBlockerModule';
+import DialogsModule from './modules/DialogsModule';
+import IPCCoverModule from './modules/IPCCoverModule';
+import IPCLibraryModule from './modules/IPCLibraryModule';
+import * as ModulesManager from './lib/modules-manager';
+import IPCTaggerModule from './modules/IPCTaggerModule';
+import DatabaseModule from './modules/DatabaseModule';
+import IPCLoggerModule from './modules/IPCLoggerModule';
 
-log.initialize();
+mainLogger.info('Starting Harmony...');
 
-// Add context menu
-contextMenu({
-  showSearchWithGoogle: false,
-  showInspectElement: false,
-  showLookUpSelection: false,
-  showLearnSpelling: false,
-  shouldShowMenu: (_event, params) => {
-    return params.isEditable;
-  },
-});
+let mainWindow: BrowserWindow | null;
 
-function createWindow(): void {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 1440,
-    height: 900,
+function initModules(window: BrowserWindow): void {
+  ModulesManager.init(
+    new DatabaseModule(window),
+    new PowerModule(window),
+    new ApplicationMenuModule(window),
+    new ThumbarModule(window),
+    new DockMenuModule(window),
+    new SleepBlockerModule(window),
+    new DialogsModule(window),
+    // Modules used to handle IPC APIs
+    new IPCCoverModule(window),
+    new IPCLibraryModule(window),
+    new IPCTaggerModule(window),
+    new IPCLoggerModule(window),
+  ).catch(mainLogger.error);
+}
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.whenReady().then(() => {
+  installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+    .then(([redux, react]) => mainLogger.info(`Added Extensions:  ${redux.name}, ${react.name}`))
+    .catch(err => mainLogger.error('An error occurred: ', err));
+  // Set app user model id for windows
+  electronApp.setAppUserModelId('com.jvegaf.emusik');
+
+  // Default open or close DevTools by F12 in development
+  // and ignore CommandOrControl + R in production.
+  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+  app.on('browser-window-created', (_, window) => {
+    optimizer.watchWindowShortcuts(window);
+  });
+
+  mainWindow = new BrowserWindow({
+    title: 'Harmony',
+    minWidth: 1366,
+    minHeight: 768,
+    width: 1366,
+    height: 768,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
-      webSecurity: false,
     },
   });
 
+  initModules(mainWindow);
+
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show();
-    if (process.platform === 'darwin') Menu.setApplicationMenu(AppMenu);
-    mainWindow.maximize();
+    is.dev && mainWindow?.webContents.openDevTools({ mode: 'detach' });
+
+    mainWindow?.show();
   });
 
   mainWindow.webContents.setWindowOpenHandler(details => {
@@ -53,31 +90,13 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
-}
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  // Set app user model id for windows
-  InitIpc();
-  electronApp.setAppUserModelId('com.electron');
-
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window);
-  });
-
-  createWindow();
-
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
 });
+
+// app.on('activate', function () {
+// 	// On macOS it's common to re-create a window in the app when the
+// 	// dock icon is clicked and there are no other windows open.
+// 	if (BrowserWindow.getAllWindows().length === 0) createWindow();
+// });
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -87,6 +106,3 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
-
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
