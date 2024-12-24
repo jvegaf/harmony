@@ -29,8 +29,8 @@ dmg:
 linux:
   target:
     - AppImage
-    - rpm
-    - deb
+    # - rpm
+    # - deb
   mimeTypes: [audio/mpeg]
   maintainer: josevega234@gmail.com
   category: Audio

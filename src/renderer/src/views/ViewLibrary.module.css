@@ -2,4 +2,5 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: calc(100vp - 50px);
 }

@@ -7,7 +7,7 @@
 .mainContent {
   width: 100%;
   flex: 1 1 auto;
-  height: calc(100vh - 20rem);
+  height: calc(100vh - 5rem);
 }
 
 .playerContent {

@@ -7,11 +7,10 @@ import RootView from './Root';
 import ViewLibrary from './ViewLibrary';
 // import ViewPlaylists from './ViewPlaylists';
 // import ViewPlaylistDetails from './ViewPlaylistDetails';
-// import ViewSettings from './ViewSettings';
-// import ViewSettingsLibrary from './ViewSettingsLibrary';
+import ViewSettings from './ViewSettings';
+import ViewSettingsLibrary from './ViewSettingsLibrary';
 // import ViewSettingsUI from './ViewSettingsUI';
 // import ViewSettingsAudio from './ViewSettingsAudio';
-// import ViewSettingsAbout from './ViewSettingsAbout';
 import ViewTrackDetails from './ViewTrackDetails';
 
 const { logger } = window.Main;
@@ -45,33 +44,28 @@ const router = createHashRouter([
       //     },
       //   ],
       // },
-      // {
-      //   path: 'settings',
-      //   id: 'settings',
-      //   element: <ViewSettings />,
-      //   children: [
-      //     {
-      //       path: 'library',
-      //       element: <ViewSettingsLibrary />,
-      //       loader: ViewSettings.loader,
-      //     },
-      //     {
-      //       path: 'interface',
-      //       element: <ViewSettingsUI />,
-      //       loader: ViewSettings.loader,
-      //     },
-      //     {
-      //       path: 'audio',
-      //       element: <ViewSettingsAudio />,
-      //       loader: ViewSettings.loader,
-      //     },
-      //     {
-      //       path: 'about',
-      //       element: <ViewSettingsAbout />,
-      //       loader: ViewSettings.loader,
-      //     },
-      //   ],
-      // },
+      {
+        path: 'settings',
+        id: 'settings',
+        element: <ViewSettings />,
+        children: [
+          {
+            path: 'library',
+            element: <ViewSettingsLibrary />,
+            loader: ViewSettings.loader,
+          },
+          // {
+          //   path: 'interface',
+          //   element: <ViewSettingsUI />,
+          //   loader: ViewSettings.loader,
+          // },
+          // {
+          //   path: 'audio',
+          //   element: <ViewSettingsAudio />,
+          //   loader: ViewSettings.loader,
+          // },
+        ],
+      },
       {
         path: 'details/:trackID',
         element: <ViewTrackDetails />,
