@@ -11,6 +11,7 @@ import { LoaderData } from './router';
 import appStyles from './Root.module.css';
 import styles from './ViewLibrary.module.css';
 import TrackList from '../components/TrackList/TrackList';
+import { useViewportSize } from '../hooks/useViewPortSize';
 
 const { db } = window.Main;
 
@@ -18,6 +19,7 @@ export default function ViewLibrary() {
   const trackPlayingID = usePlayingTrackID();
   const refreshing = useLibraryStore(state => state.refreshing);
   const search = useLibraryStore(state => state.search);
+  const { height } = useViewportSize();
 
   const { playlists } = useLoaderData() as LibraryLoaderData;
   const { tracks } = useRouteLoaderData('root') as RootLoaderData;
@@ -64,12 +66,13 @@ export default function ViewLibrary() {
     return (
       <TrackList
         type='library'
-        data={filteredTracks}
+        tracks={filteredTracks}
         trackPlayingID={trackPlayingID}
         playlists={playlists}
+        height={height}
       />
     );
-  }, [search, refreshing, filteredTracks, playlists, trackPlayingID]);
+  }, [search, refreshing, height, filteredTracks, playlists, trackPlayingID]);
 
   return <div className={`${appStyles.view} ${styles.viewLibrary}`}>{getLibraryComponent}</div>;
 }

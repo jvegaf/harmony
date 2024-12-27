@@ -12,6 +12,7 @@ import { Track } from '../../preload/types/emusik';
 import ModuleWindow from './BaseWindowModule';
 import channels from '../../preload/lib/ipc-channels';
 import makeID from '../../preload/lib/id-provider';
+import { ParseDuration } from '../../preload/utils';
 
 interface ScanFile {
   path: string;
@@ -65,10 +66,7 @@ class IPCLibraryModule extends ModuleWindow {
   }
 
   async load(): Promise<void> {
-    ipcMain.handle(
-      channels.LIBRARY_IMPORT_TRACKS,
-      this.importTracks.bind(this),
-    );
+    ipcMain.handle(channels.LIBRARY_IMPORT_TRACKS, this.importTracks.bind(this));
     ipcMain.handle(channels.LIBRARY_LOOKUP, this.libraryLookup.bind(this));
   }
 
@@ -80,10 +78,7 @@ class IPCLibraryModule extends ModuleWindow {
    * Scan the file system and return all music files and playlists that may be
    * safely imported to Harmony.
    */
-  private async libraryLookup(
-    _e: IpcMainInvokeEvent,
-    pathsToScan: string[],
-  ): Promise<[string[], string[]]> {
+  private async libraryLookup(_e: IpcMainInvokeEvent, pathsToScan: string[]): Promise<[string[], string[]]> {
     mainLogger.info('Starting tracks lookup', pathsToScan);
     loggerExtras.time('Library lookup');
 
@@ -94,14 +89,13 @@ class IPCLibraryModule extends ModuleWindow {
     const files: string[] = [];
     const folders: string[] = [];
 
-    paths.forEach((elem) => {
+    paths.forEach(elem => {
       if (elem.stat.isFile()) files.push(elem.path);
-      if (elem.stat.isDirectory() || elem.stat.isSymbolicLink())
-        folders.push(elem.path);
+      if (elem.stat.isDirectory() || elem.stat.isSymbolicLink()) folders.push(elem.path);
     });
 
     // 3. Scan all the directories with globby
-    const globbies = folders.map((folder) => {
+    const globbies = folders.map(folder => {
       // Normalize slashes and escape regex special characters
       const pattern = `${folder
         .replace(/\\/g, '/')
@@ -116,16 +110,14 @@ class IPCLibraryModule extends ModuleWindow {
     // Scan folders and add files to library
 
     // 4. Merge all path arrays together and filter them with the extensions we support
-    const allFiles = subDirectoriesFiles
-      .reduce((acc, array) => acc.concat(array), [] as string[])
-      .concat(files); // Add the initial files
+    const allFiles = subDirectoriesFiles.reduce((acc, array) => acc.concat(array), [] as string[]).concat(files); // Add the initial files
 
-    const supportedTrackFiles = allFiles.filter((filePath) => {
+    const supportedTrackFiles = allFiles.filter(filePath => {
       const extension = path.extname(filePath).toLowerCase();
       return SUPPORTED_TRACKS_EXTENSIONS.includes(extension);
     });
 
-    const supportedPlaylistsFiles = allFiles.filter((filePath) => {
+    const supportedPlaylistsFiles = allFiles.filter(filePath => {
       const extension = path.extname(filePath).toLowerCase();
       return SUPPORTED_PLAYLISTS_EXTENSIONS.includes(extension);
     });
@@ -135,15 +127,11 @@ class IPCLibraryModule extends ModuleWindow {
     return [supportedTrackFiles, supportedPlaylistsFiles];
   }
 
-
   /**
    * Now: returns the id3 tags of all the given tracks path
    * Tomorrow: do DB insertion here
    */
-  async importTracks(
-    _e: IpcMainInvokeEvent,
-    tracksPath: string[],
-  ): Promise<Array<Partial<Track>>> {
+  async importTracks(_e: IpcMainInvokeEvent, tracksPath: string[]): Promise<Array<Partial<Track>>> {
     mainLogger.info(`Starting import of ${tracksPath.length} tracks`);
     loggerExtras.time('Tracks scan');
 
@@ -171,7 +159,7 @@ class IPCLibraryModule extends ModuleWindow {
 
         // Add all the items to the queue
         tracksPath.forEach((filePath, index) => {
-          scanQueue.push(async (callback) => {
+          scanQueue.push(async callback => {
             try {
               // Normalize (back)slashes on Windows
               filePath = path.resolve(filePath);
@@ -211,23 +199,18 @@ class IPCLibraryModule extends ModuleWindow {
   // Helpers
   // ---------------------------------------------------------------------------
 
-  private parseMusicMetadata(
-    data: mmd.IAudioMetadata,
-    trackPath: string,
-  ): Partial<Track> {
+  private parseMusicMetadata(data: mmd.IAudioMetadata, trackPath: string): Partial<Track> {
     const { common, format } = data;
 
     const title: string = common.title || path.parse(trackPath).base;
 
     const metadata = {
       album: common.album,
-      artist:
-        (common.artists && common.artists.join(', ')) ||
-        common.artist ||
-        common.albumartist,
+      artist: (common.artists && common.artists.join(', ')) || common.artist || common.albumartist,
       bpm: common.bpm,
       initialKey: common.key,
       duration: format.duration || 0,
+      time: ParseDuration(format.duration || 0),
       genre: common.genre?.join(', '),
       comment: common.comment?.join(', '),
       bitrate: format.bitrate!,
