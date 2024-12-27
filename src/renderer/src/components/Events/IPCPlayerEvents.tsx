@@ -18,9 +18,10 @@ function IPCPlayerEvents() {
     function play() {
       if (player.getTrack()) {
         playerAPI.play();
-      } else {
-        playerAPI.start(tracks);
       }
+      // else {
+      //   playerAPI.start(tracks);
+      // }
     }
 
     function onPlay() {
@@ -38,7 +39,7 @@ function IPCPlayerEvents() {
 
     ipcRenderer.on(channels.PLAYBACK_PLAY, play);
     ipcRenderer.on(channels.PLAYBACK_PAUSE, playerAPI.pause);
-    ipcRenderer.on(channels.PLAYBACK_PLAYPAUSE, playerAPI.playPause);
+    ipcRenderer.on(channels.PLAYBACK_PLAYPAUSE, playerAPI.togglePlayPause);
     ipcRenderer.on(channels.PLAYBACK_PREVIOUS, playerAPI.previous);
     ipcRenderer.on(channels.PLAYBACK_NEXT, playerAPI.next);
     ipcRenderer.on(channels.PLAYBACK_STOP, playerAPI.stop);

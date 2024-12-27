@@ -17,13 +17,13 @@ import { useNavigate } from 'react-router-dom';
 
 import 'react-contexify/dist/ReactContexify.css';
 import { useHotkeys } from '@mantine/hooks';
-import { Playlist, Track } from '../../../../preload/types/emusik';
+import { Playlist, Track, TrackId } from '../../../../preload/types/emusik';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import { useLibraryAPI } from '../../stores/useLibraryStore';
 
 type Props = {
   type: string;
-  tracks: Track[];
+  data: Track[];
   trackPlayingID: string | null;
   playlists: Playlist[];
   currentPlaylist?: string;
@@ -33,7 +33,7 @@ const { logger } = window.Main;
 const MENU_ID = 'menu-id';
 
 export default function TrackList(props: Props) {
-  const { tracks, trackPlayingID, playlists, currentPlaylist } = props;
+  const { data, trackPlayingID, playlists, currentPlaylist } = props;
   const navigate = useNavigate();
   const playerAPI = usePlayerAPI();
   const libraryAPI = useLibraryAPI();
@@ -45,6 +45,7 @@ export default function TrackList(props: Props) {
   // const fixTracks = useLibraryStore(state => state.fixTracks);
   // const removeTracks = useLibraryStore(state => state.removeTracks);
   // const start = usePlayerStore(state => state.api.start);
+  // const [selected, setSelected] = useState<TrackId[]>([]);
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const colorScheme = document.querySelector('html')!.getAttribute('data-mantine-color-scheme');
 
@@ -86,17 +87,19 @@ export default function TrackList(props: Props) {
     [],
   );
 
-  const playTrackHandler = (row: Track) => {
+  const playTrackHandler = row => {
     setRowSelection({});
-    playerAPI.start([row]);
+    playerAPI.start(row.id);
   };
 
   const handleSelection = (
     event: MouseEvent<HTMLTableRowElement, globalThis.MouseEvent>,
     row: Track | MRT_Row<Track>,
   ) => {
-    if (event.detail > 1) {
-      playTrackHandler(row as Track);
+    if (!event.ctrlKey && !event.shiftKey) {
+      setRowSelection({
+        [row.id]: true,
+      });
       return;
     }
 
@@ -123,11 +126,32 @@ export default function TrackList(props: Props) {
     // return;
     // }
 
-    logger.info(`selectionHandlerRow ${row}`);
+    // logger.info(`selectionHandlerRow ${row}`);
+    console.log(row);
     setRowSelection(prev => ({
       [row.id]: !prev[row.id],
     }));
   };
+
+  // const onClickListerner = (event, row) => {
+  //   if (event.ctrlKey) {
+  //     selected.includes(row.original.id)
+  //       ? setSelected(selected.filter(id => id !== row.original.id))
+  //       : setSelected(prev => [...prev, row.original.id]);
+  //   }
+
+  //   if (event.shiftKey) {
+  //     const firstIndex = tracks.findIndex(track => track.id === selected[0]);
+  //     const secondIndex = tracks.findIndex(track => track.id === row.original.id);
+  //     const start = Math.min(firstIndex, secondIndex);
+  //     const end = Math.max(firstIndex, secondIndex);
+  //     setSelected(tracks.slice(start, end + 1).map(track => track.id));
+  //   }
+
+  //   if (!event.ctrlKey && !event.shiftKey) {
+  //     setSelected([row.original.id]);
+  //   }
+  // };
 
   const handleKeyPress = (e: globalThis.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -174,7 +198,7 @@ export default function TrackList(props: Props) {
 
   const table = useMantineReactTable({
     columns,
-    data: tracks,
+    data,
     enableFilters: false,
     enablePagination: false,
     enableTopToolbar: false,
@@ -185,7 +209,13 @@ export default function TrackList(props: Props) {
 
     getRowId: row => row.id,
     mantineTableBodyRowProps: ({ row }) => ({
-      onClick: event => handleSelection(event, row),
+      // onClick: event => handleSelection(event, row),
+      onClick: () =>
+        setRowSelection(prev => ({
+          ...prev,
+          [row.id]: !prev[row.id],
+        })),
+      onDoubleClick: () => playTrackHandler(row),
       onContextMenu: (event: MouseEvent) => {
         if (Object.keys(rowSelection).length < 2)
           setRowSelection(prev => ({
@@ -195,6 +225,7 @@ export default function TrackList(props: Props) {
       },
       selected: rowSelection[row.id],
       style: {
+        cursor: 'pointer',
         backgroundColor: isPlaying(row.id),
       },
     }),

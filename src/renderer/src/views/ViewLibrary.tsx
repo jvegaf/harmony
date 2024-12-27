@@ -64,7 +64,7 @@ export default function ViewLibrary() {
     return (
       <TrackList
         type='library'
-        tracks={filteredTracks}
+        data={filteredTracks}
         trackPlayingID={trackPlayingID}
         playlists={playlists}
       />

@@ -30,7 +30,7 @@ export function PlayerComponent() {
         </button>
         <button
           className={classes.playerButton}
-          onClick={() => playerAPI.playPause()}
+          onClick={() => playerAPI.togglePlayPause()}
           disabled={playerStatus === PlayerStatus.STOP}
         >
           {playerStatus === PlayerStatus.PLAY ? <IoPauseCircleOutline /> : <IoPlayCircleOutline />}
