@@ -74,6 +74,7 @@ app.whenReady().then(() => {
 
   mainWindow.on('ready-to-show', () => {
     is.dev && mainWindow?.webContents.openDevTools({ mode: 'detach' });
+    mainWindow?.maximize();
 
     mainWindow?.show();
   });

@@ -1,9 +1,18 @@
-import { Table, Header, HeaderRow, Body, Row, HeaderCell, Cell } from '@table-library/react-table-library/table';
-
-import { SelectTypes, useRowSelect } from '@table-library/react-table-library/select';
-
-import { useTheme } from '@table-library/react-table-library/theme';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import {
+  CellContextMenuEvent,
+  ColDef,
+  FirstDataRenderedEvent,
+  GridApi,
+  GridReadyEvent,
+  RowDoubleClickedEvent,
+} from 'ag-grid-community';
+import { AgGridReact } from 'ag-grid-react';
 import { Playlist, Track } from '../../../../preload/types/emusik';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { usePlayerAPI } from '../../stores/usePlayerStore';
 
 type Props = {
   type: string;
@@ -16,101 +25,98 @@ type Props = {
 
 const TrackList = (props: Props) => {
   const { type, tracks, trackPlayingID, playlists, currentPlaylist, height } = props;
-  const data = { nodes: tracks };
+  const playerAPI = usePlayerAPI();
+  const navigate = useNavigate();
+  const gridRef = useRef<AgGridReact>(null);
+  const [gridApi, setGridApi] = useState<GridApi | null>(null);
+  const [rowData, setRowData] = useState<Track[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [colDefs, setColDefs] = useState([
+    { field: 'title', minWidth: 150 },
+    { field: 'artist', minWidth: 90 },
+    { field: 'time', maxWidth: 90 },
+    { field: 'album', minWidth: 90 },
+    { field: 'genre', minWidth: 70 },
+    { field: 'year', maxWidth: 70 },
+    { field: 'bpm', maxWidth: 70 },
+    { field: 'bitrate', minWidth: 80, maxWidth: 90 },
+    { field: 'key', maxWidth: 70 },
+  ]);
+  // const gridStyle = useMemo(() => ({ height: `${height}px`, width: '100%' }), []);
 
-  const theme = useTheme({
-    Table: `
-        --data-table-library_grid-template-columns: repeat(2, minmax(0, 1fr)) 70px 70px 70px minmax(0,1fr) 200px  ;
-      `,
-    HeaderRow: `
-        background-color: #151313;
-      `,
-    Row: `
-        &.row-select-selected, &.row-select-single-selected {
-            color: red;
-          }
+  const defaultColDef = useMemo<ColDef>(() => {
+    return {
+      resizable: true,
+      sortable: true,
+    };
+  }, []);
 
-        &:hover {
-          color: orange;
-        }
+  const updateItem = useCallback((updatedItem: Track) => {
+    const rowNode = gridRef.current!.api.getRowNode(updatedItem.id)!;
+    rowNode.setData(updatedItem);
+    console.log(`[TracksTable] updated track: ${updatedItem.title}`);
+  }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const onFirstDataRendered = useCallback((params: FirstDataRenderedEvent) => {
+    gridRef.current?.api.sizeColumnsToFit();
+  }, []);
 
-        &:nth-of-type(odd) {
-          background-color: #1f2123;
-        }
+  // useEffect(() => {
+  //   if (!tracks.length) return;
+  //   updateItems([...tracks]);
+  // }, [tracks]);
 
-        &:nth-of-type(even) {
-          background-color: #181a1b;
-        }
-      `,
+  const onGridReady = (params: GridReadyEvent) => {
+    setGridApi(params.api);
 
-    BaseCell: `
-        padding: 5px;
-        user-select: none;
-      `,
-  });
+    setRowData(tracks);
+  };
 
-  // function onSelectChange(action, state) {
-  //   console.log(action, state);
-  // }
+  const onDoubleClick = useCallback((event: RowDoubleClickedEvent) => {
+    event.event?.preventDefault();
+    const { data } = event;
+    // navigate(`detail/${data.id}`);
+    playerAPI.start(data.id);
+  }, []);
 
-  const select = useRowSelect(
-    data,
-    // {
-    //   onChange: onSelectChange,
-    // },
-    {
-      isCarryForward: false,
-      // rowSelect: SelectTypes.MultiSelect,
-      // buttonSelect: SelectTypes.MultiSelect,
-    },
-  );
+  const onShowCtxtMenu = useCallback((event: CellContextMenuEvent) => {
+    event.event?.preventDefault();
+    if (!event.node.isSelected()) {
+      event.node.setSelected(true, true);
+    }
+
+    const selected = event.api.getSelectedRows() as Track[];
+    // showContextMenu(selected);
+    // showCtxMenu(selected);
+  }, []);
+
+  const onKeyPress = useCallback((event: { key: string }) => {
+    if (event.key === 'Escape') {
+      gridRef.current?.api.deselectAll();
+    }
+  }, []);
 
   return (
     <div
       style={{
         height: height,
       }}
+      className='ag-theme-alpine-auto-dark ag-theme-symphony'
+      onKeyDown={e => onKeyPress(e)}
     >
-      <Table
-        data={data}
-        layout={{ custom: true, fixedHeader: true }}
-        theme={theme}
-        select={select}
-      >
-        {tableList => (
-          <>
-            <Header>
-              <HeaderRow>
-                <HeaderCell>Title</HeaderCell>
-                <HeaderCell>Artist</HeaderCell>
-                <HeaderCell>BPM</HeaderCell>
-                <HeaderCell>Time</HeaderCell>
-                <HeaderCell>Year</HeaderCell>
-                <HeaderCell>Album</HeaderCell>
-                <HeaderCell>Genre</HeaderCell>
-              </HeaderRow>
-            </Header>
-
-            <Body>
-              {tableList.map(item => (
-                <Row
-                  key={item.id}
-                  item={item}
-                >
-                  <Cell>{item.title}</Cell>
-                  <Cell>{item.artist}</Cell>
-                  <Cell>{item.bpm}</Cell>
-                  <Cell>{item.time}</Cell>
-                  <Cell>{item.year}</Cell>
-                  <Cell>{item.album}</Cell>
-                  <Cell>{item.genre}</Cell>
-                </Row>
-              ))}
-            </Body>
-          </>
-        )}
-      </Table>
+      <AgGridReact
+        ref={gridRef}
+        rowSelection='multiple'
+        rowData={rowData}
+        columnDefs={colDefs}
+        defaultColDef={defaultColDef}
+        onGridReady={onGridReady}
+        onFirstDataRendered={onFirstDataRendered}
+        onRowDoubleClicked={e => onDoubleClick(e)}
+        onCellContextMenu={e => onShowCtxtMenu(e)}
+        suppressCellFocus
+      />
     </div>
   );
 };
