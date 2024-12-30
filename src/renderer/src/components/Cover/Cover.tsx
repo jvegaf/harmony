@@ -4,6 +4,7 @@ import { Track } from '../../../../preload/types/emusik';
 import Placeholder from '../../assets/placeholder.png';
 
 import styles from './Cover.module.css';
+import { Image } from '@mantine/core';
 
 type Props = {
   track: Track | null;
@@ -41,7 +42,11 @@ export default function Cover(props: Props) {
 
   return (
     <AspectRatio.Root ratio={1}>
-      <div className={`${styles.cover} ${styles.empty}`}>{Placeholder}</div>
+      <Image
+        src={Placeholder}
+        alt='Album cover'
+        className={styles.cover}
+      />
     </AspectRatio.Root>
   );
 }

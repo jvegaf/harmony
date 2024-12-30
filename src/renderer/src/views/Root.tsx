@@ -12,6 +12,7 @@ import GlobalKeyBindings from '../components/Events/GlobalKeyBindings';
 import styles from './Root.module.css';
 import { LoaderData } from './router';
 import { PlayerComponent } from '../components/Player/Player';
+import IPCMenuEvents from '../components/Events/IPCMenuEvents';
 
 const { db } = window.Main;
 
@@ -29,6 +30,7 @@ export default function ViewRoot() {
       <PlayerEvents />
       <MediaSessionEvents />
       <GlobalKeyBindings />
+      <IPCMenuEvents />
       {/** The actual app */}
       <main className={styles.mainContent}>
         <Outlet />

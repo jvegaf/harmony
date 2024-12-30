@@ -1,7 +1,12 @@
+.rootSettings {
+  display: flex;
+  flex-direction: column;
+}
+
 .viewSettings {
   display: flex;
   justify-content: center;
-  padding-top: 50px;
+  padding-top: 150px;
 }
 
 .settings__nav {
@@ -14,4 +19,10 @@
   padding: 10px 15px;
   width: 400px;
   max-width: calc(100% - 170px);
+}
+
+.settingsBtns {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 100px;
 }

@@ -1,13 +1,15 @@
-import { Outlet, useMatch, Navigate } from 'react-router-dom';
+import { Outlet, useMatch, Navigate, useNavigate } from 'react-router-dom';
 
 import * as Nav from '../elements/Nav/Nav';
 
 import { LoaderData } from './router';
 import appStyles from './Root.module.css';
 import styles from './ViewSettings.module.css';
+import { Button } from '@mantine/core';
 
 export default function ViewSettingsView() {
   const match = useMatch('/settings');
+  const navigate = useNavigate();
 
   return (
     <div className={`${appStyles.view} ${styles.viewSettings}`}>
@@ -17,8 +19,13 @@ export default function ViewSettingsView() {
         </Nav.Wrap>
       </div>
 
-      <div className={styles.settings__content}>
-        <Outlet />
+      <div className={styles.rootSettings}>
+        <div className={styles.settings__content}>
+          <Outlet />
+        </div>
+        <div className={styles.settingsBtns}>
+          <Button onClick={() => navigate('/')}>Close</Button>
+        </div>
       </div>
 
       {match && <Navigate to='/settings/library' />}

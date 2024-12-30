@@ -175,14 +175,6 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       }
     },
 
-    /**
-     * Update the id3 attributes.
-     * IMPROVE ME: add support for writing metadata (hint: node-id3 does not work
-     * well).
-     *
-     * @param trackID The ID of the track to update
-     * @param newFields The fields to be updated and their new value
-     */
     updateTrackMetadata: async (trackID: string, newFields: TrackEditableFields): Promise<void> => {
       let track = await db.tracks.findOnlyByID(trackID);
 
@@ -227,40 +219,6 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       set({ fix: { processed: 0, total: total } });
     },
   },
-
-  // Old code used to manage folders to be scanned, to be re-enabled one day
-  // case (types.LIBRARY_ADD_FOLDERS): { // TODO Redux -> move to a thunk
-  //   const { folders } = action.payload;
-  //   let musicFolders = window.Main.config.get('musicFolders');
-
-  //   // Check if we received folders
-  //   if (folders !== undefined) {
-  //     musicFolders = musicFolders.concat(folders);
-
-  //     // Remove duplicates, useless children, ect...
-  //     musicFolders = utils.removeUselessFolders(musicFolders);
-
-  //     musicFolders.sort();
-
-  //     config.set('musicFolders', musicFolders);
-  //   }
-
-  //   return { ...state };
-  // }
-
-  // case (types.LIBRARY_REMOVE_FOLDER): { // TODO Redux -> move to a thunk
-  //   if (!state.library.refreshing) {
-  //     const musicFolders = window.Main.config.get('musicFolders');
-
-  //     musicFolders.splice(action.index, 1);
-
-  //     config.set('musicFolders', musicFolders);
-
-  //     return { ...state };
-  //   }
-
-  //   return state;
-  // }
 }));
 
 export default useLibraryStore;

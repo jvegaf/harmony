@@ -9,10 +9,10 @@ import {
   RowDoubleClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { Playlist, Track } from '../../../../preload/types/emusik';
+import { CtxMenuPayload, Playlist, Track } from '../../../../preload/types/emusik';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
+import './TrackList.css';
 
 type Props = {
   type: string;
@@ -23,10 +23,11 @@ type Props = {
   height: number;
 };
 
+const { menu } = window.Main;
+
 const TrackList = (props: Props) => {
   const { type, tracks, trackPlayingID, playlists, currentPlaylist, height } = props;
   const playerAPI = usePlayerAPI();
-  const navigate = useNavigate();
   const gridRef = useRef<AgGridReact>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [rowData, setRowData] = useState<Track[]>([]);
@@ -39,7 +40,7 @@ const TrackList = (props: Props) => {
     { field: 'genre', minWidth: 70 },
     { field: 'year', maxWidth: 70 },
     { field: 'bpm', maxWidth: 70 },
-    { field: 'bitrate', minWidth: 80, maxWidth: 90 },
+    { field: 'bitrate', valueFormatter: (p: { value: number }) => p.value / 1000 + 'kbps', minWidth: 80, maxWidth: 90 },
     { field: 'key', maxWidth: 70 },
   ]);
   // const gridStyle = useMemo(() => ({ height: `${height}px`, width: '100%' }), []);
@@ -87,13 +88,22 @@ const TrackList = (props: Props) => {
     }
 
     const selected = event.api.getSelectedRows() as Track[];
-    // showContextMenu(selected);
-    // showCtxMenu(selected);
+
+    const payload: CtxMenuPayload = {
+      selected,
+      playlists,
+      currentPlaylist: currentPlaylist || null,
+    };
+
+    menu.show(payload);
   }, []);
 
-  const onKeyPress = useCallback((event: { key: string }) => {
+  const onKeyPress = useCallback((event: { ctrlKey: boolean; key: string }) => {
     if (event.key === 'Escape') {
       gridRef.current?.api.deselectAll();
+    }
+    if (event.ctrlKey && event.key === 'a') {
+      gridRef.current?.api.selectAll();
     }
   }, []);
 
@@ -102,7 +112,7 @@ const TrackList = (props: Props) => {
       style={{
         height: height,
       }}
-      className='ag-theme-alpine-auto-dark ag-theme-symphony'
+      className='ag-theme-alpine-auto-dark ag-theme-emusik'
       onKeyDown={e => onKeyPress(e)}
     >
       <AgGridReact
@@ -116,6 +126,7 @@ const TrackList = (props: Props) => {
         onRowDoubleClicked={e => onDoubleClick(e)}
         onCellContextMenu={e => onShowCtxtMenu(e)}
         suppressCellFocus
+        animateRows={false}
       />
     </div>
   );

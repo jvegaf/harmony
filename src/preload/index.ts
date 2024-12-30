@@ -1,7 +1,7 @@
 import { app, contextBridge, ipcRenderer, shell } from 'electron';
 import { ElectronAPI, electronAPI } from '@electron-toolkit/preload';
 import channels from './lib/ipc-channels';
-import { Track, Playlist, LogLevel, TrackId } from './types/emusik';
+import { Track, Playlist, LogLevel, TrackId, CtxMenuPayload } from './types/emusik';
 import parseUri from './lib/utils-uri';
 
 const api = {
@@ -50,6 +50,9 @@ const api = {
     warn: (message: string | any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.WARN, message }),
     error: (message: string | any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.ERROR, message }),
     debug: (message: string | any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.DEBUG, message }),
+  },
+  menu: {
+    show: (payload: CtxMenuPayload) => ipcRenderer.send(channels.MENU_SHOW, payload),
   },
   shell: {
     openExternal: shell.openExternal,

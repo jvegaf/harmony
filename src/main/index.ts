@@ -16,8 +16,9 @@ import * as ModulesManager from './lib/modules-manager';
 import IPCTaggerModule from './modules/IPCTaggerModule';
 import DatabaseModule from './modules/DatabaseModule';
 import IPCLoggerModule from './modules/IPCLoggerModule';
+import ContextMenuModule from './modules/ContextMenuModule';
 
-mainLogger.info('Starting Harmony...');
+mainLogger.info('Starting eMusik...');
 
 let mainWindow: BrowserWindow | null;
 
@@ -31,6 +32,7 @@ function initModules(window: BrowserWindow): void {
     new SleepBlockerModule(window),
     new DialogsModule(window),
     // Modules used to handle IPC APIs
+    new ContextMenuModule(window),
     new IPCCoverModule(window),
     new IPCLibraryModule(window),
     new IPCTaggerModule(window),
@@ -67,6 +69,7 @@ app.whenReady().then(() => {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
+      webSecurity: false,
     },
   });
 

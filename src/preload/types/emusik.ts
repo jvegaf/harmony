@@ -84,3 +84,14 @@ export type LogProps = {
   level: LogLevel;
   message: string;
 };
+
+export type CtxMenuPayload = {
+  selected: Track[];
+  playlists: Playlist[];
+  currentPlaylist: string | null;
+};
+
+export type CommandPayload = {
+  playlistId: string;
+  selected: Track[];
+};

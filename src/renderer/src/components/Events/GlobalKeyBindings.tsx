@@ -21,7 +21,7 @@ function GlobalKeyBindings() {
         case ' ':
           e.preventDefault();
           e.stopPropagation();
-          playerAPI.playPause();
+          playerAPI.togglePlayPause();
           break;
         case ',':
           if (isCtrlKey(e)) {
@@ -47,7 +47,12 @@ function GlobalKeyBindings() {
     [navigate, playerAPI],
   );
 
-  return <Keybinding onKey={onKey} preventInputConflict />;
+  return (
+    <Keybinding
+      onKey={onKey}
+      preventInputConflict
+    />
+  );
 }
 
 export default GlobalKeyBindings;
