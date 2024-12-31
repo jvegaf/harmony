@@ -4,6 +4,7 @@ import usePlayingTrack from '../../hooks/usePlayingTrack';
 import classes from './Player.module.css';
 import PlayerInfo from '../PlayerInfo/PlayerInfo';
 import PlayerControls from '../PlayerControls/PlayerControls';
+import VolumeControl from '../VolumeControl/VolumeControl';
 
 export function PlayerComponent() {
   const trackPlaying = usePlayingTrack();
@@ -23,7 +24,9 @@ export function PlayerComponent() {
       <div className={classes.playerProgress}>
         <TrackProgress trackPlaying={trackPlaying} />
       </div>
-      <div className={classes.playerVolume}>volume</div>
+      <div className={classes.playerVolume}>
+        <VolumeControl />
+      </div>
     </div>
   );
 }

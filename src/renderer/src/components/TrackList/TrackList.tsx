@@ -14,6 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import './TrackList.css';
 import useLibraryStore from '../../stores/useLibraryStore';
+import { ParseDuration } from '../../../../preload/utils';
 
 type Props = {
   type: string;
@@ -21,13 +22,14 @@ type Props = {
   trackPlayingID: string | null;
   playlists: Playlist[];
   currentPlaylist?: string;
+  width: number;
   height: number;
 };
 
 const { menu, logger } = window.Main;
 
 const TrackList = (props: Props) => {
-  const { tracks, playlists, currentPlaylist, height } = props;
+  const { tracks, playlists, currentPlaylist, width, height } = props;
   const playerAPI = usePlayerAPI();
   const gridRef = useRef<AgGridReact>(null);
   const [lastUpdated, setLastUpdated] = useState<Track | null>(null);
@@ -37,13 +39,18 @@ const TrackList = (props: Props) => {
   const colDefs = [
     { field: 'title', minWidth: 150 },
     { field: 'artist', minWidth: 90 },
-    { field: 'time', maxWidth: 90 },
+    {
+      field: 'duration',
+      maxWidth: 80,
+      headerName: 'Time',
+      valueFormatter: (p: { value: number | null }) => ParseDuration(p.value),
+    },
     { field: 'album', minWidth: 90 },
     { field: 'genre', minWidth: 70 },
     { field: 'year', maxWidth: 70 },
     { field: 'bpm', maxWidth: 70 },
     { field: 'bitrate', valueFormatter: (p: { value: number }) => p.value / 1000 + 'kbps', minWidth: 80, maxWidth: 90 },
-    { field: 'key', maxWidth: 70 },
+    { field: 'intialKey', maxWidth: 90 },
   ];
 
   const defaultColDef = useMemo<ColDef>(() => {
@@ -71,7 +78,7 @@ const TrackList = (props: Props) => {
       // Example usage of gridApi
       gridApi.sizeColumnsToFit();
     }
-  }, [gridApi]);
+  }, [gridApi, width]);
 
   const onGridReady = (params: GridReadyEvent) => {
     setGridApi(params.api);
@@ -82,7 +89,6 @@ const TrackList = (props: Props) => {
   const onDoubleClick = useCallback((event: RowDoubleClickedEvent) => {
     event.event?.preventDefault();
     const { data } = event;
-    // navigate(`detail/${data.id}`);
     playerAPI.start(data.id);
   }, []);
 
@@ -120,6 +126,7 @@ const TrackList = (props: Props) => {
     <div
       style={{
         height: height,
+        width: width,
       }}
       className='ag-theme-alpine-auto-dark ag-theme-emusik'
       onKeyDown={e => onKeyPress(e)}

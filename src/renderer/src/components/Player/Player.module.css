@@ -1,8 +1,8 @@
 .playerRoot {
   width: 100%;
-  height: 5rem;
+  height: 4rem;
   display: grid;
-  grid-template-columns: 1.5fr 1fr 2fr 1fr;
+  grid-template-columns: 1fr 1fr 2fr 1fr;
 
   @mixin light {
     background-color: var(--appbar-bg-light);
@@ -10,7 +10,7 @@
 }
 
 .playerCover {
-  width: 5rem;
+  width: 4rem;
   display: flex;
 }
 

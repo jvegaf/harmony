@@ -46,10 +46,10 @@ const api = {
     getCoverAsBase64: (track: Track) => ipcRenderer.invoke(channels.COVER_GET, track.path),
   },
   logger: {
-    info: (message: string | any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.INFO, message }),
-    warn: (message: string | any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.WARN, message }),
-    error: (message: string | any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.ERROR, message }),
-    debug: (message: string | any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.DEBUG, message }),
+    info: (...params: any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.INFO, params }),
+    warn: (...params: any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.WARN, params }),
+    error: (...params: any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.ERROR, params }),
+    debug: (...params: any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.DEBUG, params }),
   },
   menu: {
     show: (payload: CtxMenuPayload) => ipcRenderer.send(channels.MENU_SHOW, payload),

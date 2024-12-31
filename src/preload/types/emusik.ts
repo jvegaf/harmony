@@ -83,7 +83,7 @@ export type TrackEditableFields = Pick<Track, 'title' | 'artist' | 'album' | 'ge
 
 export type LogProps = {
   level: LogLevel;
-  message: string;
+  params: any[];
 };
 
 export type CtxMenuPayload = {

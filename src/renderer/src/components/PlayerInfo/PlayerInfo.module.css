@@ -9,7 +9,8 @@
 
 .infoTitle {
   width: 90%;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
+  font-weight: bold;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;

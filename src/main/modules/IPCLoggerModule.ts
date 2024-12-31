@@ -10,22 +10,22 @@ class IPCLoggerModule extends ModuleWindow {
   async load(): Promise<void> {
     ipcMain.removeAllListeners(channels.LOGGER);
     ipcMain.on(channels.LOGGER, (_e, props: LogProps) => {
-      const { level, message } = props;
+      const { level, params } = props;
       switch (level) {
         case LogLevel.INFO:
-          rendererLogger.info(message);
+          rendererLogger.info(params);
           break;
         case LogLevel.WARN:
-          rendererLogger.warn(message);
+          rendererLogger.warn(params);
           break;
         case LogLevel.ERROR:
-          rendererLogger.error(message);
+          rendererLogger.error(params);
           break;
         case LogLevel.DEBUG:
-          rendererLogger.debug(message);
+          rendererLogger.debug(params);
           break;
         default:
-          rendererLogger.info(message);
+          rendererLogger.info(params);
           break;
       }
     });

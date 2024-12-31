@@ -69,7 +69,10 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
     },
 
     previous: (): void => {
-      logger.info('Previous track');
+      if (player.getCurrentTime() > 3) {
+        player.setCurrentTime(0);
+        return;
+      }
       // player.previous();
 
       // set({

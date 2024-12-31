@@ -1,0 +1,12 @@
+.volumeControl {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding-left: 50px;
+}
+
+.volumeSlider {
+  width: 40%;
+  height: 20px;
+}

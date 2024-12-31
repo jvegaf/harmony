@@ -40,15 +40,19 @@ export default function TrackProgress(props: Props) {
 
   return (
     <div className={styles.trackProgress}>
-      <Slider
-        min={0}
-        max={max}
-        step={1}
-        value={elapsed}
-        onChange={jumpAudioTo}
-        label={value => ParseDuration(value)}
-        thumbSize={20}
-      />
+      <div className={styles.timeText}>{ParseDuration(elapsed)}</div>
+      <div className={styles.trackSlider}>
+        <Slider
+          min={0}
+          max={max}
+          step={1}
+          value={elapsed}
+          onChange={jumpAudioTo}
+          label={value => ParseDuration(value)}
+          thumbSize={20}
+        />
+      </div>
+      <div className={styles.timeText}>{ParseDuration(duration)}</div>
     </div>
   );
 }

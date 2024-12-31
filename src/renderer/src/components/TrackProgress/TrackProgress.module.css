@@ -1,4 +1,11 @@
 .trackProgress {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trackSlider {
   height: 20px;
   width: 100%;
 }

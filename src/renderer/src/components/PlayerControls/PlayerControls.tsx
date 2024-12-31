@@ -11,6 +11,8 @@ import styles from './PlayerControls.module.css';
 function PlayerControls() {
   const playerAPI = usePlayerAPI();
   const { playerStatus } = usePlayerStore();
+  const PLAY_ICON_SIZE = 42;
+  const SKIP_ICON_SIZE = 26;
 
   return (
     <div className={styles.controls}>
@@ -19,21 +21,25 @@ function PlayerControls() {
         onClick={() => playerAPI.previous()}
         disabled={playerStatus === PlayerStatus.STOP}
       >
-        <IconPlayerSkipBackFilled size={32} />
+        <IconPlayerSkipBackFilled size={SKIP_ICON_SIZE} />
       </button>
       <button
         className={styles.playerButton}
         onClick={() => playerAPI.togglePlayPause()}
         disabled={playerStatus === PlayerStatus.STOP}
       >
-        {playerStatus === PlayerStatus.PLAY ? <IconPlayerPauseFilled size={48} /> : <IconPlayerPlayFilled size={48} />}
+        {playerStatus === PlayerStatus.PLAY ? (
+          <IconPlayerPauseFilled size={PLAY_ICON_SIZE} />
+        ) : (
+          <IconPlayerPlayFilled size={PLAY_ICON_SIZE} />
+        )}
       </button>
       <button
         className={styles.playerButton}
         onClick={() => playerAPI.next()}
         disabled={playerStatus === PlayerStatus.STOP}
       >
-        <IconPlayerSkipForwardFilled size={32} />
+        <IconPlayerSkipForwardFilled size={SKIP_ICON_SIZE} />
       </button>
     </div>
   );

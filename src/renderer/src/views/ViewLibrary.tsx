@@ -19,7 +19,7 @@ export default function ViewLibrary() {
   const trackPlayingID = usePlayingTrackID();
   const refreshing = useLibraryStore.use.refreshing();
   const search = useLibraryStore.use.search();
-  const { height } = useViewportSize();
+  const { width, height } = useViewportSize();
 
   const { playlists } = useLoaderData() as LibraryLoaderData;
   const { tracks } = useRouteLoaderData('root') as RootLoaderData;
@@ -69,10 +69,11 @@ export default function ViewLibrary() {
         tracks={filteredTracks}
         trackPlayingID={trackPlayingID}
         playlists={playlists}
+        width={width}
         height={height}
       />
     );
-  }, [search, refreshing, height, filteredTracks, playlists, trackPlayingID]);
+  }, [search, refreshing, width, height, filteredTracks, playlists, trackPlayingID]);
 
   return <div className={`${appStyles.view} ${styles.viewLibrary}`}>{getLibraryComponent}</div>;
 }
