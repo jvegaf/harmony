@@ -19,9 +19,8 @@ export default function VolumeControl() {
 
   const getVolumeIcon = () => {
     if (volume === 0) return <IconVolumeOff />;
-    if (volume < 20) return <IconVolume />;
-    if (volume < 60) return <IconVolume2 />;
-    return <IconVolume3 />;
+    if (volume < 50) return <IconVolume2 />;
+    return <IconVolume />;
   };
 
   return (
