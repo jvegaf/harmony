@@ -10,6 +10,8 @@ files:
   - '!{.env,.env.*,.npmrc,yarn.lock}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
+  - node_modules/sqlite3
+  - out/main/chunks/*.node
   - resources/**
 win:
   executableName: 'eMusik'
