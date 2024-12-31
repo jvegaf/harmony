@@ -46,11 +46,11 @@ const TrackList = (props: Props) => {
       valueFormatter: (p: { value: number | null }) => ParseDuration(p.value),
     },
     { field: 'album', minWidth: 90 },
-    { field: 'genre', minWidth: 70 },
+    { field: 'genre', minWidth: 180, maxWidth: 200 },
     { field: 'year', maxWidth: 70 },
     { field: 'bpm', maxWidth: 70 },
     { field: 'bitrate', valueFormatter: (p: { value: number }) => p.value / 1000 + 'kbps', minWidth: 80, maxWidth: 90 },
-    { field: 'intialKey', maxWidth: 90 },
+    { field: 'initialKey', headerName: 'Key', maxWidth: 70 },
   ];
 
   const defaultColDef = useMemo<ColDef>(() => {
