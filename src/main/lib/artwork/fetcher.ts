@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { Artwork } from '../../../preload/types/emusik';
-import { mainLogger } from '../log/logger';
+import log from 'electron-log';
 
 export default async function FetchArtwork(url: string): Promise<Artwork | null> {
   let artwork: Artwork | null = null;
@@ -15,7 +15,7 @@ export default async function FetchArtwork(url: string): Promise<Artwork | null>
       imageBuffer: response.data,
     };
   } catch (error) {
-    mainLogger.error(error);
+    log.error(error);
   }
 
   return artwork;

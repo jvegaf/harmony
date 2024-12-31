@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { mainLogger, loggerExtras } from '../lib/log/logger';
+import log from 'electron-log';
 
 import { BrowserWindow, ipcMain, IpcMainInvokeEvent } from 'electron';
 import { globby } from 'globby';
@@ -13,6 +13,7 @@ import ModuleWindow from './BaseWindowModule';
 import channels from '../../preload/lib/ipc-channels';
 import makeID from '../../preload/lib/id-provider';
 import { ParseDuration } from '../../preload/utils';
+import { loggerExtras } from '../lib/log/logger';
 
 interface ScanFile {
   path: string;
@@ -79,9 +80,7 @@ class IPCLibraryModule extends ModuleWindow {
    * safely imported to Harmony.
    */
   private async libraryLookup(_e: IpcMainInvokeEvent, pathsToScan: string[]): Promise<[string[], string[]]> {
-    mainLogger.info('Starting tracks lookup', pathsToScan);
-    loggerExtras.time('Library lookup');
-
+    log.info('Starting tracks lookup', pathsToScan);
     // 1. Get the stats for all the files/paths
     const paths = await Promise.all(pathsToScan.map(this.getStats));
 
@@ -132,7 +131,7 @@ class IPCLibraryModule extends ModuleWindow {
    * Tomorrow: do DB insertion here
    */
   async importTracks(_e: IpcMainInvokeEvent, tracksPath: string[]): Promise<Array<Partial<Track>>> {
-    mainLogger.info(`Starting import of ${tracksPath.length} tracks`);
+    log.info(`Starting import of ${tracksPath.length} tracks`);
     loggerExtras.time('Tracks scan');
 
     return new Promise((resolve, reject) => {
@@ -177,10 +176,10 @@ class IPCLibraryModule extends ModuleWindow {
 
               this.import.processed++;
             } catch (err) {
-              mainLogger.warn(err);
+              log.warn(err);
             } finally {
               if (index % 50 == 0) {
-                mainLogger.debug(`Finished scanning ${index} tracks`);
+                log.debug(`Finished scanning ${index} tracks`);
               }
             }
 

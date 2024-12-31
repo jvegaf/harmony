@@ -1,5 +1,5 @@
 import * as NodeId3 from 'node-id3';
-import { mainLogger } from '../log/logger';
+import log from 'electron-log';
 import { Track } from '../../../preload/types/emusik';
 
 const PersistTrack = (track: Track) => {
@@ -19,7 +19,7 @@ const PersistTrack = (track: Track) => {
 
   NodeId3.Promise.update(tags, track.path)
     .then()
-    .catch(reason => mainLogger.error('track persist error', reason));
+    .catch(reason => log.error('track persist error', reason));
 };
 
 export default PersistTrack;

@@ -1,6 +1,6 @@
 import gis, { Result } from 'async-g-i-s';
 import { BuildGoogleArtworkQuery } from './querybuilder';
-import { mainLogger } from '../log/logger';
+import log from 'electron-log';
 import { Track } from '../../../preload/types/emusik';
 
 const FindArtwork = async (track: Track): Promise<string[]> => {
@@ -11,7 +11,7 @@ const FindArtwork = async (track: Track): Promise<string[]> => {
     const images = await gis(query);
     result.push(...images.filter(i => i.height === i.width));
   } catch (error) {
-    mainLogger.warn('error finding artwork', error);
+    log.warn('error finding artwork', error);
   }
 
   // if (result.length) log.info('result', result); &tbs=isz:m,iar:s,ift:jpg

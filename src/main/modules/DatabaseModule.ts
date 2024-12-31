@@ -5,8 +5,7 @@ import { Playlist, Track, TrackId } from '../../preload/types/emusik';
 
 import ModuleWindow from './BaseWindowModule';
 import { Database } from '../lib/db/database';
-import { mainLogger } from '../lib/log/logger';
-
+import log from 'electron-log';
 /**
  * Module in charge of returning the track with tags fixed
  */
@@ -24,9 +23,9 @@ class DatabaseModule extends ModuleWindow {
     });
 
     ipcMain.handle(channels.TRACKS_ADD, async (_, tracks: Track[]): Promise<Track[]> => {
-      mainLogger.info('Adding tracks to the database');
+      log.info('Adding tracks to the database');
       await this.db.insertTracks(tracks);
-      mainLogger.info('Tracks added to the database');
+      log.info('Tracks added to the database');
       return tracks;
     });
 

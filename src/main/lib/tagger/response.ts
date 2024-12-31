@@ -1,7 +1,6 @@
 import type { AxiosResponse } from 'axios';
 
-import { mainLogger } from '../log/logger';
-
+import log from 'electron-log';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handleResponse = (response: AxiosResponse<any, any>) => {
@@ -10,6 +9,6 @@ export const handleResponse = (response: AxiosResponse<any, any>) => {
 
 export const handleError = (error: Error) => {
   // eslint-disable-next-line no-console
-  mainLogger.error(error);
+  log.error(error);
   throw error;
 };

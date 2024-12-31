@@ -1,4 +1,4 @@
-import { mainLogger } from '../log/logger';
+import log from 'electron-log';
 import type { MatchResult, ResultTag, Track } from '../../../preload/types/emusik';
 import { GetStringTokens } from '../../../preload/lib/utils-id3';
 import Update from '../track/updater';
@@ -48,9 +48,9 @@ const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
 //   const trackTokens = GetStringTokens(reqAggregate);
 //   const result = await soundcloudSearch(reqAggregate.join(' '));
 
-//   mainLogger.info('Soundcloud results count: ', result.length);
-//   mainLogger.info('tokens: ', trackTokens);
-//   mainLogger.info('Soundcloud result: ', result[0]);
+//   log.info('Soundcloud results count: ', result.length);
+//   log.info('tokens: ', trackTokens);
+//   log.info('Soundcloud result: ', result[0]);
 //   const match = Match(trackTokens, result);
 
 //   return match;
@@ -91,15 +91,15 @@ const FixTags = async (track: Track): Promise<Track> => {
     const result = await SearchOnBeatport(track);
     if (!result) {
       // GetWebTrackInfo(track);
-      mainLogger.warn(`no match for ${track.title}`);
+     log.warn(`no match for ${track.title}`);
       return track;
     } else {
       const fixedTrack = Update(track, result.tag);
-      mainLogger.info(`track ${track.title} fixed`);
+      log.info(`track ${track.title} fixed`);
       return fixedTrack;
     }
   } catch (error) {
-    mainLogger.error(`fixing track ${track.title} failed: ${error}`);
+    log.error(`fixing track ${track.title} failed: ${error}`);
   }
 
   return track;

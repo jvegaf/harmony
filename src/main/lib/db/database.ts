@@ -6,7 +6,7 @@ import { DataSource, In } from 'typeorm';
 import { Playlist, Track, TrackId } from '../../../preload/types/emusik';
 
 import { TrackEntity, PlaylistEntity } from './entities';
-import { mainLogger } from '../log/logger';
+import log from 'electron-log';
 
 const pathUserData = app.getPath('userData');
 const dbPath = path.join(pathUserData, 'database/emusik.db');
@@ -28,10 +28,10 @@ export class Database {
     });
     AppDataSource.initialize()
       .then(() => {
-        mainLogger.info('Data Source has been initialized!');
+        log.info('Data Source has been initialized!');
       })
       .catch((err: any) => {
-        mainLogger.error(`Error during Data Source initialization ${err}`);
+        log.error(`Error during Data Source initialization ${err}`);
       });
     this.connection = AppDataSource;
   }

@@ -3,7 +3,7 @@ import { installExtension, REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS } from 'electro
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
-import { mainLogger } from './lib/log/logger';
+import log from 'electron-log';
 import ApplicationMenuModule from './modules/ApplicationMenuModule';
 import PowerModule from './modules/PowerMonitorModule';
 import ThumbarModule from './modules/ThumbarModule';
@@ -18,7 +18,8 @@ import DatabaseModule from './modules/DatabaseModule';
 import IPCLoggerModule from './modules/IPCLoggerModule';
 import ContextMenuModule from './modules/ContextMenuModule';
 
-mainLogger.info('Starting eMusik...');
+log.initialize();
+log.info('Starting eMusik...');
 
 let mainWindow: BrowserWindow | null;
 
@@ -37,7 +38,7 @@ function initModules(window: BrowserWindow): void {
     new IPCLibraryModule(window),
     new IPCTaggerModule(window),
     new IPCLoggerModule(window),
-  ).catch(mainLogger.error);
+  ).catch(log.error);
 }
 
 // This method will be called when Electron has finished
@@ -45,8 +46,8 @@ function initModules(window: BrowserWindow): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-    .then(([redux, react]) => mainLogger.info(`Added Extensions:  ${redux.name}, ${react.name}`))
-    .catch(err => mainLogger.error('An error occurred: ', err));
+    .then(([redux, react]) => log.info(`Added Extensions:  ${redux.name}, ${react.name}`))
+    .catch(err => log.error('An error occurred: ', err));
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.jvegaf.emusik');
 

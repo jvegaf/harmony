@@ -1,5 +1,5 @@
 import { ArtTrack } from '../../../preload/types/emusik';
-import { mainLogger } from '../log/logger';
+import log from 'electron-log';
 import FetchArtwork from './fetcher';
 import PersistArtwork from './saver';
 
@@ -8,7 +8,7 @@ const UpdateArtwork = async (artTrack: ArtTrack): Promise<void> => {
   const art = await FetchArtwork(selectedArtUrl as string);
 
   if (!art) {
-    mainLogger.warn('Failed to get artwork');
+    log.warn('Failed to get artwork');
     return;
   }
 

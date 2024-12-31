@@ -1,6 +1,6 @@
 import * as NodeId3 from 'node-id3';
 import { Artwork } from '../../../preload/types/emusik';
-import { mainLogger } from '../log/logger';
+import log from 'electron-log';
 
 const PersistArtwork = (trackPath: string, artwork: Artwork) => {
   const tags = {
@@ -9,7 +9,7 @@ const PersistArtwork = (trackPath: string, artwork: Artwork) => {
 
   NodeId3.Promise.update(tags, trackPath)
     .then()
-    .catch(reason => mainLogger.error('track persist error', reason));
+    .catch(reason => log.error('track persist error', reason));
 };
 
 export default PersistArtwork;

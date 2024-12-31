@@ -4,7 +4,7 @@
 
 import os from 'os';
 
-import { mainLogger } from '../lib/log/logger';
+import log from 'electron-log';
 
 export default class Module {
   protected loaded: boolean;
@@ -17,28 +17,22 @@ export default class Module {
 
   // To not be overriden
   async init(): Promise<void> {
-    if (this.loaded)
-      throw new TypeError(`Module ${this.constructor.name} is already loaded`);
+    if (this.loaded) throw new TypeError(`Module ${this.constructor.name} is already loaded`);
 
     if (this.platforms.includes(os.platform())) {
-      await this.load().catch((err) => {
+      await this.load().catch(err => {
         throw err;
       });
       this.loaded = true;
-      mainLogger.info(`Loaded ${this.constructor.name}`);
+      log.info(`Loaded ${this.constructor.name}`);
     } else {
-      mainLogger.info(
-        `Skipping load of ${this.constructor.name
-        } (supported platform: ${this.platforms.join(', ')})`,
-      );
+      log.info(`Skipping load of ${this.constructor.name} (supported platform: ${this.platforms.join(', ')})`);
     }
   }
 
   // Can (now) be an asynchronous method
   async load(): Promise<void> {
-    throw new TypeError(
-      `Module ${this.constructor.name} should have a load() method`,
-    );
+    throw new TypeError(`Module ${this.constructor.name} should have a load() method`);
     // Do whatever you want here :)
   }
 }
