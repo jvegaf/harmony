@@ -1,9 +1,9 @@
 import * as NodeId3 from 'node-id3';
-import log from 'electron-log/main';
-import { Artwork, Track } from '@preload/emusik';
+import { mainLogger } from '../log/logger';
+import { Track } from '../../../preload/types/emusik';
 
-const PersistTrack = (track: Track, artwork?: Artwork) => {
-  const { title, artist, album, year, genre, bpm, key } = track;
+const PersistTrack = (track: Track) => {
+  const { title, artist, album, year, genre, bpm, initialKey } = track;
 
   const beats = bpm ? bpm.toString() : undefined;
   const yearStr = year ? year.toString() : undefined;
@@ -13,14 +13,13 @@ const PersistTrack = (track: Track, artwork?: Artwork) => {
     album,
     year: yearStr,
     genre,
-    image: artwork,
     bpm: beats,
-    key,
+    initialKey,
   } as NodeId3.Tags;
 
   NodeId3.Promise.update(tags, track.path)
     .then()
-    .catch(reason => log.error('track persist error', reason));
+    .catch(reason => mainLogger.error('track persist error', reason));
 };
 
 export default PersistTrack;

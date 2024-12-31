@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain, IpcMainEvent, Menu, MenuItemConstructorOptions, PopupOptions } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
-import { CtxMenuPayload, Track } from '../../preload/types/emusik';
+import { CtxMenuPayload } from '../../preload/types/emusik';
 
 import ModuleWindow from './BaseWindowModule';
 
@@ -12,7 +12,7 @@ class ContextMenuModule extends ModuleWindow {
   async load(): Promise<void> {
     ipcMain.removeAllListeners(channels.MENU_SHOW);
 
-    ipcMain.on(channels.MENU_SHOW, (event: IpcMainEvent, payload: CtxMenuPayload): Promise<void> => {
+    ipcMain.on(channels.MENU_SHOW, (event: IpcMainEvent, payload: CtxMenuPayload) => {
       const { selected, playlists, currentPlaylist } = payload;
 
       const selectedCount = selected.length;

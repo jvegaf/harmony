@@ -1,18 +1,16 @@
 import { mainLogger } from '../log/logger';
-import type {
-  MatchResult,
-  ResultTag,
-  Track,
-} from '../../../preload/types/emusik';
+import type { MatchResult, ResultTag, Track } from '../../../preload/types/emusik';
 import { GetStringTokens } from '../../../preload/lib/utils-id3';
 import Update from '../track/updater';
 
-import { SearchTags } from './beatport';
+import { SearchTags } from './beatport/beatport';
+// import { BandcampSearchResult, search } from './bandcamp/bandcamp';
+// import { soundcloudSearch } from './soundcloud/soundcloudProvider';
 
 const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
-  const tagMatches: MatchResult[] = tags.map((tag) => {
+  const tagMatches: MatchResult[] = tags.map(tag => {
     let tokensFounded = 0;
-    trackTokens.forEach((token) => {
+    trackTokens.forEach(token => {
       if (tag.tokens.indexOf(token) > -1) {
         tokensFounded += 1;
       }
@@ -29,6 +27,34 @@ const Match = (trackTokens: string[], tags: ResultTag[]): MatchResult => {
   return tagMatches.sort((a, b) => b.matches - a.matches)[0];
 };
 
+// const searchOnBandCamp = async (track: Track): Promise<BandcampSearchResult[]> => {
+//   const { title, artist } = track;
+//   const reqAggregate: string[] = [title];
+//   if (artist) {
+//     reqAggregate.push(artist);
+//   }
+
+//   const result = await search(reqAggregate.join(' '));
+//   return result;
+// };
+
+// const searchOnSoundCloud = async (track: Track): Promise<MatchResult | null> => {
+//   const { title, artist } = track;
+//   const reqAggregate: string[] = [title];
+//   if (artist) {
+//     reqAggregate.push(artist);
+//   }
+
+//   const trackTokens = GetStringTokens(reqAggregate);
+//   const result = await soundcloudSearch(reqAggregate.join(' '));
+
+//   mainLogger.info('Soundcloud results count: ', result.length);
+//   mainLogger.info('tokens: ', trackTokens);
+//   mainLogger.info('Soundcloud result: ', result[0]);
+//   const match = Match(trackTokens, result);
+
+//   return match;
+// };
 const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
   const { title, artist, duration } = track;
   const reqAggregate: string[] = [title];
@@ -46,8 +72,7 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
   }
   const durRounded = Math.round(duration);
   const resultsFiltered = bpResults.filter(
-    (result) =>
-      result.duration >= durRounded - 10 && result.duration <= durRounded + 10,
+    result => result.duration >= durRounded - 10 && result.duration <= durRounded + 10,
   );
   if (resultsFiltered.length < 2) {
     return {
@@ -62,23 +87,22 @@ const SearchOnBeatport = async (track: Track): Promise<MatchResult | null> => {
 };
 
 const FixTags = async (track: Track): Promise<Track> => {
-  let fixedTrack;
   try {
     const result = await SearchOnBeatport(track);
     if (!result) {
       // GetWebTrackInfo(track);
       mainLogger.warn(`no match for ${track.title}`);
-      fixedTrack = track;
+      return track;
     } else {
-      fixedTrack = Update(track, result.tag);
+      const fixedTrack = Update(track, result.tag);
       mainLogger.info(`track ${track.title} fixed`);
+      return fixedTrack;
     }
   } catch (error) {
     mainLogger.error(`fixing track ${track.title} failed: ${error}`);
-    fixedTrack = track;
   }
 
-  return fixedTrack;
+  return track;
 };
 
 export default FixTags;

@@ -1,6 +1,6 @@
 {
   "name": "emusik",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Music manager for old-school DJs",
   "main": "./out/main/index.js",
   "author": "Jose Vega",

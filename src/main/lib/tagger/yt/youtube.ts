@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import YoutubeMusicApi from 'youtube-music-api';
 import GetTagResults from './ytTagMapper';
-import log from 'electron-log/main';
-import { ResultTag } from '@preload/emusik';
+import { mainLogger } from '../../log/logger';
+import { ResultTag } from '../../../../preload/types/emusik';
 
 const SearchYtTags = async (title: string, artist: string | null = null): Promise<ResultTag[]> => {
   const api = new YoutubeMusicApi();
@@ -18,7 +18,7 @@ const SearchYtTags = async (title: string, artist: string | null = null): Promis
       return GetTagResults(content);
     })
     .catch((err: Error) => {
-      log.info(err);
+      mainLogger.warn(err);
     });
 };
 

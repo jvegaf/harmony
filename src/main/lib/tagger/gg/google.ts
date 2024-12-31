@@ -1,6 +1,6 @@
 import { search } from 'googlethis';
-import { BuildGoogleQuery } from './query-builder';
-import log from 'electron-log/main';
+import { BuildGoogleQuery } from '../querybuilder';
+import { mainLogger } from '../../log/logger';
 
 const SearchTrackInfo = async (title: string, artist?: string) => {
   const options = {
@@ -14,7 +14,7 @@ const SearchTrackInfo = async (title: string, artist?: string) => {
   };
 
   const trackQuery = BuildGoogleQuery(title, artist);
-  log.info(trackQuery);
+  mainLogger.info(trackQuery);
   const response = await search(trackQuery, options);
 
   return response;

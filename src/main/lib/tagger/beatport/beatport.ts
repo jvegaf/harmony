@@ -1,9 +1,11 @@
 import axios from 'axios';
+
+import { ResultTag } from '../../../../preload/types/emusik';
+
+import { handleResponse, handleError } from '../response';
 import BeatportToken from './BeaportToken';
-import { BuildBeatportQuery } from '../query-builder';
+import { BuildBeatportQuery } from '../querybuilder';
 import GetTagResults from './bpTagMapper';
-import { ResultTag } from '@preload/emusik';
-import { handleError, handleResponse } from '@preload/reponse';
 
 const URI_BASE = 'https://api.beatport.com/v4/catalog/search/?q=';
 

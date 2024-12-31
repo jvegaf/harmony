@@ -18,11 +18,11 @@ export default function AudioOutputSelect(props: Props) {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
 
-        setDevices(devices.filter((device) => device.kind === 'audiooutput'));
+        setDevices(devices.filter(device => device.kind === 'audiooutput'));
       } catch (err) {
         setDevices([]);
         setHasError(true);
-        logger.warn(err);
+        logger.warn(err as any);
       }
     };
 
@@ -35,7 +35,10 @@ export default function AudioOutputSelect(props: Props) {
 
   if (!devices) {
     return (
-      <select disabled key="selectDisabled">
+      <select
+        disabled
+        key='selectDisabled'
+      >
         <option>loading devices...</option>
       </select>
     );
@@ -43,7 +46,10 @@ export default function AudioOutputSelect(props: Props) {
 
   if (hasError) {
     return (
-      <select disabled key="selectDisabled">
+      <select
+        disabled
+        key='selectDisabled'
+      >
         <option>Could not get audio output devices</option>
       </select>
     );
@@ -51,13 +57,16 @@ export default function AudioOutputSelect(props: Props) {
 
   return (
     <Setting.Select
-      key="devicesOk" // avoid default value problems
+      key='devicesOk' // avoid default value problems
       defaultValue={props.defaultValue}
       onChange={setAudioOutputDevice}
     >
-      {devices.map((device) => {
+      {devices.map(device => {
         return (
-          <option key={device.deviceId} value={device.deviceId}>
+          <option
+            key={device.deviceId}
+            value={device.deviceId}
+          >
             {device.label}
           </option>
         );

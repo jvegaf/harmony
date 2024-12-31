@@ -1,5 +1,5 @@
-import { ResultTag } from '@preload/emusik';
 import { Soundcloud, SoundcloudTrack } from 'soundcloud.ts';
+import { ResultTag } from '../../../../preload/types/emusik';
 
 export const soundcloudSearch = async (query: string): Promise<ResultTag[]> => {
   const soundcloud = new Soundcloud();

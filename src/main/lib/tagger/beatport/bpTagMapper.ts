@@ -1,11 +1,12 @@
-import { ResultTag } from '@preload/emusik';
-import { GetStringTokens } from '@preload/utils';
+import { ResultTag } from '../../../../preload/types/emusik';
+import { GetStringTokens } from '../../../../preload/lib/utils-id3';
 
 interface Result {
   mix_name: string;
   name: string;
-  artists: [{ name: string }];
+  artists?: [{ name: string }];
   id: string;
+  key: { camelot_number: string; camelot_letter: string };
   release: { name: string; image: { uri: string } };
   publish_date: string;
   genre: { name: string };
@@ -16,9 +17,9 @@ interface Result {
 const CreateTagResult = (result: Result): ResultTag => {
   const tagTrackTitle: string = result.mix_name ? `${result.name} (${result.mix_name})` : result.name;
 
-  const tagTrackArtists: string[] = result.artists.map((artist): string => artist.name);
+  const tagTrackArtists: string[] | undefined = result.artists?.map((artist): string => artist.name);
 
-  const tagValues = [...tagTrackArtists, result.name];
+  const tagValues = [...(tagTrackArtists ?? []), result.name];
   if (result.mix_name) {
     tagValues.push(result.mix_name);
   }
@@ -27,7 +28,8 @@ const CreateTagResult = (result: Result): ResultTag => {
   return {
     id: result.id,
     title: tagTrackTitle,
-    artist: tagTrackArtists.join(', '),
+    key: `${result.key.camelot_number}${result.key.camelot_letter}`,
+    artist: tagTrackArtists?.join(', '),
     album: result.release.name,
     year: result.publish_date.substring(0, 4),
     genre: result.genre.name,

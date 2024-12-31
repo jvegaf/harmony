@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 
-import player from '../../lib/player';
 import channels from '../../../../preload/lib/ipc-channels';
 import PlaylistsAPI from '../../stores/PlaylistsAPI';
 import { CommandPayload, Track } from '../../../../preload/types/emusik';

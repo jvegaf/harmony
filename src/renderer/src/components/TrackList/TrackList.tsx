@@ -3,7 +3,6 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {
   CellContextMenuEvent,
   ColDef,
-  FirstDataRenderedEvent,
   GetRowIdParams,
   GridApi,
   GridReadyEvent,
@@ -28,15 +27,14 @@ type Props = {
 const { menu, logger } = window.Main;
 
 const TrackList = (props: Props) => {
-  const { type, tracks, trackPlayingID, playlists, currentPlaylist, height } = props;
+  const { tracks, playlists, currentPlaylist, height } = props;
   const playerAPI = usePlayerAPI();
   const gridRef = useRef<AgGridReact>(null);
   const [lastUpdated, setLastUpdated] = useState<Track | null>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [rowData, setRowData] = useState<Track[]>([]);
   const updated = useLibraryStore.use.updated();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [colDefs, setColDefs] = useState([
+  const colDefs = [
     { field: 'title', minWidth: 150 },
     { field: 'artist', minWidth: 90 },
     { field: 'time', maxWidth: 90 },
@@ -46,7 +44,7 @@ const TrackList = (props: Props) => {
     { field: 'bpm', maxWidth: 70 },
     { field: 'bitrate', valueFormatter: (p: { value: number }) => p.value / 1000 + 'kbps', minWidth: 80, maxWidth: 90 },
     { field: 'key', maxWidth: 70 },
-  ]);
+  ];
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -68,10 +66,12 @@ const TrackList = (props: Props) => {
     }
   }, [updated, lastUpdated]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onFirstDataRendered = useCallback((params: FirstDataRenderedEvent) => {
-    gridRef.current?.api.sizeColumnsToFit();
-  }, []);
+  useEffect(() => {
+    if (gridApi) {
+      // Example usage of gridApi
+      gridApi.sizeColumnsToFit();
+    }
+  }, [gridApi]);
 
   const onGridReady = (params: GridReadyEvent) => {
     setGridApi(params.api);
@@ -132,7 +132,6 @@ const TrackList = (props: Props) => {
         defaultColDef={defaultColDef}
         onGridReady={onGridReady}
         getRowId={getRowId}
-        onFirstDataRendered={onFirstDataRendered}
         onRowDoubleClicked={e => onDoubleClick(e)}
         onCellContextMenu={e => onShowCtxtMenu(e)}
         suppressCellFocus

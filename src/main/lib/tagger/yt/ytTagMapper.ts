@@ -1,5 +1,5 @@
-import { ResultTag } from '@preload/emusik';
-import log from 'electron-log/main';
+import { ResultTag } from '../../../../preload/types/emusik';
+import { mainLogger } from '../../log/logger';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const CreateTagResult = (result: any) => {
@@ -13,8 +13,8 @@ const CreateTagResult = (result: any) => {
 };
 
 const GetTagResults = (result: any[]) => {
-  log.info('yt gettagresult');
-  log.info(result);
+  mainLogger.info('yt gettagresult');
+  mainLogger.info(result);
   return result.map(track => CreateTagResult(track));
 };
 

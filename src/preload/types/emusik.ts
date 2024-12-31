@@ -24,7 +24,7 @@ export interface Track {
   artist?: string;
   bpm?: number;
   genre?: string;
-  key?: string;
+  initialKey?: string;
   duration: number;
   time?: string;
   path: TrackSrc;
@@ -41,11 +41,12 @@ export interface ResultTag {
   artist?: string;
   bpm?: number;
   genre?: string;
-  duration?: number;
+  duration: number;
+  key?: string;
   title: string;
   year?: string;
   artworkUrl?: string;
-  tokens?: string[];
+  tokens: string[];
 }
 
 export interface Playlist {
