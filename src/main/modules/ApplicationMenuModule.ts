@@ -19,10 +19,10 @@ export default class ApplicationMenuModule extends ModuleWindow {
         label: 'View',
         submenu: [
           {
-            label: 'Jump to playing track',
-            accelerator: 'CmdOrCtrl+T',
+            label: 'Go to settings',
+            accelerator: 'CmdOrCtrl+,',
             click: () => {
-              this.window.webContents.send(channels.MENU_JUMP_TO_PLAYING_TRACK);
+              this.window.webContents.send(channels.MENU_GO_TO_SETTINGS);
             },
           },
           { type: 'separator' },

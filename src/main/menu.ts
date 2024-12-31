@@ -1,20 +1,20 @@
 import { Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
 
 const template: (MenuItemConstructorOptions | MenuItem)[] = [
-  {
-    label: 'eMusik',
-    submenu: [
-      { role: 'about' },
-      { type: 'separator' },
-      { role: 'services' },
-      { type: 'separator' },
-      { role: 'hide' },
-      { role: 'hideOthers' },
-      { role: 'unhide' },
-      { type: 'separator' },
-      { role: 'quit' },
-    ],
-  },
+  // {
+  //   label: 'eMusik',
+  //   submenu: [
+  //     { role: 'about' },
+  //     { type: 'separator' },
+  //     { role: 'services' },
+  //     { type: 'separator' },
+  //     { role: 'hide' },
+  //     { role: 'hideOthers' },
+  //     { role: 'unhide' },
+  //     { type: 'separator' },
+  //     { role: 'quit' },
+  //   ],
+  // },
   {
     label: 'File',
     submenu: [

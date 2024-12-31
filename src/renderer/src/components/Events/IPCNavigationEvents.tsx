@@ -13,25 +13,31 @@ function IPCNavigationEvents() {
 
   useEffect(() => {
     function goToLibrary() {
-      navigate('/library');
+      navigate('/');
     }
 
     function goToPlaylists() {
-      navigate('/library');
+      navigate('/');
+    }
+
+    function goToSettings() {
+      navigate('/settings');
     }
 
     function goToTrackDetail(trackID: string) {
-      navigate(`/detail/${trackID}`);
+      navigate(`/details/${trackID}`);
     }
 
     // Shortcuts from the application menu
     ipcRenderer.on(channels.MENU_GO_TO_LIBRARY, goToLibrary);
     ipcRenderer.on(channels.MENU_GO_TO_PLAYLISTS, goToPlaylists);
+    ipcRenderer.on(channels.MENU_GO_TO_SETTINGS, goToSettings);
     ipcRenderer.on(channels.CMD_TRACK_DETAIL, (_, trackID) => goToTrackDetail(trackID));
 
     return function cleanup() {
       ipcRenderer.removeAllListeners(channels.MENU_GO_TO_LIBRARY);
       ipcRenderer.removeAllListeners(channels.MENU_GO_TO_PLAYLISTS);
+      ipcRenderer.removeAllListeners(channels.MENU_GO_TO_SETTINGS);
       ipcRenderer.removeAllListeners(channels.CMD_TRACK_DETAIL);
     };
   }, [navigate]);

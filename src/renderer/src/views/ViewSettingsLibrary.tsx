@@ -8,7 +8,7 @@ const { logger, dialog } = window.Main;
 
 export default function ViewSettingsLibrary() {
   const libraryAPI = useLibraryAPI();
-  const isLibraryRefreshing = useLibraryStore(state => state.refreshing);
+  const isLibraryRefreshing = useLibraryStore.use.refreshing();
 
   const openFolderSelector = useCallback(async () => {
     const options: Electron.OpenDialogOptions = {
@@ -41,7 +41,7 @@ export default function ViewSettingsLibrary() {
       <Setting.Section>
         <h3>Danger zone</h3>
         <Button
-          variant='danger'
+          color='red'
           disabled={isLibraryRefreshing}
           onClick={libraryAPI.reset}
         >

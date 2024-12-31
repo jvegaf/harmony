@@ -17,8 +17,8 @@ const { db } = window.Main;
 
 export default function ViewLibrary() {
   const trackPlayingID = usePlayingTrackID();
-  const refreshing = useLibraryStore(state => state.refreshing);
-  const search = useLibraryStore(state => state.search);
+  const refreshing = useLibraryStore.use.refreshing();
+  const search = useLibraryStore.use.search();
   const { height } = useViewportSize();
 
   const { playlists } = useLoaderData() as LibraryLoaderData;

@@ -1,4 +1,4 @@
-import { Outlet, useMatch, Navigate, useNavigate } from 'react-router-dom';
+import { Outlet, useMatch, Navigate, useNavigate, useRevalidator } from 'react-router-dom';
 
 import * as Nav from '../elements/Nav/Nav';
 
@@ -9,7 +9,13 @@ import { Button } from '@mantine/core';
 
 export default function ViewSettingsView() {
   const match = useMatch('/settings');
+  const revalidator = useRevalidator();
   const navigate = useNavigate();
+
+  const onCloseListener = () => {
+    revalidator.revalidate();
+    navigate('/');
+  };
 
   return (
     <div className={`${appStyles.view} ${styles.viewSettings}`}>
@@ -24,7 +30,7 @@ export default function ViewSettingsView() {
           <Outlet />
         </div>
         <div className={styles.settingsBtns}>
-          <Button onClick={() => navigate('/')}>Close</Button>
+          <Button onClick={() => onCloseListener()}>Close</Button>
         </div>
       </div>
 

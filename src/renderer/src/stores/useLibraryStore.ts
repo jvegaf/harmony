@@ -6,6 +6,7 @@ import { chunk } from '../../../preload/lib/utils';
 
 import { createStore } from './store-helpers';
 import usePlayerStore from './usePlayerStore';
+import createSelectors from './selectors';
 
 const { db, covers, logger, library, dialog } = window.Main;
 
@@ -16,7 +17,7 @@ type LibraryState = {
     processed: number;
     total: number;
   };
-  updated?: Track;
+  updated: Track | null;
   fix: {
     processed: number;
     total: number;
@@ -36,14 +37,14 @@ type LibraryState = {
   };
 };
 
-const useLibraryStore = createStore<LibraryState>((set, get) => ({
+const libraryStore = createStore<LibraryState>((set, get) => ({
   search: '',
   refreshing: false,
   refresh: {
     processed: 0,
     total: 0,
   },
-  updated: undefined,
+  updated: null,
   fix: {
     processed: 0,
     total: 0,
@@ -221,8 +222,10 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
   },
 }));
 
+const useLibraryStore = createSelectors(libraryStore);
+
 export default useLibraryStore;
 
 export function useLibraryAPI() {
-  return useLibraryStore(state => state.api);
+  return libraryStore(state => state.api);
 }
