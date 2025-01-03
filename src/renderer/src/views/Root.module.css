@@ -30,7 +30,7 @@
 }
 
 .view {
-  background-color: var(--background);
+  background-color: var(--mantine-color-body);
   flex: 1 1 auto;
   overflow: auto;
   position: relative;

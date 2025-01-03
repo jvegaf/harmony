@@ -4,7 +4,7 @@
   margin: 0;
   padding: 0;
 
-  thead {
+  /* thead {
     tr {
       :hover {
         background-color: var(--mantine-color-dark-1);
@@ -14,5 +14,5 @@
         padding: 0.1rem 0.5rem !important;
       }
     }
-  }
+  } */
 }

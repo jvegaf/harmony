@@ -17,20 +17,20 @@
 
 .settingLabel {
   display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
+  /* margin-bottom: 4px; */
 }
 
 .settingSelect,
 .settingInput {
   display: block;
-  background: var(--input-bg);
+  font-weight: bold;
+  /* background: var(--input-bg); */
   color: var(--input-color);
   border: solid 1px var(--border-color);
   border-radius: var(--border-radius);
   padding: 8px 12px;
   width: 100%;
-  font-size: 1.2rem;
+  /* font-size: 1.1rem; */
   line-height: 1;
 
   &:focus {
