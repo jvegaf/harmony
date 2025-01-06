@@ -79,7 +79,10 @@ export const enum LogLevel {
   VERBOSE,
 }
 
-export type TrackEditableFields = Pick<Track, 'title' | 'artist' | 'album' | 'genre' | 'year' | 'comment'>;
+export type TrackEditableFields = Pick<
+  Track,
+  'title' | 'artist' | 'album' | 'genre' | 'year' | 'comment' | 'bpm' | 'initialKey'
+>;
 
 export type LogProps = {
   level: LogLevel;

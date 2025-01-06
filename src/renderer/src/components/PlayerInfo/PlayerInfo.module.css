@@ -1,27 +1,23 @@
 .playerInfo {
-  width: 100%;
+  width: 70%;
   height: 100%;
-  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .infoTitle {
-  width: 90%;
-  font-size: 1.1rem;
+  /* font-size: 1.1rem; */
   font-weight: bold;
   text-overflow: ellipsis;
-  overflow: hidden;
   white-space: nowrap;
   text-align: start;
 }
 
 .infoArtist {
-  width: 90%;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   text-overflow: ellipsis;
-  overflow: hidden;
   white-space: nowrap;
   text-align: start;
 }

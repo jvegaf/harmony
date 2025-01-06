@@ -31,8 +31,10 @@ export default function ViewTrackDetails() {
     title: track.title ?? '',
     artist: track.artist,
     album: track.album ?? '',
-    genre: track.genre,
-    year: track.year,
+    genre: track.genre ?? '',
+    year: track.year ?? '',
+    bpm: track.bpm ?? '',
+    initialKey: track.initialKey ?? '',
     comment: track.comment ?? '',
   });
 
@@ -59,7 +61,6 @@ export default function ViewTrackDetails() {
   return (
     <div className={`${appStyles.view} ${styles.viewDetails}`}>
       <div className={styles.detailsCover}>
-        <h1>{formData.title}</h1>
         {coverSrc === null && (
           <img
             src={Placeholder}
@@ -118,48 +119,82 @@ export default function ViewTrackDetails() {
             }}
           />
         </Setting.Section>
-        <Setting.Section>
-          <Setting.Label htmlFor='album'>Album</Setting.Label>
-          <Setting.Input
-            id='album'
-            name='album'
-            type='text'
-            value={formData.album}
-            onChange={e => {
-              setFormData({ ...formData, album: e.currentTarget.value });
-            }}
-          />
-        </Setting.Section>
-        <Setting.Section>
-          <Setting.Label htmlFor='genre'>Genre</Setting.Label>
-          <Setting.Input
-            id='genre'
-            name='genre'
-            type='text'
-            value={formData.genre}
-            onChange={e => {
-              setFormData({
-                ...formData,
-                genre: e.currentTarget.value,
-              });
-            }}
-          />
-        </Setting.Section>
-        <Setting.Section>
-          <Setting.Label htmlFor='year'>Year</Setting.Label>
-          <Setting.Input
-            id='year'
-            name='year'
-            type='text'
-            value={formData.year ?? ''}
-            onChange={e => {
-              setFormData({
-                ...formData,
-                year: Number.parseInt(e.currentTarget.value) ?? null,
-              });
-            }}
-          />
-        </Setting.Section>
+        <div className={styles.albumRow}>
+          <Setting.Section>
+            <Setting.Label htmlFor='album'>Album</Setting.Label>
+            <Setting.Input
+              id='album'
+              name='album'
+              type='text'
+              value={formData.album}
+              onChange={e => {
+                setFormData({ ...formData, album: e.currentTarget.value });
+              }}
+            />
+          </Setting.Section>
+          <Setting.Section>
+            <Setting.Label htmlFor='genre'>Genre</Setting.Label>
+            <Setting.Input
+              id='genre'
+              name='genre'
+              type='text'
+              value={formData.genre}
+              onChange={e => {
+                setFormData({
+                  ...formData,
+                  genre: e.currentTarget.value,
+                });
+              }}
+            />
+          </Setting.Section>
+        </div>
+        <div className={styles.detailRow}>
+          <Setting.Section>
+            <Setting.Label htmlFor='year'>Year</Setting.Label>
+            <Setting.Input
+              id='year'
+              name='year'
+              type='text'
+              value={formData.year ?? ''}
+              onChange={e => {
+                setFormData({
+                  ...formData,
+                  year: Number.parseInt(e.currentTarget.value) ?? null,
+                });
+              }}
+            />
+          </Setting.Section>
+          <Setting.Section>
+            <Setting.Label htmlFor='bpm'>BPM</Setting.Label>
+            <Setting.Input
+              id='bpm'
+              name='bpm'
+              type='text'
+              value={formData.bpm ?? ''}
+              onChange={e => {
+                setFormData({
+                  ...formData,
+                  bpm: Number.parseInt(e.currentTarget.value) ?? null,
+                });
+              }}
+            />
+          </Setting.Section>
+          <Setting.Section>
+            <Setting.Label htmlFor='initialKey'>Key</Setting.Label>
+            <Setting.Input
+              id='initialKey'
+              name='initialKey'
+              type='text'
+              value={formData.initialKey ?? ''}
+              onChange={e => {
+                setFormData({
+                  ...formData,
+                  initialKey: e.currentTarget.value ?? null,
+                });
+              }}
+            />
+          </Setting.Section>
+        </div>
         <Setting.Section>
           <Setting.Label htmlFor='comment'>Comments</Setting.Label>
           <Setting.TextArea

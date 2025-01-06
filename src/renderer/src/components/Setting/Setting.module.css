@@ -17,25 +17,23 @@
 
 .settingLabel {
   display: block;
-  /* margin-bottom: 4px; */
+  color: var(--mantine-color-dark-2);
+  font-size: 0.85rem;
 }
 
 .settingSelect,
 .settingInput {
   display: block;
-  font-weight: bold;
-  /* background: var(--input-bg); */
   color: var(--input-color);
-  border: solid 1px var(--border-color);
-  border-radius: var(--border-radius);
+  border: solid 1px var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-default);
   padding: 8px 12px;
   width: 100%;
-  /* font-size: 1.1rem; */
   line-height: 1;
 
   &:focus {
     outline: none;
-    border-color: var(--main-color);
+    border-color: var(--mantine-color-dimmed);
   }
 }
 

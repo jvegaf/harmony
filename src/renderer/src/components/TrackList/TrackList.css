@@ -3,16 +3,16 @@
   --ag-foreground-color: var(--mantine-color-grey-6);
   --ag-header-foreground-color: var(--mantine-color-grey-6);
   --ag-header-background-color: var(--mantine-color-gray-1);
-  --ag-row-height: 40px !important;
+  --ag-row-height: 35px !important;
   & .ag-header {
     /* background-color: var(--mantine-color-gray-1) !important; */
     color: var(--mantine-color-grey-6);
-    min-height: 30px !important;
+    min-height: 25px !important;
 
     & .ag-header-cell {
-      background-color: light-dark(var(--mantine-color-dark-0), var(--mantine-color-dark-4)) !important; 
+      background-color: light-dark(var(--mantine-color-dark-0), var(--mantine-color-dark-4)) !important;
       color: var(--mantine-color-grey-6);
-      height: 30px !important;
+      height: 28px !important;
     }
   }
 
