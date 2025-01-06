@@ -71,7 +71,7 @@
     "@types/recursive-readdir": "^2.2.4",
     "@vitejs/plugin-react": "^4.2.1",
     "classnames": "^2.5.1",
-    "electron": "^28.1.1",
+    "electron": "^33.3.0",
     "electron-builder": "^24.9.1",
     "electron-builder-squirrel-windows": "^25.1.8",
     "electron-devtools-installer": "^4.0.0",
