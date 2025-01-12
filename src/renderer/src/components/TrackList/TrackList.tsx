@@ -88,8 +88,9 @@ const TrackList = (props: Props) => {
 
   const onDoubleClick = useCallback((event: RowDoubleClickedEvent) => {
     event.event?.preventDefault();
-    const { data } = event;
-    playerAPI.start(data.id);
+    const { rowIndex } = event;
+    const queue = rowData.map(track => track.id);
+    playerAPI.start(queue, rowIndex!);
   }, []);
 
   const onShowCtxtMenu = useCallback((event: CellContextMenuEvent) => {

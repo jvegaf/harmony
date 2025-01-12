@@ -2,13 +2,15 @@ import { create } from 'zustand';
 
 import player from '../lib/player';
 
-import { PlayerStatus, Track } from '../../../preload/types/emusik';
+import { PlayerStatus, Track, TrackId } from '../../../preload/types/emusik';
 
 type PlayerState = {
   playerStatus: PlayerStatus;
   playingTrack: Track | null;
+  queue: TrackId[];
+  queueCursor: number;
   api: {
-    start: (id: string) => Promise<void>;
+    start: (queue: TrackId[], index: number) => Promise<void>;
     play: () => Promise<void>;
     pause: () => void;
     togglePlayPause: () => Promise<void>;
@@ -21,15 +23,18 @@ type PlayerState = {
   };
 };
 
-const { db, logger } = window.Main;
+const { db } = window.Main;
 
 const usePlayerStore = create<PlayerState>((set, get) => ({
   playerStatus: PlayerStatus.STOP,
   playingTrack: null,
+  queue: [],
+  queueCursor: 0,
 
   api: {
-    start: async (id): Promise<void> => {
+    start: async (queue: TrackId[], index: number): Promise<void> => {
       const state = get();
+      const id = queue[index];
 
       if (state.playingTrack?.id !== id) {
         const track = await db.tracks.findOnlyByID(id);
@@ -40,8 +45,15 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
         set({
           playingTrack: track,
           playerStatus: PlayerStatus.PLAY,
+          queue,
+          queueCursor: index,
         });
+        return;
       }
+      set({
+        queue,
+        queueCursor: index,
+      });
     },
 
     play: async () => {
@@ -68,25 +80,38 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       }
     },
 
-    previous: (): void => {
+    previous: async (): Promise<void> => {
       if (player.getCurrentTime() > 3) {
         player.setCurrentTime(0);
         return;
       }
-      // player.previous();
-
-      // set({
-      //   playerStatus: PlayerStatus.PLAY,
-      // });
+      const { queue, queueCursor } = get();
+      if (queueCursor > 0) {
+        const cursor = queueCursor - 1;
+        const track = await db.tracks.findOnlyByID(queue[cursor]);
+        player.setTrack(track);
+        await player.play();
+        set({
+          playingTrack: track,
+          playerStatus: PlayerStatus.PLAY,
+          queueCursor: cursor,
+        });
+      }
     },
 
-    next: (): void => {
-      logger.info('Next track');
-      // player.next();
-
-      // set({
-      //   playerStatus: PlayerStatus.PLAY,
-      // });
+    next: async (): Promise<void> => {
+      const { queue, queueCursor } = get();
+      if (queueCursor < queue.length - 1) {
+        const cursor = queueCursor + 1;
+        const track = await db.tracks.findOnlyByID(queue[cursor]);
+        player.setTrack(track);
+        await player.play();
+        set({
+          playingTrack: track,
+          playerStatus: PlayerStatus.PLAY,
+          queueCursor: cursor,
+        });
+      }
     },
 
     stop: (): void => {
