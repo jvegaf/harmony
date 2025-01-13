@@ -6,6 +6,23 @@ type Props = {
   rating: TrackRating;
 };
 
+function rateParser(rating: number) {
+  switch (true) {
+    case rating > 0.8:
+      return 5;
+    case rating > 0.6:
+      return 4;
+    case rating > 0.4:
+      return 3;
+    case rating > 0.2:
+      return 2;
+    case rating > 0.1:
+      return 1;
+    default:
+      return 0;
+  }
+}
+
 function TrackRatingComponent({ rating }: Props) {
   const [stars, setStars] = useState(0);
 
@@ -13,7 +30,7 @@ function TrackRatingComponent({ rating }: Props) {
     if (!rating) {
       return;
     }
-    const result = (rating.rating * 100) / 5;
+    const result = rateParser(rating.rating);
     setStars(result);
   }, [rating]);
 
