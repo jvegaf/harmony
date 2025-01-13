@@ -19,7 +19,7 @@ import IPCLoggerModule from './modules/IPCLoggerModule';
 import ContextMenuModule from './modules/ContextMenuModule';
 
 log.initialize();
-log.info('Starting eMusik...');
+log.info('Starting Harmony...');
 
 let mainWindow: BrowserWindow | null;
 

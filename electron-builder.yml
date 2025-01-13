@@ -1,5 +1,5 @@
 appId: com.github.jvegaf.harmony
-productName: 'eMusik'
+productName: 'Harmony'
 directories:
   buildResources: build
 files:
@@ -14,7 +14,7 @@ asarUnpack:
   - out/main/chunks/*.node
   - resources/**
 win:
-  executableName: 'eMusik'
+  executableName: 'Harmony'
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

@@ -2,7 +2,7 @@ import { Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
 
 const template: (MenuItemConstructorOptions | MenuItem)[] = [
   // {
-  //   label: 'eMusik',
+  //   label: 'Harmony',
   //   submenu: [
   //     { role: 'about' },
   //     { type: 'separator' },

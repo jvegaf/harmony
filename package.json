@@ -5,8 +5,8 @@
   "main": "./out/main/index.js",
   "author": "Jose Vega",
   "license": "MIT",
-  "homepage": "https://github.com/jvegaf/eMusik#readme",
-  "repository": "https://github.com/jvegaf/eMusik",
+  "homepage": "https://github.com/jvegaf/Harmony#readme",
+  "repository": "https://github.com/jvegaf/Harmony",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
