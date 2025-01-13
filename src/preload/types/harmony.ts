@@ -104,3 +104,8 @@ export type CommandPayload = {
   playlistId: string;
   selected: Track[];
 };
+
+export type UpdateRatingPayload = {
+  trackSrc: TrackSrc;
+  rating: number;
+};

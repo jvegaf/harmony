@@ -1,18 +1,17 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { LoaderFunctionArgs, useLoaderData, useNavigate } from 'react-router-dom';
-import { Button, Grid, GridCol, Group, Textarea, TextInput } from '@mantine/core';
+import { Button, Fieldset, Grid, GridCol, Group, Textarea, TextInput } from '@mantine/core';
 import { hasLength, useForm } from '@mantine/form';
-import Placeholder from '../assets/placeholder.png';
-import { useLibraryAPI } from '../stores/useLibraryStore';
 
 import { LoaderData } from './router';
 import appStyles from './Root.module.css';
 import styles from './ViewTrackDetails.module.css';
+import Cover from '../components/Cover/Cover';
+import TrackRatingComponent from '../components/TrackRatingComponent/TrackRatingComponent';
 
 export default function ViewTrackDetails() {
+  const navigate = useNavigate();
   const { track } = useLoaderData() as DetailsLoaderData;
-  const [coverSrc, setCoverSrc] = React.useState<string | null>(null);
-  const getCover = useLibraryAPI().getCover;
 
   const form = useForm({
     mode: 'uncontrolled',
@@ -38,19 +37,9 @@ export default function ViewTrackDetails() {
   React.useEffect(() => {
     form.setValues(track);
     form.resetDirty(track);
-    if (track.path) {
-      getCover(track).then(cover => {
-        if (cover) {
-          setCoverSrc(cover);
-        }
-      });
-    }
-  }, [track, getCover]);
+  }, [track]);
 
   const [submittedValues, setSubmittedValues] = useState<typeof form.values | null>(null);
-
-  const libraryAPI = useLibraryAPI();
-  const navigate = useNavigate();
 
   // const handleSubmit = useCallback(
   //   async (e: React.FormEvent<HTMLFormElement>) => {
@@ -63,25 +52,19 @@ export default function ViewTrackDetails() {
 
   return (
     <div className={`${appStyles.view} ${styles.viewDetails}`}>
-      <div className={styles.detailsCover}>
-        {coverSrc === null && (
-          <img
-            src={Placeholder}
-            alt='Cover'
-            width='400'
-            height='400'
+      <div className={styles.detailsLeft}>
+        <div className={styles.detailsCover}>
+          <Cover track={track} />
+        </div>
+        <div className={styles.rating}>
+          <TrackRatingComponent
+            trackSrc={track.path}
+            rating={track.rating}
+            size='xl'
           />
-        )}
-        {coverSrc !== null && (
-          <img
-            src={coverSrc}
-            alt='Cover'
-            width='400'
-            height='400'
-          />
-        )}
+        </div>
       </div>
-      <div className={styles.detailsForm}>
+      <div className={styles.detailsRight}>
         <form onSubmit={form.onSubmit(setSubmittedValues)}>
           <TextInput
             {...form.getInputProps('path')}
@@ -121,21 +104,6 @@ export default function ViewTrackDetails() {
             grow
           >
             <TextInput
-              {...form.getInputProps('rating.source')}
-              mt='md'
-              label='Rating Source'
-            />
-            <TextInput
-              {...form.getInputProps('rating.rating')}
-              mt='md'
-              label='Rating'
-            />
-          </Group>
-          <Group
-            justify='center'
-            grow
-          >
-            <TextInput
               {...form.getInputProps('bpm')}
               mt='md'
               label='BPM'
@@ -154,6 +122,8 @@ export default function ViewTrackDetails() {
           <Textarea
             {...form.getInputProps('comment')}
             mt='md'
+            autosize
+            minRows={8}
             label='Comments'
           />
           <Group

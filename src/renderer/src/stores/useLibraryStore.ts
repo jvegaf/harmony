@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { MessageBoxReturnValue } from 'electron';
-import { TrackEditableFields, Track, TrackId } from '../../../preload/types/harmony';
+import { TrackEditableFields, Track, TrackId, TrackSrc } from '../../../preload/types/harmony';
 import { stripAccents } from '../../../preload/lib/utils-id3';
 import { chunk } from '../../../preload/lib/utils';
 
@@ -34,6 +34,7 @@ type LibraryState = {
     getCover: (track: Track) => Promise<string | null>;
     fixTrack: (trackID: string) => Promise<void>;
     toFix: (total: number) => void;
+    updateTrackRating: (trackSrc: TrackSrc, rating: number) => Promise<void>;
   };
 };
 
@@ -218,6 +219,14 @@ const libraryStore = createStore<LibraryState>((set, get) => ({
     },
     toFix: (total: number): void => {
       set({ fix: { processed: 0, total: total } });
+    },
+    updateTrackRating: async (trackSrc: TrackSrc, newRating: number): Promise<void> => {
+      const track = await db.tracks.findOnlyByPath(trackSrc);
+      const rate = { source: 'traktor@native-instruments.de', rating: newRating };
+      const updatedTrack = { ...track, rating: rate };
+      window.Main.library.updateRating({ trackSrc, rating: newRating });
+      window.Main.db.tracks.update(updatedTrack);
+      set({ updated: updatedTrack });
     },
   },
 }));

@@ -74,7 +74,11 @@ const TrackList = (props: Props) => {
       cellRenderer: props => {
         return (
           <>
-            <TrackRatingComponent rating={props.value} />
+            <TrackRatingComponent
+              trackSrc={props.data.path}
+              rating={props.value}
+              size='md'
+            />
           </>
         );
       },

@@ -23,7 +23,8 @@ export default function Providers({ children }: any) {
       Checkbox: {
         styles: { input: { cursor: 'pointer' }, label: { cursor: 'pointer' } },
       },
-      TextInput: { styles: { label: { marginTop: '0.5rem' } } },
+      TextInput: { styles: { input: { fontSize: '1.1rem' }, label: { color: '#868e96', marginTop: '0.5rem' } } },
+      Textarea: { styles: { input: { fontSize: '1.1rem' }, label: { color: '#868e96', marginTop: '0.5rem' } } },
       Select: { styles: { label: { marginTop: '0.5rem' } } },
       Loader: { defaultProps: { size: 'xl' } },
       Space: { defaultProps: { h: 'sm' } },

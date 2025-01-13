@@ -1,7 +1,7 @@
 import { app, contextBridge, ipcRenderer, shell } from 'electron';
 import { ElectronAPI, electronAPI } from '@electron-toolkit/preload';
 import channels from './lib/ipc-channels';
-import { Track, Playlist, LogLevel, TrackId, CtxMenuPayload } from './types/harmony';
+import { Track, Playlist, LogLevel, TrackId, CtxMenuPayload, UpdateRatingPayload } from './types/harmony';
 import parseUri from './lib/utils-uri';
 
 const api = {
@@ -19,6 +19,7 @@ const api = {
       findByID: (tracksIDs: string[]) => ipcRenderer.invoke(channels.TRACKS_BY_ID, tracksIDs),
       findByPath: (paths: string[]) => ipcRenderer.invoke(channels.TRACKS_BY_PATH, paths),
       findOnlyByID: (trackID: string) => ipcRenderer.invoke(channels.TRACK_BY_ID, trackID),
+      findOnlyByPath: (path: string) => ipcRenderer.invoke(channels.TRACK_BY_PATH, path),
     },
     playlists: {
       getAll: () => ipcRenderer.invoke(channels.PLAYLIST_ALL),
@@ -37,6 +38,7 @@ const api = {
     fixTags: async (track: Track) => ipcRenderer.invoke(channels.FIX_TAGS, track),
     scanPaths: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_LOOKUP, paths),
     importTracks: async (tracks: Track[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, tracks),
+    updateRating: (payload: UpdateRatingPayload) => ipcRenderer.send(channels.TRACK_UPDATE_RATING, payload),
   },
   dialog: {
     open: async (opts: Electron.OpenDialogOptions) => ipcRenderer.invoke(channels.DIALOG_OPEN, opts),

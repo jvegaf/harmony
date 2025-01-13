@@ -3,20 +3,36 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  min-height: 500px;
   width: 100%;
 }
 
-.detailsForm {
+.detailsRight {
   width: 600px;
   padding: 10px 15px;
   display: flex;
   flex-direction: column;
 }
 
-.detailsCover {
-  width: 500px;
+.detailsLeft {
+  width: 600px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.detailsCover {
+  width: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rating {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .detailsActions {

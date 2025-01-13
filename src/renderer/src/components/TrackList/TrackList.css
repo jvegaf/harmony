@@ -4,6 +4,11 @@
   --ag-header-foreground-color: var(--mantine-color-grey-6);
   --ag-header-background-color: var(--mantine-color-gray-1);
   --ag-row-height: 35px !important;
+
+  & .ag-root-wrapper {
+    border: none;
+  }
+
   & .ag-header {
     /* background-color: var(--mantine-color-gray-1) !important; */
     color: var(--mantine-color-grey-6);

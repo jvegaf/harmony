@@ -49,6 +49,10 @@ class DatabaseModule extends ModuleWindow {
       return this.db.findTrackByID(trackID);
     });
 
+    ipcMain.handle(channels.TRACK_BY_PATH, (_, path: string): Promise<Track> => {
+      return this.db.findTrackByPath(path);
+    });
+
     ipcMain.handle(channels.PLAYLIST_ALL, (): Promise<Array<Playlist>> => {
       return this.db.getAllPlaylists();
     });

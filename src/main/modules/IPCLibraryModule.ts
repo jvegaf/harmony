@@ -2,18 +2,19 @@ import fs from 'fs';
 import path from 'path';
 import log from 'electron-log';
 
-import { BrowserWindow, ipcMain, IpcMainInvokeEvent } from 'electron';
+import { BrowserWindow, ipcMain, IpcMainEvent, IpcMainInvokeEvent } from 'electron';
 import { globby } from 'globby';
 import * as mmd from 'music-metadata';
 import queue from 'queue';
 
-import { Track } from '../../preload/types/harmony';
+import { Track, UpdateRatingPayload } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
 import channels from '../../preload/lib/ipc-channels';
 import makeID from '../../preload/lib/id-provider';
 import { ParseDuration } from '../../preload/utils';
 import { loggerExtras } from '../lib/log/logger';
+import UpdateTrackRating from '../lib/track/rating-manager';
 
 interface ScanFile {
   path: string;
@@ -69,6 +70,9 @@ class IPCLibraryModule extends ModuleWindow {
   async load(): Promise<void> {
     ipcMain.handle(channels.LIBRARY_IMPORT_TRACKS, this.importTracks.bind(this));
     ipcMain.handle(channels.LIBRARY_LOOKUP, this.libraryLookup.bind(this));
+    ipcMain.on(channels.TRACK_UPDATE_RATING, (_: IpcMainEvent, payload: UpdateRatingPayload) =>
+      UpdateTrackRating(payload),
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -203,6 +207,7 @@ class IPCLibraryModule extends ModuleWindow {
 
     const title: string = common.title || path.parse(trackPath).base;
     const rating = common.rating ? common.rating[0] : undefined;
+    const rate = rating ? { ...rating, rating: Math.round(rating.rating * 5) } : undefined;
 
     const metadata = {
       album: common.album,
@@ -216,7 +221,7 @@ class IPCLibraryModule extends ModuleWindow {
       bitrate: format.bitrate!,
       title: title,
       year: common.year,
-      rating: rating,
+      rating: rate,
     };
 
     return metadata;

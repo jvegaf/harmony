@@ -1,42 +1,38 @@
 import { Rating } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import { TrackRating } from 'src/preload/types/harmony';
+import { TrackRating, TrackSrc } from 'src/preload/types/harmony';
+import { useLibraryAPI } from '../../stores/useLibraryStore';
 
 type Props = {
+  trackSrc: TrackSrc;
   rating: TrackRating;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 };
 
-function rateParser(rating: number) {
-  switch (true) {
-    case rating > 0.8:
-      return 5;
-    case rating > 0.6:
-      return 4;
-    case rating > 0.4:
-      return 3;
-    case rating > 0.2:
-      return 2;
-    case rating > 0.1:
-      return 1;
-    default:
-      return 0;
-  }
-}
-
-function TrackRatingComponent({ rating }: Props) {
+function TrackRatingComponent({ trackSrc, rating, size }: Props) {
+  const libraryAPI = useLibraryAPI();
   const [stars, setStars] = useState(0);
 
   useEffect(() => {
     if (!rating) {
       return;
     }
-    const result = rateParser(rating.rating);
-    setStars(result);
+    // const result = Math.round(rating.rating * 5);
+    setStars(rating.rating);
   }, [rating]);
+
+  const handleRating = (value: number) => {
+    libraryAPI.updateTrackRating(trackSrc, value);
+    setStars(value);
+  };
 
   return (
     <div>
-      <Rating value={stars} />
+      <Rating
+        value={stars}
+        onChange={handleRating}
+        size={size}
+      />
     </div>
   );
 }
