@@ -21,4 +21,9 @@
     background-color: var(--table-bg) !important;
     color: var(--mantine-color-grey-6);
   }
+
+  & .playing-style {
+    background-color: var(--mantine-color-teal-filled-hover) !important;
+    /* color: var(--mantine-color-dark-text) !important; */
+  }
 }

@@ -29,7 +29,7 @@ type Props = {
 const { menu, logger } = window.Main;
 
 const TrackList = (props: Props) => {
-  const { tracks, playlists, currentPlaylist, width, height } = props;
+  const { tracks, trackPlayingID, playlists, currentPlaylist, width, height } = props;
   const playerAPI = usePlayerAPI();
   const gridRef = useRef<AgGridReact>(null);
   const [lastUpdated, setLastUpdated] = useState<Track | null>(null);
@@ -86,12 +86,16 @@ const TrackList = (props: Props) => {
     setRowData(tracks);
   };
 
-  const onDoubleClick = useCallback((event: RowDoubleClickedEvent) => {
-    event.event?.preventDefault();
-    const { rowIndex } = event;
-    const queue = rowData.map(track => track.id);
-    playerAPI.start(queue, rowIndex!);
-  }, []);
+  const onDoubleClick = useCallback(
+    (event: RowDoubleClickedEvent) => {
+      event.event?.preventDefault();
+      const { rowIndex } = event;
+      const queue = rowData.map(track => track.id);
+      playerAPI.start(queue, rowIndex!);
+      event.node.setSelected(false);
+    },
+    [playerAPI, rowData],
+  );
 
   const onShowCtxtMenu = useCallback((event: CellContextMenuEvent) => {
     event.event?.preventDefault();
@@ -123,6 +127,21 @@ const TrackList = (props: Props) => {
     return params.data.id;
   }, []);
 
+  const rowClassRules = useMemo(() => {
+    return {
+      'playing-style': params => {
+        const trackId = params.data.id;
+        return trackId === trackPlayingID;
+      },
+    };
+  }, [trackPlayingID]);
+
+  // const getRowStyle = params => {
+  //   if (params.data.id === trackPlayingID) {
+  //     return { background: 'red' };
+  //   }
+  // };
+
   return (
     <div
       style={{
@@ -136,6 +155,7 @@ const TrackList = (props: Props) => {
         ref={gridRef}
         rowSelection='multiple'
         rowData={rowData}
+        rowClassRules={rowClassRules}
         columnDefs={colDefs}
         defaultColDef={defaultColDef}
         onGridReady={onGridReady}

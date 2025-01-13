@@ -56,14 +56,6 @@ export default function ViewTrackDetails() {
   //   },
   //   [track, formData, navigate, libraryAPI],
   // );
-  //
-  // const handleCancel = useCallback(
-  //   (e: React.MouseEvent<HTMLButtonElement>) => {
-  //     e.preventDefault();
-  //     navigate(-1);
-  //   },
-  //   [navigate],
-  // );
 
   return (
     <div className={`${appStyles.view} ${styles.viewDetails}`}>
@@ -90,19 +82,16 @@ export default function ViewTrackDetails() {
           <TextInput
             {...form.getInputProps('path')}
             label='File'
-            placeholder='File'
           />
           <TextInput
             {...form.getInputProps('title')}
             mt='md'
             label='Title'
-            placeholder='Title'
           />
           <TextInput
             {...form.getInputProps('artist')}
             mt='md'
             label='Artist'
-            placeholder='Artist'
           />
           <Grid
             justify='center'
@@ -113,7 +102,6 @@ export default function ViewTrackDetails() {
                 {...form.getInputProps('album')}
                 mt='md'
                 label='Album'
-                placeholder='Album'
               />
             </GridCol>
             <GridCol span={4}>
@@ -121,7 +109,6 @@ export default function ViewTrackDetails() {
                 {...form.getInputProps('genre')}
                 mt='md'
                 label='Genre'
-                placeholder='Genre'
               />
             </GridCol>
           </Grid>
@@ -133,33 +120,38 @@ export default function ViewTrackDetails() {
               {...form.getInputProps('bpm')}
               mt='md'
               label='BPM'
-              placeholder='BPM'
             />
             <TextInput
               {...form.getInputProps('year')}
               mt='md'
               label='Year'
-              placeholder='year'
             />
             <TextInput
               {...form.getInputProps('initialKey')}
               mt='md'
               label='Key'
-              placeholder='Key'
             />
           </Group>
           <Textarea
             {...form.getInputProps('comment')}
             mt='md'
             label='Comments'
-            placeholder='Comments'
           />
-          <Group justify='end'>
+          <Group
+            justify='end'
+            gap='xl'
+          >
+            <Button
+              onClick={() => navigate(-1)}
+              mt='md'
+            >
+              Cancel
+            </Button>
             <Button
               type='submit'
               mt='md'
             >
-              Submit
+              Save
             </Button>
           </Group>
         </form>
