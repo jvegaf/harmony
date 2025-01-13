@@ -1,4 +1,4 @@
-appId: com.github.jvegaf.emusik
+appId: com.github.jvegaf.harmony
 productName: 'eMusik'
 directories:
   buildResources: build

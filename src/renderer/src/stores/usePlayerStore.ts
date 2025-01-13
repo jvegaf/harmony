@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import player from '../lib/player';
 
-import { PlayerStatus, Track, TrackId } from '../../../preload/types/emusik';
+import { PlayerStatus, Track, TrackId } from '../../../preload/types/harmony';
 
 type PlayerState = {
   playerStatus: PlayerStatus;

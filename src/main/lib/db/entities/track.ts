@@ -1,6 +1,6 @@
 import { EntitySchema } from 'typeorm';
 
-import { Track } from '../../../../preload/types/emusik';
+import { Track } from '../../../../preload/types/harmony';
 
 export const TrackEntity = new EntitySchema<Track>({
   name: 'track',

@@ -49,7 +49,7 @@ app.whenReady().then(() => {
     .then(([redux, react]) => log.info(`Added Extensions:  ${redux.name}, ${react.name}`))
     .catch(err => log.error('An error occurred: ', err));
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.jvegaf.emusik');
+  electronApp.setAppUserModelId('com.jvegaf.harmony');
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

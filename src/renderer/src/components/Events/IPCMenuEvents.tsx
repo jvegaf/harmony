@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import channels from '../../../../preload/lib/ipc-channels';
 import PlaylistsAPI from '../../stores/PlaylistsAPI';
-import { CommandPayload, Track } from '../../../../preload/types/emusik';
+import { CommandPayload, Track } from '../../../../preload/types/harmony';
 import { useLibraryAPI } from '../../stores/useLibraryStore';
 
 const { ipcRenderer } = window.ElectronAPI;

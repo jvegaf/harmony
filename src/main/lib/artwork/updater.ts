@@ -1,4 +1,4 @@
-import { ArtTrack } from '../../../preload/types/emusik';
+import { ArtTrack } from '../../../preload/types/harmony';
 import log from 'electron-log';
 import FetchArtwork from './fetcher';
 import PersistArtwork from './saver';

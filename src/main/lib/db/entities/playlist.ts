@@ -1,6 +1,6 @@
 import { EntitySchema } from 'typeorm';
 
-import { Playlist } from '../../../../preload/types/emusik';
+import { Playlist } from '../../../../preload/types/harmony';
 
 export const PlaylistEntity = new EntitySchema<Playlist>({
   name: 'playlist',

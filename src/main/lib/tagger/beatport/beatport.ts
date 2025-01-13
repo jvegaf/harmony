@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { ResultTag } from '../../../../preload/types/emusik';
+import { ResultTag } from '../../../../preload/types/harmony';
 
 import { handleResponse, handleError } from '../response';
 import BeatportToken from './BeaportToken';

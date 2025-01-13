@@ -9,7 +9,7 @@ import {
   RowDoubleClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { CtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '../../../../preload/types/emusik';
+import { CtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '../../../../preload/types/harmony';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import './TrackList.css';
@@ -175,7 +175,7 @@ const TrackList = (props: Props) => {
         height: height,
         width: width,
       }}
-      className='ag-theme-alpine-auto-dark ag-theme-emusik'
+      className='ag-theme-alpine-auto-dark ag-theme-harmony'
       onKeyDown={e => onKeyPress(e)}
     >
       <AgGridReact

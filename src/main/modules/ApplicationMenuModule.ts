@@ -59,7 +59,7 @@ export default class ApplicationMenuModule extends ModuleWindow {
           {
             label: 'Learn More',
             click: async () => {
-              await shell.openExternal('https://emusik.io');
+              await shell.openExternal('https://harmony.io');
             },
           },
         ],

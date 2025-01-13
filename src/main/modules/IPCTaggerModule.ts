@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
-import { Track } from '../../preload/types/emusik';
+import { Track } from '../../preload/types/harmony';
 import FixTags from '../lib/tagger/tagger';
 
 import ModuleWindow from './BaseWindowModule';

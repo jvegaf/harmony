@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { MessageBoxReturnValue } from 'electron';
-import { TrackEditableFields, Track, TrackId } from '../../../preload/types/emusik';
+import { TrackEditableFields, Track, TrackId } from '../../../preload/types/harmony';
 import { stripAccents } from '../../../preload/lib/utils-id3';
 import { chunk } from '../../../preload/lib/utils';
 

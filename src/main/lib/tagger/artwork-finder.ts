@@ -1,7 +1,7 @@
 import gis, { Result } from 'async-g-i-s';
 import { BuildGoogleArtworkQuery } from './querybuilder';
 import log from 'electron-log';
-import { Track } from '../../../preload/types/emusik';
+import { Track } from '../../../preload/types/harmony';
 
 const FindArtwork = async (track: Track): Promise<string[]> => {
   const { title, artist } = track;

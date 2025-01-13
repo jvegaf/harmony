@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain, IpcMainEvent, Menu, MenuItemConstructorOptions, PopupOptions } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
-import { CtxMenuPayload } from '../../preload/types/emusik';
+import { CtxMenuPayload } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
 

@@ -4,7 +4,7 @@ import channels from '../../preload/lib/ipc-channels';
 import { rendererLogger } from '../lib/log/logger';
 
 import ModuleWindow from './BaseWindowModule';
-import { LogProps, LogLevel } from '../../preload/types/emusik';
+import { LogProps, LogLevel } from '../../preload/types/harmony';
 
 class IPCLoggerModule extends ModuleWindow {
   async load(): Promise<void> {

@@ -1,5 +1,5 @@
 import { GetStringTokens } from '../../../../preload/lib/utils-id3';
-import { ResultTag } from '../../../../preload/types/emusik';
+import { ResultTag } from '../../../../preload/types/harmony';
 import { BandcampSearchResult } from './bandcamp';
 
 export const getResultTag = (result: BandcampSearchResult): ResultTag => {

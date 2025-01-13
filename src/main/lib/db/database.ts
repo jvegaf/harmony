@@ -3,13 +3,13 @@ import path from 'path';
 import { app } from 'electron';
 import { DataSource, In } from 'typeorm';
 
-import { Playlist, Track, TrackId } from '../../../preload/types/emusik';
+import { Playlist, Track, TrackId } from '../../../preload/types/harmony';
 
 import { TrackEntity, PlaylistEntity } from './entities';
 import log from 'electron-log';
 
 const pathUserData = app.getPath('userData');
-const dbPath = path.join(pathUserData, 'database/emusik.db');
+const dbPath = path.join(pathUserData, 'database/harmony.db');
 
 export class Database {
   private connection!: DataSource;

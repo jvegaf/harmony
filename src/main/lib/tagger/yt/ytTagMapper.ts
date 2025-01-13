@@ -1,4 +1,4 @@
-import { ResultTag } from '../../../../preload/types/emusik';
+import { ResultTag } from '../../../../preload/types/harmony';
 import log from 'electron-log';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

@@ -1,5 +1,5 @@
 import log from 'electron-log';
-import type { MatchResult, ResultTag, Track } from '../../../preload/types/emusik';
+import type { MatchResult, ResultTag, Track } from '../../../preload/types/harmony';
 import { GetStringTokens } from '../../../preload/lib/utils-id3';
 import Update from '../track/updater';
 

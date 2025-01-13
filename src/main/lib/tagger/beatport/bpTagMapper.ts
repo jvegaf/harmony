@@ -1,4 +1,4 @@
-import { ResultTag } from '../../../../preload/types/emusik';
+import { ResultTag } from '../../../../preload/types/harmony';
 import { GetStringTokens } from '../../../../preload/lib/utils-id3';
 
 interface Result {

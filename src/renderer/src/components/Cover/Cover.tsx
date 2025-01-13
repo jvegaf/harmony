@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import * as AspectRatio from '@radix-ui/react-aspect-ratio';
-import { Track } from '../../../../preload/types/emusik';
+import { Track } from '../../../../preload/types/harmony';
 import Placeholder from '../../assets/placeholder.png';
 
 import styles from './Cover.module.css';

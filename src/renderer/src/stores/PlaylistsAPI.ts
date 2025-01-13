@@ -3,7 +3,7 @@ import router from '../views/router';
 import makeID from '../../../preload/lib/id-provider';
 
 import usePlayerStore from './usePlayerStore';
-import { Playlist, Track } from '../../../preload/types/emusik';
+import { Playlist, Track } from '../../../preload/types/harmony';
 
 const { db, logger } = window.Main;
 const { ipcRenderer } = window.ElectronAPI;

@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
-import { Playlist, Track, TrackId } from '../../preload/types/emusik';
+import { Playlist, Track, TrackId } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
 import { Database } from '../lib/db/database';

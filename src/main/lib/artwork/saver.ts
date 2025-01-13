@@ -1,5 +1,5 @@
 import * as NodeId3 from 'node-id3';
-import { Artwork } from '../../../preload/types/emusik';
+import { Artwork } from '../../../preload/types/harmony';
 import log from 'electron-log';
 
 const PersistArtwork = (trackPath: string, artwork: Artwork) => {

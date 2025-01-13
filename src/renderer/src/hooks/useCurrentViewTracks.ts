@@ -5,7 +5,7 @@ import { RootLoaderData } from '../views/Root';
 // import { PlaylistLoaderData } from '../views/ViewPlaylistDetails';
 
 import useFilteredTracks from './useFilteredTracks';
-import { Track } from '../../../preload/types/emusik';
+import { Track } from '../../../preload/types/harmony';
 
 type Maybe<T> = T | undefined;
 

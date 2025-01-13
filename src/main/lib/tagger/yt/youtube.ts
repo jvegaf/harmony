@@ -2,7 +2,7 @@
 import YoutubeMusicApi from 'youtube-music-api';
 import GetTagResults from './ytTagMapper';
 import log from 'electron-log';
-import { ResultTag } from '../../../../preload/types/emusik';
+import { ResultTag } from '../../../../preload/types/harmony';
 
 const SearchYtTags = async (title: string, artist: string | null = null): Promise<ResultTag[]> => {
   const api = new YoutubeMusicApi();

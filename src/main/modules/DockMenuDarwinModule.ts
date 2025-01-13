@@ -5,7 +5,7 @@
 import { IpcMainEvent, Menu, app, ipcMain } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
-import { PlayerStatus, Track } from '../../preload/types/emusik';
+import { PlayerStatus, Track } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
 

@@ -1,4 +1,4 @@
-import { Track } from '../../../preload/types/emusik';
+import { Track } from '../../../preload/types/harmony';
 import * as utils from './utils';
 
 /**

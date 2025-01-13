@@ -1,4 +1,4 @@
-import { ResultTag, Track } from '../../../preload/types/emusik';
+import { ResultTag, Track } from '../../../preload/types/harmony';
 
 const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
   if (!tag) return track;

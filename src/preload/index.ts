@@ -1,7 +1,7 @@
 import { app, contextBridge, ipcRenderer, shell } from 'electron';
 import { ElectronAPI, electronAPI } from '@electron-toolkit/preload';
 import channels from './lib/ipc-channels';
-import { Track, Playlist, LogLevel, TrackId, CtxMenuPayload } from './types/emusik';
+import { Track, Playlist, LogLevel, TrackId, CtxMenuPayload } from './types/harmony';
 import parseUri from './lib/utils-uri';
 
 const api = {

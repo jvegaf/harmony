@@ -1,4 +1,4 @@
-import { Track } from '../../../preload/types/emusik';
+import { Track } from '../../../preload/types/harmony';
 import usePlayerStore from '../stores/usePlayerStore';
 
 export default function usePlayingTrack(): Track | null {
