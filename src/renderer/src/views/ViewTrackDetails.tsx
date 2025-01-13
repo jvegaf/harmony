@@ -25,6 +25,10 @@ export default function ViewTrackDetails() {
       bpm: '',
       initialKey: '',
       comment: '',
+      rating: {
+        source: '',
+        rating: '',
+      },
     },
     validate: {
       title: hasLength({ min: 3 }, 'Must be at least 3 characters'),
@@ -112,6 +116,21 @@ export default function ViewTrackDetails() {
               />
             </GridCol>
           </Grid>
+          <Group
+            justify='center'
+            grow
+          >
+            <TextInput
+              {...form.getInputProps('rating.source')}
+              mt='md'
+              label='Rating Source'
+            />
+            <TextInput
+              {...form.getInputProps('rating.rating')}
+              mt='md'
+              label='Rating'
+            />
+          </Group>
           <Group
             justify='center'
             grow

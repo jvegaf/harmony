@@ -202,6 +202,7 @@ class IPCLibraryModule extends ModuleWindow {
     const { common, format } = data;
 
     const title: string = common.title || path.parse(trackPath).base;
+    const rating = common.rating ? common.rating[0] : undefined;
 
     const metadata = {
       album: common.album,
@@ -215,6 +216,7 @@ class IPCLibraryModule extends ModuleWindow {
       bitrate: format.bitrate!,
       title: title,
       year: common.year,
+      rating: rating,
     };
 
     return metadata;

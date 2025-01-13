@@ -18,6 +18,11 @@ export interface Artwork {
   imageBuffer: Buffer;
 }
 
+export interface TrackRating {
+  source?: string;
+  rating: number;
+}
+
 export interface Track {
   id: TrackId;
   album?: string;
@@ -31,7 +36,7 @@ export interface Track {
   title: string;
   year?: number;
   bitrate?: number;
-  rating?: number;
+  rating?: TrackRating;
   comment?: string;
 }
 

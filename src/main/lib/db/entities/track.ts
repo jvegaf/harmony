@@ -53,5 +53,9 @@ export const TrackEntity = new EntitySchema<Track>({
       type: String,
       nullable: true,
     },
+    rating: {
+      type: 'json',
+      nullable: true,
+    },
   },
 });

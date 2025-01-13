@@ -9,12 +9,13 @@ import {
   RowDoubleClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { CtxMenuPayload, Playlist, Track } from '../../../../preload/types/emusik';
+import { CtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '../../../../preload/types/emusik';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import './TrackList.css';
 import useLibraryStore from '../../stores/useLibraryStore';
 import { ParseDuration } from '../../../../preload/utils';
+import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
 
 type Props = {
   type: string;
@@ -27,6 +28,25 @@ type Props = {
 };
 
 const { menu, logger } = window.Main;
+
+function ratingComparator(valueA: TrackRating | null, valueB: TrackRating | null) {
+  const a = valueA && valueA.rating ? valueA.rating : 0;
+  const b = valueB && valueB.rating ? valueB.rating : 0;
+
+  if (a === b) {
+    return 0;
+  }
+
+  if (a === null) {
+    return 1;
+  }
+
+  if (b === null) {
+    return -1;
+  }
+
+  return a - b;
+}
 
 const TrackList = (props: Props) => {
   const { tracks, trackPlayingID, playlists, currentPlaylist, width, height } = props;
@@ -46,6 +66,19 @@ const TrackList = (props: Props) => {
       valueFormatter: (p: { value: number | null }) => ParseDuration(p.value),
     },
     { field: 'album', minWidth: 90 },
+    {
+      field: 'rating',
+      minWidth: 120,
+      maxWidth: 130,
+      comparator: ratingComparator,
+      cellRenderer: props => {
+        return (
+          <>
+            <TrackRatingComponent rating={props.value} />
+          </>
+        );
+      },
+    },
     { field: 'genre', minWidth: 180, maxWidth: 200 },
     { field: 'year', maxWidth: 70 },
     { field: 'bpm', maxWidth: 70 },
@@ -90,11 +123,11 @@ const TrackList = (props: Props) => {
     (event: RowDoubleClickedEvent) => {
       event.event?.preventDefault();
       const { rowIndex } = event;
-      const queue = rowData.map(track => track.id);
+      const queue = event.node.parent!.childrenAfterSort!.map((node: any) => node.data.id as TrackId);
       playerAPI.start(queue, rowIndex!);
       event.node.setSelected(false);
     },
-    [playerAPI, rowData],
+    [playerAPI],
   );
 
   const onShowCtxtMenu = useCallback((event: CellContextMenuEvent) => {
@@ -135,12 +168,6 @@ const TrackList = (props: Props) => {
       },
     };
   }, [trackPlayingID]);
-
-  // const getRowStyle = params => {
-  //   if (params.data.id === trackPlayingID) {
-  //     return { background: 'red' };
-  //   }
-  // };
 
   return (
     <div
