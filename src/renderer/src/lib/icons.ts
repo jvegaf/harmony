@@ -1,5 +1,3 @@
-/* eslint-disable import/no-unresolved */
-
 import NEXT from '../../shared/assets/icons/player-next.svg?raw';
 import PAUSE from '../../shared/assets/icons/player-pause.svg?raw';
 import PLAY from '../../shared/assets/icons/player-play.svg?raw';

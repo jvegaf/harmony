@@ -16,12 +16,8 @@ function MediaSessionEvents() {
 
     navigator.mediaSession.setActionHandler('play', () => playerAPI.play());
     navigator.mediaSession.setActionHandler('pause', () => playerAPI.pause());
-    navigator.mediaSession.setActionHandler('previoustrack', () =>
-      playerAPI.previous(),
-    );
-    navigator.mediaSession.setActionHandler('nexttrack', () =>
-      playerAPI.next(),
-    );
+    navigator.mediaSession.setActionHandler('previoustrack', () => playerAPI.previous());
+    navigator.mediaSession.setActionHandler('nexttrack', () => playerAPI.next());
 
     return function cleanup() {
       player.getAudio().removeEventListener('loadstart', syncArtwork);

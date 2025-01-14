@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import { LoaderFunctionArgs, useLoaderData, useNavigate } from 'react-router-dom';
-import { Button, Fieldset, Grid, GridCol, Group, Textarea, TextInput } from '@mantine/core';
+import { Button, Grid, GridCol, Group, Textarea, TextInput } from '@mantine/core';
 import { hasLength, useForm } from '@mantine/form';
-
 import { LoaderData } from './router';
 import appStyles from './Root.module.css';
 import styles from './ViewTrackDetails.module.css';
 import Cover from '../components/Cover/Cover';
 import TrackRatingComponent from '../components/TrackRatingComponent/TrackRatingComponent';
+import { useLibraryAPI } from '../stores/useLibraryStore';
 
 export default function ViewTrackDetails() {
   const navigate = useNavigate();
   const { track } = useLoaderData() as DetailsLoaderData;
+  const libraryAPI = useLibraryAPI();
 
   const form = useForm({
     mode: 'uncontrolled',
@@ -39,16 +40,13 @@ export default function ViewTrackDetails() {
     form.resetDirty(track);
   }, [track]);
 
-  const [submittedValues, setSubmittedValues] = useState<typeof form.values | null>(null);
-
-  // const handleSubmit = useCallback(
-  //   async (e: React.FormEvent<HTMLFormElement>) => {
-  //     e.preventDefault();
-  //     await libraryAPI.updateTrackMetadata(track.id, formData);
-  //     navigate(-1);
-  //   },
-  //   [track, formData, navigate, libraryAPI],
-  // );
+  const handleSubmit = useCallback(
+    async values => {
+      await libraryAPI.updateTrackMetadata(track.id, values);
+      navigate(-1);
+    },
+    [track, navigate, libraryAPI],
+  );
 
   return (
     <div className={`${appStyles.view} ${styles.viewDetails}`}>
@@ -65,20 +63,24 @@ export default function ViewTrackDetails() {
         </div>
       </div>
       <div className={styles.detailsRight}>
-        <form onSubmit={form.onSubmit(setSubmittedValues)}>
+        <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
-            {...form.getInputProps('path')}
+            readOnly
             label='File'
+            {...form.getInputProps('path')}
+            key={form.key('path')}
           />
           <TextInput
-            {...form.getInputProps('title')}
             mt='md'
             label='Title'
+            {...form.getInputProps('title')}
+            key={form.key('title')}
           />
           <TextInput
-            {...form.getInputProps('artist')}
             mt='md'
             label='Artist'
+            {...form.getInputProps('artist')}
+            key={form.key('artist')}
           />
           <Grid
             justify='center'
@@ -86,16 +88,18 @@ export default function ViewTrackDetails() {
           >
             <GridCol span={8}>
               <TextInput
-                {...form.getInputProps('album')}
                 mt='md'
                 label='Album'
+                {...form.getInputProps('album')}
+                key={form.key('album')}
               />
             </GridCol>
             <GridCol span={4}>
               <TextInput
-                {...form.getInputProps('genre')}
                 mt='md'
                 label='Genre'
+                {...form.getInputProps('genre')}
+                key={form.key('genre')}
               />
             </GridCol>
           </Grid>
@@ -104,27 +108,31 @@ export default function ViewTrackDetails() {
             grow
           >
             <TextInput
-              {...form.getInputProps('bpm')}
               mt='md'
               label='BPM'
+              {...form.getInputProps('bpm')}
+              key={form.key('bpm')}
             />
             <TextInput
-              {...form.getInputProps('year')}
               mt='md'
               label='Year'
+              {...form.getInputProps('year')}
+              key={form.key('year')}
             />
             <TextInput
-              {...form.getInputProps('initialKey')}
               mt='md'
               label='Key'
+              {...form.getInputProps('initialKey')}
+              key={form.key('initialKey')}
             />
           </Group>
           <Textarea
-            {...form.getInputProps('comment')}
             mt='md'
             autosize
             minRows={8}
             label='Comments'
+            {...form.getInputProps('comment')}
+            key={form.key('comment')}
           />
           <Group
             justify='end'

@@ -13,11 +13,7 @@ interface WrapProps {
  * Wrapper for navigation
  */
 export function Wrap(props: WrapProps) {
-  return (
-    <nav className={cx(styles.nav, { [styles.navVertical]: props.vertical })}>
-      {props.children}
-    </nav>
-  );
+  return <nav className={cx(styles.nav, { [styles.navVertical]: props.vertical })}>{props.children}</nav>;
 }
 
 interface LinkProps {
@@ -32,9 +28,7 @@ export function Link(props: LinkProps) {
   return (
     <NavLink
       to={props.to}
-      className={({ isActive }) =>
-        `${styles.nav__link} ${isActive && styles.nav__linkActive}`
-      }
+      className={({ isActive }) => `${styles.nav__link} ${isActive && styles.nav__linkActive}`}
       draggable={false}
     >
       {props.children}

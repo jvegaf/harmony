@@ -189,7 +189,9 @@ const libraryStore = createStore<LibraryState>((set, get) => ({
         throw new Error('No track found while trying to update track metadata');
       }
 
+      await library.updateMetadata(track);
       await db.tracks.update(track);
+      set({ updated: track });
     },
 
     /**

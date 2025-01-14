@@ -15,6 +15,7 @@ import makeID from '../../preload/lib/id-provider';
 import { ParseDuration } from '../../preload/utils';
 import { loggerExtras } from '../lib/log/logger';
 import UpdateTrackRating from '../lib/track/rating-manager';
+import PersistTrack from '../lib/track/saver';
 
 interface ScanFile {
   path: string;
@@ -73,6 +74,7 @@ class IPCLibraryModule extends ModuleWindow {
     ipcMain.on(channels.TRACK_UPDATE_RATING, (_: IpcMainEvent, payload: UpdateRatingPayload) =>
       UpdateTrackRating(payload),
     );
+    ipcMain.on(channels.TRACK_UPDATE_METADATA, (_: IpcMainEvent, track: Track) => PersistTrack(track));
   }
 
   // ---------------------------------------------------------------------------

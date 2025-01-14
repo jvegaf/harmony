@@ -1,4 +1,4 @@
-.PHONY: all install clean clean/deps clean/data dev run lint build/linux build/win build/mac
+.PHONY: all install clean clean/deps clean/data dev run lint check build/linux build/win build/mac
 
 YARN_CMD = yarn
 CONFIG_DIR = ~/.config/harmony
@@ -32,6 +32,10 @@ run:
 lint:
 	@echo "Linting code..."
 	@$(YARN_CMD) lint
+
+check:
+	@echo "Linting code..."
+	@$(YARN_CMD) typecheck
 
 build/linux: clean
 	@echo "Building Linux application..."

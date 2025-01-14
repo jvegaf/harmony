@@ -23,7 +23,7 @@ type PlayerState = {
   };
 };
 
-const { db, logger } = window.Main;
+const { db } = window.Main;
 
 const usePlayerStore = create<PlayerState>((set, get) => ({
   playerStatus: PlayerStatus.STOP,

@@ -14,7 +14,9 @@ const { ipcRenderer } = window.ElectronAPI;
 const play = async (playlistID: string): Promise<void> => {
   try {
     const playlist: Playlist = await db.playlists.findOnlyByID(playlistID);
-    usePlayerStore.getState().api.start(playlist.tracks![0].id).catch(logger.warn);
+    const queue = playlist.tracks!.map(track => track.id);
+    const index = 0;
+    usePlayerStore.getState().api.start(queue, index).catch(logger.warn);
   } catch (err) {
     logger.warn((err as Error).message);
   }

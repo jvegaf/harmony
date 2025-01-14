@@ -11,7 +11,7 @@ export const useViewportSize = (debounceTime = 250) => {
     height: 0,
   });
 
-  const debounce = (fn: Function, ms: number) => {
+  const debounce = (fn: () => void, ms: number) => {
     let timer: number | null;
     return () => {
       if (timer !== null) clearTimeout(timer);
