@@ -5,13 +5,21 @@ CONFIG_DIR = ~/.config/harmony
 
 all: clean install
 
-install:
+install: clean clean/deps
 	@echo "Installing dependencies..."
 	@$(YARN_CMD) install
 
 clean:
 	@echo "Cleaning up..."
-	@rm -rf out dist node_modules $(CONFIG_DIR)
+	@rm -rf out dist
+
+clean/data:
+	@echo "Cleaning up data ..."
+	@rm -rf $(CONFIG_DIR)
+
+clean/deps:
+	@echo "Cleaning up deps..."
+	@rm -rf node_modules
 
 dev:
 	@echo "Running development environment..."
