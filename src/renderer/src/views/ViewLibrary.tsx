@@ -12,6 +12,7 @@ import appStyles from './Root.module.css';
 import styles from './ViewLibrary.module.css';
 import TrackList from '../components/TrackList/TrackList';
 import { useViewportSize } from '../hooks/useViewPortSize';
+import SearchBar from '../components/SearchBar/SearchBar';
 
 const { db } = window.Main;
 
@@ -70,12 +71,19 @@ export default function ViewLibrary() {
         trackPlayingID={trackPlayingID}
         playlists={playlists}
         width={width}
-        height={height}
+        height={height - 50}
       />
     );
   }, [search, refreshing, width, height, filteredTracks, playlists, trackPlayingID]);
 
-  return <div className={`${appStyles.view} ${styles.viewLibrary}`}>{getLibraryComponent}</div>;
+  return (
+    <div className={`${appStyles.view} ${styles.viewLibrary}`}>
+      <div>
+        <SearchBar tracks={tracks} />
+      </div>
+      <div>{getLibraryComponent}</div>
+    </div>
+  );
 }
 
 export type LibraryLoaderData = LoaderData<typeof ViewLibrary.loader>;

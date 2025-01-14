@@ -25,6 +25,7 @@ export default function Providers({ children }: any) {
       },
       TextInput: { styles: { input: { fontSize: '1.1rem' }, label: { color: '#868e96', marginTop: '0.5rem' } } },
       Textarea: { styles: { input: { fontSize: '1.1rem' }, label: { color: '#868e96', marginTop: '0.5rem' } } },
+      Autocomplete: { styles: { wrapper: { width: '500px' } } },
       Select: { styles: { label: { marginTop: '0.5rem' } } },
       Loader: { defaultProps: { size: 'xl' } },
       Space: { defaultProps: { h: 'sm' } },
