@@ -11,7 +11,7 @@ install:
 
 clean:
 	@echo "Cleaning up..."
-	@rm -rf out node_modules $(CONFIG_DIR)
+	@rm -rf out dist node_modules $(CONFIG_DIR)
 
 dev:
 	@echo "Running development environment..."
