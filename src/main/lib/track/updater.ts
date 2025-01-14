@@ -1,4 +1,6 @@
 import { ResultTag, Track } from '../../../preload/types/harmony';
+import log from 'electron-log';
+import PersistTrack from './saver';
 
 const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
   if (!tag) return track;
@@ -14,15 +16,11 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     genre: tag.genre || track.genre,
   };
 
-  /**
-   persisting disabled for debugging
-  */
-
-  // try {
-  //   await PersistTrack(newTrack);
-  // } catch (error){
-  //   logger.error(error);
-  // }
+  try {
+    PersistTrack(newTrack);
+  } catch (error) {
+    log.error(error);
+  }
 
   return newTrack;
 };
