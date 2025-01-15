@@ -1,16 +1,18 @@
 import log from 'electron-log';
 
-export const removeFile = (path: string) => {
+function RemoveFile(path: string) {
   return new Promise<void>((resolve, reject) => {
     const fs = require('fs');
-    fs.unlink(path, err => {
+    fs.unlink(path, (err: Error) => {
       if (err) {
-        log.warn(err);
+        log.error('remove file error: ', err);
         reject(err);
       } else {
         resolve();
-        log.info('file removed');
+        log.info('file removed: ', path);
       }
     });
   });
-};
+}
+
+export default RemoveFile;

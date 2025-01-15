@@ -16,6 +16,7 @@ import './TrackList.css';
 import useLibraryStore from '../../stores/useLibraryStore';
 import { ParseDuration } from '../../../../preload/utils';
 import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
+import { ratingComparator } from '../../lib/utils-library';
 
 type Props = {
   type: string;
@@ -28,25 +29,6 @@ type Props = {
 };
 
 const { menu, logger } = window.Main;
-
-function ratingComparator(valueA: TrackRating | null, valueB: TrackRating | null) {
-  const a = valueA && valueA.rating ? valueA.rating : 0;
-  const b = valueB && valueB.rating ? valueB.rating : 0;
-
-  if (a === b) {
-    return 0;
-  }
-
-  if (a === null) {
-    return 1;
-  }
-
-  if (b === null) {
-    return -1;
-  }
-
-  return a - b;
-}
 
 const TrackList = (props: Props) => {
   const { tracks, trackPlayingID, playlists, currentPlaylist, width, height } = props;

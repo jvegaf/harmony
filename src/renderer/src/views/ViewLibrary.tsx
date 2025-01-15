@@ -65,22 +65,24 @@ export default function ViewLibrary() {
 
     // All good !
     return (
-      <TrackList
-        type='library'
-        tracks={filteredTracks}
-        trackPlayingID={trackPlayingID}
-        playlists={playlists}
-        width={width}
-        height={height - 50}
-      />
+      <div className={styles.viewLibrary}>
+        <div>
+          <SearchBar tracks={tracks} />
+        </div>
+        <TrackList
+          type='library'
+          tracks={filteredTracks}
+          trackPlayingID={trackPlayingID}
+          playlists={playlists}
+          width={width}
+          height={height - 115}
+        />
+      </div>
     );
   }, [search, refreshing, width, height, filteredTracks, playlists, trackPlayingID]);
 
   return (
-    <div className={`${appStyles.view} ${styles.viewLibrary}`}>
-      <div>
-        <SearchBar tracks={tracks} />
-      </div>
+    <div className={appStyles.view}>
       <div>{getLibraryComponent}</div>
     </div>
   );

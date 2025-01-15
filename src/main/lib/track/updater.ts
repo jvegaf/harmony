@@ -19,7 +19,7 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
   try {
     PersistTrack(newTrack);
   } catch (error) {
-    log.error(error);
+    log.error('update error: ', error);
   }
 
   return newTrack;

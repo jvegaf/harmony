@@ -10,6 +10,6 @@ export default async function UpdateTrackRating(payload: UpdateRatingPayload) {
   try {
     await NodeID3.Promise.update(updatedTags, trackSrc);
   } catch (error) {
-    log.error(error);
+    log.error('update rating error: ', error);
   }
 }

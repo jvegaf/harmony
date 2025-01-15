@@ -40,6 +40,7 @@ const api = {
     importTracks: async (tracks: Track[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, tracks),
     updateRating: (payload: UpdateRatingPayload) => ipcRenderer.send(channels.TRACK_UPDATE_RATING, payload),
     updateMetadata: async (track: Track) => ipcRenderer.send(channels.TRACK_UPDATE_METADATA, track),
+    deleteTracks: async (tracks: Track[]) => ipcRenderer.send(channels.TRACKS_REMOVE, tracks),
   },
   dialog: {
     open: async (opts: Electron.OpenDialogOptions) => ipcRenderer.invoke(channels.DIALOG_OPEN, opts),

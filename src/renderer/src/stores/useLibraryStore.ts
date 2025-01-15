@@ -7,6 +7,7 @@ import { chunk } from '../../../preload/lib/utils';
 import { createStore } from './store-helpers';
 import usePlayerStore from './usePlayerStore';
 import createSelectors from './selectors';
+import router from '../views/router';
 
 const { db, covers, logger, library, dialog } = window.Main;
 
@@ -35,6 +36,7 @@ type LibraryState = {
     fixTrack: (trackID: string) => Promise<void>;
     toFix: (total: number) => void;
     updateTrackRating: (trackSrc: TrackSrc, rating: number) => Promise<void>;
+    deleteTracks: (tracks: Track[]) => Promise<void>;
   };
 };
 
@@ -206,7 +208,7 @@ const libraryStore = createStore<LibraryState>((set, get) => ({
     },
     fixTrack: async (trackID: string): Promise<void> => {
       let track = await db.tracks.findOnlyByID(trackID);
-      const fixedTrack = await window.Main.library.fixTags(track);
+      const fixedTrack = await library.fixTags(track);
       track = {
         ...track,
         ...fixedTrack,
@@ -229,6 +231,29 @@ const libraryStore = createStore<LibraryState>((set, get) => ({
       window.Main.library.updateRating({ trackSrc, rating: newRating });
       window.Main.db.tracks.update(updatedTrack);
       set({ updated: updatedTrack });
+    },
+    deleteTracks: async (tracks: Track[]) => {
+      usePlayerStore.getState().api.stop();
+      try {
+        const options: Electron.MessageBoxOptions = {
+          buttons: ['Cancel', 'Delete'],
+          title: 'Delete tracks from disk?',
+          message: 'Are you sure you want to delete tracks from disk? ',
+          type: 'warning',
+        };
+
+        const result = await dialog.msgbox(options);
+
+        if (result.response === 1) {
+          set({ refreshing: true });
+          await db.tracks.remove(tracks.map(track => track.id));
+          await library.deleteTracks(tracks);
+          set({ refreshing: false });
+          router.revalidate();
+        }
+      } catch (err) {
+        logger.error(err as any);
+      }
     },
   },
 }));

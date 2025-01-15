@@ -129,6 +129,15 @@ class ContextMenuModule extends ModuleWindow {
             event.sender.send(channels.CMD_TRACKS_LIBRARY_REMOVE, selected);
           },
         },
+        {
+          type: 'separator',
+        },
+        {
+          label: 'Delete from disk',
+          click: () => {
+            event.sender.send(channels.CMD_TRACKS_DELETE, selected);
+          },
+        },
       );
 
       const menu = Menu.buildFromTemplate(template);
