@@ -1,5 +1,7 @@
 # Harmony
 
+[![Build/release](https://github.com/jvegaf/harmony/actions/workflows/build.yml/badge.svg)](https://github.com/jvegaf/harmony/actions/workflows/build.yml)
+
 ## Description
 
 Symphony is a music manager designed specifically for old school DJs. It allows you to organize and manage your music collection efficiently.
