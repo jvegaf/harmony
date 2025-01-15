@@ -9,7 +9,7 @@ import {
   RowDoubleClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { CtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '../../../../preload/types/harmony';
+import { CtxMenuPayload, Playlist, Track, TrackId } from '../../../../preload/types/harmony';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import './TrackList.css';
