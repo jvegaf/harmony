@@ -29,6 +29,7 @@ export class Database {
     AppDataSource.initialize()
       .then(() => {
         log.info('Data Source has been initialized!');
+        log.info('database path: ', dbPath);
       })
       .catch((err: any) => {
         log.error(`Error during Data Source initialization ${err}`);
