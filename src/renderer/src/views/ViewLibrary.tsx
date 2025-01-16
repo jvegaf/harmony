@@ -39,18 +39,20 @@ export default function ViewLibrary() {
       }
 
       return (
-        <ViewMessage.Notice>
-          <p>Too bad, there is no music in your library =(</p>
-          <ViewMessage.Sub>
-            <span>you can always just drop files and folders anywhere or</span>{' '}
-            <Link
-              to='/settings/library'
-              draggable={false}
-            >
-              add your music here
-            </Link>
-          </ViewMessage.Sub>
-        </ViewMessage.Notice>
+        <div className={styles.viewMessage}>
+          <ViewMessage.Notice>
+            <p>Too bad, there is no music in your library =(</p>
+            <ViewMessage.Sub>
+              <span>you can always just drop files and folders anywhere or</span>{' '}
+              <Link
+                to='/settings/library'
+                draggable={false}
+              >
+                add your music here
+              </Link>
+            </ViewMessage.Sub>
+          </ViewMessage.Notice>
+        </div>
       );
     }
 
