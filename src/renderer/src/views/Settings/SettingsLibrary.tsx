@@ -1,12 +1,12 @@
 import { useCallback } from 'react';
 
-import * as Setting from '../components/Setting/Setting';
-import useLibraryStore, { useLibraryAPI } from '../stores/useLibraryStore';
+import * as Setting from '../../components/Setting/Setting';
+import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
 import { Button } from '@mantine/core';
 
 const { logger, dialog } = window.Main;
 
-export default function ViewSettingsLibrary() {
+export default function SettingsLibrary() {
   const libraryAPI = useLibraryAPI();
   const isLibraryRefreshing = useLibraryStore.use.refreshing();
 

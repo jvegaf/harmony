@@ -1,22 +1,22 @@
 import { useMemo } from 'react';
 import { Link, useLoaderData, useRouteLoaderData } from 'react-router-dom';
 
-import * as ViewMessage from '../elements/ViewMessage/ViewMessage';
-import useLibraryStore from '../stores/useLibraryStore';
-import usePlayingTrackID from '../hooks/usePlayingTrackID';
-import useFilteredTracks from '../hooks/useFilteredTracks';
+import * as ViewMessage from '../../elements/ViewMessage/ViewMessage';
+import useLibraryStore from '../../stores/useLibraryStore';
+import usePlayingTrackID from '../../hooks/usePlayingTrackID';
+import useFilteredTracks from '../../hooks/useFilteredTracks';
 
-import { RootLoaderData } from './Root';
-import { LoaderData } from './router';
-import appStyles from './Root.module.css';
-import styles from './ViewLibrary.module.css';
-import TrackList from '../components/TrackList/TrackList';
-import { useViewportSize } from '../hooks/useViewPortSize';
-import SearchBar from '../components/SearchBar/SearchBar';
+import { RootLoaderData } from '../Root';
+import { LoaderData } from '../router';
+import appStyles from '../Root.module.css';
+import styles from './Library.module.css';
+import TrackList from '../../components/TrackList/TrackList';
+import { useViewportSize } from '../../hooks/useViewPortSize';
+import SearchBar from '../../components/SearchBar/SearchBar';
 
 const { db } = window.Main;
 
-export default function ViewLibrary() {
+export default function LibraryView() {
   const trackPlayingID = usePlayingTrackID();
   const refreshing = useLibraryStore.use.refreshing();
   const search = useLibraryStore.use.search();
@@ -90,9 +90,9 @@ export default function ViewLibrary() {
   );
 }
 
-export type LibraryLoaderData = LoaderData<typeof ViewLibrary.loader>;
+export type LibraryLoaderData = LoaderData<typeof LibraryView.loader>;
 
-ViewLibrary.loader = async () => {
+LibraryView.loader = async () => {
   return {
     playlists: await db.playlists.getAll(),
   };
