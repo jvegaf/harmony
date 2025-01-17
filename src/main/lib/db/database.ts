@@ -56,7 +56,9 @@ export class Database {
 
   public async removeTracks(trackIDs: TrackId[]): Promise<void> {
     const repository = this.connection.getRepository<Track>(TrackEntity);
+    log.info('[db] tracks to remove: ', trackIDs.length);
     await repository.delete(trackIDs);
+    log.info('[db] tracks removed');
   }
 
   public async findTracksByID(tracksIDs: string[]): Promise<Track[]> {

@@ -1,8 +1,9 @@
 import log from 'electron-log';
 
 const rendererLogger = log.scope('renderer');
+const logger = log.scope('main');
 
-export { rendererLogger };
+export { logger, rendererLogger };
 
 /**
  * Custom implementation of timers helpers for benchmarking

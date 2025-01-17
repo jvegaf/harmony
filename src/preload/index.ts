@@ -4,6 +4,13 @@ import channels from './lib/ipc-channels';
 import { Track, Playlist, LogLevel, TrackId, CtxMenuPayload, UpdateRatingPayload } from './types/harmony';
 import parseUri from './lib/utils-uri';
 
+/*
+|--------------------------------------------------------------------------
+| Config API: the config lives in the main process and we communicate with
+| it via IPC
+|--------------------------------------------------------------------------
+*/
+
 const api = {
   app: {
     ready: () => ipcRenderer.send(channels.APP_READY),
@@ -40,7 +47,7 @@ const api = {
     importTracks: async (tracks: Track[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, tracks),
     updateRating: (payload: UpdateRatingPayload) => ipcRenderer.send(channels.TRACK_UPDATE_RATING, payload),
     updateMetadata: async (track: Track) => ipcRenderer.send(channels.TRACK_UPDATE_METADATA, track),
-    deleteTracks: async (tracks: Track[]) => ipcRenderer.send(channels.TRACKS_REMOVE, tracks),
+    deleteTracks: async (tracks: Track[]) => ipcRenderer.send(channels.TRACKS_DELETE, tracks),
   },
   dialog: {
     open: async (opts: Electron.OpenDialogOptions) => ipcRenderer.invoke(channels.DIALOG_OPEN, opts),

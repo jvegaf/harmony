@@ -1,0 +1,14 @@
+.viewLibrary {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 50px);
+}
+
+.viewMessage {
+  display: flex;
+  height: 100%;
+  padding-top: 300px;
+  justify-content: center;
+  align-items: center;
+}

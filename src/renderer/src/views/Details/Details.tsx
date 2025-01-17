@@ -2,14 +2,14 @@ import React, { useCallback } from 'react';
 import { LoaderFunctionArgs, useLoaderData, useNavigate } from 'react-router-dom';
 import { Button, Grid, GridCol, Group, Textarea, TextInput } from '@mantine/core';
 import { hasLength, useForm } from '@mantine/form';
-import { LoaderData } from './router';
-import appStyles from './Root.module.css';
-import styles from './ViewTrackDetails.module.css';
-import Cover from '../components/Cover/Cover';
-import TrackRatingComponent from '../components/TrackRatingComponent/TrackRatingComponent';
-import { useLibraryAPI } from '../stores/useLibraryStore';
+import { LoaderData } from '../router';
+import appStyles from '../Root.module.css';
+import styles from './Details.module.css';
+import Cover from '../../components/Cover/Cover';
+import TrackRatingComponent from '../../components/TrackRatingComponent/TrackRatingComponent';
+import { useLibraryAPI } from '../../stores/useLibraryStore';
 
-export default function ViewTrackDetails() {
+export default function DetailsView() {
   const navigate = useNavigate();
   const { track } = useLoaderData() as DetailsLoaderData;
   const libraryAPI = useLibraryAPI();
@@ -157,9 +157,9 @@ export default function ViewTrackDetails() {
   );
 }
 
-export type DetailsLoaderData = LoaderData<typeof ViewTrackDetails.loader>;
+export type DetailsLoaderData = LoaderData<typeof DetailsView.loader>;
 
-ViewTrackDetails.loader = async ({ params }: LoaderFunctionArgs) => {
+DetailsView.loader = async ({ params }: LoaderFunctionArgs) => {
   const { trackID } = params;
 
   if (trackID == null) {

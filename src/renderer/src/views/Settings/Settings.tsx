@@ -1,20 +1,20 @@
 import { Outlet, useMatch, Navigate, useNavigate, useRevalidator } from 'react-router-dom';
 
-import * as Nav from '../elements/Nav/Nav';
+import * as Nav from '../../elements/Nav/Nav';
 
-import { LoaderData } from './router';
-import appStyles from './Root.module.css';
-import styles from './ViewSettings.module.css';
+import { LoaderData } from '../router';
+import appStyles from '../Root.module.css';
+import styles from './Settings.module.css';
 import { Button } from '@mantine/core';
 
-export default function ViewSettingsView() {
+export default function SettingsView() {
   const match = useMatch('/settings');
   const revalidator = useRevalidator();
   const navigate = useNavigate();
 
   const onCloseListener = () => {
     revalidator.revalidate();
-    navigate('/');
+    navigate('/library');
   };
 
   return (
@@ -39,9 +39,9 @@ export default function ViewSettingsView() {
   );
 }
 
-export type SettingsLoaderData = LoaderData<typeof ViewSettingsView.loader>;
+export type SettingsLoaderData = LoaderData<typeof SettingsView.loader>;
 
-ViewSettingsView.loader = async () => {
+SettingsView.loader = async () => {
   // const config = await window.HarmonyAPI.config.getAll();
 
   // return {
