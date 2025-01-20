@@ -48,6 +48,23 @@ export default function DetailsView() {
     [track, navigate, libraryAPI],
   );
 
+  const getFilenameWithoutExtension = (filePath: string): string => {
+    const parts = filePath.split(/[/\\]/); 
+    const filename = parts[parts.length - 1];
+    const filenameWithoutExtension = filename.split('.').slice(0, -1).join('.');
+    return filenameWithoutExtension;
+  };
+
+  const filenameToTag = useCallback(() => {
+    const filename = getFilenameWithoutExtension(track.path);
+    const parts = filename.split(' - ');
+    if (parts.length < 2) return;
+    form.setValues({
+      title: parts[1],
+      artist: parts[0],
+    });
+  }, [track]);
+
   return (
     <div className={`${appStyles.view} ${styles.viewDetails}`}>
       <div className={styles.detailsLeft}>
@@ -61,13 +78,21 @@ export default function DetailsView() {
             size='xl'
           />
         </div>
+        <div>
+          <Button
+            onClick={filenameToTag}
+            mt='md'
+          >
+            Filename to Tag
+          </Button>
+        </div>
       </div>
       <div className={styles.detailsRight}>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
             readOnly
             label='File'
-            {...form.getInputProps('path')}
+            value={getFilenameWithoutExtension(track.path)}
             key={form.key('path')}
           />
           <TextInput

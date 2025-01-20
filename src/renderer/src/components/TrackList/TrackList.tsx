@@ -80,11 +80,16 @@ const TrackList = (props: Props) => {
   }, []);
 
   const updateTrackRow = useCallback(updatedTrack => {
-    const rowNode = gridRef.current!.api.getRowNode(updatedTrack.id)!;
+    // const rowNode = gridRef.current!.api.getRowNode(updatedTrack.id)!;
+    const rowNode = gridRef.current?.api.getRowNode(updatedTrack.id)!;
+    if (!rowNode) {
+      logger.error(`[TracksTable] track not found: ${updatedTrack.title}`);
+      return;
+    }
     rowNode.updateData(updatedTrack);
     logger.info(`[TracksTable] updated track: ${updatedTrack.title}`);
     setLastUpdated(updatedTrack);
-  }, []);
+  }, [gridRef]);
 
   useEffect(() => {
     if (updated !== null && updated !== lastUpdated) {

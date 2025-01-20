@@ -18,7 +18,7 @@ const PersistTrack = (track: Track) => {
   } as NodeId3.Tags;
 
   NodeId3.Promise.update(tags, track.path)
-    .then()
+    .then(() => log.info('track persisted', track.path))
     .catch(reason => log.error('track persist error', reason));
 };
 
