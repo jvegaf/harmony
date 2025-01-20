@@ -43,3 +43,10 @@ export function ratingComparator(valueA: TrackRating | null, valueB: TrackRating
 
   return a - b;
 }
+
+export const GetFilenameWithoutExtension = (filePath: string): string => {
+  const parts = filePath.split(/[/\\]/);
+  const filename = parts[parts.length - 1];
+  const filenameWithoutExtension = filename.split('.').slice(0, -1).join('.');
+  return filenameWithoutExtension;
+};

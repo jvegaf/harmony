@@ -23,8 +23,8 @@ export default function Providers({ children }: any) {
       Checkbox: {
         styles: { input: { cursor: 'pointer' }, label: { cursor: 'pointer' } },
       },
-      TextInput: { styles: { input: { fontSize: '1.1rem' }, label: { color: '#868e96', marginTop: '0.5rem' } } },
-      Textarea: { styles: { input: { fontSize: '1.1rem' }, label: { color: '#868e96', marginTop: '0.5rem' } } },
+      TextInput: { styles: { label: { fontSize: '0.7rem', color: '#868e96', marginTop: '0.5rem' } } },
+      Textarea: { styles: { label: { fontSize: '0.8rem', color: '#868e96', marginTop: '0.5rem' } } },
       Autocomplete: { styles: { wrapper: { width: '500px' } } },
       Select: { styles: { label: { marginTop: '0.5rem' } } },
       Loader: { defaultProps: { size: 'xl' } },

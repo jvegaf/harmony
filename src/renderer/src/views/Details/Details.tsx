@@ -1,6 +1,6 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { LoaderFunctionArgs, useLoaderData, useNavigate } from 'react-router-dom';
-import { Button, Grid, GridCol, Group, Textarea, TextInput } from '@mantine/core';
+import { ActionIcon, Button, Grid, GridCol, Group, Textarea, TextInput } from '@mantine/core';
 import { hasLength, useForm } from '@mantine/form';
 import { LoaderData } from '../router';
 import appStyles from '../Root.module.css';
@@ -8,11 +8,15 @@ import styles from './Details.module.css';
 import Cover from '../../components/Cover/Cover';
 import TrackRatingComponent from '../../components/TrackRatingComponent/TrackRatingComponent';
 import { useLibraryAPI } from '../../stores/useLibraryStore';
+import { MdContentPasteGo } from 'react-icons/md';
+import { GetFilenameWithoutExtension } from '../../lib/utils-library';
 
 export default function DetailsView() {
   const navigate = useNavigate();
   const { track } = useLoaderData() as DetailsLoaderData;
   const libraryAPI = useLibraryAPI();
+  // const selection = window.getSelection();
+  const [selectedText, setSelectedText] = React.useState('');
 
   const form = useForm({
     mode: 'uncontrolled',
@@ -35,7 +39,7 @@ export default function DetailsView() {
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     form.setValues(track);
     form.resetDirty(track);
   }, [track]);
@@ -43,20 +47,13 @@ export default function DetailsView() {
   const handleSubmit = useCallback(
     async values => {
       await libraryAPI.updateTrackMetadata(track.id, values);
-      navigate(-1);
+      navigate('/');
     },
     [track, navigate, libraryAPI],
   );
 
-  const getFilenameWithoutExtension = (filePath: string): string => {
-    const parts = filePath.split(/[/\\]/); 
-    const filename = parts[parts.length - 1];
-    const filenameWithoutExtension = filename.split('.').slice(0, -1).join('.');
-    return filenameWithoutExtension;
-  };
-
   const filenameToTag = useCallback(() => {
-    const filename = getFilenameWithoutExtension(track.path);
+    const filename = GetFilenameWithoutExtension(track.path);
     const parts = filename.split(' - ');
     if (parts.length < 2) return;
     form.setValues({
@@ -64,6 +61,33 @@ export default function DetailsView() {
       artist: parts[0],
     });
   }, [track]);
+
+  const clearComments = useCallback(() => {
+    form.setValues({ comment: '' });
+  }, []);
+
+  useEffect(() => {
+    const handleSelect = () => {
+      const text = window.getSelection()!.toString();
+      if (text) {
+        console.log('selected text', text);
+        setSelectedText(text);
+      }
+    };
+
+    window.addEventListener('select', handleSelect);
+
+    return () => {
+      window.removeEventListener('select', handleSelect);
+      setSelectedText('');
+    };
+  }, []);
+
+  const setNewValue = useCallback((key: string) => {
+    form.setValues({ [key]: selectedText });
+    setSelectedText('');
+    window.getSelection()?.removeAllRanges();
+  }, []);
 
   return (
     <div className={`${appStyles.view} ${styles.viewDetails}`}>
@@ -79,12 +103,13 @@ export default function DetailsView() {
           />
         </div>
         <div>
-          <Button
-            onClick={filenameToTag}
+          <Group
             mt='md'
+            justify='center'
           >
-            Filename to Tag
-          </Button>
+            <Button onClick={filenameToTag}>Filename to Tag</Button>
+            <Button onClick={clearComments}>Clear Comments</Button>
+          </Group>
         </div>
       </div>
       <div className={styles.detailsRight}>
@@ -92,20 +117,40 @@ export default function DetailsView() {
           <TextInput
             readOnly
             label='File'
-            value={getFilenameWithoutExtension(track.path)}
+            value={GetFilenameWithoutExtension(track.path)}
             key={form.key('path')}
           />
           <TextInput
-            mt='md'
             label='Title'
             {...form.getInputProps('title')}
             key={form.key('title')}
+            leftSection={
+              selectedText && (
+                <ActionIcon
+                  variant='transparent'
+                  aria-label='Paste title'
+                  onClick={() => setNewValue('title')}
+                >
+                  <MdContentPasteGo />
+                </ActionIcon>
+              )
+            }
           />
           <TextInput
-            mt='md'
             label='Artist'
             {...form.getInputProps('artist')}
             key={form.key('artist')}
+            leftSection={
+              selectedText && (
+                <ActionIcon
+                  variant='transparent'
+                  aria-label='Paste Artist'
+                  onClick={() => setNewValue('artist')}
+                >
+                  <MdContentPasteGo />
+                </ActionIcon>
+              )
+            }
           />
           <Grid
             justify='center'
@@ -113,7 +158,6 @@ export default function DetailsView() {
           >
             <GridCol span={8}>
               <TextInput
-                mt='md'
                 label='Album'
                 {...form.getInputProps('album')}
                 key={form.key('album')}
@@ -121,7 +165,6 @@ export default function DetailsView() {
             </GridCol>
             <GridCol span={4}>
               <TextInput
-                mt='md'
                 label='Genre'
                 {...form.getInputProps('genre')}
                 key={form.key('genre')}
@@ -133,26 +176,22 @@ export default function DetailsView() {
             grow
           >
             <TextInput
-              mt='md'
               label='BPM'
               {...form.getInputProps('bpm')}
               key={form.key('bpm')}
             />
             <TextInput
-              mt='md'
               label='Year'
               {...form.getInputProps('year')}
               key={form.key('year')}
             />
             <TextInput
-              mt='md'
               label='Key'
               {...form.getInputProps('initialKey')}
               key={form.key('initialKey')}
             />
           </Group>
           <Textarea
-            mt='md'
             autosize
             minRows={8}
             label='Comments'
@@ -160,21 +199,12 @@ export default function DetailsView() {
             key={form.key('comment')}
           />
           <Group
+            mt='md'
             justify='end'
             gap='xl'
           >
-            <Button
-              onClick={() => navigate(-1)}
-              mt='md'
-            >
-              Cancel
-            </Button>
-            <Button
-              type='submit'
-              mt='md'
-            >
-              Save
-            </Button>
+            <Button onClick={() => navigate(-1)}>Cancel</Button>
+            <Button type='submit'>Save</Button>
           </Group>
         </form>
       </div>

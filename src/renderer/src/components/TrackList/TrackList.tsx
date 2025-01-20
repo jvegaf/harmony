@@ -96,10 +96,10 @@ const TrackList = (props: Props) => {
   );
 
   useEffect(() => {
-    if (updated !== null && updated !== lastUpdated) {
+    if (gridApi && updated !== null && updated !== lastUpdated) {
       updateTrackRow(updated);
     }
-  }, [updated, lastUpdated]);
+  }, [gridApi, updated, lastUpdated]);
 
   useEffect(() => {
     if (deleting) {
