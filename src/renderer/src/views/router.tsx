@@ -8,6 +8,7 @@ import LibraryView from './Library/Library';
 import SettingsLibrary from './Settings/SettingsLibrary';
 import DetailsView from './Details/Details';
 import SettingsView from './Settings/Settings';
+import SettingsAudio from './Settings/SettingsAudio';
 // import ViewPlaylists from './ViewPlaylists';
 // import ViewPlaylistDetails from './ViewPlaylistDetails';
 
@@ -57,11 +58,11 @@ const router = createHashRouter([
           //   element: <SettingsUI />,
           //   loader: SettingsView.loader,
           // },
-          // {
-          //   path: 'audio',
-          //   element: <SettingsAudio />,
-          //   loader: SettingsView.loader,
-          // },
+          {
+            path: 'audio',
+            element: <SettingsAudio />,
+            loader: SettingsView.loader,
+          },
         ],
       },
       {

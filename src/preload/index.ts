@@ -1,15 +1,21 @@
 import { app, contextBridge, ipcRenderer, shell } from 'electron';
 import { ElectronAPI, electronAPI } from '@electron-toolkit/preload';
 import channels from './lib/ipc-channels';
-import { Track, Playlist, LogLevel, TrackId, CtxMenuPayload, UpdateRatingPayload } from './types/harmony';
+import { Track, Playlist, LogLevel, TrackId, CtxMenuPayload, UpdateRatingPayload, Config } from './types/harmony';
 import parseUri from './lib/utils-uri';
 
-/*
-|--------------------------------------------------------------------------
-| Config API: the config lives in the main process and we communicate with
-| it via IPC
-|--------------------------------------------------------------------------
-*/
+const config = {
+  __initialConfig: ipcRenderer.sendSync(channels.CONFIG_GET_ALL),
+  getAll(): Promise<Config> {
+    return ipcRenderer.invoke(channels.CONFIG_GET_ALL);
+  },
+  get<T extends keyof Config>(key: T): Promise<Config[T]> {
+    return ipcRenderer.invoke(channels.CONFIG_GET, key);
+  },
+  set<T extends keyof Config>(key: T, value: Config[T]): Promise<void> {
+    return ipcRenderer.invoke(channels.CONFIG_SET, key, value);
+  },
+};
 
 const api = {
   app: {
@@ -17,6 +23,7 @@ const api = {
     restart: () => ipcRenderer.send(channels.APP_RESTART),
     clone: () => ipcRenderer.send(channels.APP_CLOSE),
   },
+  config,
   db: {
     tracks: {
       getAll: () => ipcRenderer.invoke(channels.TRACK_ALL),

@@ -7,14 +7,6 @@ interface PlayerOptions {
   muted?: boolean;
 }
 
-/**
- * Library in charge of playing audio. Currently uses HTMLAudioElement.
- *
- * Open questions:
- *   - Should it emit IPC events itself? Or expose events?
- *   - Should it hold the concepts of queue/random/etc? (in other words, should
- *     we merge player actions here?)
- */
 class Player {
   private audio: HTMLAudioElement;
   private durationThresholdReached: boolean;
@@ -132,8 +124,10 @@ class Player {
  * one anyway)
  */
 
+const { config } = window.Main;
+
 export default new Player({
-  volume: 1,
-  audioOutputDevice: 'default',
-  muted: false,
+  volume: config.__initialConfig['audioVolume'],
+  audioOutputDevice: config.__initialConfig['audioOutputDevice'],
+  muted: config.__initialConfig['audioMuted'],
 });

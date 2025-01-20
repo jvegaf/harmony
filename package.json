@@ -1,6 +1,6 @@
 {
   "name": "harmony",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "description": "Music manager for old-school DJs",
   "main": "./out/main/index.js",
   "author": "Jose Vega",
@@ -45,6 +45,7 @@
     "axios": "^1.7.9",
     "cherio": "^1.0.0-rc.2",
     "dayjs": "^1.11.10",
+    "electron-store": "8.2.0",
     "googlethis": "^1.8.0",
     "lodash": "^4.17.21",
     "music-metadata": "^7.14.0",
