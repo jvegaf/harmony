@@ -14,7 +14,7 @@ export default function SettingsView() {
 
   const onCloseListener = () => {
     revalidator.revalidate();
-    navigate('/library');
+    navigate('/');
   };
 
   return (

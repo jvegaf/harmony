@@ -22,8 +22,9 @@ const router = createHashRouter([
     ErrorBoundary: GlobalErrorBoundary,
     children: [
       {
-        path: 'library',
+        // path: 'library',
         id: 'library',
+        index: true,
         element: <LibraryView />,
         loader: LibraryView.loader,
       },
