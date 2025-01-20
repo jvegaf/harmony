@@ -38,6 +38,7 @@ const TrackList = (props: Props) => {
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [rowData, setRowData] = useState<Track[]>([]);
   const updated = useLibraryStore.use.updated();
+  const deleting = useLibraryStore.use.deleting();
   const colDefs = [
     { field: 'title', minWidth: 150 },
     { field: 'artist', minWidth: 90 },
@@ -79,23 +80,33 @@ const TrackList = (props: Props) => {
     };
   }, []);
 
-  const updateTrackRow = useCallback(updatedTrack => {
-    // const rowNode = gridRef.current!.api.getRowNode(updatedTrack.id)!;
-    const rowNode = gridRef.current?.api.getRowNode(updatedTrack.id)!;
-    if (!rowNode) {
-      logger.error(`[TracksTable] track not found: ${updatedTrack.title}`);
-      return;
-    }
-    rowNode.updateData(updatedTrack);
-    logger.info(`[TracksTable] updated track: ${updatedTrack.title}`);
-    setLastUpdated(updatedTrack);
-  }, [gridRef]);
+  const updateTrackRow = useCallback(
+    updatedTrack => {
+      // const rowNode = gridRef.current!.api.getRowNode(updatedTrack.id)!;
+      const rowNode = gridRef.current?.api.getRowNode(updatedTrack.id);
+      if (!rowNode) {
+        logger.error(`[TracksTable] track not found: ${updatedTrack.title}`);
+        return;
+      }
+      rowNode.updateData(updatedTrack);
+      logger.info(`[TracksTable] updated track: ${updatedTrack.title}`);
+      setLastUpdated(updatedTrack);
+    },
+    [gridRef],
+  );
 
   useEffect(() => {
     if (updated !== null && updated !== lastUpdated) {
       updateTrackRow(updated);
     }
   }, [updated, lastUpdated]);
+
+  useEffect(() => {
+    if (deleting) {
+      const selectedRowData = gridRef.current!.api.getSelectedRows();
+      gridRef.current!.api.applyTransaction({ remove: selectedRowData });
+    }
+  }, [deleting]);
 
   useEffect(() => {
     if (gridApi) {

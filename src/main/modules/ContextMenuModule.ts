@@ -120,15 +120,15 @@ class ContextMenuModule extends ModuleWindow {
             event.sender.send(channels.CMD_FIX_TAGS, selected);
           },
         },
-        {
-          type: 'separator',
-        },
-        {
-          label: 'Remove from library',
-          click: () => {
-            event.sender.send(channels.CMD_TRACKS_LIBRARY_REMOVE, selected);
-          },
-        },
+        // {
+        //   type: 'separator',
+        // },
+        // {
+        //   label: 'Remove from library',
+        //   click: () => {
+        //     event.sender.send(channels.CMD_TRACKS_LIBRARY_REMOVE, selected);
+        //   },
+        // },
         {
           type: 'separator',
         },

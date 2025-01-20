@@ -14,6 +14,7 @@ const { db, covers, logger, library, dialog } = window.Main;
 type LibraryState = {
   search: string;
   refreshing: boolean;
+  deleting: boolean;
   refresh: {
     processed: number;
     total: number;
@@ -43,6 +44,7 @@ type LibraryState = {
 const libraryStore = createStore<LibraryState>((set, get) => ({
   search: '',
   refreshing: false,
+  deleting: false,
   refresh: {
     processed: 0,
     total: 0,
@@ -245,10 +247,10 @@ const libraryStore = createStore<LibraryState>((set, get) => ({
         const result = await dialog.msgbox(options);
 
         if (result.response === 1) {
-          set({ refreshing: true });
+          set({ deleting: true });
           await db.tracks.remove(tracks.map(track => track.id));
           await library.deleteTracks(tracks);
-          set({ refreshing: false });
+          set({ deleting: false });
           router.revalidate();
         }
       } catch (err) {
