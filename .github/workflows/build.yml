@@ -16,13 +16,15 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: 'npm'
+          cache: 'yarn'
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1.6.0
