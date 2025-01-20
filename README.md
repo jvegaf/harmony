@@ -1,6 +1,6 @@
 # Harmony
 
-[![Build/release](https://github.com/jvegaf/harmony/actions/workflows/build.yml/badge.svg)](https://github.com/jvegaf/harmony/actions/workflows/build.yml)
+[![CI](https://github.com/jvegaf/harmony/actions/workflows/ci.yml/badge.svg)](https://github.com/jvegaf/harmony/actions/workflows/ci.yml)
 
 ## Description
 
