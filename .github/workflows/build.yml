@@ -27,8 +27,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: 'yarn'
-
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1.6.0
