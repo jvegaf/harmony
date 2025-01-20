@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import player from '../lib/player';
 
 import { PlayerStatus, Track, TrackId } from '../../../preload/types/harmony';
+import { debounce } from 'lodash';
 
 type PlayerState = {
   playerStatus: PlayerStatus;
@@ -20,10 +21,11 @@ type PlayerState = {
     setVolume: (volume: number) => void;
     setMuted: (muted: boolean) => void;
     jumpTo: (to: number) => void;
+    setOutputDevice: (deviceId: string) => void;
   };
 };
 
-const { db } = window.Main;
+const { db, config } = window.Main;
 
 const usePlayerStore = create<PlayerState>((set, get) => ({
   playerStatus: PlayerStatus.STOP,
@@ -124,20 +126,41 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
 
     setVolume: volume => {
       player.setVolume(volume);
+      saveVolume(volume);
     },
 
     setMuted: async (muted = false) => {
       if (muted) player.mute();
       else player.unmute();
+
+      await config.set('audioMuted', muted);
     },
 
     jumpTo: to => {
       player.setCurrentTime(to);
     },
   },
+  setOutputDevice: async (deviceId = 'default') => {
+    if (deviceId) {
+      try {
+        await player.setOutputDevice(deviceId);
+        await config.set('audioOutputDevice', deviceId);
+      } catch (err) {
+        logger.warn(err);
+      }
+    }
+  },
 }));
 
 export default usePlayerStore;
+
+/**
+ * Make sure we don't save audio volume to the file system too often
+ */
+
+const saveVolume = debounce(async (volume: number) => {
+  await config.set('audioVolume', volume);
+}, 500);
 
 export function usePlayerAPI() {
   return usePlayerStore(state => state.api);

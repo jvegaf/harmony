@@ -22,6 +22,7 @@ export default function SettingsView() {
       <div className={styles.settings__nav}>
         <Nav.Wrap vertical>
           <Nav.Link to='/settings/library'>Library</Nav.Link>
+          <Nav.Link to='/settings/audio'>Audio</Nav.Link>
         </Nav.Wrap>
       </div>
 
@@ -42,10 +43,9 @@ export default function SettingsView() {
 export type SettingsLoaderData = LoaderData<typeof SettingsView.loader>;
 
 SettingsView.loader = async () => {
-  // const config = await window.HarmonyAPI.config.getAll();
+  const config = await window.Main.config.getAll();
 
-  // return {
-  // config,
-  // };
-  return null;
+  return {
+    config,
+  };
 };

@@ -109,3 +109,11 @@ export type UpdateRatingPayload = {
   trackSrc: TrackSrc;
   rating: number;
 };
+
+export interface Config {
+  audioVolume: number;
+  audioOutputDevice: string;
+  audioMuted: boolean;
+  sleepBlocker: boolean;
+  displayNotifications: boolean;
+}

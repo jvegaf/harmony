@@ -17,14 +17,18 @@ import IPCTaggerModule from './modules/IPCTaggerModule';
 import DatabaseModule from './modules/DatabaseModule';
 import IPCLoggerModule from './modules/IPCLoggerModule';
 import ContextMenuModule from './modules/ContextMenuModule';
+import ConfigModule from './modules/ConfigModule';
 
 log.initialize();
 log.info('Starting Harmony...');
 
 let mainWindow: BrowserWindow | null;
 
-function initModules(window: BrowserWindow): void {
-  ModulesManager.init(
+async function initModules(window: BrowserWindow): Promise<void> {
+  const configModule = new ConfigModule();
+  await ModulesManager.init(configModule).catch(log.error);
+
+  await ModulesManager.init(
     new DatabaseModule(window),
     new PowerModule(window),
     new ApplicationMenuModule(window),
