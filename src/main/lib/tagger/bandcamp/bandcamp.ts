@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import cheerio from 'cheerio';
 import * as bandcamp from '@alexjorgef/bandcamp-scraper';
 import _ from 'lodash';

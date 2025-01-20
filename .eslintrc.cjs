@@ -12,4 +12,5 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'react/prop-types': 'off',
   },
+  files: ['*.ts', '*.tsx', '*.js', '*.jsx', '*.mjs', '*.cjs', '*.cts', '*.mts'],
 };

@@ -4,7 +4,6 @@ import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function Providers({ children }: any) {
   // long tasks should use useState(true)
 

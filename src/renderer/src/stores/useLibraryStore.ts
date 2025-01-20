@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { MessageBoxReturnValue } from 'electron';
 import { TrackEditableFields, Track, TrackId, TrackSrc } from '../../../preload/types/harmony';
 import { stripAccents } from '../../../preload/lib/utils-id3';

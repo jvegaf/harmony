@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import YoutubeMusicApi from 'youtube-music-api';
 import GetTagResults from './ytTagMapper';
 import log from 'electron-log';

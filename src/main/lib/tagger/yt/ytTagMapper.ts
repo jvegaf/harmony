@@ -1,7 +1,6 @@
 import { ResultTag } from '../../../../preload/types/harmony';
 import log from 'electron-log';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const CreateTagResult = (result: any) => {
   return {
     id: result.videoId,

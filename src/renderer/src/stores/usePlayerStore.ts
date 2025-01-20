@@ -25,7 +25,7 @@ type PlayerState = {
   };
 };
 
-const { db, config } = window.Main;
+const { db, config, logger } = window.Main;
 
 const usePlayerStore = create<PlayerState>((set, get) => ({
   playerStatus: PlayerStatus.STOP,
@@ -139,16 +139,16 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
     jumpTo: to => {
       player.setCurrentTime(to);
     },
-  },
-  setOutputDevice: async (deviceId = 'default') => {
-    if (deviceId) {
-      try {
-        await player.setOutputDevice(deviceId);
-        await config.set('audioOutputDevice', deviceId);
-      } catch (err) {
-        logger.warn(err);
+    setOutputDevice: async (deviceId = 'default') => {
+      if (deviceId) {
+        try {
+          await player.setOutputDevice(deviceId);
+          await config.set('audioOutputDevice', deviceId);
+        } catch (err) {
+          logger.warn(err);
+        }
       }
-    }
+    },
   },
 }));
 
