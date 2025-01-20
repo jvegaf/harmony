@@ -26,6 +26,9 @@ jobs:
           node-version: 20
           cache: 'yarn'
 
+      - name: Install Yarn 4.6.0
+        run: corepack prepare yarn@4.6.0 --activate
+
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1.6.0
         with:
