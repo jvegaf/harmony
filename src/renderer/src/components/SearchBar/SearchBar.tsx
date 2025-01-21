@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Track } from 'src/preload/types/harmony';
 import styles from './SearchBar.module.css';
 import { Autocomplete, AutocompleteProps, Group, Text } from '@mantine/core';
-import { getHotkeyHandler, useClickOutside } from '@mantine/hooks';
+import useLibraryStore from '../../stores/useLibraryStore';
 
 type Props = {
   tracks: Track[];
@@ -13,12 +13,7 @@ type TrackData = Record<string, Track>;
 function SearchBar({ tracks }: Props) {
   const [titles, setTitles] = useState<string[]>([]);
   const [data, setData] = useState<TrackData>({});
-  const [value, setValue] = useState('');
-  const [opened, setOpened] = useState(false);
-  const ref = useClickOutside(() => {
-    setOpened(false);
-    setValue('');
-  });
+  const libraryAPI = useLibraryStore.use.api();
 
   useEffect(() => {
     const tracksData = tracks.reduce<TrackData>((acc, track) => {
@@ -34,16 +29,6 @@ function SearchBar({ tracks }: Props) {
       setData({});
     };
   }, [tracks]);
-
-  useEffect(() => {
-    if (value) {
-      setOpened(true);
-    }
-
-    return () => {
-      setOpened(false);
-    };
-  }, [value]);
 
   const renderAutocompleteOption: AutocompleteProps['renderOption'] = ({ option }) => (
     <Group gap='sm'>
@@ -64,26 +49,19 @@ function SearchBar({ tracks }: Props) {
     </Group>
   );
 
-  const downFocus = () => {
-    setValue('');
-    setOpened(false);
+  const selected = (value: string) => {
+    const result = tracks.filter(track => value.toLowerCase().includes(track.title.toLowerCase()));
+    libraryAPI.setSearched(result[0]);
   };
 
   return (
     <div className={styles.searchBar}>
       <Autocomplete
-        ref={ref}
         data={titles}
-        value={value}
-        onChange={setValue}
+        onChange={selected}
         renderOption={renderAutocompleteOption}
-        dropdownOpened={opened}
         maxDropdownHeight={300}
         placeholder='Search'
-        onKeyDown={getHotkeyHandler([
-          ['enter', () => console.log('enter')],
-          ['alt + Q', () => downFocus()],
-        ])}
       />
     </div>
   );

@@ -12,6 +12,7 @@ const { db, covers, logger, library, dialog } = window.Main;
 
 type LibraryState = {
   search: string;
+  searched: Track | null;
   refreshing: boolean;
   deleting: boolean;
   refresh: {
@@ -27,6 +28,7 @@ type LibraryState = {
   api: {
     openHandler: (opts: Electron.OpenDialogOptions) => Promise<void>;
     search: (value: string) => void;
+    setSearched: (trackSearched: Track | null) => void;
     add: (pathsToScan: string[]) => Promise<void>;
     remove: (trackIDs: TrackId[]) => Promise<void>;
     reset: () => Promise<void>;
@@ -42,6 +44,7 @@ type LibraryState = {
 
 const libraryStore = createStore<LibraryState>((set, get) => ({
   search: '',
+  searched: null,
   refreshing: false,
   deleting: false,
   refresh: {
@@ -68,6 +71,7 @@ const libraryStore = createStore<LibraryState>((set, get) => ({
     search: (search): void => {
       set({ search: stripAccents(search) });
     },
+    setSearched: (trackSearched: Track | null) => set({ searched: trackSearched }),
     /**
      * Add tracks to Library
      */

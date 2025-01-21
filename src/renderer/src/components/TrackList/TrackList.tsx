@@ -33,6 +33,8 @@ const { menu, logger } = window.Main;
 const TrackList = (props: Props) => {
   const { tracks, trackPlayingID, playlists, currentPlaylist, width, height } = props;
   const playerAPI = usePlayerAPI();
+  const libraryAPI = useLibraryStore.use.api();
+  const searched = useLibraryStore.use.searched();
   const gridRef = useRef<AgGridReact>(null);
   const [lastUpdated, setLastUpdated] = useState<Track | null>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
@@ -95,6 +97,24 @@ const TrackList = (props: Props) => {
     [gridRef],
   );
 
+  const goTo = useCallback(
+    (trackID: string) => {
+      const rowNode = gridRef.current!.api.getRowNode(trackID);
+      if (!rowNode) {
+        logger.error(`[TracksTable] track not found: ${trackID}`);
+        return;
+      }
+      rowNode.setSelected(true);
+      // rowNode.setFocused ? rowNode.setFocused(true) : rowNode.setSelected(true, true);
+      gridRef.current!.api.ensureNodeVisible(rowNode);
+
+      logger.info(`[TracksTable] selected track: ${trackID}`);
+
+      libraryAPI.setSearched(null);
+    },
+    [gridRef, libraryAPI],
+  );
+
   useEffect(() => {
     if (gridApi && updated !== null && updated !== lastUpdated) {
       updateTrackRow(updated);
@@ -114,6 +134,16 @@ const TrackList = (props: Props) => {
       gridApi.sizeColumnsToFit();
     }
   }, [gridApi, width]);
+
+  useEffect(() => {
+    if (searched) {
+      goTo(searched.id);
+    }
+
+    return () => {
+      libraryAPI.setSearched(null);
+    };
+  }, [searched]);
 
   const onGridReady = (params: GridReadyEvent) => {
     setGridApi(params.api);
@@ -192,7 +222,6 @@ const TrackList = (props: Props) => {
         onRowDoubleClicked={e => onDoubleClick(e)}
         onCellContextMenu={e => onShowCtxtMenu(e)}
         suppressCellFocus
-        animateRows={false}
       />
     </div>
   );
