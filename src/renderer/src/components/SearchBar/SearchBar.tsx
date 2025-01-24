@@ -14,6 +14,8 @@ function SearchBar({ tracks }: Props) {
   const [titles, setTitles] = useState<string[]>([]);
   const [data, setData] = useState<TrackData>({});
   const libraryAPI = useLibraryStore.use.api();
+  const [value, setValue] = useState('');
+  const [dropdownOpened, setDropdownOpened] = useState(false);
 
   useEffect(() => {
     const tracksData = tracks.reduce<TrackData>((acc, track) => {
@@ -29,6 +31,20 @@ function SearchBar({ tracks }: Props) {
       setData({});
     };
   }, [tracks]);
+
+  useEffect(() => {
+    value.length > 0 ? setDropdownOpened(true) : setDropdownOpened(false);
+
+    const result = tracks.filter(track => value.toLowerCase().includes(track.title.toLowerCase()));
+    if (result.length === 0) {
+      return;
+    }
+    libraryAPI.setSearched(result[0]);
+    setValue('');
+    return () => {
+      setDropdownOpened(false);
+    };
+  }, [value]);
 
   const renderAutocompleteOption: AutocompleteProps['renderOption'] = ({ option }) => (
     <Group gap='sm'>
@@ -49,16 +65,15 @@ function SearchBar({ tracks }: Props) {
     </Group>
   );
 
-  const selected = (value: string) => {
-    const result = tracks.filter(track => value.toLowerCase().includes(track.title.toLowerCase()));
-    libraryAPI.setSearched(result[0]);
-  };
+  const selected = () => {};
 
   return (
     <div className={styles.searchBar}>
       <Autocomplete
         data={titles}
-        onChange={selected}
+        dropdownOpened={dropdownOpened}
+        onChange={setValue}
+        value={value}
         renderOption={renderAutocompleteOption}
         maxDropdownHeight={300}
         placeholder='Search'

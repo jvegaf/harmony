@@ -32,25 +32,6 @@ export function Title(props: Props) {
 
 export function TextArea(props: JSX.IntrinsicElements['textarea']) {
   const ref = useRef<HTMLTextAreaElement>(null);
-
-  if (typeof window !== 'undefined' && window.process && window.process.type === 'renderer') {
-    const useContextMenu = require('use-electron-context-menu').default;
-    useContextMenu(ref as React.MutableRefObject<HTMLElement>, [
-      {
-        label: 'Copy',
-        click: () => {
-          console.log('Copy');
-        },
-      },
-      {
-        label: 'Paste',
-        click: () => {
-          console.log('Paste');
-        },
-      },
-    ]);
-  }
-
   return (
     <textarea
       ref={ref}

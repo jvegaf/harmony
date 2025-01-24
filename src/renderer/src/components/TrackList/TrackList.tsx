@@ -104,6 +104,8 @@ const TrackList = (props: Props) => {
         logger.error(`[TracksTable] track not found: ${trackID}`);
         return;
       }
+
+      gridRef.current!.api.deselectAll();
       rowNode.setSelected(true);
       // rowNode.setFocused ? rowNode.setFocused(true) : rowNode.setSelected(true, true);
       gridRef.current!.api.ensureNodeVisible(rowNode);
