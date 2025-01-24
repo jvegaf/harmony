@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, IpcMainEvent, Menu, MenuItemConstructorOptions, PopupOptions } from 'electron';
+import { BrowserWindow, ipcMain, IpcMainEvent, Menu, MenuItemConstructorOptions, PopupOptions, shell } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
 import { CtxMenuPayload } from '../../preload/types/harmony';
@@ -84,6 +84,12 @@ class ContextMenuModule extends ModuleWindow {
             },
           });
         template.push(
+          {
+            label: 'Show in folder',
+            click: () => {
+              shell.showItemInFolder(track.path);
+            },
+          },
           {
             type: 'separator',
           },
