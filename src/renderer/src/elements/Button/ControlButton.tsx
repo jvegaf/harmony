@@ -1,11 +1,17 @@
-import React from 'react'
+import styles from './ControlButton.module.css';
 
-type Props = {}
-
-function ControlButton({}: Props) {
+function ControlButton(props: JSX.IntrinsicElements['button']) {
+  const { children, ...restProps } = props;
   return (
-    <div>ControlButton</div>
-  )
+    <div>
+      <button
+        className={styles.ctrlBtn}
+        {...restProps}
+      >
+        {children}
+      </button>
+    </div>
+  );
 }
 
-export default ControlButton
+export default ControlButton;

@@ -10,6 +10,12 @@
   height: calc(100vh - 64px);
 }
 
+.headerContent {
+  flex: none;
+  width: 100%;
+  height: 100px;
+}
+
 .playerContent {
   flex: none;
   width: 100%;

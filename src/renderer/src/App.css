@@ -7,7 +7,7 @@
   overflow: hidden;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  color: #ffffffde;
   background-color: #242424;
 
   font-synthesis: none;
@@ -15,10 +15,12 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --progress-bg: hsl(216, 0%, 20%);
+  --normal-color-dark: #ffffffde;
+  --progress-bg: #333333;
   --main-color: #459ce7;
-  --background: hsl(216, 0%, 9.5%);
-  --border-color: hsl(216, 0%, 20%);
+  --main-bg-dark: #232323;
+  --second-bg-dark: #333333;
+  --second-hover-dark: #3c3b3b;
 
   --table-vertical-spacing: 0.5rem;
 

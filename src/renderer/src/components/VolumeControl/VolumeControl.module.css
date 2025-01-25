@@ -10,3 +10,15 @@
   width: 100%;
   min-width: 100px;
 }
+
+.muteBtn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background-color: var(--main-bg-dark);
+  color: var(--main-text);
+  cursor: pointer;
+}

@@ -13,6 +13,7 @@ import styles from './Root.module.css';
 import { LoaderData } from './router';
 import { PlayerBar } from '../components/Player/PlayerBar';
 import IPCMenuEvents from '../components/Events/IPCMenuEvents';
+import Header from '../components/Header/Header';
 
 const { db } = window.Main;
 
@@ -32,12 +33,15 @@ export default function ViewRoot() {
       <GlobalKeyBindings />
       <IPCMenuEvents />
       {/** The actual app */}
+      <header className={styles.headerContent}>
+        <Header />
+      </header>
       <main className={styles.mainContent}>
         <Outlet />
       </main>
-      <footer className={styles.playerContent}>
-        <PlayerBar />
-      </footer>
+      {/* <footer className={styles.playerContent}> */}
+      {/*   <PlayerBar /> */}
+      {/* </footer> */}
     </div>
   );
 }
