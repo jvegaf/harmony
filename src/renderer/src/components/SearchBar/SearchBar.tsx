@@ -65,8 +65,6 @@ function SearchBar({ tracks }: Props) {
     </Group>
   );
 
-  const selected = () => {};
-
   return (
     <div className={styles.searchBar}>
       <Autocomplete

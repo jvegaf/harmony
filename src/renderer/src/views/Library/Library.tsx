@@ -12,7 +12,7 @@ import appStyles from '../Root.module.css';
 import styles from './Library.module.css';
 import TrackList from '../../components/TrackList/TrackList';
 import { useViewportSize } from '../../hooks/useViewPortSize';
-import SearchBar from '../../components/SearchBar/SearchBar';
+// import SearchBar from '../../components/SearchBar/SearchBar';
 
 const { db } = window.Main;
 
@@ -68,9 +68,9 @@ export default function LibraryView() {
     // All good !
     return (
       <div className={styles.viewLibrary}>
-        <div>
+        {/* <div>
           <SearchBar tracks={tracks} />
-        </div>
+        </div> */}
         <TrackList
           type='library'
           tracks={filteredTracks}
