@@ -39,6 +39,7 @@
     "@radix-ui/react-popover": "^1.1.4",
     "@radix-ui/react-slider": "^1.2.2",
     "@tabler/icons-react": "^2.47.0",
+    "@wavesurfer/react": "^1.0.8",
     "ag-grid-community": "^32.0.2",
     "ag-grid-react": "^32.0.2",
     "async-g-i-s": "^1.5.2",
@@ -57,6 +58,7 @@
     "sqlite3": "5.1.6",
     "styled-components": "^6.1.11",
     "typeorm": "^0.3.20",
+    "wavesurfer.js": "^7.9.0",
     "youtube-music-api": "^1.0.6",
     "zustand": "^4.5.0"
   },

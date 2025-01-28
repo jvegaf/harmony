@@ -1535,6 +1535,11 @@
     "@types/babel__core" "^7.20.5"
     react-refresh "^0.14.2"
 
+"@wavesurfer/react@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@wavesurfer/react/-/react-1.0.8.tgz#2988eb8682768490a17da218764194267b4dbe68"
+  integrity sha512-YowJcynQTTC1oWBWlxr7IkZn9QlYfvOC2rYqOvVA2DwBh+nMEoZca7718disoFNnnX7/NzTKqZd/VuWI5RbhMQ==
+
 "@xmldom/xmldom@^0.8.8":
   version "0.8.10"
   resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.8.10.tgz#a1337ca426aa61cef9fe15b5b28e340a72f6fa99"
@@ -7352,6 +7357,11 @@ vite@^5.0.11:
     rollup "^4.20.0"
   optionalDependencies:
     fsevents "~2.3.3"
+
+wavesurfer.js@^7.9.0:
+  version "7.9.0"
+  resolved "https://registry.yarnpkg.com/wavesurfer.js/-/wavesurfer.js-7.9.0.tgz#03a8ab15c46464521cfcbfc4d6d90d3608f0ac7a"
+  integrity sha512-ZzyHn+htSsZ0omPSYaAbhnoMqlLVO1lR8b+hACMBEvpZmkScJn0AmQkBo2a5u5UtOuCVc0Xv/tM+KtJVv5yvtQ==
 
 wcwidth@^1.0.1:
   version "1.0.1"

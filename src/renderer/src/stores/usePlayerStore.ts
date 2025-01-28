@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 
-import player from '../lib/player';
-
 import { PlayerStatus, Track, TrackId } from '../../../preload/types/harmony';
 import { debounce } from 'lodash';
+import { createStore } from './store-helpers';
+import createSelectors from './selectors';
 
 type PlayerState = {
   playerStatus: PlayerStatus;
@@ -27,7 +27,7 @@ type PlayerState = {
 
 const { db, config, logger } = window.Main;
 
-const usePlayerStore = create<PlayerState>((set, get) => ({
+const playerStore = createStore<PlayerState>((set, get) => ({
   playerStatus: PlayerStatus.STOP,
   playingTrack: null,
   queue: [],
@@ -41,8 +41,8 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       if (state.playingTrack?.id !== id) {
         const track = await db.tracks.findOnlyByID(id);
 
-        player.setTrack(track);
-        await player.play();
+        // player.setTrack(track);
+        // await player.play();
 
         set({
           playingTrack: track,
@@ -59,40 +59,44 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
     },
 
     play: async () => {
-      await player.play();
+      // await player.play();
 
       set({ playerStatus: PlayerStatus.PLAY });
     },
 
     pause: (): void => {
-      player.pause();
+      // player.pause();
 
       set({ playerStatus: PlayerStatus.PAUSE });
     },
 
     togglePlayPause: async () => {
       const playerAPI = get().api;
-      const { playingTrack } = get();
-      const { paused } = player.getAudio();
+      const { playerStatus } = get();
+      // const { paused } = player.getAudio();
 
-      if (paused && playingTrack) {
-        playerAPI.play();
-      } else {
+      if (playerStatus === PlayerStatus.STOP) {
+        return;
+      }
+
+      if (playerStatus === PlayerStatus.PLAY) {
         playerAPI.pause();
+      } else {
+        playerAPI.play();
       }
     },
 
     previous: async (): Promise<void> => {
-      if (player.getCurrentTime() > 3) {
-        player.setCurrentTime(0);
-        return;
-      }
+      // if (player.getCurrentTime() > 3) {
+      //   player.setCurrentTime(0);
+      //   return;
+      // }
       const { queue, queueCursor } = get();
       if (queueCursor > 0) {
         const cursor = queueCursor - 1;
         const track = await db.tracks.findOnlyByID(queue[cursor]);
-        player.setTrack(track);
-        await player.play();
+        // player.setTrack(track);
+        // await player.play();
         set({
           playingTrack: track,
           playerStatus: PlayerStatus.PLAY,
@@ -106,8 +110,8 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       if (queueCursor < queue.length - 1) {
         const cursor = queueCursor + 1;
         const track = await db.tracks.findOnlyByID(queue[cursor]);
-        player.setTrack(track);
-        await player.play();
+        // player.setTrack(track);
+        // await player.play();
         set({
           playingTrack: track,
           playerStatus: PlayerStatus.PLAY,
@@ -117,7 +121,7 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
     },
 
     stop: (): void => {
-      player.stop();
+      // player.stop();
 
       set({
         playerStatus: PlayerStatus.STOP,
@@ -125,24 +129,25 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
     },
 
     setVolume: volume => {
-      player.setVolume(volume);
+      // player.setVolume(volume);
       saveVolume(volume);
     },
 
     setMuted: async (muted = false) => {
-      if (muted) player.mute();
-      else player.unmute();
+      // if (muted) player.mute();
+      // else player.unmute();
 
       await config.set('audioMuted', muted);
     },
 
     jumpTo: to => {
-      player.setCurrentTime(to);
+      // player.setCurrentTime(to);
+      logger.info(`Jumping to ${to}`);
     },
     setOutputDevice: async (deviceId = 'default') => {
       if (deviceId) {
         try {
-          await player.setOutputDevice(deviceId);
+          // await player.setOutputDevice(deviceId);
           await config.set('audioOutputDevice', deviceId);
         } catch (err) {
           logger.warn(err);
@@ -151,6 +156,8 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
     },
   },
 }));
+
+const usePlayerStore = createSelectors(playerStore);
 
 export default usePlayerStore;
 
@@ -163,5 +170,5 @@ const saveVolume = debounce(async (volume: number) => {
 }, 500);
 
 export function usePlayerAPI() {
-  return usePlayerStore(state => state.api);
+  return playerStore(state => state.api);
 }

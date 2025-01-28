@@ -1,29 +1,23 @@
-import ControlButton from '../../elements/Button/ControlButton';
-import { IconPlayerSkipBackFilled, IconPlayerPlayFilled, IconPlayerSkipForwardFilled } from '@tabler/icons-react';
-import styles from './Header.module.css';
+import { useRef, useState } from 'react';
+import usePlayingTrack from '../../hooks/usePlayingTrack';
 import Cover from '../Cover/Cover';
-import VolumeControl from '../VolumeControl/VolumeControl';
+import PlayerControls from '../PlayerControls/PlayerControls';
+import styles from './Header.module.css';
+import WavePlayer from '../Player/WavePlayer';
 
 function Header() {
-  const trackPlaying = null;
+  const trackPlaying = usePlayingTrack();
+
   return (
     <div className={styles.headerRoot}>
       <div className={styles.coverImage}>
         <Cover track={trackPlaying} />
       </div>
       <div className={styles.controls}>
-        <VolumeControl />
-        <div className={styles.playerControls}>
-          <ControlButton onClick={() => console.log('clic')}>
-            <IconPlayerSkipBackFilled size={16} />
-          </ControlButton>
-          <ControlButton onClick={() => console.log('clic')}>
-            <IconPlayerPlayFilled size={16} />
-          </ControlButton>
-          <ControlButton onClick={() => console.log('clic')}>
-            <IconPlayerSkipForwardFilled size={16} />
-          </ControlButton>
-        </div>
+        <PlayerControls />
+      </div>
+      <div className={styles.playerWaveform}>
+        <WavePlayer />
       </div>
     </div>
   );
