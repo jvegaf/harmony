@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Track } from 'src/preload/types/harmony';
 import styles from './SearchBar.module.css';
 import { Autocomplete, AutocompleteProps, Group, Text } from '@mantine/core';
-import useLibraryStore from '../../stores/useLibraryStore';
+import { useLibraryAPI } from '../../stores/useLibraryStore';
 
 type Props = {
   tracks: Track[];
@@ -13,7 +13,7 @@ type TrackData = Record<string, Track>;
 function SearchBar({ tracks }: Props) {
   const [titles, setTitles] = useState<string[]>([]);
   const [data, setData] = useState<TrackData>({});
-  const libraryAPI = useLibraryStore.use.api();
+  const libraryAPI = useLibraryAPI();
   const [value, setValue] = useState('');
   const [dropdownOpened, setDropdownOpened] = useState(false);
 

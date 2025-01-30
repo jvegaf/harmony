@@ -5,7 +5,6 @@ import { chunk } from '../../../preload/lib/utils';
 
 import { createStore } from './store-helpers';
 import usePlayerStore from './usePlayerStore';
-import createSelectors from './selectors';
 import router from '../views/router';
 
 const { db, covers, logger, library, dialog } = window.Main;

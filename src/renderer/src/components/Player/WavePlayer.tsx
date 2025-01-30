@@ -2,9 +2,7 @@ import { useWavesurfer } from '@wavesurfer/react';
 import { useRef, useEffect, useState } from 'react';
 import styles from './WavePlayer.module.css';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
-import { Track, PlayerStatus } from '../../../../preload/types/harmony';
-
-const { config } = window.Main;
+import { PlayerStatus } from '../../../../preload/types/harmony';
 
 function WavePlayer() {
   const containerRef = useRef(null);

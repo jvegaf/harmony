@@ -11,7 +11,6 @@ import GlobalKeyBindings from '../components/Events/GlobalKeyBindings';
 
 import styles from './Root.module.css';
 import { LoaderData } from './router';
-import { PlayerBar } from '../components/Player/PlayerBar';
 import IPCMenuEvents from '../components/Events/IPCMenuEvents';
 import Header from '../components/Header/Header';
 
@@ -39,9 +38,6 @@ export default function ViewRoot() {
       <main className={styles.mainContent}>
         <Outlet />
       </main>
-      {/* <footer className={styles.playerContent}> */}
-      {/*   <PlayerBar /> */}
-      {/* </footer> */}
     </div>
   );
 }

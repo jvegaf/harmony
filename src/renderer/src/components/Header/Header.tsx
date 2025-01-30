@@ -1,4 +1,3 @@
-import { useRef, useState } from 'react';
 import usePlayingTrack from '../../hooks/usePlayingTrack';
 import Cover from '../Cover/Cover';
 import PlayerControls from '../PlayerControls/PlayerControls';

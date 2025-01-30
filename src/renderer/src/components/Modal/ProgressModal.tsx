@@ -1,6 +1,4 @@
-import { useEffect } from 'react';
 import { Modal, Text, Progress, Stack } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 import useLibraryStore from '../../stores/useLibraryStore';
 
 function ProgressModal() {
