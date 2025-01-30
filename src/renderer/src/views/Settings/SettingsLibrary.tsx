@@ -8,7 +8,7 @@ const { logger, dialog } = window.Main;
 
 export default function SettingsLibrary() {
   const libraryAPI = useLibraryAPI();
-  const isLibraryRefreshing = useLibraryStore.use.refreshing();
+  const { refreshing } = useLibraryStore();
 
   const openFolderSelector = useCallback(async () => {
     const options: Electron.OpenDialogOptions = {
@@ -32,7 +32,7 @@ export default function SettingsLibrary() {
           This will also scan for <code>.m3u</code> files and create corresponding playlists.
         </Setting.Description>
         <Button
-          disabled={isLibraryRefreshing}
+          disabled={refreshing}
           onClick={openFolderSelector}
         >
           Add files or folders
@@ -42,7 +42,7 @@ export default function SettingsLibrary() {
         <h3>Danger zone</h3>
         <Button
           color='red'
-          disabled={isLibraryRefreshing}
+          disabled={refreshing}
           onClick={libraryAPI.reset}
         >
           Reset library

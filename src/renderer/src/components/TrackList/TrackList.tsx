@@ -13,7 +13,7 @@ import { CtxMenuPayload, Playlist, Track, TrackId } from '../../../../preload/ty
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import './TrackList.css';
-import useLibraryStore from '../../stores/useLibraryStore';
+import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
 import { ParseDuration } from '../../../../preload/utils';
 import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
 import { ratingComparator } from '../../lib/utils-library';
@@ -33,14 +33,12 @@ const { menu, logger } = window.Main;
 const TrackList = (props: Props) => {
   const { tracks, trackPlayingID, playlists, currentPlaylist, width, height } = props;
   const playerAPI = usePlayerAPI();
-  const libraryAPI = useLibraryStore.use.api();
-  const searched = useLibraryStore.use.searched();
+  const libraryAPI = useLibraryAPI();
+  const { searched, updated, deleting } = useLibraryStore();
   const gridRef = useRef<AgGridReact>(null);
   const [lastUpdated, setLastUpdated] = useState<Track | null>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [rowData, setRowData] = useState<Track[]>([]);
-  const updated = useLibraryStore.use.updated();
-  const deleting = useLibraryStore.use.deleting();
   const colDefs = [
     { field: 'title', minWidth: 150 },
     { field: 'artist', minWidth: 90 },
@@ -181,7 +179,8 @@ const TrackList = (props: Props) => {
     menu.show(payload);
   }, []);
 
-  const onKeyPress = useCallback((event: { ctrlKey: boolean; key: string }) => {
+  const onKeyPress = useCallback((event: { ctrlKey: boolean; key: string; preventDefault: () => void }) => {
+    event.preventDefault();
     if (event.key === 'Escape') {
       gridRef.current?.api.deselectAll();
     }

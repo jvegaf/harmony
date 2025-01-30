@@ -12,14 +12,14 @@ import appStyles from '../Root.module.css';
 import styles from './Library.module.css';
 import TrackList from '../../components/TrackList/TrackList';
 import { useViewportSize } from '../../hooks/useViewPortSize';
+import ProgressModal from '../../components/Modal/ProgressModal';
 // import SearchBar from '../../components/SearchBar/SearchBar';
 
 const { db } = window.Main;
 
 export default function LibraryView() {
   const trackPlayingID = usePlayingTrackID();
-  const refreshing = useLibraryStore.use.refreshing();
-  const search = useLibraryStore.use.search();
+  const { refreshing, search } = useLibraryStore();
   const { width, height } = useViewportSize();
 
   const { playlists } = useLoaderData() as LibraryLoaderData;
@@ -71,6 +71,7 @@ export default function LibraryView() {
         {/* <div>
           <SearchBar tracks={tracks} />
         </div> */}
+        <ProgressModal />
         <TrackList
           type='library'
           tracks={filteredTracks}

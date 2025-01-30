@@ -9,6 +9,7 @@
   border-radius: 3px;
   background-color: var(--second-bg-dark);
   cursor: pointer;
+  outline: none;
 
   &:hover {
     background-color: var(--second-hover-dark);

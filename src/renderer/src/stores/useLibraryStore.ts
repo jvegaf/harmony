@@ -14,6 +14,7 @@ type LibraryState = {
   search: string;
   searched: Track | null;
   refreshing: boolean;
+  fixing: boolean;
   deleting: boolean;
   refresh: {
     processed: number;
@@ -42,10 +43,11 @@ type LibraryState = {
   };
 };
 
-const libraryStore = createStore<LibraryState>((set, get) => ({
+const useLibraryStore = createStore<LibraryState>((set, get) => ({
   search: '',
   searched: null,
   refreshing: false,
+  fixing: false,
   deleting: false,
   refresh: {
     processed: 0,
@@ -219,15 +221,17 @@ const libraryStore = createStore<LibraryState>((set, get) => ({
         ...fixedTrack,
       };
       await db.tracks.update(track);
+      const fixed = get().fix.processed + 1;
+      const totalToFix = get().fix.total;
 
       set({
         fix: { processed: get().fix.processed + 1, total: get().fix.total },
         updated: track,
+        fixing: fixed < totalToFix,
       });
-      logger.info(`fixed ${get().fix.processed} tracks of ${get().fix.total}`);
     },
     toFix: (total: number): void => {
-      set({ fix: { processed: 0, total: total } });
+      set({ fixing: true, fix: { processed: 0, total: total } });
     },
     updateTrackRating: async (trackSrc: TrackSrc, newRating: number): Promise<void> => {
       const track = await db.tracks.findOnlyByPath(trackSrc);
@@ -263,10 +267,8 @@ const libraryStore = createStore<LibraryState>((set, get) => ({
   },
 }));
 
-const useLibraryStore = createSelectors(libraryStore);
-
 export default useLibraryStore;
 
 export function useLibraryAPI() {
-  return libraryStore(state => state.api);
+  return useLibraryStore(state => state.api);
 }
