@@ -19,12 +19,8 @@ function PlayerInfo({ track }: Props) {
 
   return (
     <div className={styles.playerInfo}>
-      <div className={styles.infoArtist}>
-        <span>{artist}</span>
-      </div>
-      <div className={styles.infoTitle}>
-        <span>{title}</span>
-      </div>
+      <p className={styles.infoArtist}>{artist}</p>
+      <p className={styles.infoTitle}>{title}</p>
     </div>
   );
 }

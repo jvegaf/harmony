@@ -1,6 +1,6 @@
 .controls {
   height: 100%;
-  width: 350px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-around;

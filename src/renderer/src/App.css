@@ -15,9 +15,10 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --normal-color-dark: #ffffffde;
+  --normal-color-dark: #e6e6e6;
   --progress-bg: #333333;
   --main-color: #459ce7;
+  --red-color: #d30e21;
   --main-bg-dark: #232323;
   --second-bg-dark: #333333;
   --second-hover-dark: #3c3b3b;

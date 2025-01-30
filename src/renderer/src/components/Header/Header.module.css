@@ -11,7 +11,7 @@
 
 .controls {
   height: 100%;
-  width: 350px;
+  width: 400px;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
