@@ -5,8 +5,10 @@
 .settingTitle {
   display: inline-block;
   font-weight: bold;
-  margin-top: 4px;
-  margin-left: 6px;
+  font-size: 1.2rem;
+  background-color: var(--second-bg-dark);
+  padding: 5px 10px;
+  margin: 0;
 }
 
 .settingDescription {

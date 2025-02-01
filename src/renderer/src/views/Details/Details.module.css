@@ -55,3 +55,7 @@
     text-align: center;
   }
 }
+
+.cancelBtn:hover {
+  background-color: var(--red-color) !important;
+}

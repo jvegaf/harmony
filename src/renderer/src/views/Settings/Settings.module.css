@@ -6,23 +6,17 @@
 .viewSettings {
   display: flex;
   justify-content: center;
-  padding-top: 150px;
+  padding-top: 30px;
 }
 
-.settings__nav {
-  padding: 0 30px;
-  width: 150px;
-  margin-left: -150px;
+.settingsTabList {
+  margin-bottom: 20px;
 }
 
-.settings__content {
-  padding: 10px 15px;
-  width: 400px;
-  max-width: calc(100% - 170px);
-}
-
-.settingsBtns {
+.settingsContainer {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 100px;
+  flex-direction: column;
+  width: 100%;
+  min-width: 800px;
+  padding: 0 20px;
 }

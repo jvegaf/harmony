@@ -1,17 +1,20 @@
-import { useLoaderData } from 'react-router-dom';
-
 import * as Setting from '../../components/Setting/Setting';
 import AudioOutputSelect from '../../components/AudioOutputSelect/AudioOutputSelect';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
+import styles from './Settings.module.css';
 
-import { SettingsLoaderData } from './Settings';
+import { Config } from 'src/preload/types/harmony';
 
-export default function SettingsAudio() {
-  const { config } = useLoaderData() as SettingsLoaderData;
+type Props = {
+  config: Config;
+};
+
+function SettingsAudio({ config }: Props) {
   const playerAPI = usePlayerAPI();
 
   return (
-    <div className='setting setting-audio'>
+    <div className={styles.settingsContainer}>
+      <Setting.Title>Audio</Setting.Title>
       <Setting.Section>
         <Setting.Label htmlFor='setting-playbackrate'>Audio output</Setting.Label>
         <AudioOutputSelect
@@ -23,3 +26,5 @@ export default function SettingsAudio() {
     </div>
   );
 }
+
+export default SettingsAudio;

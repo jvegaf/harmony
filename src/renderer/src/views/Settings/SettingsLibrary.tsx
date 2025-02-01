@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import * as Setting from '../../components/Setting/Setting';
 import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
 import { Button } from '@mantine/core';
+import styles from './Settings.module.css';
 
 const { logger, dialog } = window.Main;
 
@@ -25,7 +26,8 @@ export default function SettingsLibrary() {
   }, [libraryAPI]);
 
   return (
-    <div className='setting settings-musicfolder'>
+    <div className={styles.settingsContainer}>
+      <Setting.Title>Library</Setting.Title>
       <Setting.Section>
         <h3 style={{ marginTop: 0 }}>Import music</h3>
         <Setting.Description>

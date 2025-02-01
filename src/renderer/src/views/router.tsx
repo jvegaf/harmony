@@ -5,12 +5,8 @@ import ExternalLink from '../elements/ExternalLink/ExternalLink';
 
 import RootView from './Root';
 import LibraryView from './Library/Library';
-import SettingsLibrary from './Settings/SettingsLibrary';
 import DetailsView from './Details/Details';
 import SettingsView from './Settings/Settings';
-import SettingsAudio from './Settings/SettingsAudio';
-// import ViewPlaylists from './ViewPlaylists';
-// import ViewPlaylistDetails from './ViewPlaylistDetails';
 
 const { logger } = window.Main;
 
@@ -47,23 +43,7 @@ const router = createHashRouter([
         path: 'settings',
         id: 'settings',
         element: <SettingsView />,
-        children: [
-          {
-            path: 'library',
-            element: <SettingsLibrary />,
-            loader: SettingsView.loader,
-          },
-          // {
-          //   path: 'interface',
-          //   element: <SettingsUI />,
-          //   loader: SettingsView.loader,
-          // },
-          {
-            path: 'audio',
-            element: <SettingsAudio />,
-            loader: SettingsView.loader,
-          },
-        ],
+        loader: SettingsView.loader,
       },
       {
         path: 'details/:trackID',

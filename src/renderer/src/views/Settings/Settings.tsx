@@ -1,16 +1,22 @@
-import { Outlet, useMatch, Navigate, useNavigate, useRevalidator } from 'react-router-dom';
+import { Outlet, useMatch, Navigate, useNavigate, useRevalidator, useLoaderData } from 'react-router-dom';
 
 import * as Nav from '../../elements/Nav/Nav';
 
 import { LoaderData } from '../router';
 import appStyles from '../Root.module.css';
 import styles from './Settings.module.css';
-import { Button } from '@mantine/core';
+import { Button, Tabs } from '@mantine/core';
+import Keybinding from 'react-keybinding-component';
+import SettingsLibrary from './SettingsLibrary';
+import SettingsAudio from './SettingsAudio';
+import { IconDeviceSpeaker, IconVinyl } from '@tabler/icons-react';
+
+const { config } = window.Main;
 
 export default function SettingsView() {
-  const match = useMatch('/settings');
   const revalidator = useRevalidator();
   const navigate = useNavigate();
+  const { appConfig } = useLoaderData() as SettingsLoaderData;
 
   const onCloseListener = () => {
     revalidator.revalidate();
@@ -18,34 +24,53 @@ export default function SettingsView() {
   };
 
   return (
-    <div className={`${appStyles.view} ${styles.viewSettings}`}>
-      <div className={styles.settings__nav}>
-        <Nav.Wrap vertical>
-          <Nav.Link to='/settings/library'>Library</Nav.Link>
-          <Nav.Link to='/settings/audio'>Audio</Nav.Link>
-        </Nav.Wrap>
-      </div>
+    <>
+      <Keybinding
+        onKey={e => {
+          if (e.key === 'Escape') {
+            onCloseListener();
+          }
+        }}
+        preventInputConflict
+      />
+      <div className={styles.viewSettings}>
+        <Tabs
+          defaultValue='library'
+          orientation='vertical'
+          variant='pills'
+          radius='xs'
+        >
+          <Tabs.List>
+            <Tabs.Tab
+              value='library'
+              leftSection={<IconVinyl size={12} />}
+            >
+              Library
+            </Tabs.Tab>
+            <Tabs.Tab
+              value='audio'
+              leftSection={<IconDeviceSpeaker size={14} />}
+            >
+              Audio
+            </Tabs.Tab>
+          </Tabs.List>
 
-      <div className={styles.rootSettings}>
-        <div className={styles.settings__content}>
-          <Outlet />
-        </div>
-        <div className={styles.settingsBtns}>
-          <Button onClick={() => onCloseListener()}>Close</Button>
-        </div>
+          <Tabs.Panel value='library'>
+            <SettingsLibrary />
+          </Tabs.Panel>
+          <Tabs.Panel value='audio'>
+            <SettingsAudio config={appConfig} />
+          </Tabs.Panel>
+        </Tabs>
       </div>
-
-      {match && <Navigate to='/settings/library' />}
-    </div>
+    </>
   );
 }
 
 export type SettingsLoaderData = LoaderData<typeof SettingsView.loader>;
 
 SettingsView.loader = async () => {
-  const config = await window.Main.config.getAll();
-
   return {
-    config,
+    appConfig: await config.getAll(),
   };
 };

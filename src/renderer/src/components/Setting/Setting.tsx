@@ -27,7 +27,7 @@ export function Label(props: JSX.IntrinsicElements['label']) {
 }
 
 export function Title(props: Props) {
-  return <span className={styles.settingTitle}>{props.children}</span>;
+  return <p className={styles.settingTitle}>{props.children}</p>;
 }
 
 export function TextArea(props: JSX.IntrinsicElements['textarea']) {

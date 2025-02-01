@@ -203,7 +203,12 @@ export default function DetailsView() {
             justify='end'
             gap='xl'
           >
-            <Button onClick={() => navigate(-1)}>Cancel</Button>
+            <Button
+              className={styles.cancelBtn}
+              onClick={() => navigate(-1)}
+            >
+              Cancel
+            </Button>
             <Button type='submit'>Save</Button>
           </Group>
         </form>

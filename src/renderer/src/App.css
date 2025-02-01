@@ -35,4 +35,7 @@
 
   --appbar-bg-light: #e5e5e5;
   --appbar-color-light: #555555;
+
+  --button-bg: #333333;
+  --button-radius: 3px;
 }
