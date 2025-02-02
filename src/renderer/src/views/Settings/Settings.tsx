@@ -40,7 +40,7 @@ export default function SettingsView() {
           variant='pills'
           radius='xs'
         >
-          <Tabs.List>
+          <Tabs.List classNames={styles}>
             <Tabs.Tab
               value='library'
               leftSection={<IconVinyl size={12} />}

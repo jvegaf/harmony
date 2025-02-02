@@ -13,6 +13,10 @@ export function Description(props: Props) {
   return <p className={styles.settingDescription}>{props.children}</p>;
 }
 
+export function Action(props: Props) {
+  return <div className={styles.settingAction}>{props.children}</div>;
+}
+
 export function Label(props: JSX.IntrinsicElements['label']) {
   const { children, ...restProps } = props;
 

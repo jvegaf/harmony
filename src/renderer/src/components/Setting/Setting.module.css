@@ -1,5 +1,10 @@
 .settingSection {
-  padding-bottom: 10px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: solid 1px var(--mantine-color-default-border);
 }
 
 .settingTitle {
@@ -8,13 +13,16 @@
   font-size: 1.2rem;
   background-color: var(--second-bg-dark);
   padding: 5px 10px;
-  margin: 0;
+  margin: 0 0 40px 0;
 }
 
 .settingDescription {
   font-weight: normal;
-  margin-top: 5px;
-  margin-bottom: 4px;
+}
+
+.settingAction {
+  display: flex;
+  align-items: center;
 }
 
 .settingLabel {
@@ -27,6 +35,7 @@
 .settingInput {
   display: block;
   color: var(--input-color);
+  background-color: var(--second-bg-dark);
   border: solid 1px var(--mantine-color-default-border);
   border-radius: var(--mantine-radius-default);
   padding: 8px 12px;

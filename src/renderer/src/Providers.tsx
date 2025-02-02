@@ -1,4 +1,4 @@
-import { ColorSchemeScript, MantineProvider, createTheme } from '@mantine/core';
+import { ColorSchemeScript, MantineProvider, Tabs, TabsList, TabsTab, createTheme } from '@mantine/core';
 import '@mantine/core/styles.css';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
@@ -20,6 +20,10 @@ export default function Providers({ children }: any) {
     fontFamilyMonospace:
       'source-code-pro, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
     components: {
+      Button: {
+        defaultProps: { radius: 'xs' },
+        // styles: { root: { textTransform: 'none' } },
+      },
       Checkbox: {
         styles: { input: { cursor: 'pointer' }, label: { cursor: 'pointer' } },
       },

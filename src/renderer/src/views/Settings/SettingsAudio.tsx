@@ -16,12 +16,13 @@ function SettingsAudio({ config }: Props) {
     <div className={styles.settingsContainer}>
       <Setting.Title>Audio</Setting.Title>
       <Setting.Section>
-        <Setting.Label htmlFor='setting-playbackrate'>Audio output</Setting.Label>
-        <AudioOutputSelect
-          defaultValue={config.audioOutputDevice}
-          onChange={playerAPI.setOutputDevice}
-        />
-        <Setting.Description>Advanced: set a custom audio output device.</Setting.Description>
+        <Setting.Description>Audio output</Setting.Description>
+        <Setting.Action>
+          <AudioOutputSelect
+            defaultValue={config.audioOutputDevice}
+            onChange={playerAPI.setOutputDevice}
+          />
+        </Setting.Action>
       </Setting.Section>
     </div>
   );

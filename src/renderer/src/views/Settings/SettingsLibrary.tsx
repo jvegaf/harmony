@@ -29,26 +29,27 @@ export default function SettingsLibrary() {
     <div className={styles.settingsContainer}>
       <Setting.Title>Library</Setting.Title>
       <Setting.Section>
-        <h3 style={{ marginTop: 0 }}>Import music</h3>
-        <Setting.Description>
-          This will also scan for <code>.m3u</code> files and create corresponding playlists.
-        </Setting.Description>
-        <Button
-          disabled={refreshing}
-          onClick={openFolderSelector}
-        >
-          Add files or folders
-        </Button>
+        <Setting.Description>Import Music</Setting.Description>
+        <Setting.Action>
+          <Button
+            disabled={refreshing}
+            onClick={openFolderSelector}
+          >
+            Add files or folders
+          </Button>
+        </Setting.Action>
       </Setting.Section>
       <Setting.Section>
-        <h3>Danger zone</h3>
-        <Button
-          color='red'
-          disabled={refreshing}
-          onClick={libraryAPI.reset}
-        >
-          Reset library
-        </Button>
+        <Setting.Description>Danger zone</Setting.Description>
+        <Setting.Action>
+          <Button
+            color='red'
+            disabled={refreshing}
+            onClick={libraryAPI.reset}
+          >
+            Reset library
+          </Button>
+        </Setting.Action>
       </Setting.Section>
     </div>
   );

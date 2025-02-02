@@ -7,10 +7,19 @@
   display: flex;
   justify-content: center;
   padding-top: 30px;
+  height: 100%;
+  width: 100%;
 }
 
-.settingsTabList {
-  margin-bottom: 20px;
+.list {
+  padding-top: 80px;
+  & > button {
+    padding: 10px 50px;
+    & > span {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+  }
 }
 
 .settingsContainer {
