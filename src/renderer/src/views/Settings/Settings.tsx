@@ -5,11 +5,12 @@ import * as Nav from '../../elements/Nav/Nav';
 import { LoaderData } from '../router';
 import appStyles from '../Root.module.css';
 import styles from './Settings.module.css';
-import { Button, Tabs } from '@mantine/core';
+import { ActionIcon, Button, Tabs } from '@mantine/core';
 import Keybinding from 'react-keybinding-component';
 import SettingsLibrary from './SettingsLibrary';
 import SettingsAudio from './SettingsAudio';
-import { IconDeviceSpeaker, IconVinyl } from '@tabler/icons-react';
+import { IconAdCircleOff, IconDeviceSpeaker, IconVinyl } from '@tabler/icons-react';
+import { MdArrowBack } from 'react-icons/md';
 
 const { config } = window.Main;
 
@@ -34,9 +35,17 @@ export default function SettingsView() {
         preventInputConflict
       />
       <div className={styles.viewSettings}>
+        <div className={styles.header}>
+          <ActionIcon
+            variant='subtle'
+            onClick={onCloseListener}
+          >
+            <MdArrowBack size="3em" />
+          </ActionIcon>
+        </div>
         <Tabs
           defaultValue='library'
-          orientation='vertical'
+          // orientation='vertical'
           variant='pills'
           radius='xs'
         >

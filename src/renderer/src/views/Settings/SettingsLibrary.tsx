@@ -27,7 +27,7 @@ export default function SettingsLibrary() {
 
   return (
     <div className={styles.settingsContainer}>
-      <Setting.Title>Library</Setting.Title>
+      {/* <Setting.Title>Library</Setting.Title> */}
       <Setting.Section>
         <Setting.Description>Import Music</Setting.Description>
         <Setting.Action>

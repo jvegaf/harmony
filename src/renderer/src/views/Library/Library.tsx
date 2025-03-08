@@ -45,7 +45,7 @@ export default function LibraryView() {
             <ViewMessage.Sub>
               <span>you can always just drop files and folders anywhere or</span>{' '}
               <Link
-                to='/settings/library'
+                to='/settings'
                 draggable={false}
               >
                 add your music here

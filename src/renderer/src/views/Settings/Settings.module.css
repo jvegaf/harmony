@@ -5,14 +5,26 @@
 
 .viewSettings {
   display: flex;
-  justify-content: center;
-  padding-top: 30px;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 50px;
   height: 100%;
   width: 100%;
 }
 
+.header {
+  display: flex;
+  /* justify-content: start; */
+  align-items: center;
+  width: 100%;
+  min-width: 800px;
+  padding: 0 300px;
+  margin-bottom: 20px;
+}
+
 .list {
-  padding-top: 80px;
+  margin-bottom: 20px;
+  border-bottom: solid 1px var(--mantine-color-default-border);
   & > button {
     padding: 10px 50px;
     & > span {

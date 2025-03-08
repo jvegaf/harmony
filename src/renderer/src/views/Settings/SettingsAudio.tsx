@@ -14,7 +14,7 @@ function SettingsAudio({ config }: Props) {
 
   return (
     <div className={styles.settingsContainer}>
-      <Setting.Title>Audio</Setting.Title>
+      {/* <Setting.Title>Audio</Setting.Title> */}
       <Setting.Section>
         <Setting.Description>Audio output</Setting.Description>
         <Setting.Action>
