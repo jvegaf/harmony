@@ -7,6 +7,7 @@ import {
   GridApi,
   GridReadyEvent,
   RowDoubleClickedEvent,
+  SortChangedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { CtxMenuPayload, Playlist, Track, TrackId } from '../../../../preload/types/harmony';
@@ -16,7 +17,7 @@ import './TrackList.css';
 import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
 import { ParseDuration } from '../../../../preload/utils';
 import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
-import { ratingComparator } from '../../lib/utils-library';
+import { GetParentFolderName, ratingComparator } from '../../lib/utils-library';
 
 type Props = {
   type: string;
@@ -48,7 +49,14 @@ const TrackList = (props: Props) => {
       headerName: 'Time',
       valueFormatter: (p: { value: number | null }) => ParseDuration(p.value),
     },
-    { field: 'album', minWidth: 90 },
+    // { field: 'album', minWidth: 90 },
+    {
+      field: 'path',
+      headerName: 'Crate',
+      valueFormatter: (p: { value: string }) => GetParentFolderName(p.value),
+      minWidth: 80,
+      maxWidth: 100,
+    },
     {
       field: 'rating',
       minWidth: 120,
@@ -130,7 +138,6 @@ const TrackList = (props: Props) => {
 
   useEffect(() => {
     if (gridApi) {
-      // Example usage of gridApi
       gridApi.sizeColumnsToFit();
     }
   }, [gridApi, width]);
@@ -189,6 +196,13 @@ const TrackList = (props: Props) => {
     }
   }, []);
 
+  const onSortChanged = useCallback((event: SortChangedEvent) => {
+    const colId = event.columns![0].getColId();
+    const sortMode = event.columns![0].getSort();
+    console.log(`sort changed: ${colId}, mode: ${sortMode}`);
+    // TODO: save sorting
+  }, []);
+
   const getRowId = useCallback((params: GetRowIdParams) => {
     return params.data.id;
   }, []);
@@ -220,6 +234,7 @@ const TrackList = (props: Props) => {
         defaultColDef={defaultColDef}
         onGridReady={onGridReady}
         getRowId={getRowId}
+        onSortChanged={onSortChanged}
         onRowDoubleClicked={e => onDoubleClick(e)}
         onCellContextMenu={e => onShowCtxtMenu(e)}
         suppressCellFocus

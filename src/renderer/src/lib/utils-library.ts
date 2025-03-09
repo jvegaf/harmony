@@ -50,3 +50,10 @@ export const GetFilenameWithoutExtension = (filePath: string): string => {
   const filenameWithoutExtension = filename.split('.').slice(0, -1).join('.');
   return filenameWithoutExtension;
 };
+
+// get parent song folder
+
+export const GetParentFolderName = (filePath: string): string => {
+  const parts = filePath.split(/[/\\]/);
+  return parts[parts.length - 2];
+};

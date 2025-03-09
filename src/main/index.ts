@@ -83,8 +83,9 @@ app.whenReady().then(() => {
   initModules(mainWindow);
 
   mainWindow.on('ready-to-show', () => {
-    is.dev && mainWindow?.webContents.openDevTools({ mode: 'detach' });
-    // mainWindow?.maximize();
+    // is.dev && mainWindow?.webContents.openDevTools({ mode: 'detach' });
+    is.dev && mainWindow?.webContents.openDevTools();
+    mainWindow?.maximize();
 
     mainWindow?.show();
   });

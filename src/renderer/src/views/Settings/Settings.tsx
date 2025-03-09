@@ -1,15 +1,12 @@
-import { Outlet, useMatch, Navigate, useNavigate, useRevalidator, useLoaderData } from 'react-router-dom';
-
-import * as Nav from '../../elements/Nav/Nav';
+import { useNavigate, useRevalidator, useLoaderData } from 'react-router-dom';
 
 import { LoaderData } from '../router';
-import appStyles from '../Root.module.css';
 import styles from './Settings.module.css';
-import { ActionIcon, Button, Tabs } from '@mantine/core';
+import { ActionIcon, Tabs } from '@mantine/core';
 import Keybinding from 'react-keybinding-component';
 import SettingsLibrary from './SettingsLibrary';
 import SettingsAudio from './SettingsAudio';
-import { IconAdCircleOff, IconDeviceSpeaker, IconVinyl } from '@tabler/icons-react';
+import { IconDeviceSpeaker, IconVinyl } from '@tabler/icons-react';
 import { MdArrowBack } from 'react-icons/md';
 
 const { config } = window.Main;
@@ -40,7 +37,7 @@ export default function SettingsView() {
             variant='subtle'
             onClick={onCloseListener}
           >
-            <MdArrowBack size="3em" />
+            <MdArrowBack size='3em' />
           </ActionIcon>
         </div>
         <Tabs
