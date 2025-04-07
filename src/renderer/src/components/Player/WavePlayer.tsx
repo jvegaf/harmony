@@ -1,8 +1,8 @@
 import { useWavesurfer } from '../../hooks/useWavesurfer';
-import { useRef, useEffect, useState, RefObject, useMemo, useCallback } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
 import { PlayerStatus } from '../../../../preload/types/harmony';
-import WaveSurfer, { WaveSurferOptions } from 'wavesurfer.js';
+import { WaveSurferOptions } from 'wavesurfer.js';
 import './WavePlayer.css';
 
 const formatTime = (seconds: number) => {
@@ -14,14 +14,11 @@ const formatTime = (seconds: number) => {
 
 function WavePlayer() {
   const containerRef = useRef<HTMLInputElement>(null);
-  const timeRef = useRef<HTMLInputElement>(null);
-  const durationRef = useRef<HTMLInputElement>(null);
   const hoverRef = useRef<HTMLInputElement>(null);
   const playingTrack = usePlayerStore.use.playingTrack();
   const playerStatus = usePlayerStore.use.playerStatus();
   const playerAPI = usePlayerAPI();
   const [audioUrl, setAudioUrl] = useState('');
-  const [durationTrack, setDurationTrack] = useState<number>(0);
   const [time, setTime] = useState<string>('0:00');
   const [duration, setDuration] = useState<string>('0:00');
 

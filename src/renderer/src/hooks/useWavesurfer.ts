@@ -18,8 +18,6 @@ export const useWavesurfer = (
         const { width, height } = ctx.canvas;
         const barWidth = options.barWidth || 2;
         const barGap = options.barGap || 1;
-        const barRadius = options.barRadius || 0;
-        const separationLineHeight = 0.5;
 
         const barCount = Math.floor(width / (barWidth + barGap));
         const step = Math.floor(channels[0].length / barCount);
