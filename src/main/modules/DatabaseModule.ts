@@ -24,7 +24,18 @@ class DatabaseModule extends ModuleWindow {
 
     ipcMain.handle(channels.TRACKS_ADD, async (_, tracks: Track[]): Promise<Track[]> => {
       log.info('Adding tracks to the database');
-      await this.db.insertTracks(tracks);
+      // Check if the tracks are already in the database
+      const existingTracks = await this.db.findTracksByPath(tracks.map(track => track.path));
+
+      const newTracks = tracks.filter(track => {
+        return !existingTracks.some(existingTrack => existingTrack.path === track.path);
+      });
+      if (newTracks.length === 0) {
+        log.info('No new tracks to add to the database');
+        return [];
+      }
+
+      await this.db.insertTracks(newTracks);
       log.info('Tracks added to the database');
       return tracks;
     });
