@@ -7,15 +7,15 @@
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 3px;
-  background-color: var(--second-bg-dark);
+  background-color: var(--mantine-color-dark-5);
   cursor: pointer;
   outline: none;
 
   &:hover {
-    background-color: var(--second-hover-dark);
+    background-color: var(--mantine-color-dark-3);
   }
 
   &:only-child {
-    color: var(--normal-color-dark);
+    color: var(--mantine-color-teal-0);
   }
 }
