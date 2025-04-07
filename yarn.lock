@@ -1535,11 +1535,6 @@
     "@types/babel__core" "^7.20.5"
     react-refresh "^0.14.2"
 
-"@wavesurfer/react@^1.0.8":
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/@wavesurfer/react/-/react-1.0.8.tgz#2988eb8682768490a17da218764194267b4dbe68"
-  integrity sha512-YowJcynQTTC1oWBWlxr7IkZn9QlYfvOC2rYqOvVA2DwBh+nMEoZca7718disoFNnnX7/NzTKqZd/VuWI5RbhMQ==
-
 "@xmldom/xmldom@^0.8.8":
   version "0.8.10"
   resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.8.10.tgz#a1337ca426aa61cef9fe15b5b28e340a72f6fa99"
