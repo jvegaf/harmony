@@ -1,18 +1,18 @@
 import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import AppActions from '../stores/AppAPI';
-import MediaSessionEvents from '../components/Events/MediaSessionEvents';
 import AppEvents from '../components/Events/AppEvents';
-import PlayerEvents from '../components/Events/PlayerEvents';
-import IPCPlayerEvents from '../components/Events/IPCPlayerEvents';
-import IPCNavigationEvents from '../components/Events/IPCNavigationEvents';
 import GlobalKeyBindings from '../components/Events/GlobalKeyBindings';
+import IPCNavigationEvents from '../components/Events/IPCNavigationEvents';
+import IPCPlayerEvents from '../components/Events/IPCPlayerEvents';
+import MediaSessionEvents from '../components/Events/MediaSessionEvents';
+import PlayerEvents from '../components/Events/PlayerEvents';
+import AppActions from '../stores/AppAPI';
 
+import IPCMenuEvents from '../components/Events/IPCMenuEvents';
+import { PlayerBar } from '../components/Player/PlayerBar';
 import styles from './Root.module.css';
 import { LoaderData } from './router';
-import IPCMenuEvents from '../components/Events/IPCMenuEvents';
-import Header from '../components/Header/Header';
 
 const { db } = window.Main;
 
@@ -33,7 +33,7 @@ export default function ViewRoot() {
       <IPCMenuEvents />
       {/** The actual app */}
       <header className={styles.headerContent}>
-        <Header />
+        <PlayerBar />
       </header>
       <main className={styles.mainContent}>
         <Outlet />

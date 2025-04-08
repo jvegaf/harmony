@@ -106,27 +106,29 @@ function WavePlayer() {
 
   return (
     <div className='wave-player-root'>
-      <div
-        ref={containerRef}
-        className='wave-form-container'
-      >
-        <div className='time'>{time}</div>
-        <div className='duration'>{duration}</div>
+      {playingTrack && (
         <div
-          ref={hoverRef}
-          className='hover-wave'
-        ></div>
-        <div
-          className='overlay'
-          style={{
-            position: 'absolute',
-            height: '30px',
-            width: '100%',
-            bottom: '0',
-            backdropFilter: 'brightness(0.5)',
-          }}
-        ></div>
-      </div>
+          ref={containerRef}
+          className='wave-form-container'
+        >
+          <div className='time'>{time}</div>
+          <div className='duration'>{duration}</div>
+          <div
+            ref={hoverRef}
+            className='hover-wave'
+          ></div>
+          <div
+            className='overlay'
+            style={{
+              position: 'absolute',
+              height: '30px',
+              width: '100%',
+              bottom: '0',
+              backdropFilter: 'brightness(0.5)',
+            }}
+          ></div>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,27 +5,21 @@ import classes from './PlayerBar.module.css';
 import PlayerInfo from '../PlayerInfo/PlayerInfo';
 import PlayerControls from '../PlayerControls/PlayerControls';
 import VolumeControl from '../VolumeControl/VolumeControl';
+import WavePlayer from './WavePlayer';
 
 export function PlayerBar() {
   const trackPlaying = usePlayingTrack();
 
   return (
     <div className={classes.playerRoot}>
-      <div className={classes.playerInfo}>
-        <div className={classes.playerCover}>
-          <Cover track={trackPlaying} />
-        </div>
-        <PlayerInfo track={trackPlaying} />
+      <div className={classes.playerCover}>
+        <Cover track={trackPlaying} />
       </div>
-
       <div className={classes.playerControls}>
         <PlayerControls />
       </div>
-      <div className={classes.playerProgress}>
-        <TrackProgress trackPlaying={trackPlaying} />
-      </div>
-      <div className={classes.playerVolume}>
-        <VolumeControl />
+      <div className={classes.playerWaveform}>
+        <WavePlayer />
       </div>
     </div>
   );
