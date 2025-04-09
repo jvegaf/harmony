@@ -1,10 +1,12 @@
-import { ipcMain } from 'electron';
+import { app, ipcMain } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
 import { rendererLogger } from '../lib/log/logger';
 
 import ModuleWindow from './BaseWindowModule';
 import { LogProps, LogLevel } from '../../preload/types/harmony';
+import { getLogsFromFile } from '../lib/log/log-reader';
+import path from 'node:path';
 
 class IPCLoggerModule extends ModuleWindow {
   async load(): Promise<void> {
@@ -28,6 +30,11 @@ class IPCLoggerModule extends ModuleWindow {
           rendererLogger.info(params);
           break;
       }
+    });
+    ipcMain.removeAllListeners(channels.APP_GET_LOGS);
+    ipcMain.handle(channels.APP_GET_LOGS, async event => {
+      const logs = await getLogsFromFile(path.join(app.getPath('userData'), 'logs', 'main.log'));
+      return logs;
     });
   }
 }

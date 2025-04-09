@@ -21,7 +21,8 @@ const api = {
   app: {
     ready: () => ipcRenderer.send(channels.APP_READY),
     restart: () => ipcRenderer.send(channels.APP_RESTART),
-    clone: () => ipcRenderer.send(channels.APP_CLOSE),
+    close: () => ipcRenderer.send(channels.APP_CLOSE),
+    getLogs: () => ipcRenderer.invoke(channels.APP_GET_LOGS),
   },
   config,
   db: {

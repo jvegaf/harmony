@@ -63,6 +63,7 @@ export default class ConfigModule extends Module {
       audioMuted: false,
       sleepBlocker: false,
       displayNotifications: true,
+      audioPreCuePosition: 120,
     };
 
     return config;

@@ -8,7 +8,9 @@ type PlayerState = {
   playingTrack: Track | null;
   queue: TrackId[];
   queueCursor: number;
+  isPreCueing: boolean;
   api: {
+    setAudioPreCuePosition(value: number): unknown;
     start: (queue: TrackId[], index: number) => Promise<void>;
     play: () => Promise<void>;
     pause: () => void;
@@ -20,6 +22,7 @@ type PlayerState = {
     setMuted: (muted: boolean) => void;
     jumpTo: (to: number) => void;
     setOutputDevice: (deviceId: string) => void;
+    togglePreCue: () => void;
   };
 };
 
@@ -30,8 +33,13 @@ const playerStore = createStore<PlayerState>((set, get) => ({
   playingTrack: null,
   queue: [],
   queueCursor: 0,
+  isPreCueing: false,
 
   api: {
+    setAudioPreCuePosition: async (value: number) => {
+      // player.setAudioPreCuePosition(value);
+      await config.set('audioPreCuePosition', value);
+    },
     start: async (queue: TrackId[], index: number): Promise<void> => {
       const state = get();
       const id = queue[index];
@@ -151,6 +159,15 @@ const playerStore = createStore<PlayerState>((set, get) => ({
           logger.warn(err);
         }
       }
+    },
+    togglePreCue: async () => {
+      const { isPreCueing } = get();
+
+      if (isPreCueing) {
+        set({ isPreCueing: false });
+        return;
+      }
+      set({ isPreCueing: true });
     },
   },
 }));

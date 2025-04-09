@@ -3,6 +3,7 @@ import {
   IconPlayerPlayFilled,
   IconPlayerSkipForwardFilled,
   IconSettings,
+  IconHeadphones,
 } from '@tabler/icons-react';
 import { PlayerStatus } from '../../../../preload/types/harmony';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
@@ -17,7 +18,7 @@ function PlayerControls() {
   const trackPlaying = usePlayingTrack();
   const playerAPI = usePlayerAPI();
   const navigate = useNavigate();
-  const { playerStatus } = usePlayerStore();
+  const { playerStatus, isPreCueing } = usePlayerStore();
   const ICON_SIZE = 16;
 
   return (
@@ -41,6 +42,12 @@ function PlayerControls() {
         <VolumeControl />
         <ControlButton onClick={() => navigate('/settings')}>
           <IconSettings size={ICON_SIZE} />
+        </ControlButton>
+        <ControlButton onClick={() => playerAPI.togglePreCue()}>
+          <IconHeadphones
+            size={ICON_SIZE}
+            style={{ color: isPreCueing ? '#d30e21' : '#e6e6e6' }}
+          />
         </ControlButton>
       </div>
     </div>

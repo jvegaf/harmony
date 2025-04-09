@@ -1,4 +1,4 @@
-import { useNavigate, useRevalidator, useLoaderData } from 'react-router-dom';
+import { useNavigate, useRevalidator, useLoaderData, useRouteLoaderData } from 'react-router-dom';
 
 import { LoaderData } from '../router';
 import styles from './Settings.module.css';
@@ -6,15 +6,18 @@ import { ActionIcon, Tabs } from '@mantine/core';
 import Keybinding from 'react-keybinding-component';
 import SettingsLibrary from './SettingsLibrary';
 import SettingsAudio from './SettingsAudio';
-import { IconDeviceSpeaker, IconVinyl } from '@tabler/icons-react';
+import { IconDeviceSpeaker, IconPencilCog, IconVinyl } from '@tabler/icons-react';
 import { MdArrowBack } from 'react-icons/md';
+import SettingsLog from './SettingsLog';
+import { RootLoaderData } from '../Root';
 
 const { config } = window.Main;
 
 export default function SettingsView() {
   const revalidator = useRevalidator();
   const navigate = useNavigate();
-  const { appConfig } = useLoaderData() as SettingsLoaderData;
+  // const { appConfig } = useLoaderData() as SettingsLoaderData;
+  const { appConfig } = useRouteLoaderData('root') as RootLoaderData;
 
   const onCloseListener = () => {
     revalidator.revalidate();
@@ -59,6 +62,12 @@ export default function SettingsView() {
             >
               Audio
             </Tabs.Tab>
+            <Tabs.Tab
+              value='logs'
+              leftSection={<IconPencilCog size={14} />}
+            >
+              Logs
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value='library'>
@@ -66,6 +75,9 @@ export default function SettingsView() {
           </Tabs.Panel>
           <Tabs.Panel value='audio'>
             <SettingsAudio config={appConfig} />
+          </Tabs.Panel>
+          <Tabs.Panel value='logs'>
+            <SettingsLog />
           </Tabs.Panel>
         </Tabs>
       </div>
@@ -76,7 +88,8 @@ export default function SettingsView() {
 export type SettingsLoaderData = LoaderData<typeof SettingsView.loader>;
 
 SettingsView.loader = async () => {
-  return {
-    appConfig: await config.getAll(),
-  };
+  return {};
+  // return {
+  //   appConfig: await config.getAll(),
+  // };
 };

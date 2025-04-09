@@ -116,4 +116,5 @@ export interface Config {
   audioMuted: boolean;
   sleepBlocker: boolean;
   displayNotifications: boolean;
+  audioPreCuePosition: number;
 }

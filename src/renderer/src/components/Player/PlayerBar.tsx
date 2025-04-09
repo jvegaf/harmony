@@ -6,9 +6,12 @@ import PlayerInfo from '../PlayerInfo/PlayerInfo';
 import PlayerControls from '../PlayerControls/PlayerControls';
 import VolumeControl from '../VolumeControl/VolumeControl';
 import WavePlayer from './WavePlayer';
+import { useRouteLoaderData } from 'react-router-dom';
+import { RootLoaderData } from '../../views/Root';
 
 export function PlayerBar() {
   const trackPlaying = usePlayingTrack();
+  const { appConfig } = useRouteLoaderData('root') as RootLoaderData;
 
   return (
     <div className={classes.playerRoot}>
@@ -19,7 +22,7 @@ export function PlayerBar() {
         <PlayerControls />
       </div>
       <div className={classes.playerWaveform}>
-        <WavePlayer />
+        <WavePlayer preCuePos={appConfig.audioPreCuePosition} />
       </div>
     </div>
   );

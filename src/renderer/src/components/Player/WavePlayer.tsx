@@ -12,11 +12,16 @@ const formatTime = (seconds: number) => {
   return `${minutes}:${paddedSeconds}`;
 };
 
-function WavePlayer() {
+type WavePlayerProps = {
+  preCuePos: number;
+};
+
+function WavePlayer({ preCuePos }: WavePlayerProps) {
   const containerRef = useRef<HTMLInputElement>(null);
   const hoverRef = useRef<HTMLInputElement>(null);
   const playingTrack = usePlayerStore.use.playingTrack();
   const playerStatus = usePlayerStore.use.playerStatus();
+  const isPreCueing = usePlayerStore.use.isPreCueing();
   const playerAPI = usePlayerAPI();
   const [audioUrl, setAudioUrl] = useState('');
   const [time, setTime] = useState<string>('0:00');
@@ -103,6 +108,13 @@ function WavePlayer() {
       wavesurfer && wavesurfer.pause();
     }
   }, [playerStatus]);
+
+  useEffect(() => {
+    if (!wavesurfer) return;
+    if (isPreCueing) {
+      const event = wavesurfer.on('play', () => wavesurfer.skip(preCuePos));
+    }
+  }, [wavesurfer, isPreCueing]);
 
   return (
     <div className='wave-player-root'>

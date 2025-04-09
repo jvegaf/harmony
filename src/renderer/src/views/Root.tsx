@@ -14,7 +14,7 @@ import { PlayerBar } from '../components/Player/PlayerBar';
 import styles from './Root.module.css';
 import { LoaderData } from './router';
 
-const { db } = window.Main;
+const { db, config } = window.Main;
 
 export default function ViewRoot() {
   useEffect(() => {
@@ -48,5 +48,6 @@ ViewRoot.loader = async () => {
   // this can be slow, think about caching it or something, especially when
   // we revalidate routing
   const tracks = await db.tracks.getAll();
-  return { tracks };
+  const appConfig = await config.getAll();
+  return { tracks, appConfig };
 };
