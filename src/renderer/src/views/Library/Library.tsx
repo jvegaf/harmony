@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useLoaderData, useRouteLoaderData } from 'react-router-dom';
 
 import * as ViewMessage from '../../elements/ViewMessage/ViewMessage';
@@ -13,6 +13,8 @@ import styles from './Library.module.css';
 import TrackList from '../../components/TrackList/TrackList';
 import { useViewportSize } from '../../hooks/useViewPortSize';
 import ProgressModal from '../../components/Modal/ProgressModal';
+import Footer from '../../components/Footer/Footer';
+import { clear } from 'console';
 // import SearchBar from '../../components/SearchBar/SearchBar';
 
 const { db } = window.Main;
@@ -21,10 +23,19 @@ export default function LibraryView() {
   const trackPlayingID = usePlayingTrackID();
   const { refreshing, search } = useLibraryStore();
   const { width, height } = useViewportSize();
+  const [message, setMessage] = useState<string>('');
 
   const { playlists } = useLoaderData() as LibraryLoaderData;
   const { tracks } = useRouteLoaderData('root') as RootLoaderData;
   const filteredTracks = useFilteredTracks(tracks);
+
+  useEffect(() => {
+    if (filteredTracks.length) setMessage(`Total ${filteredTracks.length} tracks`);
+
+    return () => {
+      setMessage('');
+    };
+  }, [filteredTracks]);
 
   const getLibraryComponent = useMemo(() => {
     // Empty library
@@ -78,8 +89,11 @@ export default function LibraryView() {
           trackPlayingID={trackPlayingID}
           playlists={playlists}
           width={width}
-          height={height - 115}
+          height={height - 138}
         />
+        <div className={styles.footerStyles}>
+          <Footer msg={message} />
+        </div>
       </div>
     );
   }, [search, refreshing, width, height, filteredTracks, playlists, trackPlayingID]);
