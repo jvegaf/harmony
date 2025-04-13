@@ -1,4 +1,4 @@
-import { useNavigate, useRevalidator, useLoaderData, useRouteLoaderData } from 'react-router-dom';
+import { useNavigate, useRevalidator, useRouteLoaderData } from 'react-router-dom';
 
 import { LoaderData } from '../router';
 import styles from './Settings.module.css';
@@ -10,8 +10,6 @@ import { IconDeviceSpeaker, IconPencilCog, IconVinyl } from '@tabler/icons-react
 import { MdArrowBack } from 'react-icons/md';
 import SettingsLog from './SettingsLog';
 import { RootLoaderData } from '../Root';
-
-const { config } = window.Main;
 
 export default function SettingsView() {
   const revalidator = useRevalidator();

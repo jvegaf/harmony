@@ -1,21 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import * as Setting from '../../components/Setting/Setting';
-import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
-import { Button } from '@mantine/core';
 import styles from './Settings.module.css';
 
-const { logger, app } = window.Main;
-
 export default function SettingsLog() {
+  const { logger, app } = window.Main;
   const [logs, setLogs] = useState<string[]>([]);
 
   useEffect(() => {
-    const getLogs = async () => {
-      const logsResponse = await app.getLogs();
+    logger.info('SettingsLog mounted');
+    app.getLogs().then(logsResponse => {
       setLogs(logsResponse);
       logger.info(`logs size: ${logsResponse.length}`);
-    };
+    });
   }, []);
 
   return (

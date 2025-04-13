@@ -1,10 +1,7 @@
-import TrackProgress from '../TrackProgress/TrackProgress';
 import Cover from '../Cover/Cover';
 import usePlayingTrack from '../../hooks/usePlayingTrack';
 import classes from './PlayerBar.module.css';
-import PlayerInfo from '../PlayerInfo/PlayerInfo';
 import PlayerControls from '../PlayerControls/PlayerControls';
-import VolumeControl from '../VolumeControl/VolumeControl';
 import WavePlayer from './WavePlayer';
 import { useRouteLoaderData } from 'react-router-dom';
 import { RootLoaderData } from '../../views/Root';
@@ -22,7 +19,7 @@ export function PlayerBar() {
         <PlayerControls />
       </div>
       <div className={classes.playerWaveform}>
-        <WavePlayer preCuePos={appConfig.audioPreCuePosition} />
+        <WavePlayer config={appConfig} />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useWavesurfer } from '../../hooks/useWavesurfer';
 import { useRef, useEffect, useState, useMemo } from 'react';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
-import { PlayerStatus } from '../../../../preload/types/harmony';
+import { Config, PlayerStatus } from '../../../../preload/types/harmony';
 import { WaveSurferOptions } from 'wavesurfer.js';
 import './WavePlayer.css';
 
@@ -13,15 +13,18 @@ const formatTime = (seconds: number) => {
 };
 
 type WavePlayerProps = {
-  preCuePos: number;
+  config: Config;
 };
 
-function WavePlayer({ preCuePos }: WavePlayerProps) {
+function WavePlayer({ config }: WavePlayerProps) {
+  const { audioPreCuePosition } = config;
   const containerRef = useRef<HTMLInputElement>(null);
   const hoverRef = useRef<HTMLInputElement>(null);
   const playingTrack = usePlayerStore.use.playingTrack();
   const playerStatus = usePlayerStore.use.playerStatus();
   const isPreCueing = usePlayerStore.use.isPreCueing();
+  const audioVolume = usePlayerStore.use.volume();
+  const isMuted = usePlayerStore.use.isMuted();
   const playerAPI = usePlayerAPI();
   const [audioUrl, setAudioUrl] = useState('');
   const [time, setTime] = useState<string>('0:00');
@@ -112,9 +115,23 @@ function WavePlayer({ preCuePos }: WavePlayerProps) {
   useEffect(() => {
     if (!wavesurfer) return;
     if (isPreCueing) {
-      const event = wavesurfer.on('play', () => wavesurfer.skip(preCuePos));
+      wavesurfer.on('play', () => wavesurfer.skip(audioPreCuePosition));
     }
   }, [wavesurfer, isPreCueing]);
+
+  useEffect(() => {
+    if (!wavesurfer) return;
+    if (isMuted) {
+      wavesurfer.setVolume(0);
+    } else {
+      wavesurfer.setVolume(audioVolume);
+    }
+  }, [wavesurfer, isMuted]);
+
+  useEffect(() => {
+    if (!wavesurfer) return;
+    wavesurfer.setVolume(audioVolume);
+  }, [wavesurfer, audioVolume]);
 
   return (
     <div className='wave-player-root'>

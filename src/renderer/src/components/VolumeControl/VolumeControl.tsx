@@ -1,14 +1,17 @@
 import { useCallback, useState } from 'react';
 
 import styles from './VolumeControl.module.css';
-import { usePlayerAPI } from '../../stores/usePlayerStore';
+import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
 import { Slider } from '@mantine/core';
 import { IconVolume, IconVolume2, IconVolumeOff } from '@tabler/icons-react';
 import player from '../../lib/player';
 
+const { logger } = window.Main;
+
 export default function VolumeControl() {
   const audio = player.getAudio();
   const playerAPI = usePlayerAPI();
+  const volumeStore = usePlayerStore.use.volume();
   const [volume, setVolume] = useState(audio.volume);
   const [isMuted, setIsMuted] = useState(audio.muted);
 
@@ -16,6 +19,7 @@ export default function VolumeControl() {
 
   const changeVol = useCallback(
     (to: number) => {
+      logger.debug('VolumeControl', 'changeVol', to);
       playerAPI.setVolume(to);
       setVolume(to);
     },
@@ -31,8 +35,10 @@ export default function VolumeControl() {
   const toggleMute = () => {
     if (isMuted) {
       playerAPI.setMuted(false);
+      setVolume(volumeStore);
     } else {
       playerAPI.setMuted(true);
+      setVolume(0);
     }
     setIsMuted(!isMuted);
   };
@@ -52,7 +58,12 @@ export default function VolumeControl() {
           step={0.01}
           value={volume}
           onChange={changeVol}
-          label={false}
+          labelTransitionProps={{
+            transition: 'skew-down',
+            duration: 150,
+            timingFunction: 'linear',
+          }}
+          label={value => `${Math.round(value * 100)}%`}
         />
       </div>
     </div>

@@ -31,9 +31,13 @@ class IPCLoggerModule extends ModuleWindow {
           break;
       }
     });
-    ipcMain.removeAllListeners(channels.APP_GET_LOGS);
-    ipcMain.handle(channels.APP_GET_LOGS, async event => {
-      const logs = await getLogsFromFile(path.join(app.getPath('userData'), 'logs', 'main.log'));
+
+    ipcMain.handle(channels.APP_GET_LOGS, async _ => {
+      console.log('get logs from main process');
+      const pathUserData = app.getPath('userData');
+      const logPath = path.join(pathUserData, 'logs/main.log');
+      const logs = await getLogsFromFile(logPath);
+      console.log('logs size: ', logs.length);
       return logs;
     });
   }
