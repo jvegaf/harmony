@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import styles from './Settings.module.css';
-import { ScrollAreaAutosize } from '@mantine/core';
+import { Box, ScrollAreaAutosize, Text } from '@mantine/core';
 
 export default function SettingsLog() {
   const viewPortRef = useRef<HTMLDivElement>(null);
@@ -9,10 +9,8 @@ export default function SettingsLog() {
   const [logs, setLogs] = useState<string[]>([]);
 
   useEffect(() => {
-    logger.info('SettingsLog mounted');
     app.getLogs().then(logsResponse => {
       setLogs(logsResponse.reverse());
-      logger.info(`logs size: ${logsResponse.length}`);
     });
   }, []);
 
@@ -21,12 +19,18 @@ export default function SettingsLog() {
       <ScrollAreaAutosize
         viewportRef={viewPortRef}
         type='always'
-        scrollbars='y'
-        mah={900}
+        mah={700}
       >
-        {logs.map((log, index) => (
-          <p key={index}>{log}</p>
-        ))}
+        <Box w={900}>
+          {logs.map((log, index) => (
+            <Text
+              component='div'
+              key={index}
+            >
+              {log}
+            </Text>
+          ))}
+        </Box>
       </ScrollAreaAutosize>
     </div>
   );
