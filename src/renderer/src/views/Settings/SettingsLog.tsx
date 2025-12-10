@@ -5,7 +5,7 @@ import { Box, ScrollAreaAutosize, Text } from '@mantine/core';
 
 export default function SettingsLog() {
   const viewPortRef = useRef<HTMLDivElement>(null);
-  const { logger, app } = window.Main;
+  const { app } = window.Main;
   const [logs, setLogs] = useState<string[]>([]);
 
   useEffect(() => {

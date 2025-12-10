@@ -1,7 +1,4 @@
 import classes from './Footer.module.css';
-import { useEffect } from 'react';
-
-const { logger } = window.Main;
 
 type FooterProps = {
   msg: string;

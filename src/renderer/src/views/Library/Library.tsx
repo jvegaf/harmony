@@ -14,7 +14,6 @@ import TrackList from '../../components/TrackList/TrackList';
 import { useViewportSize } from '../../hooks/useViewPortSize';
 import ProgressModal from '../../components/Modal/ProgressModal';
 import Footer from '../../components/Footer/Footer';
-import { clear } from 'console';
 // import SearchBar from '../../components/SearchBar/SearchBar';
 
 const { db } = window.Main;
