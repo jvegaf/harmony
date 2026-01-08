@@ -10,11 +10,11 @@
   padding-top: 50px;
   height: 100%;
   width: 100%;
+  background-color: rgba(17, 24, 39, 0.7);
 }
 
 .header {
   display: flex;
-  /* justify-content: start; */
   align-items: center;
   width: 100%;
   min-width: 800px;
@@ -24,7 +24,7 @@
 
 .list {
   margin-bottom: 20px;
-  border-bottom: solid 1px var(--mantine-color-default-border);
+  border-bottom: solid 1px var(--border-color);
   & > button {
     padding: 10px 50px;
     & > span {

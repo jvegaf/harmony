@@ -1,5 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&display=swap');
+
 :root {
   font-family:
+    'Spline Sans',
     Verdana,
     Segoe UI,
     Roboto,
@@ -15,27 +18,65 @@
   overflow: hidden;
 
   color-scheme: light dark;
-  color: #e6e6e6;
-  background-color: #242424;
+  color: #d1d5db;
+  background-color: #231a0f;
 
   font-synthesis: none;
   text-rendering: optimizelegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --normal-color-dark: #e6e6e6;
-  --progress-bg: #333333;
-  --main-color: #459ce7;
+  /* New color scheme */
+  --primary-color: #fa8905;
+  --primary-color-hover: #fb9f2d;
+  --primary-color-light: rgba(250, 137, 5, 0.2);
+
+  --background-light: #f8f7f5;
+  --background-dark: #231a0f;
+
+  --normal-color-dark: #d1d5db;
+  --progress-bg: #374151;
+  --main-color: #fa8905;
   --red-color: #d30e21;
-  --main-bg-dark: #232323;
-  --second-bg-dark: #333333;
-  --second-hover-dark: #3c3b3b;
+  --main-bg-dark: #1f2937;
+  --second-bg-dark: #374151;
+  --second-hover-dark: #4b5563;
+
+  --sidebar-bg: rgba(17, 24, 39, 0.4);
+  --header-bg: rgba(31, 41, 55, 0.5);
+  --card-bg: rgba(31, 41, 55, 0.7);
+  --border-color: rgba(75, 85, 99, 0.5);
 
   --table-vertical-spacing: 0.5rem;
+  --table-bg: transparent;
 
   --appbar-bg-light: #e5e5e5;
   --appbar-color-light: #555555;
 
-  --button-bg: #333333;
-  --button-radius: 3px;
+  --button-bg: #374151;
+  --button-radius: 0.5rem;
+
+  /* Text colors */
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }

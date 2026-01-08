@@ -2,18 +2,21 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 64px);
+  height: 100%;
+  background-color: transparent;
 }
 
 .viewMessage {
   display: flex;
   height: 100%;
-  padding-top: 300px;
+  padding-top: 200px;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  color: var(--text-muted);
 }
 
 .footerStyles {
   width: 100%;
   height: 36px;
+  flex-shrink: 0;
 }

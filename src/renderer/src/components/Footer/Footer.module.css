@@ -5,6 +5,7 @@
   align-items: center;
   justify-content: flex-start;
   padding-left: 10px;
-  background-color: light-dark(var(--mantine-color-default-border), var(--mantine-color-dark-5));
-  color: var(--mantine-color-yellow-9);
+  background-color: rgba(31, 41, 55, 0.8);
+  color: var(--primary-color);
+  font-size: 0.75rem;
 }

@@ -1,0 +1,224 @@
+.nowPlayingBar {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background-color: rgba(17, 24, 39, 0.7);
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-muted);
+}
+
+/* Track Info Section */
+.trackInfoSection {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.coverContainer {
+  width: 64px;
+  height: 64px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.trackDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.trackTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trackArtist {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.trackActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.actionButton:hover {
+  background-color: rgba(55, 65, 81, 0.5);
+  color: var(--text-secondary);
+}
+
+/* Tags Section */
+.tagsSection {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tag {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  background-color: rgba(31, 41, 55, 0.8);
+  color: var(--text-secondary);
+}
+
+.tagPrimary {
+  background-color: var(--primary-color-light);
+  color: var(--primary-color);
+  border: 1px solid rgba(250, 137, 5, 0.5);
+}
+
+/* Waveform Section */
+.waveformSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.playIndicator {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playIcon {
+  color: var(--primary-color);
+}
+
+.waveformContainer {
+  flex: 1;
+  height: 64px;
+  position: relative;
+  overflow: hidden;
+}
+
+.zoomControls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.zoomButton {
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.zoomButton:hover {
+  color: var(--text-secondary);
+}
+
+/* Cue Section */
+.cueSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cueButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cueDropdown {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  background-color: rgba(31, 41, 55, 0.8);
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.cueDropdown:hover {
+  background-color: rgba(55, 65, 81, 0.8);
+}
+
+.cueSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 8rem;
+  padding: 0.25rem;
+  background-color: rgba(31, 41, 55, 0.8);
+  border: none;
+  border-radius: 0.25rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.cueSlot:hover {
+  background-color: rgba(55, 65, 81, 0.8);
+}
+
+.cueControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.beatSelector {
+  display: flex;
+  align-items: center;
+  background-color: rgba(31, 41, 55, 0.8);
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.beatButton {
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+.beatButton:hover {
+  background-color: rgba(55, 65, 81, 0.8);
+}
+
+.beatValue {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}

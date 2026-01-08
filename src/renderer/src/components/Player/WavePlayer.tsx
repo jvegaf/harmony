@@ -36,27 +36,29 @@ function WavePlayer({ config }: WavePlayerProps) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!;
 
+      // Updated waveform colors to match the new orange theme
       gradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 1.35);
-      gradient.addColorStop(0, '#656666');
-      gradient.addColorStop((canvas.height * 0.7) / canvas.height, '#656666');
-      gradient.addColorStop((canvas.height * 0.7 + 1) / canvas.height, '#ffffff');
-      gradient.addColorStop((canvas.height * 0.7 + 2) / canvas.height, '#ffffff');
-      gradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, '#B1B1B1');
-      gradient.addColorStop(1, '#B1B1B1');
+      gradient.addColorStop(0, '#4b5563');
+      gradient.addColorStop((canvas.height * 0.7) / canvas.height, '#4b5563');
+      gradient.addColorStop((canvas.height * 0.7 + 1) / canvas.height, '#6b7280');
+      gradient.addColorStop((canvas.height * 0.7 + 2) / canvas.height, '#6b7280');
+      gradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, '#374151');
+      gradient.addColorStop(1, '#374151');
 
+      // Orange progress gradient matching the primary color
       progressGradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 1.35);
-      progressGradient.addColorStop(0, '#EE772F');
-      progressGradient.addColorStop((canvas.height * 0.7) / canvas.height, '#EB4926');
-      progressGradient.addColorStop((canvas.height * 0.7 + 1) / canvas.height, '#ffffff');
-      progressGradient.addColorStop((canvas.height * 0.7 + 2) / canvas.height, '#ffffff');
-      progressGradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, '#F6B094');
-      progressGradient.addColorStop(1, '#F6B094');
+      progressGradient.addColorStop(0, '#fa8905');
+      progressGradient.addColorStop((canvas.height * 0.7) / canvas.height, '#f76707');
+      progressGradient.addColorStop((canvas.height * 0.7 + 1) / canvas.height, '#ffd8a8');
+      progressGradient.addColorStop((canvas.height * 0.7 + 2) / canvas.height, '#ffd8a8');
+      progressGradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, '#ffc078');
+      progressGradient.addColorStop(1, '#ffc078');
     }
     return {
       waveColor: gradient,
       progressColor: progressGradient,
       autoplay: true,
-      height: 100,
+      height: 64,
       barWidth: 2,
       url: audioUrl,
     };

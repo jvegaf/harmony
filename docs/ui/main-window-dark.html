@@ -1,0 +1,669 @@
+<!doctype html>
+
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Symphony</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#fa8905",
+              "background-light": "#f8f7f5",
+              "background-dark": "#231a0f",
+            },
+            fontFamily: { display: "Spline Sans" },
+            borderRadius: {
+              DEFAULT: "1rem",
+              lg: "2rem",
+              xl: "3rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-icons {
+        font-size: 20px;
+        vertical-align: middle;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #2d3748;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4a5568;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #718096;
+      }
+    </style>
+  </head>
+  <body
+    class="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-300 antialiased"
+  >
+    <div class="flex flex-col h-screen">
+      <header
+        class="flex items-center justify-between bg-white/5 dark:bg-gray-800/50 p-2 border-b border-gray-200/10 dark:border-gray-700/50 text-xs text-gray-500 dark:text-gray-400"
+      >
+        <div class="flex items-center space-x-2">
+          <span>Analysing 287/1417</span>
+          <span class="text-gray-400 dark:text-gray-600">|</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="flex space-x-1">
+            <button class="bg-primary text-white py-1 px-4 rounded-l">
+              Library
+            </button>
+            <button
+              class="bg-gray-200/20 dark:bg-gray-700 hover:bg-gray-300/30 dark:hover:bg-gray-600 py-1 px-4"
+            >
+              Settings
+            </button>
+            <button
+              class="bg-gray-200/20 dark:bg-gray-700 hover:bg-gray-300/30 dark:hover:bg-gray-600 py-1 px-4"
+            >
+              Import
+            </button>
+            <button
+              class="bg-gray-200/20 dark:bg-gray-700 hover:bg-gray-300/30 dark:hover:bg-gray-600 py-1 px-4"
+            >
+              Export
+            </button>
+            <button
+              class="bg-gray-200/20 dark:bg-gray-700 hover:bg-gray-300/30 dark:hover:bg-gray-600 py-1 px-4 rounded-r"
+            >
+              Tools
+            </button>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div
+            class="w-24 h-2 bg-gray-200/20 dark:bg-gray-700 rounded-full overflow-hidden"
+          >
+            <div
+              class="bg-gray-400 dark:bg-gray-500 h-full"
+              style="width: 75%"
+            ></div>
+          </div>
+          <i class="material-icons text-base">remove</i>
+          <i class="material-icons text-base">check_box_outline_blank</i>
+          <i class="material-icons text-base">close</i>
+        </div>
+      </header>
+      <div class="flex flex-1 overflow-hidden">
+        <aside
+          class="w-64 bg-gray-100/30 dark:bg-gray-900/40 p-4 space-y-4 flex-shrink-0"
+        >
+          <div class="relative">
+            <i
+              class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-lg"
+              >search</i
+            >
+            <input
+              class="w-full bg-gray-200/50 dark:bg-gray-800/60 border-none rounded pl-10 pr-3 py-2 text-sm focus:ring-primary focus:ring-1"
+              placeholder="Search... All Tracks"
+              type="text"
+            />
+          </div>
+          <nav class="space-y-1 text-sm">
+            <a
+              class="flex justify-between items-center px-3 py-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+              href="#"
+            >
+              <span>Queue</span>
+            </a>
+            <a
+              class="flex justify-between items-center px-3 py-1.5 rounded bg-gray-200/50 dark:bg-gray-700/50 font-semibold text-gray-800 dark:text-gray-200"
+              href="#"
+            >
+              <span>All Tracks [1417]</span>
+              <i class="material-icons text-primary text-lg">equalizer</i>
+            </a>
+            <a
+              class="flex justify-between items-center px-3 py-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+              href="#"
+            >
+              <span>Recently Added [1417]</span>
+            </a>
+            <a
+              class="flex justify-between items-center px-3 py-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+              href="#"
+            >
+              <span
+                >Watch Folder
+                <span class="text-gray-500">[Inactive]</span></span
+              >
+            </a>
+          </nav>
+          <div
+            class="border-t border-gray-200/50 dark:border-gray-700/50 my-2"
+          ></div>
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h3
+                class="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider"
+              >
+                Playlists
+              </h3>
+              <button
+                class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <i class="material-icons text-lg">add</i>
+              </button>
+            </div>
+          </div>
+        </aside>
+        <main class="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900/70">
+          <div class="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
+            <div class="flex items-start">
+              <img
+                alt="Album art for 2NIGHT (Original Mix)"
+                class="w-16 h-16 rounded mr-4"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3EDaPAC_WAIrh711uc48R_CNbZOnRjd5IY1Raxqxa_ZkqDlcZPdWgHnMZvS5c_qCsokaff40XI9MtScR23gPgAsbknUxGopp9PrPhg9K8pjWBjoZhtEXFB7s6J4J-KE5OaRzfbvTKS-k05ZrscNzDc7v20hQk7-SrDlQTKuiF9RfeHcKXbYAeBNQ6zymTiSk977u_oEuew5g-M4mYMcUu0ZAxlvrT3H2EQwmefUSavDrOtwzKch_6-6uHJnqIjJlFxkSi7PXSHKw"
+              />
+              <div class="flex-1">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                  2NIGHT (Original Mix)
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400">Will Taylor (UK)</p>
+              </div>
+              <div
+                class="flex items-center space-x-2 text-gray-500 dark:text-gray-400"
+              >
+                <button
+                  class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+                >
+                  <i class="material-icons">pause</i>
+                </button>
+                <button
+                  class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+                >
+                  <i class="material-icons">fast_rewind</i>
+                </button>
+                <button
+                  class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+                >
+                  <i class="material-icons">fast_forward</i>
+                </button>
+                <button
+                  class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+                >
+                  <i class="material-icons">info_outline</i>
+                </button>
+                <button
+                  class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+                >
+                  <i class="material-icons">cancel</i>
+                </button>
+              </div>
+            </div>
+            <div class="mt-3 flex space-x-2 text-xs">
+              <div class="bg-gray-200 dark:bg-gray-800 rounded px-2 py-1">
+                132BPM
+              </div>
+              <div
+                class="bg-primary/20 text-primary border border-primary/50 rounded px-2 py-1"
+              >
+                12D
+              </div>
+              <div class="bg-gray-200 dark:bg-gray-800 rounded px-2 py-1">
+                2024
+              </div>
+              <div class="bg-gray-200 dark:bg-gray-800 rounded px-2 py-1">
+                House
+              </div>
+            </div>
+            <div class="mt-3 flex items-center space-x-2">
+              <i class="material-icons text-primary text-xl"
+                >play_circle_filled</i
+              >
+              <div class="relative flex-1">
+                <img
+                  alt="Audio waveform visualization"
+                  class="w-full h-16 object-cover"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiKSN-0YEBKvIsmJPaxVQ40gvewZYiM6dkFPzQYcEvpvG9HnYGi5sxb2YMaEjQ6BYHMpCfElu9AQ4mUemVQI2YNG8gPRb66mvNXAGKmvMdhfWxXXgt-k9InPayNlG-DaNjjlUrU_Usblgr7M8xqMdxaCZfs3exHWbpDX-ofpd9BBK3ZfYWo8nGZ58_LhZeYEF6Smg78dJE1Q8JxxkgD1D32cQX_Ngn3W-VFYz7KKigWh4XLxNSdCVr1kUhvZnBNHsKQGePYUZF6T8"
+                />
+                <div
+                  class="absolute top-0 left-0 h-full bg-primary/50"
+                  style="width: 20%"
+                ></div>
+              </div>
+              <div
+                class="flex items-center space-x-1 text-gray-500 dark:text-gray-400 text-xs"
+              >
+                <i class="material-icons text-lg">remove_circle_outline</i>
+                <i class="material-icons text-lg">add_circle_outline</i>
+              </div>
+            </div>
+            <div
+              class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1"
+            >
+              <span>1:13</span>
+              <span>5:54</span>
+            </div>
+            <div class="mt-2 flex items-center justify-between">
+              <div class="flex space-x-2">
+                <button
+                  class="bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-3 py-1 rounded text-sm flex items-center"
+                >
+                  Cues
+                  <i class="material-icons text-base ml-1">arrow_drop_down</i>
+                </button>
+                <button
+                  class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm"
+                >
+                  <i class="material-icons text-base">add</i>
+                </button>
+                <button
+                  class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm"
+                >
+                  <i class="material-icons text-base">add</i>
+                </button>
+                <button
+                  class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm"
+                >
+                  <i class="material-icons text-base">add</i>
+                </button>
+                <button
+                  class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm"
+                >
+                  <i class="material-icons text-base">add</i>
+                </button>
+              </div>
+              <div class="flex items-center space-x-2 text-sm">
+                <button
+                  class="bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded flex items-center"
+                >
+                  Default
+                  <i class="material-icons text-base ml-1">arrow_drop_down</i>
+                </button>
+                <div
+                  class="flex items-center bg-gray-200 dark:bg-gray-800 rounded"
+                >
+                  <button class="px-2 py-1">
+                    <i class="material-icons text-base">arrow_left</i>
+                  </button>
+                  <span class="px-2">4</span>
+                  <button class="px-2 py-1">
+                    <i class="material-icons text-base">arrow_right</i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex-1 overflow-auto">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+              <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10">
+                <tr class="border-b border-gray-200/50 dark:border-gray-700/50">
+                  <th class="p-2 w-8">
+                    <input
+                      class="rounded border-gray-400 dark:border-gray-600 bg-transparent focus:ring-primary"
+                      type="checkbox"
+                    />
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Art
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Added
+                  </th>
+                  <th
+                    class="p-2 font-medium text-gray-800 dark:text-gray-200 flex items-center"
+                  >
+                    Title
+                    <i class="material-icons text-base ml-1">arrow_upward</i>
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Artist
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Album
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Time
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Bpm
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Key
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Rating
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Genre
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Kind
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Track#
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Year
+                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
+                    Comments
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                class="divide-y divide-gray-200/30 dark:divide-gray-700/50"
+              >
+                <tr class="hover:bg-gray-100/50 dark:hover:bg-gray-800/50">
+                  <td class="p-2">
+                    <input
+                      class="rounded border-gray-400 dark:border-gray-600 bg-transparent focus:ring-primary"
+                      type="checkbox"
+                    />
+                  </td>
+                  <td class="p-2">
+                    <img
+                      alt="Get Bossy album art"
+                      class="w-6 h-6 rounded-sm"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuByoPuXoOAjI8-jBbY4Hc3WQ5ki_dVxlquPGc8-Im1XBKHUr9RFw0XuVOW487KWGamyPMU2Ip5U2vs77M4g89iKOO1CfW519iD5UjkmvCRfuNKbylPnxqmYJ4dqcanXZkCXg3ADPI13J8IwkM9PP-pgRz62S-SyfI-JLL40yXdCO-Is_e0n0jliINRex7Ea5OlPMTwAGPv7SRlVw7OMpumOYGTn-cj02Nq7RDLwNpdPxFW6q6VUvcJT8Y0cA1oUhNN5ck6W4DoKtpA"
+                    />
+                  </td>
+                  <td class="p-2">25/01...</td>
+                  <td class="p-2">Get Bossy (Extended Mix)</td>
+                  <td class="p-2">Us Two feat. MariaDennis</td>
+                  <td class="p-2"></td>
+                  <td class="p-2">6:27</td>
+                  <td class="p-2">130.00</td>
+                  <td class="p-2"></td>
+                  <td class="p-2 text-gray-400 dark:text-gray-600">☆☆☆☆☆</td>
+                  <td class="p-2"></td>
+                  <td class="p-2">MP3</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2"></td>
+                </tr>
+                <tr class="hover:bg-gray-100/50 dark:hover:bg-gray-800/50">
+                  <td class="p-2">
+                    <input
+                      class="rounded border-gray-400 dark:border-gray-600 bg-transparent focus:ring-primary"
+                      type="checkbox"
+                    />
+                  </td>
+                  <td class="p-2">
+                    <img
+                      alt="Let Me Tell You Something album art"
+                      class="w-6 h-6 rounded-sm"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsBgNm5sKoeGeJAIUP4FTgE4Stx__HAtP_oDn2SYt36zNAlaWCZgOXJTPY1jvX_EZsBYPVWTCXZwdModctRXjgv0V42QvC5SgEJqeL5UmpfXXjhaOr0S6hvLzXAA0vLGfG-a3y9NPJrvJlVoU3uE0UREUGUIAtLo5c-UHOGHHcyT9HDlI4P_pwHrCIivmxgD1sfUwWDZQB0sQkCm2WXTY3wuGa36gyHJhhJbqEQ9vZvgPxNBka0XEPvRDP5-xJojsWQzsInTmIMXY"
+                    />
+                  </td>
+                  <td class="p-2">25/01...</td>
+                  <td class="p-2">Let Me Tell You Something (Original Mix)</td>
+                  <td class="p-2">Mendo</td>
+                  <td class="p-2"></td>
+                  <td class="p-2">5:39</td>
+                  <td class="p-2">130.00</td>
+                  <td class="p-2"></td>
+                  <td class="p-2 text-gray-400 dark:text-gray-600">☆☆☆☆☆</td>
+                  <td class="p-2"></td>
+                  <td class="p-2">MP3</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2"></td>
+                </tr>
+                <tr class="hover:bg-gray-100/50 dark:hover:bg-gray-800/50">
+                  <td class="p-2">
+                    <input
+                      class="rounded border-gray-400 dark:border-gray-600 bg-transparent focus:ring-primary"
+                      type="checkbox"
+                    />
+                  </td>
+                  <td class="p-2">
+                    <i
+                      class="material-icons text-gray-400 dark:text-gray-600 text-2xl"
+                      >music_note</i
+                    >
+                  </td>
+                  <td class="p-2">25/01...</td>
+                  <td class="p-2">Love Song</td>
+                  <td class="p-2">Pig &amp; Dan</td>
+                  <td class="p-2"></td>
+                  <td class="p-2">7:00</td>
+                  <td class="p-2">126.00</td>
+                  <td class="p-2"></td>
+                  <td class="p-2 text-gray-400 dark:text-gray-600">☆☆☆☆☆</td>
+                  <td class="p-2"></td>
+                  <td class="p-2">MP3</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2"></td>
+                </tr>
+                <tr class="hover:bg-gray-100/50 dark:hover:bg-gray-800/50">
+                  <td class="p-2">
+                    <input
+                      class="rounded border-gray-400 dark:border-gray-600 bg-transparent focus:ring-primary"
+                      type="checkbox"
+                    />
+                  </td>
+                  <td class="p-2">
+                    <i
+                      class="material-icons text-gray-400 dark:text-gray-600 text-2xl"
+                      >music_note</i
+                    >
+                  </td>
+                  <td class="p-2">25/01...</td>
+                  <td class="p-2">01 I'm Talking About It.mp3</td>
+                  <td class="p-2"></td>
+                  <td class="p-2"></td>
+                  <td class="p-2">0:00</td>
+                  <td class="p-2"></td>
+                  <td class="p-2"></td>
+                  <td class="p-2 text-gray-400 dark:text-gray-600">☆☆☆☆☆</td>
+                  <td class="p-2"></td>
+                  <td class="p-2">MP3</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2"></td>
+                </tr>
+                <tr
+                  class="bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30"
+                >
+                  <td class="p-2">
+                    <input
+                      checked=""
+                      class="rounded border-primary bg-primary text-primary focus:ring-primary"
+                      type="checkbox"
+                    />
+                  </td>
+                  <td class="p-2">
+                    <img
+                      alt="2NIGHT (Original Mix) album art"
+                      class="w-6 h-6 rounded-sm"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuABae5TKv34MWvRTeLApqEU193G4Gb0eHN7Cu1v58-ot63q8HxPvvxEFoiUcQGCe40gDCpfVuf0OuH55T02wZLjAqSfVQBWy6YfOhlHrI7RRyD3wjVafPqw8HT1vaQ7mp99N6wfpsxvdUXEB2Yt4iXW5eyXf0X2QH2oepBeU4Tte1PB5XVxepSgrn66nRaGR4UpUCEEY3Z8iOnhLhuYKnYCJzfXuTsZB6-I0o9itjGi12MAp06mrV12bRJpekb4VLMlxEJMAQjtKUw"
+                    />
+                  </td>
+                  <td class="p-2 text-primary font-medium">25/01...</td>
+                  <td class="p-2 text-primary font-medium">
+                    2NIGHT (Original Mix)
+                  </td>
+                  <td class="p-2 text-primary font-medium">Will Taylor (UK)</td>
+                  <td class="p-2 text-primary font-medium">2NIGHT</td>
+                  <td class="p-2 text-primary font-medium">5:54</td>
+                  <td class="p-2 text-primary font-medium">132.00</td>
+                  <td class="p-2 text-primary font-medium">12D</td>
+                  <td class="p-2 text-primary font-medium">☆☆☆☆☆</td>
+                  <td class="p-2 text-primary font-medium">House</td>
+                  <td class="p-2 text-primary font-medium">MP3</td>
+                  <td class="p-2 text-primary font-medium">0</td>
+                  <td class="p-2 text-primary font-medium">2024</td>
+                  <td class="p-2 text-primary font-medium"></td>
+                </tr>
+                <tr class="hover:bg-gray-100/50 dark:hover:bg-gray-800/50">
+                  <td class="p-2">
+                    <input
+                      class="rounded border-gray-400 dark:border-gray-600 bg-transparent focus:ring-primary"
+                      type="checkbox"
+                    />
+                  </td>
+                  <td class="p-2">
+                    <i
+                      class="material-icons text-gray-400 dark:text-gray-600 text-2xl"
+                      >music_note</i
+                    >
+                  </td>
+                  <td class="p-2">25/01...</td>
+                  <td class="p-2">2pole - Hyperion Original Mix.mp3</td>
+                  <td class="p-2"></td>
+                  <td class="p-2"></td>
+                  <td class="p-2">0:00</td>
+                  <td class="p-2"></td>
+                  <td class="p-2"></td>
+                  <td class="p-2 text-gray-400 dark:text-gray-600">☆☆☆☆☆</td>
+                  <td class="p-2"></td>
+                  <td class="p-2">MP3</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2"></td>
+                </tr>
+                <tr class="hover:bg-gray-100/50 dark:hover:bg-gray-800/50">
+                  <td class="p-2">
+                    <input
+                      class="rounded border-gray-400 dark:border-gray-600 bg-transparent focus:ring-primary"
+                      type="checkbox"
+                    />
+                  </td>
+                  <td class="p-2">
+                    <i
+                      class="material-icons text-gray-400 dark:text-gray-600 text-2xl"
+                      >music_note</i
+                    >
+                  </td>
+                  <td class="p-2">25/01...</td>
+                  <td class="p-2">ANEY - Spend My Life (Original Mix).mp3</td>
+                  <td class="p-2"></td>
+                  <td class="p-2"></td>
+                  <td class="p-2">0:00</td>
+                  <td class="p-2"></td>
+                  <td class="p-2"></td>
+                  <td class="p-2 text-gray-400 dark:text-gray-600">☆☆☆☆☆</td>
+                  <td class="p-2"></td>
+                  <td class="p-2">MP3</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2"></td>
+                </tr>
+                <tr class="hover:bg-gray-100/50 dark:hover:bg-gray-800/50">
+                  <td class="p-2">
+                    <input
+                      class="rounded border-gray-400 dark:border-gray-600 bg-transparent focus:ring-primary"
+                      type="checkbox"
+                    />
+                  </td>
+                  <td class="p-2">
+                    <img
+                      alt="Aburaya album art"
+                      class="w-6 h-6 rounded-sm"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiinzRw5U2Ki5SE9XENQ3EN2M3UxF9sLFYOvvAVsaCHe5MQyLfmXKJHBpmkvy93-Z1pNuG6Fr9lf8JmJlTV2l2xs82F_kpPiz5GBjPwVnWtE3tsZm2DHBCS4qkddghBOsUnTzQKKZw1N3i_bjT6XA8iSMoeu_pjLWd0GVhaPpEdGepEraWuYipZ_U0lgQyR0BWv7pm_nNlaSXruskmdBDS8lwGGYWenaiAOhuahM_-nZ475b-oPSb0Sev1E9COdFCPdRjjgo4gFN4"
+                    />
+                  </td>
+                  <td class="p-2">25/01...</td>
+                  <td class="p-2">Aburaya (Original Mix)</td>
+                  <td class="p-2">WEIRD.</td>
+                  <td class="p-2">Orbiter VI</td>
+                  <td class="p-2">6:55</td>
+                  <td class="p-2">130.00</td>
+                  <td class="p-2">
+                    <span
+                      class="bg-primary/20 text-primary border border-primary/50 rounded px-1 text-[10px]"
+                      >12D</span
+                    >
+                  </td>
+                  <td class="p-2 text-gray-400 dark:text-gray-600">☆☆☆☆☆</td>
+                  <td class="p-2">House</td>
+                  <td class="p-2">MP3</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2">2023</td>
+                  <td class="p-2"></td>
+                </tr>
+                <tr class="hover:bg-gray-100/50 dark:hover:bg-gray-800/50">
+                  <td class="p-2">
+                    <input
+                      class="rounded border-gray-400 dark:border-gray-600 bg-transparent focus:ring-primary"
+                      type="checkbox"
+                    />
+                  </td>
+                  <td class="p-2">
+                    <i
+                      class="material-icons text-gray-400 dark:text-gray-600 text-2xl"
+                      >music_note</i
+                    >
+                  </td>
+                  <td class="p-2">25/01...</td>
+                  <td class="p-2">Adam Port - Sally.mp3</td>
+                  <td class="p-2"></td>
+                  <td class="p-2"></td>
+                  <td class="p-2">0:00</td>
+                  <td class="p-2"></td>
+                  <td class="p-2"></td>
+                  <td class="p-2 text-gray-400 dark:text-gray-600">☆☆☆☆☆</td>
+                  <td class="p-2"></td>
+                  <td class="p-2">MP3</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2"></td>
+                  <td class="p-2"></td>
+                </tr>
+                <tr class="hover:bg-gray-100/50 dark:hover:bg-gray-800/50">
+                  <td class="p-2">
+                    <input
+                      class="rounded border-gray-400 dark:border-gray-600 bg-transparent focus:ring-primary"
+                      type="checkbox"
+                    />
+                  </td>
+                  <td class="p-2">
+                    <img
+                      alt="Afro Boogie album art"
+                      class="w-6 h-6 rounded-sm"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuBu_u5v_fxifYHhbDUYM716-vsBKe7b7JnvzHSyB1aQDpiM56jMlcQ7m8QKQaF8PnxwKuOyaiWphuXUuxHIjOfrBrq42wWT1j92NYFakIhZWdL81YaMmdtuO82nJWhzTWcgdbMCBR4o5ofbLo028arhnH9rn0MBUYbTWPRAKX5rnK0oEYrQMbP1knf4AnBwwyIiJWq0K5H_lXzfOf9jXGMKNHDiVyE-AW8bAIUtHcMp_zBR2ljhx11SbR7lQ38PifT-DKj3EUJELpQ"
+                    />
+                  </td>
+                  <td class="p-2">25/01...</td>
+                  <td class="p-2">Afro Boogie (Original Mix)</td>
+                  <td class="p-2">Rick Marshall.</td>
+                  <td class="p-2">Afro Boogie</td>
+                  <td class="p-2">6:53</td>
+                  <td class="p-2">122.00</td>
+                  <td class="p-2">
+                    <span
+                      class="bg-primary/20 text-primary border border-primary/50 rounded px-1 text-[10px]"
+                      >2M</span
+                    >
+                  </td>
+                  <td class="p-2 text-gray-400 dark:text-gray-600">☆☆☆☆☆</td>
+                  <td class="p-2">Jackin House</td>
+                  <td class="p-2">MP3</td>
+                  <td class="p-2">0</td>
+                  <td class="p-2">2022</td>
+                  <td class="p-2"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

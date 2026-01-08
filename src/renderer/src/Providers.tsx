@@ -11,40 +11,133 @@ export default function Providers({ children }: any) {
   // https://mantine.dev/theming/mantine-provider/
 
   const theme = createTheme({
-    // Added Segoe UI Variable Text (Win11) to https://mantine.dev/theming/typography/#system-fonts
+    // Using Spline Sans as the primary font
     fontFamily:
-      // '-apple-system, BlinkMacSystemFont, Segoe UI Variable Text, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji',
-      'Verdana,  Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji',
+      "'Spline Sans', Verdana, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji",
     // added source-code-pro and SFMono-Regular
     fontFamilyMonospace:
       'source-code-pro, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
+    primaryColor: 'orange',
+    colors: {
+      orange: [
+        '#fff4e6',
+        '#ffe8cc',
+        '#ffd8a8',
+        '#ffc078',
+        '#ffa94d',
+        '#fa8905',
+        '#f76707',
+        '#e8590c',
+        '#d9480f',
+        '#c92a2a',
+      ],
+      dark: [
+        '#C1C2C5',
+        '#A6A7AB',
+        '#909296',
+        '#5c5f66',
+        '#373A40',
+        '#2C2E33',
+        '#25262b',
+        '#1A1B1E',
+        '#141517',
+        '#101113',
+      ],
+    },
     components: {
       Button: {
-        defaultProps: { radius: 'xs' },
-        // styles: { root: { textTransform: 'none' } },
+        defaultProps: { radius: 'md' },
+        styles: {
+          root: {
+            backgroundColor: 'var(--button-bg)',
+            '&:hover': {
+              backgroundColor: 'var(--second-hover-dark)',
+            }
+          }
+        },
       },
       Checkbox: {
-        styles: { input: { cursor: 'pointer' }, label: { cursor: 'pointer' } },
+        styles: {
+          input: {
+            cursor: 'pointer',
+            backgroundColor: 'transparent',
+            borderColor: 'var(--border-color)',
+          },
+          label: { cursor: 'pointer' }
+        },
       },
-      TextInput: { styles: { label: { fontSize: '0.7rem', color: '#868e96', marginTop: '0.5rem' } } },
-      Textarea: { styles: { label: { fontSize: '0.8rem', color: '#868e96', marginTop: '0.5rem' } } },
+      TextInput: {
+        styles: {
+          label: { fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.5rem' },
+          input: {
+            backgroundColor: 'rgba(31, 41, 55, 0.6)',
+            borderColor: 'var(--border-color)',
+            color: 'var(--text-primary)',
+            '&:focus': {
+              borderColor: 'var(--primary-color)',
+            }
+          }
+        }
+      },
+      Textarea: {
+        styles: {
+          label: { fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' },
+          input: {
+            backgroundColor: 'rgba(31, 41, 55, 0.6)',
+            borderColor: 'var(--border-color)',
+            color: 'var(--text-primary)',
+          }
+        }
+      },
       Autocomplete: { styles: { wrapper: { width: '500px' } } },
-      Select: { styles: { label: { marginTop: '0.5rem' } } },
-      Loader: { defaultProps: { size: 'xl' } },
+      Select: {
+        styles: {
+          label: { marginTop: '0.5rem' },
+          input: {
+            backgroundColor: 'rgba(31, 41, 55, 0.6)',
+            borderColor: 'var(--border-color)',
+            color: 'var(--text-primary)',
+          }
+        }
+      },
+      Loader: { defaultProps: { size: 'xl', color: 'orange' } },
       Space: { defaultProps: { h: 'sm' } },
       Anchor: { defaultProps: { target: '_blank' } },
-      Burger: { styles: { burger: { color: '--mantine-color-grey-6' } } },
+      Burger: { styles: { burger: { color: 'var(--text-secondary)' } } },
       Table: {
-        styles: { td: { padding: '0.6rem' }, th: { padding: '0.5rem', backgroundColor: '--mantine-color-gray-6' } },
+        styles: {
+          td: { padding: '0.6rem' },
+          th: { padding: '0.5rem', backgroundColor: 'rgba(31, 41, 55, 0.8)' }
+        },
       },
+      Tabs: {
+        styles: {
+          tab: {
+            '&[dataActive]': {
+              backgroundColor: 'var(--primary-color)',
+              color: 'white',
+            }
+          }
+        }
+      },
+      ActionIcon: {
+        styles: {
+          root: {
+            color: 'var(--text-secondary)',
+            '&:hover': {
+              backgroundColor: 'rgba(55, 65, 81, 0.5)',
+            }
+          }
+        }
+      }
     },
   });
 
   return (
     <>
-      <ColorSchemeScript defaultColorScheme='auto' />
+      <ColorSchemeScript defaultColorScheme='dark' />
       <MantineProvider
-        defaultColorScheme='auto'
+        defaultColorScheme='dark'
         theme={theme}
         withCssVariables
       >

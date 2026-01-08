@@ -1,0 +1,109 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--header-bg);
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  -webkit-app-region: drag;
+  min-height: 40px;
+}
+
+/* Left Section */
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  -webkit-app-region: no-drag;
+}
+
+.analysisText {
+  color: var(--text-muted);
+}
+
+.separator {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+/* Center Section */
+.centerSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-app-region: no-drag;
+}
+
+.tabGroup {
+  display: flex;
+}
+
+.tab {
+  background-color: rgba(55, 65, 81, 0.5);
+  border: none;
+  padding: 0.25rem 1rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.tab:hover {
+  background-color: rgba(75, 85, 99, 0.5);
+}
+
+.tabActive {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.tabFirst {
+  border-radius: 0.25rem 0 0 0.25rem;
+}
+
+.tabLast {
+  border-radius: 0 0.25rem 0.25rem 0;
+}
+
+/* Right Section */
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  -webkit-app-region: no-drag;
+}
+
+.progressBar {
+  width: 6rem;
+}
+
+.progressTrack {
+  height: 0.5rem;
+  background-color: rgba(55, 65, 81, 0.5);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--text-muted);
+  transition: width 0.3s ease;
+}
+
+.windowControl {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.windowControl:hover {
+  color: var(--text-secondary);
+}
