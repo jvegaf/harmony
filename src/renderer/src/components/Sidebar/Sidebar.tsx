@@ -24,10 +24,8 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
   const [searchQuery, setSearchQuery] = useState('');
 
   const navItems: NavItem[] = [
-    { id: 'queue', label: 'Queue' },
     { id: 'all-tracks', label: `All Tracks`, count: trackCount, isActive: true, isPlaying: true },
     { id: 'recently-added', label: 'Recently Added', count: trackCount },
-    { id: 'watch-folder', label: 'Watch Folder', badge: 'Inactive' },
   ];
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

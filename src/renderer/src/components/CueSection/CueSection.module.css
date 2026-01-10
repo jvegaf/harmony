@@ -1,0 +1,83 @@
+/* Cue Section */
+.cueSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cueButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cueDropdown {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  background-color: rgba(31, 41, 55, 0.8);
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.cueDropdown:hover {
+  background-color: rgba(55, 65, 81, 0.8);
+}
+
+.cueSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 8rem;
+  padding: 0.25rem;
+  background-color: rgba(31, 41, 55, 0.8);
+  border: none;
+  border-radius: 0.25rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.cueSlot:hover {
+  background-color: rgba(55, 65, 81, 0.8);
+}
+
+.cueControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.beatSelector {
+  display: flex;
+  align-items: center;
+  background-color: rgba(31, 41, 55, 0.8);
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.beatButton {
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+.beatButton:hover {
+  background-color: rgba(55, 65, 81, 0.8);
+}
+
+.beatValue {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}

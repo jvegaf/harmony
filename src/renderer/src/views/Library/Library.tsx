@@ -88,7 +88,7 @@ export default function LibraryView() {
           trackPlayingID={trackPlayingID}
           playlists={playlists}
           width={width - 256}
-          height={height - 340}
+          height={height - 250}
         />
         <div className={styles.footerStyles}>
           <Footer msg={message} />

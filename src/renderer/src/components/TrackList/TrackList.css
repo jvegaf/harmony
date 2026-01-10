@@ -46,7 +46,7 @@
   & .ag-row {
     background-color: transparent !important;
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     border-bottom: 1px solid rgba(55, 65, 81, 0.3);
 
     &:hover {
@@ -69,8 +69,6 @@
   }
 
   & .playing-style {
-    background-color: rgba(250, 137, 5, 0.2) !important;
-
     & .ag-cell {
       color: var(--primary-color) !important;
       font-weight: 500;

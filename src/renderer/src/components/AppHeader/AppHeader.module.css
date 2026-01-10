@@ -1,7 +1,6 @@
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
   background-color: var(--header-bg);
   padding: 0.5rem;
   border-bottom: 1px solid var(--border-color);
@@ -16,11 +15,11 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  -webkit-app-region: no-drag;
 }
 
 .analysisText {
   color: var(--text-muted);
+  -webkit-app-region: no-drag;
 }
 
 .separator {
@@ -33,11 +32,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  -webkit-app-region: no-drag;
 }
 
 .tabGroup {
   display: flex;
+  -webkit-app-region: no-drag;
 }
 
 .tab {
@@ -69,14 +68,15 @@
 
 /* Right Section */
 .rightSection {
+  margin-right: 10rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  -webkit-app-region: no-drag;
 }
 
 .progressBar {
   width: 6rem;
+  -webkit-app-region: no-drag;
 }
 
 .progressTrack {
@@ -90,20 +90,4 @@
   height: 100%;
   background-color: var(--text-muted);
   transition: width 0.3s ease;
-}
-
-.windowControl {
-  background: none;
-  border: none;
-  padding: 0.25rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.15s ease;
-}
-
-.windowControl:hover {
-  color: var(--text-secondary);
 }

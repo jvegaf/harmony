@@ -1,5 +1,4 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { IconMinus, IconSquare, IconX } from '@tabler/icons-react';
 import styles from './AppHeader.module.css';
 
 type Tab = {
@@ -82,15 +81,6 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
             />
           </div>
         </div>
-        <button className={styles.windowControl}>
-          <IconMinus size={14} />
-        </button>
-        <button className={styles.windowControl}>
-          <IconSquare size={12} />
-        </button>
-        <button className={styles.windowControl}>
-          <IconX size={14} />
-        </button>
       </div>
     </header>
   );

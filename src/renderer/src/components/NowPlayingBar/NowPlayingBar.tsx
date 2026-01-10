@@ -8,16 +8,13 @@ import {
   IconX,
   IconCircleMinus,
   IconCirclePlus,
-  IconChevronDown,
-  IconChevronLeft,
-  IconChevronRight,
-  IconPlus,
 } from '@tabler/icons-react';
 import { Track, PlayerStatus, Config } from '../../../../preload/types/harmony';
 import Cover from '../Cover/Cover';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
 import styles from './NowPlayingBar.module.css';
 import WavePlayer from '../Player/WavePlayer';
+// import CueSection from '../CueSection';
 
 type NowPlayingBarProps = {
   track: Track | null;
@@ -70,52 +67,65 @@ export default function NowPlayingBar({ track, config }: NowPlayingBarProps) {
           <h1 className={styles.trackTitle}>{track.title}</h1>
           <p className={styles.trackArtist}>{track.artist || 'Unknown Artist'}</p>
         </div>
-        <div className={styles.trackActions}>
-          <button
-            className={styles.actionButton}
-            onClick={() => playerAPI.togglePlayPause()}
-          >
-            {playerStatus === PlayerStatus.PLAY ? (
-              <IconPlayerPauseFilled size={20} />
-            ) : (
-              <IconPlayerPlayFilled size={20} />
-            )}
-          </button>
-          <button
-            className={styles.actionButton}
-            onClick={() => playerAPI.previous()}
-          >
-            <IconRewindBackward10 size={20} />
-          </button>
-          <button
-            className={styles.actionButton}
-            onClick={() => playerAPI.next()}
-          >
-            <IconRewindForward10 size={20} />
-          </button>
-          <button className={styles.actionButton}>
-            <IconInfoCircle size={20} />
-          </button>
-          <button className={styles.actionButton}>
-            <IconX size={20} />
-          </button>
+        <div className={styles.trackExtra}>
+          <div className={styles.trackActions}>
+            <button
+              type='button'
+              className={styles.actionButton}
+              onClick={() => playerAPI.togglePlayPause()}
+            >
+              {playerStatus === PlayerStatus.PLAY ? (
+                <IconPlayerPauseFilled size={20} />
+              ) : (
+                <IconPlayerPlayFilled size={20} />
+              )}
+            </button>
+            <button
+              type='button'
+              className={styles.actionButton}
+              onClick={() => playerAPI.previous()}
+            >
+              <IconRewindBackward10 size={20} />
+            </button>
+            <button
+              type='button'
+              className={styles.actionButton}
+              onClick={() => playerAPI.next()}
+            >
+              <IconRewindForward10 size={20} />
+            </button>
+            <button
+              type='button'
+              className={styles.actionButton}
+            >
+              <IconInfoCircle size={20} />
+            </button>
+            <button
+              type='button'
+              className={styles.actionButton}
+            >
+              <IconX size={20} />
+            </button>
+          </div>
+          {/* Tags Section */}
+          <div className={styles.tagsSection}>
+            {tags.map((tag, index) => (
+              <Tag
+                key={`${tag.label}-${tag.variant}-${index}`}
+                label={tag.label}
+                variant={tag.variant}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* Tags Section */}
-      <div className={styles.tagsSection}>
-        {tags.map((tag, index) => (
-          <Tag
-            key={index}
-            label={tag.label}
-            variant={tag.variant}
-          />
-        ))}
       </div>
 
       {/* Waveform Section */}
       <div className={styles.waveformSection}>
-        <button className={styles.playIndicator}>
+        <button
+          type='button'
+          className={styles.playIndicator}
+        >
           <IconPlayerPlayFilled
             size={24}
             className={styles.playIcon}
@@ -124,54 +134,10 @@ export default function NowPlayingBar({ track, config }: NowPlayingBarProps) {
         <div className={styles.waveformContainer}>
           <WavePlayer config={config} />
         </div>
-        <div className={styles.zoomControls}>
-          <IconCircleMinus
-            size={18}
-            className={styles.zoomButton}
-          />
-          <IconCirclePlus
-            size={18}
-            className={styles.zoomButton}
-          />
-        </div>
       </div>
 
       {/* Cue Points Section */}
-      <div className={styles.cueSection}>
-        <div className={styles.cueButtons}>
-          <button className={styles.cueDropdown}>
-            Cues
-            <IconChevronDown size={16} />
-          </button>
-          <button className={styles.cueSlot}>
-            <IconPlus size={16} />
-          </button>
-          <button className={styles.cueSlot}>
-            <IconPlus size={16} />
-          </button>
-          <button className={styles.cueSlot}>
-            <IconPlus size={16} />
-          </button>
-          <button className={styles.cueSlot}>
-            <IconPlus size={16} />
-          </button>
-        </div>
-        <div className={styles.cueControls}>
-          <button className={styles.cueDropdown}>
-            Default
-            <IconChevronDown size={16} />
-          </button>
-          <div className={styles.beatSelector}>
-            <button className={styles.beatButton}>
-              <IconChevronLeft size={16} />
-            </button>
-            <span className={styles.beatValue}>4</span>
-            <button className={styles.beatButton}>
-              <IconChevronRight size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* <CueSection /> */}
     </div>
   );
 }

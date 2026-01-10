@@ -72,6 +72,9 @@ app.whenReady().then(() => {
     height: 768,
     show: false,
     autoHideMenuBar: true,
+    titleBarStyle: 'hidden',
+    // expose window controls in Windows/Linux
+    ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
