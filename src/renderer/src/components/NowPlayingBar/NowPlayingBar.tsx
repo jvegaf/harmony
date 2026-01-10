@@ -6,15 +6,12 @@ import {
   IconRewindForward10,
   IconInfoCircle,
   IconX,
-  IconCircleMinus,
-  IconCirclePlus,
 } from '@tabler/icons-react';
 import { Track, PlayerStatus, Config } from '../../../../preload/types/harmony';
 import Cover from '../Cover/Cover';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
 import styles from './NowPlayingBar.module.css';
 import WavePlayer from '../Player/WavePlayer';
-// import CueSection from '../CueSection';
 
 type NowPlayingBarProps = {
   track: Track | null;
@@ -135,9 +132,6 @@ export default function NowPlayingBar({ track, config }: NowPlayingBarProps) {
           <WavePlayer config={config} />
         </div>
       </div>
-
-      {/* Cue Points Section */}
-      {/* <CueSection /> */}
     </div>
   );
 }
