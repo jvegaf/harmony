@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { LoaderFunctionArgs, useLoaderData, useNavigate } from 'react-router-dom';
-import { ActionIcon, Button, Grid, GridCol, Group, Textarea, TextInput } from '@mantine/core';
+import { Button, Grid, GridCol, Group, Textarea, TextInput } from '@mantine/core';
 import { hasLength, useForm } from '@mantine/form';
 import { LoaderData } from '../router';
 import appStyles from '../Root.module.css';
@@ -8,14 +8,16 @@ import styles from './Details.module.css';
 import Cover from '../../components/Cover/Cover';
 import TrackRatingComponent from '../../components/TrackRatingComponent/TrackRatingComponent';
 import { useLibraryAPI } from '../../stores/useLibraryStore';
-import { MdContentPasteGo } from 'react-icons/md';
 import { GetFilenameWithoutExtension } from '../../lib/utils-library';
+import { SearchEngine } from '../../../../preload/types/harmony';
+import { SanitizedTitle } from '../../../../preload/utils';
+
+const { menu, shell } = window.Main;
 
 export default function DetailsView() {
   const navigate = useNavigate();
   const { track } = useLoaderData() as DetailsLoaderData;
   const libraryAPI = useLibraryAPI();
-  // const selection = window.getSelection();
   const [selectedText, setSelectedText] = React.useState('');
 
   const form = useForm({
@@ -66,27 +68,31 @@ export default function DetailsView() {
     form.setValues({ comment: '' });
   }, []);
 
-  useEffect(() => {
-    const handleSelect = () => {
-      const text = window.getSelection()!.toString();
-      if (text) {
-        console.log('selected text', text);
-        setSelectedText(text);
+  const searchOn = useCallback(
+    (engine: SearchEngine) => {
+      const sanitizedQuery = encodeURIComponent(`${track.artist} ${SanitizedTitle(track.title)}`);
+      const query = encodeURIComponent(`${track.artist} ${track.title}`);
+
+      switch (engine) {
+        case SearchEngine.BEATPORT:
+          shell.openExternal(`https://www.beatport.com/tracks/search?q=${sanitizedQuery}`);
+          break;
+        case SearchEngine.TRAXSOURCE:
+          shell.openExternal(`https://www.traxsource.com/search/tracks?term=${sanitizedQuery}`);
+          break;
+        case SearchEngine.GOOGLE:
+          shell.openExternal(`https://www.google.com/search?q=${query}`);
+          break;
+        default:
+          break;
       }
-    };
+    },
+    [shell, track],
+  );
 
-    window.addEventListener('select', handleSelect);
-
-    return () => {
-      window.removeEventListener('select', handleSelect);
-      setSelectedText('');
-    };
-  }, []);
-
-  const setNewValue = useCallback((key: string) => {
-    form.setValues({ [key]: selectedText });
-    setSelectedText('');
-    window.getSelection()?.removeAllRanges();
+  const handleContextMenu = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    menu.common();
   }, []);
 
   return (
@@ -109,6 +115,9 @@ export default function DetailsView() {
           >
             <Button onClick={filenameToTag}>Filename to Tag</Button>
             <Button onClick={clearComments}>Clear Comments</Button>
+            <Button onClick={() => searchOn(SearchEngine.BEATPORT)}>Search on Beatport</Button>
+            <Button onClick={() => searchOn(SearchEngine.GOOGLE)}>Search on Google</Button>
+            <Button onClick={() => searchOn(SearchEngine.TRAXSOURCE)}>Search on TraxxSource</Button>
           </Group>
         </div>
       </div>
@@ -124,33 +133,13 @@ export default function DetailsView() {
             label='Title'
             {...form.getInputProps('title')}
             key={form.key('title')}
-            leftSection={
-              selectedText && (
-                <ActionIcon
-                  variant='transparent'
-                  aria-label='Paste title'
-                  onClick={() => setNewValue('title')}
-                >
-                  <MdContentPasteGo />
-                </ActionIcon>
-              )
-            }
+            onContextMenu={handleContextMenu}
           />
           <TextInput
             label='Artist'
             {...form.getInputProps('artist')}
             key={form.key('artist')}
-            leftSection={
-              selectedText && (
-                <ActionIcon
-                  variant='transparent'
-                  aria-label='Paste Artist'
-                  onClick={() => setNewValue('artist')}
-                >
-                  <MdContentPasteGo />
-                </ActionIcon>
-              )
-            }
+            onContextMenu={handleContextMenu}
           />
           <Grid
             justify='center'
@@ -161,6 +150,7 @@ export default function DetailsView() {
                 label='Album'
                 {...form.getInputProps('album')}
                 key={form.key('album')}
+                onContextMenu={handleContextMenu}
               />
             </GridCol>
             <GridCol span={4}>
@@ -168,6 +158,7 @@ export default function DetailsView() {
                 label='Genre'
                 {...form.getInputProps('genre')}
                 key={form.key('genre')}
+                onContextMenu={handleContextMenu}
               />
             </GridCol>
           </Grid>
@@ -179,16 +170,19 @@ export default function DetailsView() {
               label='BPM'
               {...form.getInputProps('bpm')}
               key={form.key('bpm')}
+              onContextMenu={handleContextMenu}
             />
             <TextInput
               label='Year'
               {...form.getInputProps('year')}
               key={form.key('year')}
+              onContextMenu={handleContextMenu}
             />
             <TextInput
               label='Key'
               {...form.getInputProps('initialKey')}
               key={form.key('initialKey')}
+              onContextMenu={handleContextMenu}
             />
           </Group>
           <Textarea
@@ -197,6 +191,7 @@ export default function DetailsView() {
             label='Comments'
             {...form.getInputProps('comment')}
             key={form.key('comment')}
+            onContextMenu={handleContextMenu}
           />
           <Group
             mt='md'

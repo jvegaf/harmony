@@ -94,7 +94,7 @@ export type LogProps = {
   params: any[];
 };
 
-export type CtxMenuPayload = {
+export type TrklistCtxMenuPayload = {
   selected: Track[];
   playlists: Playlist[];
   currentPlaylist: string | null;
@@ -117,4 +117,10 @@ export interface Config {
   sleepBlocker: boolean;
   displayNotifications: boolean;
   audioPreCuePosition: number;
+}
+
+export const enum SearchEngine {
+  BEATPORT,
+  TRAXSOURCE,
+  GOOGLE,
 }

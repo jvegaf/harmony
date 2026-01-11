@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain, IpcMainEvent, Menu, MenuItemConstructorOptions, PopupOptions, shell } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
-import { CtxMenuPayload } from '../../preload/types/harmony';
+import { TrklistCtxMenuPayload } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
 import { SanitizedTitle } from '../../preload/utils';
@@ -11,9 +11,10 @@ import { SanitizedTitle } from '../../preload/utils';
  */
 class ContextMenuModule extends ModuleWindow {
   async load(): Promise<void> {
-    ipcMain.removeAllListeners(channels.MENU_SHOW);
+    ipcMain.removeAllListeners(channels.TRKLIST_MENU_SHOW);
+    ipcMain.removeAllListeners(channels.COMMON_MENU_SHOW);
 
-    ipcMain.on(channels.MENU_SHOW, (event: IpcMainEvent, payload: CtxMenuPayload) => {
+    ipcMain.on(channels.TRKLIST_MENU_SHOW, (event: IpcMainEvent, payload: TrklistCtxMenuPayload) => {
       const { selected, playlists, currentPlaylist } = payload;
 
       const selectedCount = selected.length;
@@ -85,7 +86,7 @@ class ContextMenuModule extends ModuleWindow {
         searchInTemplate.push({
           label: 'Search in Beatport',
           click: () => {
-            shell.openExternal(`https://www.beatport.com/search?q=${sanitizedQuery}`);
+            shell.openExternal(`https://www.beatport.com/search/tracks?q=${sanitizedQuery}`);
           },
         });
         searchInTemplate.push({
@@ -185,6 +186,17 @@ class ContextMenuModule extends ModuleWindow {
       );
 
       const menu = Menu.buildFromTemplate(template);
+      menu.popup(BrowserWindow.fromWebContents(event.sender) as PopupOptions);
+    });
+
+    ipcMain.on(channels.COMMON_MENU_SHOW, (event: IpcMainEvent) => {
+      const menu = Menu.buildFromTemplate([
+        { role: 'copy' },
+        { role: 'cut' },
+        { role: 'paste' },
+        { role: 'selectAll' },
+      ]);
+
       menu.popup(BrowserWindow.fromWebContents(event.sender) as PopupOptions);
     });
   }

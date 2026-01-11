@@ -1,7 +1,15 @@
 import { app, contextBridge, ipcRenderer, shell } from 'electron';
 import { ElectronAPI, electronAPI } from '@electron-toolkit/preload';
 import channels from './lib/ipc-channels';
-import { Track, Playlist, LogLevel, TrackId, CtxMenuPayload, UpdateRatingPayload, Config } from './types/harmony';
+import {
+  Track,
+  Playlist,
+  LogLevel,
+  TrackId,
+  TrklistCtxMenuPayload,
+  UpdateRatingPayload,
+  Config,
+} from './types/harmony';
 import parseUri from './lib/utils-uri';
 
 const config = {
@@ -72,7 +80,8 @@ const api = {
     debug: (...params: any[]) => ipcRenderer.send(channels.LOGGER, { level: LogLevel.DEBUG, params }),
   },
   menu: {
-    show: (payload: CtxMenuPayload) => ipcRenderer.send(channels.MENU_SHOW, payload),
+    tracklist: (payload: TrklistCtxMenuPayload) => ipcRenderer.send(channels.TRKLIST_MENU_SHOW, payload),
+    common: () => ipcRenderer.send(channels.COMMON_MENU_SHOW),
   },
   shell: {
     openExternal: shell.openExternal,

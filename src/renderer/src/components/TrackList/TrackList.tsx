@@ -10,7 +10,7 @@ import {
   SortChangedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { CtxMenuPayload, Playlist, Track, TrackId } from '../../../../preload/types/harmony';
+import { TrklistCtxMenuPayload, Playlist, Track, TrackId } from '../../../../preload/types/harmony';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import './TrackList.css';
@@ -177,13 +177,13 @@ const TrackList = (props: Props) => {
 
     const selected = event.api.getSelectedRows() as Track[];
 
-    const payload: CtxMenuPayload = {
+    const payload: TrklistCtxMenuPayload = {
       selected,
       playlists,
       currentPlaylist: currentPlaylist || null,
     };
 
-    menu.show(payload);
+    menu.tracklist(payload);
   }, []);
 
   const onKeyPress = useCallback((event: { ctrlKey: boolean; key: string; preventDefault: () => void }) => {
