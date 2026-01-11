@@ -35,9 +35,7 @@ export class BeatportTagsUtils {
   static fromTrack(track: BeatportTrack): BeatportTags {
     const artists = track.artists?.map(a => a.name).join(', ') || '';
 
-    const year = track.publish_date
-      ? parseInt(track.publish_date.split('-')[0], 10) || undefined
-      : undefined;
+    const year = track.publish_date ? parseInt(track.publish_date.split('-')[0], 10) || undefined : undefined;
 
     // Usar el helper get_artwork_url que busca en todas las fuentes posibles
     // (release.image, release.image_dynamic_uri, track.image, track.track_image_dynamic_uri)

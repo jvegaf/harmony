@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { minify } from 'html-minifier-terser';
 import pLimit from 'p-limit';
 import { parseISO, isValid, format } from 'date-fns';
+import { logger } from '../../log/logger';
 
 // Create configured axios instance with retries/timeouts
 export function createHttpClient(): AxiosInstance {
@@ -58,7 +59,9 @@ export function parseDateIso(dateStr: string): string | null {
     // If already yyyy-mm-dd
     const maybe = parseISO(dateStr.trim());
     if (isValid(maybe)) return format(maybe, 'yyyy-MM-dd');
-  } catch (_) {}
+  } catch (err) {
+    logger.error(err);
+  }
   // Try to extract yyyy-mm-dd with regex
   const m = dateStr.match(/(\d{4}-\d{2}-\d{2})/);
   if (m) return m[1];

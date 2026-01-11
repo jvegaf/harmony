@@ -26,9 +26,7 @@ export class BeatportImageUtils {
   static getUrl(image: BeatportImage, size: number): string {
     if (image.dynamic_uri) {
       // El dynamic_uri tiene formato: "https://geo-media.beatport.com/image_size/{size}x{size}/..."
-      return image.dynamic_uri
-        .replace('{w}', size.toString())
-        .replace('{h}', size.toString());
+      return image.dynamic_uri.replace('{w}', size.toString()).replace('{h}', size.toString());
     } else {
       return image.uri;
     }
@@ -68,9 +66,7 @@ export class BeatportReleaseUtils {
     }
     // Luego desde image_dynamic_uri (scraping)
     if (release.image_dynamic_uri) {
-      return release.image_dynamic_uri
-        .replace('{w}', size.toString())
-        .replace('{h}', size.toString());
+      return release.image_dynamic_uri.replace('{w}', size.toString()).replace('{h}', size.toString());
     }
     // Finalmente image_uri sin dynamic
     return release.image_uri || release.release_image_uri;

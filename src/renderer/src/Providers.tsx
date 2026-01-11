@@ -52,8 +52,8 @@ export default function Providers({ children }: any) {
             backgroundColor: 'var(--button-bg)',
             '&:hover': {
               backgroundColor: 'var(--second-hover-dark)',
-            }
-          }
+            },
+          },
         },
       },
       Checkbox: {
@@ -63,7 +63,7 @@ export default function Providers({ children }: any) {
             backgroundColor: 'transparent',
             borderColor: 'var(--border-color)',
           },
-          label: { cursor: 'pointer' }
+          label: { cursor: 'pointer' },
         },
       },
       TextInput: {
@@ -75,9 +75,9 @@ export default function Providers({ children }: any) {
             color: 'var(--text-primary)',
             '&:focus': {
               borderColor: 'var(--primary-color)',
-            }
-          }
-        }
+            },
+          },
+        },
       },
       Textarea: {
         styles: {
@@ -86,8 +86,8 @@ export default function Providers({ children }: any) {
             backgroundColor: 'rgba(31, 41, 55, 0.6)',
             borderColor: 'var(--border-color)',
             color: 'var(--text-primary)',
-          }
-        }
+          },
+        },
       },
       Autocomplete: { styles: { wrapper: { width: '500px' } } },
       Select: {
@@ -97,8 +97,8 @@ export default function Providers({ children }: any) {
             backgroundColor: 'rgba(31, 41, 55, 0.6)',
             borderColor: 'var(--border-color)',
             color: 'var(--text-primary)',
-          }
-        }
+          },
+        },
       },
       Loader: { defaultProps: { size: 'xl', color: 'orange' } },
       Space: { defaultProps: { h: 'sm' } },
@@ -107,7 +107,7 @@ export default function Providers({ children }: any) {
       Table: {
         styles: {
           td: { padding: '0.6rem' },
-          th: { padding: '0.5rem', backgroundColor: 'rgba(31, 41, 55, 0.8)' }
+          th: { padding: '0.5rem', backgroundColor: 'rgba(31, 41, 55, 0.8)' },
         },
       },
       Tabs: {
@@ -116,9 +116,9 @@ export default function Providers({ children }: any) {
             '&[dataActive]': {
               backgroundColor: 'var(--primary-color)',
               color: 'white',
-            }
-          }
-        }
+            },
+          },
+        },
       },
       ActionIcon: {
         styles: {
@@ -126,10 +126,10 @@ export default function Providers({ children }: any) {
             color: 'var(--text-secondary)',
             '&:hover': {
               backgroundColor: 'rgba(55, 65, 81, 0.5)',
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     },
   });
 

@@ -18,7 +18,6 @@ export default function DetailsView() {
   const navigate = useNavigate();
   const { track } = useLoaderData() as DetailsLoaderData;
   const libraryAPI = useLibraryAPI();
-  const [selectedText, setSelectedText] = React.useState('');
 
   const form = useForm({
     mode: 'uncontrolled',

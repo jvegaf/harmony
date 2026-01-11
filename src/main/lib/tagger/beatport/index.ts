@@ -6,15 +6,9 @@
  */
 
 // Re-exports principales
-export * from "./models";
-export * from "./client";
-export * from "./error";
-export * from "./tagger";
-export * from "./tag-writer";
-export * from "./tag-merge";
+export * from './models';
+export * from './client';
+export * from './error';
 
 // Re-export del cliente por defecto para uso fácil
-export { defaultClient } from "./client/client";
-
-// Re-export del tagger por defecto para uso fácil
-export { BeatportTagger } from "./tagger";
+export { defaultClient } from './client/client';

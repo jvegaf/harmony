@@ -171,9 +171,7 @@ export class BeatportTrackUtils {
     }
     // Finalmente desde track_image_dynamic_uri (scraping)
     if (track.track_image_dynamic_uri) {
-      return track.track_image_dynamic_uri
-        .replace('{w}', size.toString())
-        .replace('{h}', size.toString());
+      return track.track_image_dynamic_uri.replace('{w}', size.toString()).replace('{h}', size.toString());
     }
     // O track_image_uri sin dynamic
     return track.track_image_uri;

@@ -2,6 +2,7 @@ import { AxiosInstance } from 'axios';
 import * as cheerio from 'cheerio';
 import { createHttpClient, minifyHtml, parseDurationToSeconds, parseDateIso, limit } from './utils';
 import type { TXTrack, TraxSourceMatch, AudioFileInfo } from './types';
+import { logger } from '../../log/logger';
 
 export class Traxsource {
   client: AxiosInstance;
@@ -57,7 +58,7 @@ export class Traxsource {
           const link = titleElem.find('a').first();
           const href = link.attr('href') ?? '';
           const url = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
-          const trackIdMatch = href.match(/\/track\/([^\/\?]+)/);
+          const trackIdMatch = href.match(/\/track\/([^/?]+)/);
           const track_id = trackIdMatch ? trackIdMatch[1] : undefined;
 
           // artists
@@ -139,7 +140,7 @@ export class Traxsource {
       const albumName = albumElem.text().trim() || undefined;
       if (albumName) track.album = albumName;
       if (albumHref) {
-        const releaseIdMatch = albumHref.match(/\/title\/([^\/\?]+)/);
+        const releaseIdMatch = albumHref.match(/\/title\/([^/?]+)/);
         if (releaseIdMatch) track.release_id = releaseIdMatch[1];
       }
 
@@ -200,11 +201,15 @@ export class Traxsource {
                 headers: { Referer: this.baseUrl },
                 responseType: 'arraybuffer',
               });
-            } catch (err) {}
+            } catch (err) {
+              logger.error(err);
+            }
           });
         }
       }
-    } catch (err) {}
+    } catch (err) {
+      logger.error(err);
+    }
   }
 
   // Simple match implementation: search + naive scoring. Replace with your real MatchingUtils if available.

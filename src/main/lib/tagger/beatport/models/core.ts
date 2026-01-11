@@ -28,7 +28,7 @@ export class BeatportOAuthUtils {
     }
 
     const elapsed = (Date.now() - oauth.obtained_at.getTime()) / 1000;
-    return elapsed >= (oauth.expires_in - 60);
+    return elapsed >= oauth.expires_in - 60;
   }
 }
 

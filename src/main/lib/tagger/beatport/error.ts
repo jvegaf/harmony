@@ -39,7 +39,7 @@ export class BeatportError extends Error {
       title?: string;
       artist?: string;
       reason?: string;
-    }
+    },
   ) {
     super(message);
     this.name = 'BeatportError';
@@ -72,11 +72,9 @@ export class BeatportError extends Error {
    * Crea un error de rate limiting
    */
   static rateLimited(retryAfterSecs: number): BeatportError {
-    return new BeatportError(
-      BeatportErrorType.RateLimited,
-      `Rate limited. Reintentar en ${retryAfterSecs} segundos`,
-      { retryAfterSecs }
-    );
+    return new BeatportError(BeatportErrorType.RateLimited, `Rate limited. Reintentar en ${retryAfterSecs} segundos`, {
+      retryAfterSecs,
+    });
   }
 
   /**
@@ -90,22 +88,20 @@ export class BeatportError extends Error {
    * Crea un error de track no encontrado
    */
   static trackNotFound(title: string, artist: string): BeatportError {
-    return new BeatportError(
-      BeatportErrorType.TrackNotFound,
-      `Track no encontrado: ${artist} - ${title}`,
-      { title, artist }
-    );
+    return new BeatportError(BeatportErrorType.TrackNotFound, `Track no encontrado: ${artist} - ${title}`, {
+      title,
+      artist,
+    });
   }
 
   /**
    * Crea un error de track restringido
    */
   static trackRestricted(trackId: number, reason: string): BeatportError {
-    return new BeatportError(
-      BeatportErrorType.TrackRestricted,
-      `Track ${trackId} restringido: ${reason}`,
-      { trackId, reason }
-    );
+    return new BeatportError(BeatportErrorType.TrackRestricted, `Track ${trackId} restringido: ${reason}`, {
+      trackId,
+      reason,
+    });
   }
 
   /**
@@ -133,7 +129,6 @@ export class BeatportError extends Error {
    * Verifica si el error es recuperable (se puede reintentar)
    */
   isRecoverable(): boolean {
-    return this.type === BeatportErrorType.NetworkError ||
-           this.type === BeatportErrorType.RateLimited;
+    return this.type === BeatportErrorType.NetworkError || this.type === BeatportErrorType.RateLimited;
   }
 }

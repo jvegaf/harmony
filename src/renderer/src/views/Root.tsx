@@ -98,7 +98,12 @@ function NowPlayingBarWrapper({ track }: { track: Track | null }) {
 
   if (!appConfig) return null;
 
-  return <NowPlayingBar track={track} config={appConfig} />;
+  return (
+    <NowPlayingBar
+      track={track}
+      config={appConfig}
+    />
+  );
 }
 
 export type RootLoaderData = LoaderData<typeof ViewRoot.loader>;

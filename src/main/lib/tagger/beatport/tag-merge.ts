@@ -4,7 +4,7 @@
  * Decide qué datos preservar del archivo local vs qué datos aplicar de Beatport
  */
 
-import { BeatportTags } from "./models/tags";
+import { BeatportTags } from './models/tags';
 
 /**
  * Resultado del merge de tags
@@ -43,47 +43,38 @@ export function mergeTags(
   // Lógica de merge para BPM
   if (shouldPreserveBpm(localBpm, beatportTags.bpm)) {
     result.merged.bpm = localBpm;
-    result.preserved.push("bpm");
+    result.preserved.push('bpm');
   } else if (beatportTags.bpm !== undefined) {
-    result.overwritten.push("bpm");
+    result.overwritten.push('bpm');
   }
 
   // Lógica de merge para género
   if (shouldPreserveGenre(localGenre, beatportTags.genre)) {
     result.merged.genre = localGenre;
-    result.preserved.push("genre");
+    result.preserved.push('genre');
   } else if (beatportTags.genre !== undefined) {
-    result.overwritten.push("genre");
+    result.overwritten.push('genre');
   }
 
   // Lógica de merge para álbum
   if (shouldPreserveAlbum(localAlbum, beatportTags.album)) {
     result.merged.album = localAlbum;
-    result.preserved.push("album");
+    result.preserved.push('album');
   } else if (beatportTags.album !== undefined) {
-    result.overwritten.push("album");
+    result.overwritten.push('album');
   }
 
   // Lógica de merge para año
   if (shouldPreserveYear(localYear, beatportTags.year)) {
     result.merged.year = localYear;
-    result.preserved.push("year");
+    result.preserved.push('year');
   } else if (beatportTags.year !== undefined) {
-    result.overwritten.push("year");
+    result.overwritten.push('year');
   }
 
   // Campos que SIEMPRE se sobrescriben con datos de Beatport
-  const alwaysOverwrite = [
-    "title",
-    "artist",
-    "key",
-    "label",
-    "isrc",
-    "catalog_number",
-    "artwork_url",
-    "artwork_data",
-  ];
-  alwaysOverwrite.forEach((field) => {
+  const alwaysOverwrite = ['title', 'artist', 'key', 'label', 'isrc', 'catalog_number', 'artwork_url', 'artwork_data'];
+  alwaysOverwrite.forEach(field => {
     if ((beatportTags as any)[field] !== undefined) {
       result.overwritten.push(field);
     }
@@ -100,10 +91,7 @@ export function mergeTags(
  * - Ambos existen pero están muy diferentes (posible corrección manual)
  * - El BPM local está en un rango válido y el de Beatport parece inválido
  */
-function shouldPreserveBpm(
-  localBpm: number | undefined,
-  beatportBpm: number | undefined,
-): boolean {
+function shouldPreserveBpm(localBpm: number | undefined, beatportBpm: number | undefined): boolean {
   if (!localBpm) return false; // No hay BPM local
   if (!beatportBpm) return true; // No hay BPM de Beatport, preservar local
 
@@ -134,10 +122,7 @@ function shouldPreserveBpm(
  * - El usuario ha especificado un género específico que difiere del de Beatport
  * - El género local parece ser una corrección manual
  */
-function shouldPreserveGenre(
-  localGenre: string | undefined,
-  beatportGenre: string | undefined,
-): boolean {
+function shouldPreserveGenre(localGenre: string | undefined, beatportGenre: string | undefined): boolean {
   if (!localGenre) return false;
   if (!beatportGenre) return true;
 
@@ -166,10 +151,7 @@ function shouldPreserveGenre(
  *
  * Generalmente usa el de Beatport, pero preserva si parece ser una edición especial
  */
-function shouldPreserveAlbum(
-  localAlbum: string | undefined,
-  beatportAlbum: string | undefined,
-): boolean {
+function shouldPreserveAlbum(localAlbum: string | undefined, beatportAlbum: string | undefined): boolean {
   if (!localAlbum) return false;
   if (!beatportAlbum) return true;
 
@@ -182,10 +164,7 @@ function shouldPreserveAlbum(
   }
 
   // Si el álbum local incluye información extra (edición, remix, etc.), preservarlo
-  if (
-    localNorm.includes(beatportNorm) &&
-    localNorm.length > beatportNorm.length
-  ) {
+  if (localNorm.includes(beatportNorm) && localNorm.length > beatportNorm.length) {
     return true;
   }
 
@@ -200,10 +179,7 @@ function shouldPreserveAlbum(
  * - Es significativamente diferente (posible reedición)
  * - El año de Beatport parece inválido
  */
-function shouldPreserveYear(
-  localYear: number | undefined,
-  beatportYear: number | undefined,
-): boolean {
+function shouldPreserveYear(localYear: number | undefined, beatportYear: number | undefined): boolean {
   if (!localYear) return false;
   if (!beatportYear) return true;
 
@@ -239,18 +215,18 @@ export function getMergeStats(result: MergeResult): {
   preservationRate: number;
 } {
   const allFields = [
-    "title",
-    "artist",
-    "album",
-    "year",
-    "genre",
-    "bpm",
-    "key",
-    "label",
-    "isrc",
-    "catalog_number",
-    "artwork_url",
-    "artwork_data",
+    'title',
+    'artist',
+    'album',
+    'year',
+    'genre',
+    'bpm',
+    'key',
+    'label',
+    'isrc',
+    'catalog_number',
+    'artwork_url',
+    'artwork_data',
   ];
 
   const totalFields = allFields.length;

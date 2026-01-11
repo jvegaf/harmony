@@ -158,4 +158,3 @@ export interface SearchCandidatesResult {
   /** Tracks sin candidatos encontrados */
   without_candidates: number;
 }
-
