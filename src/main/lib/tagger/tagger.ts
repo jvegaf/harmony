@@ -4,6 +4,7 @@ import { GetStringTokens } from '../../../preload/lib/utils-id3';
 import Update from '../track/updater';
 import { SearchTags } from './dab/dab.tagger';
 import { BeatportCandidate, BeatportClient } from './beatport';
+import { Traxsource } from './traxsource/traxsource';
 
 // import { SearchTags } from './beatport/beatport';
 // import { BandcampSearchResult, search } from './bandcamp/bandcamp';
@@ -108,14 +109,14 @@ export const FixTags = async (track: Track): Promise<Track> => {
 };
 
 export const FindCandidates = async (track: Track): Promise<BeatportCandidate[]> => {
-  const client = new BeatportClient();
-  // Búsqueda por scraping
-  // const results = await client.search("Daft Punk", "Around The World");
-  // console.log(`Encontradas ${results.tracks.length} pistas`);
+  const bpClient = new BeatportClient();
+  const tsClient = new Traxsource();
 
-  // Candidatos con scores
-  const candidates = await client.searchCandidates(track.title, track.artist!, track.duration, 5, 0.3);
-  candidates.forEach(c => log.info(`${c.title} - Score: ${(c.similarity_score * 100).toFixed(1)}%`));
+  const txsCandidates = await tsClient.searchTracks(track.title, track.artist!);
+  txsCandidates.forEach(c => log.info(`TRAXXSOURCE ${c.artists} - ${c.title}`));
+
+  const candidates = await bpClient.searchCandidates(track.title, track.artist!, track.duration, 5, 0.3);
+  candidates.forEach(c => log.info(`BEATPORT ${c.title} - Score: ${(c.similarity_score * 100).toFixed(1)}%`));
 
   return candidates;
 };

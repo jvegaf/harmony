@@ -1,9 +1,14 @@
 import { AxiosInstance } from 'axios';
+import log from 'electron-log';
 import * as cheerio from 'cheerio';
 import { createHttpClient, minifyHtml, parseDurationToSeconds, parseDateIso, limit } from './utils';
 import type { TXTrack, TraxSourceMatch, AudioFileInfo } from './types';
-import { logger } from '../../log/logger';
+import { SanitizedTitle } from '../../../../preload/utils';
 
+// AIDEV-NOTE: Fixed search functionality by changing from /search/tracks to /search endpoint
+// and building URL manually instead of using axios params to avoid double-encoding.
+// Also fixed key/bpm parsing to handle "Key\nBPM" format instead of "Key BPM".
+// Fixed version parsing to extract only version name without duration from "Version (Duration)" format.
 export class Traxsource {
   client: AxiosInstance;
   baseUrl = 'https://www.traxsource.com';
@@ -13,16 +18,18 @@ export class Traxsource {
   }
 
   // Buscar pistas en Traxsource. No lanza panic: devuelve array (posiblemente vacío).
-  async searchTracks(query: string): Promise<TXTrack[]> {
+  async searchTracks(title: string, artist: string): Promise<TXTrack[]> {
+    const query = encodeURIComponent(`${artist} ${SanitizedTitle(title)}`);
+
     try {
-      const res = await this.client.get(`${this.baseUrl}/search/tracks`, {
-        params: { term: query },
-      });
+      const url = `${this.baseUrl}/search?term=${query}`;
+      const res = await this.client.get(url);
       const html = await minifyHtml(res.data as string);
       const $ = cheerio.load(html);
 
       const list = $('#searchTrackList');
       if (!list || list.length === 0) {
+        log.error('searchTrackList not found');
         return [];
       }
 
@@ -35,6 +42,7 @@ export class Traxsource {
 
           // Title / version / duration: prefer robust parsing
           const titleElem = row.find('div.title').first();
+
           const titleTextParts = titleElem
             .contents()
             .toArray()
@@ -46,12 +54,19 @@ export class Traxsource {
           let durationSeconds: number | undefined;
 
           if (titleTextParts.length === 3) {
-            version = titleTextParts[1]?.replace(/\u00A0/g, ' ').trim() ?? undefined;
+            // Format: [title, version, duration]
+            version = titleTextParts[1]?.replace(/\u00A0/g, ' ').trim() || undefined;
             const dur = parseDurationToSeconds(titleTextParts[2]);
             if (dur != null) durationSeconds = dur;
           } else if (titleTextParts.length >= 2) {
-            const dur = parseDurationToSeconds(titleTextParts[1]);
-            if (dur != null) durationSeconds = dur;
+            // Format: [title, "version (duration)"]
+            const versionAndDuration = titleTextParts[1]?.replace(/\u00A0/g, ' ').trim();
+            if (versionAndDuration) {
+              // Extract version by removing duration in parentheses
+              version = versionAndDuration.replace(/\s*\([^)]*\)\s*$/, '').trim() || undefined;
+              const dur = parseDurationToSeconds(versionAndDuration);
+              if (dur != null) durationSeconds = dur;
+            }
           }
 
           // URL and track_id
@@ -76,13 +91,20 @@ export class Traxsource {
           let key: string | undefined;
           let bpm: number | undefined;
           if (keyBpmText) {
-            // often something like "Amaj 120"
-            const parts = keyBpmText.split(/\s+/).filter(Boolean);
-            if (parts.length >= 1) {
-              key = parts[0].replace(/maj/gi, '').replace(/min/gi, 'm');
+            // format is "Key\nBPM" like "G#min\n129"
+            const lines = keyBpmText.split(/\s+/).filter(Boolean);
+            if (lines.length >= 2) {
+              key = lines[0];
+              bpm = parseInt(lines[1], 10);
+            } else if (lines.length === 1) {
+              // try to extract number for BPM
+              const bpmMatch = keyBpmText.match(/(\d{2,3})/);
+              if (bpmMatch) {
+                bpm = parseInt(bpmMatch[1], 10);
+                // assume the rest is key
+                key = keyBpmText.replace(/(\d{2,3})/, '').trim();
+              }
             }
-            const bpmMatch = keyBpmText.match(/(\d{2,3})/);
-            if (bpmMatch) bpm = parseInt(bpmMatch[1], 10);
           }
 
           // genre
@@ -123,6 +145,7 @@ export class Traxsource {
 
       return tracks;
     } catch (err) {
+      log.error(err);
       return []; // fail gracefully
     }
   }
@@ -202,13 +225,13 @@ export class Traxsource {
                 responseType: 'arraybuffer',
               });
             } catch (err) {
-              logger.error(err);
+              log.error(err);
             }
           });
         }
       }
     } catch (err) {
-      logger.error(err);
+      log.error(err);
     }
   }
 
@@ -217,8 +240,7 @@ export class Traxsource {
     try {
       const artist = (await info.artist()).trim();
       const title = (await info.title()).trim();
-      const query = `${artist} ${title}`;
-      const candidates = await this.searchTracks(query);
+      const candidates = await this.searchTracks(title, artist);
 
       // Simple scoring: token overlap on title + artist
       function scoreCandidate(t: TXTrack): number {
