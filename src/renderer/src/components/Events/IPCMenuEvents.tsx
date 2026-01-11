@@ -39,6 +39,10 @@ function IPCMenuEvents() {
       });
     }
 
+    function findCandidates(selected: Track[]) {
+      libraryAPI.findCandidates(selected[0].id);
+    }
+
     function deleteTracks(selected: Track[]) {
       libraryAPI.deleteTracks(selected);
     }
@@ -48,6 +52,7 @@ function IPCMenuEvents() {
     ipcRenderer.on(channels.CMD_TRACKS_PLAYLIST_REMOVE, (_, payload) => removeTracksToPlaylist(payload));
     ipcRenderer.on(channels.CMD_TRACK_ARTIST_FIND, (_, artist) => artistFind(artist));
     ipcRenderer.on(channels.CMD_FIX_TAGS, (_, selected) => fixTags(selected));
+    ipcRenderer.on(channels.CMD_FIND_CANDIDATES, (_, selected) => findCandidates(selected));
     ipcRenderer.on(channels.CMD_TRACKS_DELETE, (_, selected) => deleteTracks(selected));
 
     return function cleanup() {
@@ -56,6 +61,7 @@ function IPCMenuEvents() {
       ipcRenderer.removeAllListeners(channels.CMD_TRACKS_PLAYLIST_REMOVE);
       ipcRenderer.removeAllListeners(channels.CMD_TRACK_ARTIST_FIND);
       ipcRenderer.removeAllListeners(channels.CMD_FIX_TAGS);
+      ipcRenderer.removeAllListeners(channels.CMD_FIND_CANDIDATES);
       ipcRenderer.removeAllListeners(channels.CMD_TRACKS_DELETE);
     };
   }, [libraryAPI]);

@@ -40,3 +40,16 @@ const GetTokens = (strVal: string): string[] => {
 export const GetStringTokens = (values: string[]): string[] => {
   return values.reduce<string[]>((acc, curr) => acc.concat(GetTokens(curr)), []);
 };
+
+export const SanitizedTitle = (str: string): string => {
+  // Remove content in parentheses that contains remix-related terms
+  let result = str.replace(/\s*\([^)]*\)/gi, '');
+
+  // Remove standalone remix terms at the end of the string
+  // result = result.replace(/\s+(?:original|extended)?\s*(?:remix|mix|edit|remmix)\s*$/gi, '');
+
+  // Clean up extra whitespace
+  result = result.trim().replace(/\s+/g, ' ');
+
+  return result;
+};

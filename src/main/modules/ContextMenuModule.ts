@@ -4,6 +4,7 @@ import channels from '../../preload/lib/ipc-channels';
 import { CtxMenuPayload } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
+import { SanitizedTitle } from '../../preload/utils';
 
 /**
  * Module in charge of returning the track with tags fixed
@@ -24,6 +25,9 @@ class ContextMenuModule extends ModuleWindow {
       }
 
       const playlistTemplate: MenuItemConstructorOptions[] = [];
+
+      // submenu para poder buscar en beatport y en google {artista titulo}
+      const searchInTemplate: MenuItemConstructorOptions[] = [];
 
       if (shownPlaylists) {
         playlistTemplate.push(
@@ -75,7 +79,27 @@ class ContextMenuModule extends ModuleWindow {
 
       if (selectedCount < 2) {
         const track = selected[0];
+        const sanitizedQuery = encodeURIComponent(`${track.artist} ${SanitizedTitle(track.title)}`);
+        const query = encodeURIComponent(`${track.artist} ${track.title}`);
 
+        searchInTemplate.push({
+          label: 'Search in Beatport',
+          click: () => {
+            shell.openExternal(`https://www.beatport.com/search?q=${sanitizedQuery}`);
+          },
+        });
+        searchInTemplate.push({
+          label: 'Search in TraxxSource',
+          click: () => {
+            shell.openExternal(`https://www.traxsource.com/search?term=${sanitizedQuery}`);
+          },
+        });
+        searchInTemplate.push({
+          label: 'Search in Google',
+          click: () => {
+            shell.openExternal(`https://www.google.com/search?q=${query}`);
+          },
+        });
         track.artist &&
           template.push({
             label: `Search for "${track.artist}" `,
@@ -83,12 +107,20 @@ class ContextMenuModule extends ModuleWindow {
               event.sender.send(channels.CMD_TRACK_ARTIST_FIND, track.artist);
             },
           });
+
         template.push(
           {
             label: 'Show in folder',
             click: () => {
               shell.showItemInFolder(track.path);
             },
+          },
+          {
+            type: 'separator',
+          },
+          {
+            label: 'Search',
+            submenu: searchInTemplate,
           },
           {
             type: 'separator',
@@ -124,6 +156,12 @@ class ContextMenuModule extends ModuleWindow {
           label: 'Fix Tags',
           click: () => {
             event.sender.send(channels.CMD_FIX_TAGS, selected);
+          },
+        },
+        {
+          label: 'Find Tag Candidates',
+          click: () => {
+            event.sender.send(channels.CMD_FIND_CANDIDATES, selected);
           },
         },
         // {

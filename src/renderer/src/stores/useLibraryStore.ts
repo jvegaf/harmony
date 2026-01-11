@@ -35,6 +35,7 @@ type LibraryState = {
     updateTrackMetadata: (trackID: string, newFields: TrackEditableFields) => Promise<void>;
     highlightPlayingTrack: (highlight: boolean) => void;
     getCover: (track: Track) => Promise<string | null>;
+    findCandidates: (trackID: string) => Promise<void>;
     fixTrack: (trackID: string) => Promise<void>;
     toFix: (total: number) => void;
     updateTrackRating: (trackSrc: TrackSrc, rating: number) => Promise<void>;
@@ -211,6 +212,13 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     },
     getCover: async (track: Track): Promise<string | null> => {
       return await covers.getCoverAsBase64(track);
+    },
+    findCandidates: async (trackID: string): Promise<void> => {
+      const track = await db.tracks.findOnlyByID(trackID);
+      const candidates = await library.findTagCandidates(track);
+      candidates.forEach((c: { artists: string; title: string; similarity_score: number }) => {
+        logger.info(`${c.artists} - ${c.title} - Score: ${(c.similarity_score * 100).toFixed(1)}%`);
+      });
     },
     fixTrack: async (trackID: string): Promise<void> => {
       let track = await db.tracks.findOnlyByID(trackID);

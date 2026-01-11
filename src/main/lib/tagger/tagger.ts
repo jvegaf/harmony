@@ -3,6 +3,7 @@ import type { MatchResult, ResultTag, Track } from '../../../preload/types/harmo
 import { GetStringTokens } from '../../../preload/lib/utils-id3';
 import Update from '../track/updater';
 import { SearchTags } from './dab/dab.tagger';
+import { BeatportCandidate, BeatportClient } from './beatport';
 
 // import { SearchTags } from './beatport/beatport';
 // import { BandcampSearchResult, search } from './bandcamp/bandcamp';
@@ -87,7 +88,7 @@ const SearchOnDab = async (track: Track): Promise<MatchResult | null> => {
   return match;
 };
 
-const FixTags = async (track: Track): Promise<Track> => {
+export const FixTags = async (track: Track): Promise<Track> => {
   try {
     const result = await SearchOnDab(track);
     if (!result) {
@@ -106,4 +107,15 @@ const FixTags = async (track: Track): Promise<Track> => {
   return track;
 };
 
-export default FixTags;
+export const FindCandidates = async (track: Track): Promise<BeatportCandidate[]> => {
+  const client = new BeatportClient();
+  // Búsqueda por scraping
+  // const results = await client.search("Daft Punk", "Around The World");
+  // console.log(`Encontradas ${results.tracks.length} pistas`);
+
+  // Candidatos con scores
+  const candidates = await client.searchCandidates(track.title, track.artist!, track.duration, 5, 0.3);
+  candidates.forEach(c => log.info(`${c.title} - Score: ${(c.similarity_score * 100).toFixed(1)}%`));
+
+  return candidates;
+};
