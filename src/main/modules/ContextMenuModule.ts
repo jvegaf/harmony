@@ -91,7 +91,7 @@ class ContextMenuModule extends ModuleWindow {
         searchInTemplate.push({
           label: 'Search in TraxxSource',
           click: () => {
-            shell.openExternal(`https://www.traxsource.com/search?term=${sanitizedQuery}`);
+            shell.openExternal(`https://www.traxsource.com/search/tracks?term=${sanitizedQuery}`);
           },
         });
         searchInTemplate.push({
