@@ -13,7 +13,8 @@ const toResultTag = (sctrack: SoundcloudTrack): ResultTag => {
     duration: sctrack.duration,
     title: sctrack.title,
     year: sctrack.release_date?.slice(-4),
-    artworkUrl: sctrack.artwork_url,
+    art: sctrack.artwork_url,
+    artists: sctrack.user ? [sctrack.user.username] : [],
     tokens: sctrack.title.split(' '),
   };
 };

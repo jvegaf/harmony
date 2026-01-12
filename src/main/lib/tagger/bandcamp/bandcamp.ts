@@ -1,4 +1,4 @@
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 import * as bandcamp from '@alexjorgef/bandcamp-scraper';
 import _ from 'lodash';
 
@@ -55,8 +55,7 @@ export type BandcampSearchResult = {
   tracks?: BandcampTrack[];
 };
 
-/* eslint-disable @typescript-eslint/ban-types */
-const promisify = <T>(func: Function, arg: any): Promise<T> =>
+const promisify = <T>(func: (...args: any[]) => void, arg: any): Promise<T> =>
   new Promise((resolve, reject) => {
     func.apply(null, [
       arg,

@@ -30,14 +30,15 @@ const CreateTagResult = (result: Result): ResultTag => {
     title: tagTrackTitle,
     key: `${result.key.camelot_number}${result.key.camelot_letter}`,
     artist: tagTrackArtists?.join(', '),
+    artists: tagTrackArtists ?? [],
     album: result.release.name,
     year: result.publish_date.substring(0, 4),
     genre: result.genre.name,
     bpm: result.bpm,
     duration: Number((result.length_ms / 1000).toFixed(0)),
-    artworkUrl: result.release.image.uri,
+    art: result.release.image.uri,
     tokens: tagTokens,
-  } as ResultTag;
+  };
 };
 
 const GetTagResults = (result: Result[]): ResultTag[] => {

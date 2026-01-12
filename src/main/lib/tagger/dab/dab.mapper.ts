@@ -28,13 +28,14 @@ const CreateTagResult = (track: DabTrack): ResultTag => {
     id: track.id,
     title: tagTrackTitle,
     artist: track.artist,
+    artists: [track.artist],
     album: track.albumTitle,
     year: track.releaseDate.substring(0, 4),
     genre: track.genre,
     duration: track.duration,
-    artworkUrl: track.images.large,
+    art: track.images.large,
     tokens: tagTokens,
-  } as ResultTag;
+  };
 };
 
 const GetTagResults = (res: DabResponse): ResultTag[] => {

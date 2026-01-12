@@ -8,11 +8,11 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
   const newTrack = {
     ...track,
     title: tag.title,
-    artist: tag.artist,
-    album: tag.album,
+    artist: tag.artist ? tag.artist : tag.artists.join(),
+    album: tag.album ?? undefined,
     year: (tag.year && Number(tag.year)) || track.year,
     bpm: tag.bpm || track.bpm,
-    initialKey: tag.key,
+    initialKey: tag.key ?? undefined,
     genre: tag.genre || track.genre,
   };
 

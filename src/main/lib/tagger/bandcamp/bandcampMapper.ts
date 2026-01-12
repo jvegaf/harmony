@@ -8,11 +8,12 @@ export const getResultTag = (result: BandcampSearchResult): ResultTag => {
   return {
     album: result.album,
     artist: result.artist,
+    artists: result.artist ? [result.artist] : [],
     genre: result.genre,
     duration: result.duration || 0,
     title: result.name,
     year: result.releaseDate?.slice(-4),
+    art: result.imageUrl,
     tokens: tagTokens,
-    artworkUrl: result.imageUrl,
   };
 };

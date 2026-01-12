@@ -1,14 +1,11 @@
 import { AxiosInstance } from 'axios';
 import log from 'electron-log';
 import * as cheerio from 'cheerio';
-import { createHttpClient, minifyHtml, parseDurationToSeconds, parseDateIso, limit } from './utils';
-import type { TXTrack, TraxSourceMatch, AudioFileInfo } from './types';
+import { createHttpClient, minifyHtml, parseDurationToSeconds, parseDateIso } from './utils';
+import type { TXTrack, TraxSourceMatch } from './types';
 import { SanitizedTitle } from '../../../../preload/utils';
+import { Track } from 'src/preload/types/harmony';
 
-// AIDEV-NOTE: Fixed search functionality by changing from /search/tracks to /search endpoint
-// and building URL manually instead of using axios params to avoid double-encoding.
-// Also fixed key/bpm parsing to handle "Key\nBPM" format instead of "Key BPM".
-// Fixed version parsing to extract only version name without duration from "Version (Duration)" format.
 export class Traxsource {
   client: AxiosInstance;
   baseUrl = 'https://www.traxsource.com';
@@ -17,7 +14,6 @@ export class Traxsource {
     this.client = client ?? createHttpClient();
   }
 
-  // Buscar pistas en Traxsource. No lanza panic: devuelve array (posiblemente vacío).
   async searchTracks(title: string, artist: string): Promise<TXTrack[]> {
     const query = encodeURIComponent(`${artist} ${SanitizedTitle(title)}`);
 
@@ -127,7 +123,6 @@ export class Traxsource {
             key,
             title,
             url,
-            album_artists: [],
             label,
             release_date,
             genres: genre ? [genre] : [],
@@ -151,7 +146,7 @@ export class Traxsource {
   }
 
   // Extiende datos de track con info de página de track y opcionalmente de album
-  async extendTrack(track: TXTrack, albumMeta = true, albumArt = true): Promise<void> {
+  async extendTrack(track: TXTrack, albumMeta = true): Promise<TXTrack> {
     if (!track.url) throw new Error('track.url is required for extendTrack');
     try {
       const res = await this.client.get(track.url);
@@ -167,7 +162,7 @@ export class Traxsource {
         if (releaseIdMatch) track.release_id = releaseIdMatch[1];
       }
 
-      if (!albumMeta || !albumHref) return;
+      if (!albumMeta || !albumHref) return track;
 
       // Fetch album page
       const albumUrl = albumHref.startsWith('http') ? albumHref : `${this.baseUrl}${albumHref}`;
@@ -176,39 +171,7 @@ export class Traxsource {
       const $$ = cheerio.load(albumHtml);
 
       // catalog number and release date block: "cat | 2021-08-..."
-      const catRdate = $$('div.cat-rdate').first().text().trim() || '';
-      const rdSplit = catRdate
-        .split(' | ')
-        .map(s => s.trim())
-        .filter(Boolean);
-      if (rdSplit.length >= 1) {
-        // often first part is catalog number
-        track.catalog_number = rdSplit[0] || undefined;
-      }
-
-      // album artists
-      const albumArtistsText = $$('h1.artists').first().text().trim() || '';
-      if (albumArtistsText) {
-        track.album_artists = albumArtistsText
-          .split(',')
-          .map(s => s.trim())
-          .filter(Boolean);
-      }
-
-      // track number: element with class ptk-<track_id> inside album page
-      if (track.track_id) {
-        const sel = `div.trk-row.ptk-${track.track_id}`;
-        const trackRow = $$(sel).first();
-        if (trackRow && trackRow.length) {
-          const tnumText = trackRow.find('div.tnum').first().text().trim();
-          const parsed = parseInt(tnumText.replace(/\D/g, ''), 10);
-          if (!Number.isNaN(parsed)) track.track_number = parsed;
-        }
-      }
-
-      // track total: count trk-row.play-trk
-      const total = $$('.trk-row.play-trk').length;
-      if (total > 0) track.track_total = total;
+      // const catRdate = $$('div.cat-rdate').first().text().trim() || '';
 
       // album art
       const img = $$('div.t-image img').first();
@@ -216,30 +179,17 @@ export class Traxsource {
       if (src) {
         track.art = src.startsWith('http') ? src : `${this.baseUrl}${src}`;
         // optionally prefetch art to bypass hotlink protections
-        if (albumArt && track.art) {
-          // fire and forget with concurrency limit
-          limit(async () => {
-            try {
-              await this.client.get(track.art!, {
-                headers: { Referer: this.baseUrl },
-                responseType: 'arraybuffer',
-              });
-            } catch (err) {
-              log.error(err);
-            }
-          });
-        }
       }
     } catch (err) {
       log.error(err);
     }
+    return track;
   }
 
-  // Simple match implementation: search + naive scoring. Replace with your real MatchingUtils if available.
-  async matchTrack(info: AudioFileInfo): Promise<TraxSourceMatch[]> {
+  async matchTrack(track: Track): Promise<TraxSourceMatch[]> {
     try {
-      const artist = (await info.artist()).trim();
-      const title = (await info.title()).trim();
+      const artist = track.artist ? track.artist.trim() : '';
+      const title = track.title.trim();
       const candidates = await this.searchTracks(title, artist);
 
       // Simple scoring: token overlap on title + artist
@@ -255,9 +205,11 @@ export class Traxsource {
       }
 
       return candidates
+        .filter(t => t.duration && Math.abs(t.duration - track.duration) <= 10)
         .map(t => ({ track: t, score: scoreCandidate(t) }) as TraxSourceMatch)
         .sort((a, b) => b.score - a.score);
     } catch (err) {
+      log.error(err);
       return [];
     }
   }

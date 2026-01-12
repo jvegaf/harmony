@@ -1,3 +1,5 @@
+export type Maybe<T> = T | null | undefined;
+
 export enum PlayerStatus {
   PLAY = 'play',
   PAUSE = 'pause',
@@ -42,16 +44,17 @@ export interface Track {
 
 export interface ResultTag {
   id?: string | number;
-  album?: string;
-  artist?: string;
-  bpm?: number;
+  album?: Maybe<string>;
+  artist?: Maybe<string>;
+  artists: string[];
+  bpm?: Maybe<number>;
   genre?: string;
-  duration: number;
-  key?: string;
+  duration?: Maybe<number>; // seconds
+  key?: Maybe<string>;
   title: string;
   year?: string;
-  artworkUrl?: string;
-  tokens: string[];
+  art?: Maybe<string>;
+  tokens?: Maybe<string[]>;
 }
 
 export interface Playlist {

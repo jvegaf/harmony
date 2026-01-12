@@ -1,6 +1,6 @@
-export type Maybe<T> = T | null | undefined;
+import { ResultTag, Maybe } from 'src/preload/types/harmony';
 
-export interface TXTrack {
+export interface TXTrack extends ResultTag {
   platform: string;
   version?: Maybe<string>;
   artists: string[];
@@ -9,7 +9,6 @@ export interface TXTrack {
   title: string;
   url: string;
   album?: Maybe<string>;
-  album_artists?: string[];
   label?: Maybe<string>;
   release_date?: Maybe<string>; // ISO yyyy-MM-dd when parsed
   genres?: string[];
@@ -18,16 +17,7 @@ export interface TXTrack {
   duration?: Maybe<number>; // seconds
   thumbnail?: Maybe<string>;
   art?: Maybe<string>;
-  catalog_number?: Maybe<string>;
-  track_number?: Maybe<number>;
-  track_total?: Maybe<number>;
   // other fields omitted for brevity
-}
-
-export interface AudioFileInfo {
-  artist(): Promise<string>;
-  title(): Promise<string>;
-  // other fields may exist
 }
 
 export interface TaggerConfig {
