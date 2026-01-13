@@ -3,6 +3,7 @@ import type { Track } from '../../../preload/types/harmony';
 import Update from '../track/updater';
 import { BeatportCandidate, BeatportClient } from './beatport';
 import { Traxsource } from './traxsource/traxsource';
+import { TrackCandidates } from 'src/preload/types/beatport';
 
 // import { SearchTags } from './beatport/beatport';
 // import { BandcampSearchResult, search } from './bandcamp/bandcamp';
@@ -88,7 +89,7 @@ export const FixTags = async (track: Track): Promise<Track> => {
   return track;
 };
 
-export const FindCandidates = async (track: Track): Promise<BeatportCandidate[]> => {
+export const FindCandidates = async (track: Track): Promise<TrackCandidates> => {
   const bpClient = new BeatportClient();
   const tsClient = new Traxsource();
 
@@ -98,5 +99,14 @@ export const FindCandidates = async (track: Track): Promise<BeatportCandidate[]>
   const candidates = await bpClient.searchCandidates(track.title, track.artist!, track.duration, 5, 0.3);
   candidates.forEach(c => log.info(`BEATPORT ${c.title} - Score: ${(c.similarity_score * 100).toFixed(1)}%`));
 
-  return candidates;
+  const trkCandidates: TrackCandidates = {
+    local_artist: track.artist ?? ' ',
+    local_title: track.title,
+    local_track_id: track.id,
+    local_duration: track.duration,
+    local_filename: track.path,
+    candidates,
+  };
+
+  return trkCandidates;
 };

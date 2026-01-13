@@ -4,7 +4,7 @@
  * Decide qué datos preservar del archivo local vs qué datos aplicar de Beatport
  */
 
-import { BeatportTags } from './models/tags';
+import { BeatportTags } from '../../../../preload/types/beatport';
 
 /**
  * Resultado del merge de tags

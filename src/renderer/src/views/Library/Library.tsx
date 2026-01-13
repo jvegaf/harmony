@@ -5,6 +5,7 @@ import * as ViewMessage from '../../elements/ViewMessage/ViewMessage';
 import useLibraryStore from '../../stores/useLibraryStore';
 import usePlayingTrackID from '../../hooks/usePlayingTrackID';
 import useFilteredTracks from '../../hooks/useFilteredTracks';
+import type { TrackSelection } from '../../../../preload/types/beatport';
 
 import { RootLoaderData } from '../Root';
 import { LoaderData } from '../router';
@@ -13,6 +14,7 @@ import styles from './Library.module.css';
 import TrackList from '../../components/TrackList/TrackList';
 import { useViewportSize } from '../../hooks/useViewPortSize';
 import ProgressModal from '../../components/Modal/ProgressModal';
+import BeatportSelectionModal from '../../components/Modal/Beatport/BeatportModal';
 import Footer from '../../components/Footer/Footer';
 // import SearchBar from '../../components/SearchBar/SearchBar';
 
@@ -20,7 +22,7 @@ const { db } = window.Main;
 
 export default function LibraryView() {
   const trackPlayingID = usePlayingTrackID();
-  const { refreshing, search } = useLibraryStore();
+  const { refreshing, search, beatportCandidates, api } = useLibraryStore();
   const { width, height } = useViewportSize();
   const [message, setMessage] = useState<string>('');
 
@@ -35,6 +37,15 @@ export default function LibraryView() {
       setMessage('');
     };
   }, [filteredTracks]);
+
+  // Handlers para el modal de Beatport
+  const handleBeatportConfirm = (selections: TrackSelection[]) => {
+    api.applyBeatportSelections(selections);
+  };
+
+  const handleBeatportCancel = () => {
+    api.setBeatportCandidates(null);
+  };
 
   const getLibraryComponent = useMemo(() => {
     // Empty library
@@ -95,11 +106,20 @@ export default function LibraryView() {
         </div>
       </div>
     );
-  }, [search, refreshing, width, height, filteredTracks, playlists, trackPlayingID]);
+  }, [search, refreshing, width, height, filteredTracks, playlists, trackPlayingID, message]);
 
   return (
     <div className={appStyles.view}>
       <div>{getLibraryComponent}</div>
+
+      {/* Modal de selección de Beatport */}
+      {beatportCandidates && beatportCandidates.length > 0 && (
+        <BeatportSelectionModal
+          trackCandidates={beatportCandidates}
+          onConfirm={handleBeatportConfirm}
+          onCancel={handleBeatportCancel}
+        />
+      )}
     </div>
   );
 }

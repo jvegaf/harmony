@@ -6,7 +6,6 @@
  */
 
 // Re-exports principales
-export * from './models';
 export * from './client';
 export * from './error';
 

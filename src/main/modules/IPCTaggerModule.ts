@@ -5,7 +5,7 @@ import { Track } from '../../preload/types/harmony';
 import { FindCandidates, FixTags } from '../lib/tagger/tagger';
 
 import ModuleWindow from './BaseWindowModule';
-import { BeatportCandidate } from '../lib/tagger/beatport';
+import { TrackCandidates } from 'src/preload/types/beatport';
 
 /**
  * Module in charge of returning the track with tags fixed
@@ -15,7 +15,7 @@ class IPCTaggerModule extends ModuleWindow {
     ipcMain.handle(channels.FIX_TAGS, (_e, track: Track): Promise<Track> => {
       return FixTags(track);
     });
-    ipcMain.handle(channels.FIND_TAG_CANDIDATES, (_e, track: Track): Promise<BeatportCandidate[]> => {
+    ipcMain.handle(channels.FIND_TAG_CANDIDATES, (_e, track: Track): Promise<TrackCandidates> => {
       return FindCandidates(track);
     });
   }

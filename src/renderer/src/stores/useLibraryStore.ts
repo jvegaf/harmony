@@ -1,5 +1,6 @@
 import type { MessageBoxReturnValue } from 'electron';
 import { TrackEditableFields, Track, TrackId, TrackSrc } from '../../../preload/types/harmony';
+import { TrackCandidates, TrackSelection } from '../../../preload/types/beatport';
 import { stripAccents } from '../../../preload/lib/utils-id3';
 import { chunk } from '../../../preload/lib/utils';
 
@@ -14,6 +15,7 @@ type LibraryState = {
   searched: Track | null;
   refreshing: boolean;
   fixing: boolean;
+  tagsSelecting: boolean;
   deleting: boolean;
   refresh: {
     processed: number;
@@ -25,6 +27,7 @@ type LibraryState = {
     total: number;
   };
   highlightPlayingTrack: boolean;
+  beatportCandidates: TrackCandidates[] | null;
   api: {
     openHandler: (opts: Electron.OpenDialogOptions) => Promise<void>;
     search: (value: string) => void;
@@ -40,6 +43,8 @@ type LibraryState = {
     toFix: (total: number) => void;
     updateTrackRating: (trackSrc: TrackSrc, rating: number) => Promise<void>;
     deleteTracks: (tracks: Track[]) => Promise<void>;
+    setBeatportCandidates: (candidates: TrackCandidates[] | null) => void;
+    applyBeatportSelections: (selections: TrackSelection[]) => Promise<void>;
   };
 };
 
@@ -48,6 +53,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
   searched: null,
   refreshing: false,
   fixing: false,
+  tagsSelecting: false,
   deleting: false,
   refresh: {
     processed: 0,
@@ -59,6 +65,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     total: 0,
   },
   highlightPlayingTrack: false, // hacky, fixme
+  beatportCandidates: null,
 
   api: {
     openHandler: async (opts: Electron.OpenDialogOptions) => {
@@ -215,9 +222,13 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     },
     findCandidates: async (trackID: string): Promise<void> => {
       const track = await db.tracks.findOnlyByID(trackID);
-      const candidates = await library.findTagCandidates(track);
-      candidates.forEach((c: { artists: string; title: string; similarity_score: number }) => {
+      const trkCandidates = await library.findTagCandidates(track);
+      trkCandidates.candidates.forEach((c: { artists: string; title: string; similarity_score: number }) => {
         logger.info(`${c.artists} - ${c.title} - Score: ${(c.similarity_score * 100).toFixed(1)}%`);
+      });
+      set({
+        beatportCandidates: [trkCandidates],
+        tagsSelecting: true,
       });
     },
     fixTrack: async (trackID: string): Promise<void> => {
@@ -267,6 +278,24 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
           set({ deleting: false });
           router.revalidate();
         }
+      } catch (err) {
+        logger.error(err as any);
+      }
+    },
+    setBeatportCandidates: (candidates: TrackCandidates[] | null) => {
+      set({ beatportCandidates: candidates, tagsSelecting: candidates !== null });
+    },
+    applyBeatportSelections: async (selections: TrackSelection[]) => {
+      try {
+        set({ tagsSelecting: false, beatportCandidates: null });
+        logger.info(`Applying Beatport selections for ${selections.length} tracks`);
+
+        // TODO: Implementar la aplicación de tags desde Beatport
+        // Por ahora solo cerramos el modal
+        // En el futuro, esto debería:
+        // 1. Obtener los tags completos de cada track de Beatport
+        // 2. Aplicar los tags a los tracks locales
+        // 3. Actualizar la base de datos
       } catch (err) {
         logger.error(err as any);
       }
