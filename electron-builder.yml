@@ -20,19 +20,19 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
-mac:
-  entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
-dmg:
-  artifactName: ${name}-${version}.${ext}
+# mac:
+#   entitlementsInherit: build/entitlements.mac.plist
+#   extendInfo:
+#     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+#     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+#   notarize: false
+# dmg:
+#   artifactName: ${name}-${version}.${ext}
 linux:
   target:
     - AppImage
-    # - rpm
-    # - deb
+    - rpm
+    - deb
   mimeTypes: [audio/mpeg]
   maintainer: josevega234@gmail.com
   category: Audio
