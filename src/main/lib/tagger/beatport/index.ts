@@ -8,6 +8,7 @@
 // Re-exports principales
 export * from './client';
 export * from './error';
+export * from './provider';
 
 // Re-export del cliente por defecto para uso fácil
 export { defaultClient } from './client/client';

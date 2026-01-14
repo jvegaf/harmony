@@ -7,7 +7,7 @@ import { globby } from 'globby';
 import * as mmd from 'music-metadata';
 import queue from 'queue';
 
-import { Track, UpdateRatingPayload } from '../../preload/types/harmony';
+import { Track, TrackSrc, UpdateRatingPayload } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
 import channels from '../../preload/lib/ipc-channels';
@@ -76,8 +76,8 @@ class IPCLibraryModule extends ModuleWindow {
       UpdateTrackRating(payload),
     );
     ipcMain.on(channels.TRACK_UPDATE_METADATA, (_: IpcMainEvent, track: Track) => PersistTrack(track));
-    ipcMain.on(channels.TRACKS_DELETE, (_: IpcMainEvent, tracks: Track[]) => {
-      tracks.forEach(t => RemoveFile(t.path));
+    ipcMain.on(channels.TRACKS_DELETE, (_: IpcMainEvent, trackFiles: TrackSrc[]) => {
+      trackFiles.forEach(tf => RemoveFile(tf));
     });
   }
 

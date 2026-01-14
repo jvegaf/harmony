@@ -3,7 +3,7 @@ import log from 'electron-log';
 import * as cheerio from 'cheerio';
 import { createHttpClient, minifyHtml, parseDurationToSeconds, parseDateIso } from './utils';
 import { SanitizedTitle } from '../../../../preload/utils';
-import { Track } from 'src/preload/types/harmony';
+import { Track } from '@preload/types/harmony';
 import { TXTrack, TraxSourceMatch } from '../../../../preload/types/traxsource';
 
 export class Traxsource {

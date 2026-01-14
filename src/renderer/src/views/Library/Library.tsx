@@ -5,7 +5,6 @@ import * as ViewMessage from '../../elements/ViewMessage/ViewMessage';
 import useLibraryStore from '../../stores/useLibraryStore';
 import usePlayingTrackID from '../../hooks/usePlayingTrackID';
 import useFilteredTracks from '../../hooks/useFilteredTracks';
-import type { TrackSelection } from '../../../../preload/types/beatport';
 
 import { RootLoaderData } from '../Root';
 import { LoaderData } from '../router';
@@ -13,16 +12,26 @@ import appStyles from '../Root.module.css';
 import styles from './Library.module.css';
 import TrackList from '../../components/TrackList/TrackList';
 import { useViewportSize } from '../../hooks/useViewPortSize';
-import ProgressModal from '../../components/Modal/ProgressModal';
-import BeatportSelectionModal from '../../components/Modal/Beatport/BeatportModal';
+import ProgressModal from '../../components/Modal/ProgressModal/ProgressModal';
 import Footer from '../../components/Footer/Footer';
+import TagCandidatesSelectionModal from '../../components/Modal/TagCandidateSelection/TagCandidatesSelection';
+import { TrackSelection } from '@preload/types/tagger';
 // import SearchBar from '../../components/SearchBar/SearchBar';
 
 const { db } = window.Main;
 
 export default function LibraryView() {
   const trackPlayingID = usePlayingTrackID();
-  const { refreshing, search, beatportCandidates, api } = useLibraryStore();
+  const {
+    refreshing,
+    search,
+    trackTagsCandidates,
+    candidatesSearching,
+    candidatesSearchProgress,
+    tagsApplying,
+    tagsApplyProgress,
+    api,
+  } = useLibraryStore();
   const { width, height } = useViewportSize();
   const [message, setMessage] = useState<string>('');
 
@@ -39,12 +48,12 @@ export default function LibraryView() {
   }, [filteredTracks]);
 
   // Handlers para el modal de Beatport
-  const handleBeatportConfirm = (selections: TrackSelection[]) => {
-    api.applyBeatportSelections(selections);
+  const handleSelectionConfirm = (selections: TrackSelection[]) => {
+    api.applyTrackTagsSelections(selections);
   };
 
-  const handleBeatportCancel = () => {
-    api.setBeatportCandidates(null);
+  const handleSelectionCancel = () => {
+    api.setTagCandidates(null);
   };
 
   const getLibraryComponent = useMemo(() => {
@@ -92,7 +101,6 @@ export default function LibraryView() {
         {/* <div>
           <SearchBar tracks={tracks} />
         </div> */}
-        <ProgressModal />
         <TrackList
           type='library'
           tracks={filteredTracks}
@@ -112,12 +120,34 @@ export default function LibraryView() {
     <div className={appStyles.view}>
       <div>{getLibraryComponent}</div>
 
+      {/* Modal de búsqueda de candidatos */}
+      {candidatesSearching && (
+        <ProgressModal
+          title='Buscando Candidatos'
+          message='Buscando matches en Beatport y Traxsource...'
+          processed={candidatesSearchProgress.processed}
+          total={candidatesSearchProgress.total}
+          type='search'
+        />
+      )}
+
+      {/* Modal de aplicación de tags */}
+      {tagsApplying && (
+        <ProgressModal
+          title='Aplicando Tags'
+          message='Actualizando metadata de los tracks...'
+          processed={tagsApplyProgress.processed}
+          total={tagsApplyProgress.total}
+          type='apply'
+        />
+      )}
+
       {/* Modal de selección de Beatport */}
-      {beatportCandidates && beatportCandidates.length > 0 && (
-        <BeatportSelectionModal
-          trackCandidates={beatportCandidates}
-          onConfirm={handleBeatportConfirm}
-          onCancel={handleBeatportCancel}
+      {trackTagsCandidates && trackTagsCandidates.length > 0 && (
+        <TagCandidatesSelectionModal
+          trackCandidates={trackTagsCandidates}
+          onConfirm={handleSelectionConfirm}
+          onCancel={handleSelectionCancel}
         />
       )}
     </div>

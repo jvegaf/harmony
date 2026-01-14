@@ -1,12 +1,13 @@
 import type { MessageBoxReturnValue } from 'electron';
 import { TrackEditableFields, Track, TrackId, TrackSrc } from '../../../preload/types/harmony';
-import { TrackCandidates, TrackSelection } from '../../../preload/types/beatport';
+import { TrackSelection } from '../../../preload/types/tagger';
 import { stripAccents } from '../../../preload/lib/utils-id3';
 import { chunk } from '../../../preload/lib/utils';
 
 import { createStore } from './store-helpers';
 import usePlayerStore from './usePlayerStore';
 import router from '../views/router';
+import { TrackCandidatesResult } from '@preload/types/tagger';
 
 const { db, covers, logger, library, dialog } = window.Main;
 
@@ -27,7 +28,17 @@ type LibraryState = {
     total: number;
   };
   highlightPlayingTrack: boolean;
-  beatportCandidates: TrackCandidates[] | null;
+  trackTagsCandidates: TrackCandidatesResult[] | null;
+  candidatesSearching: boolean;
+  candidatesSearchProgress: {
+    processed: number;
+    total: number;
+  };
+  tagsApplying: boolean;
+  tagsApplyProgress: {
+    processed: number;
+    total: number;
+  };
   api: {
     openHandler: (opts: Electron.OpenDialogOptions) => Promise<void>;
     search: (value: string) => void;
@@ -38,13 +49,13 @@ type LibraryState = {
     updateTrackMetadata: (trackID: string, newFields: TrackEditableFields) => Promise<void>;
     highlightPlayingTrack: (highlight: boolean) => void;
     getCover: (track: Track) => Promise<string | null>;
-    findCandidates: (trackID: string) => Promise<void>;
+    findCandidates: (tracks: Track[]) => Promise<void>;
     fixTrack: (trackID: string) => Promise<void>;
     toFix: (total: number) => void;
     updateTrackRating: (trackSrc: TrackSrc, rating: number) => Promise<void>;
     deleteTracks: (tracks: Track[]) => Promise<void>;
-    setBeatportCandidates: (candidates: TrackCandidates[] | null) => void;
-    applyBeatportSelections: (selections: TrackSelection[]) => Promise<void>;
+    setTagCandidates: (candidates: TrackCandidatesResult[] | null) => void;
+    applyTrackTagsSelections: (selections: TrackSelection[]) => Promise<void>;
   };
 };
 
@@ -64,8 +75,18 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     processed: 0,
     total: 0,
   },
-  highlightPlayingTrack: false, // hacky, fixme
-  beatportCandidates: null,
+  highlightPlayingTrack: false,
+  trackTagsCandidates: null,
+  candidatesSearching: false,
+  candidatesSearchProgress: {
+    processed: 0,
+    total: 0,
+  },
+  tagsApplying: false,
+  tagsApplyProgress: {
+    processed: 0,
+    total: 0,
+  },
 
   api: {
     openHandler: async (opts: Electron.OpenDialogOptions) => {
@@ -220,16 +241,34 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     getCover: async (track: Track): Promise<string | null> => {
       return await covers.getCoverAsBase64(track);
     },
-    findCandidates: async (trackID: string): Promise<void> => {
-      const track = await db.tracks.findOnlyByID(trackID);
-      const trkCandidates = await library.findTagCandidates(track);
-      trkCandidates.candidates.forEach((c: { artists: string; title: string; similarity_score: number }) => {
-        logger.info(`${c.artists} - ${c.title} - Score: ${(c.similarity_score * 100).toFixed(1)}%`);
-      });
-      set({
-        beatportCandidates: [trkCandidates],
-        tagsSelecting: true,
-      });
+    findCandidates: async (tracks: Track[]): Promise<void> => {
+      try {
+        set({
+          candidatesSearching: true,
+          candidatesSearchProgress: { processed: 0, total: tracks.length },
+        });
+
+        logger.info(`Starting candidate search for ${tracks.length} tracks`);
+
+        // Llamar a la API (que procesa internamente todos los tracks)
+        const trkCandidates = await library.findTagCandidates(tracks);
+
+        // Marcar como completado
+        set({
+          candidatesSearching: false,
+          candidatesSearchProgress: { processed: tracks.length, total: tracks.length },
+          trackTagsCandidates: trkCandidates,
+          tagsSelecting: true,
+        });
+
+        logger.info(`Candidate search completed: ${trkCandidates.length} results`);
+      } catch (err) {
+        logger.error('Error finding candidates:', err as any);
+        set({
+          candidatesSearching: false,
+          candidatesSearchProgress: { processed: 0, total: 0 },
+        });
+      }
     },
     fixTrack: async (trackID: string): Promise<void> => {
       let track = await db.tracks.findOnlyByID(trackID);
@@ -282,22 +321,105 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         logger.error(err as any);
       }
     },
-    setBeatportCandidates: (candidates: TrackCandidates[] | null) => {
-      set({ beatportCandidates: candidates, tagsSelecting: candidates !== null });
+    setTagCandidates: (candidates: TrackCandidatesResult[] | null) => {
+      set({ trackTagsCandidates: candidates, tagsSelecting: candidates !== null });
     },
-    applyBeatportSelections: async (selections: TrackSelection[]) => {
+    applyTrackTagsSelections: async (selections: TrackSelection[]) => {
       try {
-        set({ tagsSelecting: false, beatportCandidates: null });
-        logger.info(`Applying Beatport selections for ${selections.length} tracks`);
+        logger.info(`Applying Tags selections for ${selections.length} tracks`);
 
-        // TODO: Implementar la aplicación de tags desde Beatport
-        // Por ahora solo cerramos el modal
-        // En el futuro, esto debería:
-        // 1. Obtener los tags completos de cada track de Beatport
-        // 2. Aplicar los tags a los tracks locales
-        // 3. Actualizar la base de datos
+        // Filtrar selecciones válidas (con candidato seleccionado)
+        const validSelections = selections.filter(s => s.selected_candidate_id !== null);
+
+        if (validSelections.length === 0) {
+          logger.info('No valid selections to apply');
+          set({ tagsSelecting: false, trackTagsCandidates: null });
+          return;
+        }
+
+        logger.info(`Processing ${validSelections.length} valid selections`);
+
+        set({
+          tagsSelecting: false,
+          trackTagsCandidates: null,
+          tagsApplying: true,
+          tagsApplyProgress: { processed: 0, total: validSelections.length },
+        });
+
+        // Obtener todos los tracks locales desde la base de datos
+        const trackIds = validSelections.map(s => s.local_track_id);
+        const tracks = await db.tracks.findByID(trackIds);
+
+        let totalUpdated = 0;
+        let totalErrors = 0;
+
+        for (let i = 0; i < validSelections.length; i++) {
+          const selection = validSelections[i];
+          const track = tracks.find(t => t.id === selection.local_track_id);
+
+          if (!track) {
+            logger.error(`Track ${selection.local_track_id} not found`);
+            totalErrors++;
+            set({
+              tagsApplyProgress: { processed: i + 1, total: validSelections.length },
+            });
+            continue;
+          }
+
+          try {
+            // Aplicar tags a un solo track
+            const result = await library.applyTagSelections([selection], [track]);
+
+            // Si hubo éxito, actualizar en la BD y UI
+            if (result.updated.length > 0) {
+              const updatedTrack = result.updated[0];
+              await db.tracks.update(updatedTrack);
+
+              set({ updated: updatedTrack });
+
+              totalUpdated++;
+              logger.info(`[${i + 1}/${validSelections.length}] Tags applied to: ${updatedTrack.title}`);
+            }
+
+            // Log de errores si los hay
+            if (result.errors.length > 0) {
+              totalErrors++;
+              logger.error(`[${i + 1}/${validSelections.length}] Error: ${result.errors[0].error}`);
+            }
+          } catch (err) {
+            totalErrors++;
+            logger.error(`[${i + 1}/${validSelections.length}] Exception:`, err);
+          }
+
+          // Actualizar progreso
+          set({
+            tagsApplyProgress: { processed: i + 1, total: validSelections.length },
+          });
+
+          // Pequeña pausa para permitir que la UI se actualice
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+
+        // Finalizar
+        set({
+          tagsApplying: false,
+          tagsApplyProgress: { processed: 0, total: 0 },
+        });
+
+        // Revalidar el router para refrescar toda la lista
+        router.revalidate();
+
+        logger.info(
+          `Tag application complete: ${totalUpdated} updated, ${totalErrors} errors, ${selections.length - validSelections.length} skipped`,
+        );
       } catch (err) {
-        logger.error(err as any);
+        logger.error('Error in applyTrackTagsSelections:', err as any);
+        set({
+          tagsSelecting: false,
+          trackTagsCandidates: null,
+          tagsApplying: false,
+          tagsApplyProgress: { processed: 0, total: 0 },
+        });
       }
     },
   },

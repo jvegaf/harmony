@@ -26,7 +26,7 @@ export class ConcurrencyConfigUtils {
    */
   static default(): ConcurrencyConfig {
     return {
-      // AIDEV-NOTE: Valores conservadores para evitar rate limiting
+      //   Valores conservadores para evitar rate limiting
       // - 4 concurrentes para HTML scraping (search)
       // - 100ms entre requests por slot
       // - 2s extra si detectamos 429

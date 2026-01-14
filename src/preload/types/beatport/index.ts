@@ -17,3 +17,5 @@ export * from './track';
 export * from './tags';
 export * from './operations';
 export * from './candidates';
+//   compat.ts no se exporta automáticamente para evitar conflictos
+// Importar explícitamente si se necesita: import { ... } from './beatport/compat';

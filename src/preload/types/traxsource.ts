@@ -1,4 +1,4 @@
-import { ResultTag, Maybe } from 'src/preload/types/harmony';
+import { ResultTag, Maybe } from '@preload/types/harmony';
 
 export interface TXTrack extends ResultTag {
   platform: string;

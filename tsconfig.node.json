@@ -11,6 +11,11 @@
     "types": [
       "electron-vite/node"
     ],
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@main/*": ["src/main/*"],
+      "@preload/*": ["src/preload/*"],
+      "@renderer/*": ["src/renderer/src/*"]
+    }
   }
 }

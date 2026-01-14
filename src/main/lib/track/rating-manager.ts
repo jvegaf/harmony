@@ -1,5 +1,5 @@
 import NodeID3 from 'node-id3';
-import { UpdateRatingPayload } from 'src/preload/types/harmony';
+import { UpdateRatingPayload } from '@preload/types/harmony';
 import log from 'electron-log';
 
 export default async function UpdateTrackRating(payload: UpdateRatingPayload) {

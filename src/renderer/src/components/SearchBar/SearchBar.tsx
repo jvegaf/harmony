@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Track } from 'src/preload/types/harmony';
+import { Track } from '@preload/types/harmony';
 import styles from './SearchBar.module.css';
 import { Autocomplete, AutocompleteProps, Group, Text } from '@mantine/core';
 import { useLibraryAPI } from '../../stores/useLibraryStore';

@@ -1,6 +1,6 @@
 import { Rating } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import { TrackRating, TrackSrc } from 'src/preload/types/harmony';
+import { TrackRating, TrackSrc } from '@preload/types/harmony';
 import { useLibraryAPI } from '../../stores/useLibraryStore';
 
 type Props = {

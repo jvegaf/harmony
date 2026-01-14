@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import channels from '../../../../preload/lib/ipc-channels';
 import PlaylistsAPI from '../../stores/PlaylistsAPI';
-import { CommandPayload, Track } from '../../../../preload/types/harmony';
+import { CommandPayload, Track, TrackId } from '../../../../preload/types/harmony';
 import { useLibraryAPI } from '../../stores/useLibraryStore';
 
 const { ipcRenderer } = window.ElectronAPI;
@@ -32,15 +32,15 @@ function IPCMenuEvents() {
       libraryAPI.search(artist);
     }
 
-    function fixTags(selected: Track[]) {
+    function fixTags(selected: TrackId[]) {
       libraryAPI.toFix(selected.length);
-      selected.forEach(track => {
-        libraryAPI.fixTrack(track.id);
+      selected.forEach(trackId => {
+        libraryAPI.fixTrack(trackId);
       });
     }
 
     function findCandidates(selected: Track[]) {
-      libraryAPI.findCandidates(selected[0].id);
+      libraryAPI.findCandidates(selected);
     }
 
     function deleteTracks(selected: Track[]) {

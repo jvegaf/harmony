@@ -59,7 +59,19 @@ const api = {
   library: {
     parseUri,
     fixTags: async (track: Track) => ipcRenderer.invoke(channels.FIX_TAGS, track),
-    findTagCandidates: async (track: Track) => ipcRenderer.invoke(channels.FIND_TAG_CANDIDATES, track),
+    findTagCandidates: async (tracks: Track[]) => {
+      const results = await ipcRenderer.invoke(channels.FIND_TAG_CANDIDATES, tracks);
+      return results.map((result: any) => ({
+        ...result,
+        candidates: result.candidates.map((c: any) => ({
+          ...c,
+          beatport_id: c.source === 'beatport' ? parseInt(c.id) : undefined,
+        })),
+      }));
+    },
+    applyTagSelections: async (selections: any[], tracks: Track[]) => {
+      return ipcRenderer.invoke(channels.APPLY_TAG_SELECTIONS, selections, tracks);
+    },
     scanPaths: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_LOOKUP, paths),
     importTracks: async (tracks: Track[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, tracks),
     updateRating: (payload: UpdateRatingPayload) => ipcRenderer.send(channels.TRACK_UPDATE_RATING, payload),

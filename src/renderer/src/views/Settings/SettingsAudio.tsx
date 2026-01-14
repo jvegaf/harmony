@@ -3,7 +3,7 @@ import AudioOutputSelect from '../../components/AudioOutputSelect/AudioOutputSel
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import styles from './Settings.module.css';
 
-import { Config } from 'src/preload/types/harmony';
+import { Config } from '@preload/types/harmony';
 import { NumberInput } from '@mantine/core';
 import { useEffect, useState } from 'react';
 

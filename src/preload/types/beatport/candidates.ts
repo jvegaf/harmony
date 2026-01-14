@@ -1,7 +1,10 @@
 /**
  * Tipos relacionados con selección manual de candidatos de Beatport
  *
- * Incluye: BeatportCandidate, TrackCandidates, TrackSelection, SearchCandidatesResult
+ *   Este archivo está siendo deprecado en favor del sistema unificado
+ * en 'src/preload/types/tagger'. Los tipos aquí se mantienen para compatibilidad.
+ *
+ * @deprecated Use TrackCandidate and TrackCandidatesResult from 'src/preload/types/tagger' instead
  */
 
 import { BeatportTrack, BeatportTrackUtils } from './track';
@@ -9,6 +12,8 @@ import { BeatportTrack, BeatportTrackUtils } from './track';
 /**
  * Candidato de Beatport para un track local
  * Contiene información resumida para mostrar en la UI de selección
+ *
+ * @deprecated Use TrackCandidate from 'src/preload/types/tagger' instead
  */
 export interface BeatportCandidate {
   /** ID del track en Beatport */
@@ -67,6 +72,8 @@ export class BeatportCandidateUtils {
 /**
  * Candidatos de Beatport para un track local
  * Agrupa el track local con sus posibles matches de Beatport
+ *
+ * @deprecated Use TrackCandidatesResult from 'src/preload/types/tagger' instead
  */
 export interface TrackCandidates {
   /** ID del track local en Harmony */

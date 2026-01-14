@@ -7,8 +7,8 @@
 
 import { useState, useMemo } from 'react';
 import { X, Music, Clock, Check, AlertCircle, Disc, Calendar, FileAudio } from 'lucide-react';
-import type { TrackCandidates, BeatportCandidate, TrackSelection } from '../../../../../preload/types/beatport';
-import styles from './BeatportModal.module.css';
+import styles from './TagCandidateSelection.module.css';
+import { TrackCandidate, TrackCandidatesResult, TrackSelection } from '@preload/types/tagger';
 
 /**
  * Helper para combinar clases CSS
@@ -17,9 +17,9 @@ function cn(...classes: (string | boolean | undefined | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-interface BeatportSelectionModalProps {
+interface TagsSelectionModalProps {
   /** Lista de tracks con sus candidatos de Beatport */
-  trackCandidates: TrackCandidates[];
+  trackCandidates: TrackCandidatesResult[];
   /** Callback cuando el usuario confirma la selección */
   onConfirm: (selections: TrackSelection[]) => void;
   /** Callback cuando el usuario cancela */
@@ -87,7 +87,9 @@ function isDurationMatch(
 }
 
 /**
- * Componente para mostrar un candidato de Beatport
+ * Componente para mostrar un candidato de track (Beatport o Traxsource)
+ *
+ *  Ahora soporta candidatos de múltiples providers
  */
 function CandidateCard({
   candidate,
@@ -95,7 +97,7 @@ function CandidateCard({
   onSelect,
   localDuration,
 }: {
-  candidate: BeatportCandidate;
+  candidate: TrackCandidate;
   isSelected: boolean;
   onSelect: () => void;
   /** Duración del track local para comparar */
@@ -103,6 +105,9 @@ function CandidateCard({
 }) {
   const scorePercent = Math.round(candidate.similarity_score * 100);
   const durationMatches = isDurationMatch(localDuration, candidate.duration_secs);
+
+  //  Determinar la fuente del candidato (beatport o traxsource)
+  const providerSource = (candidate as any).source || 'beatport';
 
   return (
     <button
@@ -155,7 +160,10 @@ function CandidateCard({
       </div>
 
       {/* Score badge */}
-      <div className={cn(styles.scoreBadge, getScoreColor(candidate.similarity_score))}>{scorePercent}% match</div>
+      <div className={cn(styles.scoreBadge, getScoreColor(candidate.similarity_score))}>
+        {scorePercent}% match
+        {providerSource === 'traxsource' && ' (TX)'}
+      </div>
 
       {/* Info grid */}
       <div className={styles.infoGrid}>
@@ -217,7 +225,7 @@ function CandidateCard({
 }
 
 /**
- * Botón "No está en Beatport"
+ * Botón "No está disponible" (en ningún provider)
  */
 function NotFoundButton({ isSelected, onSelect }: { isSelected: boolean; onSelect: () => void }) {
   return (
@@ -234,9 +242,9 @@ function NotFoundButton({ isSelected, onSelect }: { isSelected: boolean; onSelec
 
       <X className={styles.notFoundIcon} />
       <span className={styles.notFoundText}>
-        No está en
+        No está
         <br />
-        Beatport
+        disponible
       </span>
     </button>
   );
@@ -250,9 +258,9 @@ function TrackRow({
   selection,
   onSelectionChange,
 }: {
-  trackData: TrackCandidates;
-  selection: number | null | undefined; // beatport_id, null (no está), o undefined (sin selección)
-  onSelectionChange: (beatportId: number | null) => void;
+  trackData: TrackCandidatesResult;
+  selection: string | null | undefined;
+  onSelectionChange: (candidateId: string | null) => void;
 }) {
   const hasCandidates = trackData.candidates.length > 0;
   const hasError = trackData.error !== undefined;
@@ -261,12 +269,15 @@ function TrackRow({
   const bestCandidate = trackData.candidates[0];
   const shouldAutoSelect = bestCandidate && bestCandidate.similarity_score >= 0.85;
 
+  // Construir ID formateado (provider:id) para el mejor candidato
+  const bestCandidateId = bestCandidate ? `${bestCandidate.source}:${bestCandidate.id}` : undefined;
+
   // Si no hay selección pero debería auto-seleccionar, hacerlo
   useMemo(() => {
-    if (selection === undefined && shouldAutoSelect) {
-      onSelectionChange(bestCandidate.beatport_id);
+    if (selection === undefined && shouldAutoSelect && bestCandidateId) {
+      onSelectionChange(bestCandidateId);
     }
-  }, [selection, shouldAutoSelect, bestCandidate, onSelectionChange]);
+  }, [selection, shouldAutoSelect, bestCandidateId, onSelectionChange]);
 
   return (
     <div className={styles.trackRow}>
@@ -313,15 +324,19 @@ function TrackRow({
         <div className={styles.errorMessage}>{trackData.error}</div>
       ) : (
         <div className={styles.candidatesContainer}>
-          {trackData.candidates.map((candidate: BeatportCandidate) => (
-            <CandidateCard
-              key={candidate.beatport_id}
-              candidate={candidate}
-              isSelected={selection === candidate.beatport_id}
-              onSelect={() => onSelectionChange(candidate.beatport_id)}
-              localDuration={trackData.local_duration}
-            />
-          ))}
+          {trackData.candidates.map((candidate: TrackCandidate) => {
+            //Construir ID formateado (provider:id) para usar como selected_candidate_id
+            const formattedId = `${candidate.source}:${candidate.id}`;
+            return (
+              <CandidateCard
+                key={formattedId}
+                candidate={candidate}
+                isSelected={selection === formattedId}
+                onSelect={() => onSelectionChange(formattedId)}
+                localDuration={trackData.local_duration}
+              />
+            );
+          })}
 
           {/* Siempre mostrar opción "No está en Beatport" */}
           <NotFoundButton
@@ -337,21 +352,23 @@ function TrackRow({
 /**
  * Modal principal de selección de matches de Beatport
  */
-function BeatportSelectionModal({
+function TagCandidatesSelectionModal({
   trackCandidates,
   onConfirm,
   onCancel,
   isLoading = false,
-}: BeatportSelectionModalProps) {
-  // Estado de selecciones: Map de local_track_id -> beatport_id (o null)
-  const [selections, setSelections] = useState<Map<string, number | null>>(() => {
-    const initial = new Map<string, number | null>();
+}: TagsSelectionModalProps) {
+  // Estado de selecciones: Map de local_track_id -> selected_candidate_id formateado (provider:id o null)
+  const [selections, setSelections] = useState<Map<string, string | null>>(() => {
+    const initial = new Map<string, string | null>();
 
     // Auto-seleccionar candidatos con alta similitud (>85%)
     for (const track of trackCandidates) {
       const best = track.candidates[0];
       if (best && best.similarity_score >= 0.85) {
-        initial.set(track.local_track_id, best.beatport_id);
+        // Construir ID formateado (provider:id)
+        const formattedId = `${best.source}:${best.id}`;
+        initial.set(track.local_track_id, formattedId);
       }
     }
 
@@ -374,10 +391,10 @@ function BeatportSelectionModal({
   const skippedCount = totalSelections - validMatchCount;
 
   // Handler para cambiar selección
-  const handleSelectionChange = (localTrackId: string, beatportId: number | null) => {
+  const handleSelectionChange = (localTrackId: string, candidateId: string | null) => {
     setSelections(prev => {
       const next = new Map(prev);
-      next.set(localTrackId, beatportId);
+      next.set(localTrackId, candidateId);
       return next;
     });
   };
@@ -386,10 +403,10 @@ function BeatportSelectionModal({
   const handleConfirm = () => {
     const result: TrackSelection[] = [];
 
-    for (const [localTrackId, beatportId] of selections) {
+    for (const [localTrackId, candidateTrackId] of selections) {
       result.push({
         local_track_id: localTrackId,
-        beatport_track_id: beatportId,
+        selected_candidate_id: candidateTrackId,
       });
     }
 
@@ -406,9 +423,9 @@ function BeatportSelectionModal({
         {/* Header */}
         <div className={styles.modalHeader}>
           <div>
-            <h2 className={styles.modalTitle}>Seleccionar Matches de Beatport</h2>
+            <h2 className={styles.modalTitle}>Seleccionar Matches de Tracks</h2>
             <p className={styles.modalSubtitle}>
-              {tracksWithCandidates} de {totalTracks} tracks tienen candidatos
+              {tracksWithCandidates} de {totalTracks} tracks tienen candidatos (Beatport + Traxsource)
             </p>
           </div>
           <button
@@ -486,4 +503,4 @@ function BeatportSelectionModal({
   );
 }
 
-export default BeatportSelectionModal;
+export default TagCandidatesSelectionModal;

@@ -155,6 +155,7 @@ class ContextMenuModule extends ModuleWindow {
         },
         {
           label: 'Fix Tags',
+          enabled: false,
           click: () => {
             event.sender.send(channels.CMD_FIX_TAGS, selected);
           },

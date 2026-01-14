@@ -148,7 +148,7 @@ export class BeatportClient {
     maxResults: number,
     minScore: number,
   ): Promise<BeatportCandidate[]> {
-    const results = await this.search(title, artist);
+    const results: BeatportSearchResult = await this.search(title, artist);
 
     if (results.tracks.length === 0) {
       return [];
