@@ -4,6 +4,7 @@
  * Incluye: BeatportTrack, BeatportKey, BeatportSearchResult
  */
 
+import { logger } from '@main/lib/log/logger';
 import { BeatportArtist, BeatportLabel, GenreData, GenreDataUtils } from './core';
 import { BeatportImage, BeatportImageUtils, BeatportRelease, BeatportReleaseUtils } from './release';
 

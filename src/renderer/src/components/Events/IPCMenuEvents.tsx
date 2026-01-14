@@ -32,11 +32,8 @@ function IPCMenuEvents() {
       libraryAPI.search(artist);
     }
 
-    function fixTags(selected: TrackId[]) {
-      libraryAPI.toFix(selected.length);
-      selected.forEach(trackId => {
-        libraryAPI.fixTrack(trackId);
-      });
+    function filenameToTags(selected: Track[]) {
+      libraryAPI.filenameToTags(selected);
     }
 
     function findCandidates(selected: Track[]) {
@@ -51,7 +48,7 @@ function IPCMenuEvents() {
     ipcRenderer.on(channels.CMD_TRACKS_PLAYLIST_ADD, (_, payload) => addTracksToPlaylist(payload));
     ipcRenderer.on(channels.CMD_TRACKS_PLAYLIST_REMOVE, (_, payload) => removeTracksToPlaylist(payload));
     ipcRenderer.on(channels.CMD_TRACK_ARTIST_FIND, (_, artist) => artistFind(artist));
-    ipcRenderer.on(channels.CMD_FIX_TAGS, (_, selected) => fixTags(selected));
+    ipcRenderer.on(channels.CMD_FILENAME_TAGS, (_, selected) => filenameToTags(selected));
     ipcRenderer.on(channels.CMD_FIND_CANDIDATES, (_, selected) => findCandidates(selected));
     ipcRenderer.on(channels.CMD_TRACKS_DELETE, (_, selected) => deleteTracks(selected));
 
@@ -60,7 +57,7 @@ function IPCMenuEvents() {
       ipcRenderer.removeAllListeners(channels.CMD_TRACKS_PLAYLIST_ADD);
       ipcRenderer.removeAllListeners(channels.CMD_TRACKS_PLAYLIST_REMOVE);
       ipcRenderer.removeAllListeners(channels.CMD_TRACK_ARTIST_FIND);
-      ipcRenderer.removeAllListeners(channels.CMD_FIX_TAGS);
+      ipcRenderer.removeAllListeners(channels.CMD_FILENAME_TAGS);
       ipcRenderer.removeAllListeners(channels.CMD_FIND_CANDIDATES);
       ipcRenderer.removeAllListeners(channels.CMD_TRACKS_DELETE);
     };

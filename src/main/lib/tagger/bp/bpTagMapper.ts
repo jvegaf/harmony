@@ -1,6 +1,8 @@
 import { ResultTag } from '../../../../preload/types/harmony';
 import { GetStringTokens } from '../../../../preload/lib/utils-id3';
 
+// AIDEV-NOTE: Interface actualizada para manejar respuestas de Beatport API v4
+// genre puede ser opcional si la API no lo incluye
 interface Result {
   mix_name: string;
   name: string;
@@ -9,7 +11,7 @@ interface Result {
   key: { camelot_number: string; camelot_letter: string };
   release: { name: string; image: { uri: string } };
   publish_date: string;
-  genre: { name: string };
+  genre?: { name: string };
   bpm: number;
   length_ms: number;
 }
@@ -25,6 +27,7 @@ const CreateTagResult = (result: Result): ResultTag => {
   }
   const tagTokens = GetStringTokens(tagValues);
 
+  // AIDEV-NOTE: Si genre no está presente, usamos undefined para que el campo sea opcional
   return {
     id: result.id,
     title: tagTrackTitle,
@@ -33,7 +36,7 @@ const CreateTagResult = (result: Result): ResultTag => {
     artists: tagTrackArtists ?? [],
     album: result.release.name,
     year: result.publish_date.substring(0, 4),
-    genre: result.genre.name,
+    genre: result.genre?.name,
     bpm: result.bpm,
     duration: Number((result.length_ms / 1000).toFixed(0)),
     art: result.release.image.uri,

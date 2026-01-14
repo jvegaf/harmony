@@ -154,10 +154,9 @@ class ContextMenuModule extends ModuleWindow {
           type: 'separator',
         },
         {
-          label: 'Fix Tags',
-          enabled: false,
+          label: 'Filename->Tag',
           click: () => {
-            event.sender.send(channels.CMD_FIX_TAGS, selected);
+            event.sender.send(channels.CMD_FILENAME_TAGS, selected);
           },
         },
         {

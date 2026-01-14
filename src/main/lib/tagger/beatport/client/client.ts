@@ -346,6 +346,8 @@ export class BeatportClient {
                   name: artist.artist_name,
                   slug: artist.slug,
                 })) || [],
+              // AIDEV-NOTE: En scraping, genre puede venir como array o como objeto
+              // Intentamos primero como array, luego como objeto simple
               genre: track.genre?.[0]
                 ? {
                     genre_id: track.genre[0].genre_id,
@@ -354,7 +356,17 @@ export class BeatportClient {
                     name: track.genre[0].genre_name,
                     slug: track.genre[0].slug,
                   }
-                : undefined,
+                : Array.isArray(track.genre)
+                  ? undefined
+                  : track.genre
+                    ? {
+                        genre_id: track.genre.genre_id,
+                        id: track.genre.genre_id,
+                        genre_name: track.genre.genre_name,
+                        name: track.genre.genre_name,
+                        slug: track.genre.slug,
+                      }
+                    : undefined,
               sub_genre: track.sub_genre?.[0]
                 ? {
                     genre_id: track.sub_genre[0].genre_id,
@@ -363,7 +375,17 @@ export class BeatportClient {
                     name: track.sub_genre[0].genre_name,
                     slug: track.sub_genre[0].slug,
                   }
-                : undefined,
+                : Array.isArray(track.sub_genre)
+                  ? undefined
+                  : track.sub_genre
+                    ? {
+                        genre_id: track.sub_genre.genre_id,
+                        id: track.sub_genre.genre_id,
+                        genre_name: track.sub_genre.genre_name,
+                        name: track.sub_genre.genre_name,
+                        slug: track.sub_genre.slug,
+                      }
+                    : undefined,
               label: track.label
                 ? {
                     label_id: track.label.label_id,
@@ -501,24 +523,43 @@ export class BeatportClient {
             name: artist.name,
             slug: artist.slug,
           })) || [],
-        genre: data.genres?.[0]
+        // AIDEV-NOTE: La API v4 devuelve 'genre' (singular) directamente, no 'genres' (plural)
+        // Intentamos primero data.genre, luego data.genres[0] como fallback
+        genre: data.genre
           ? {
-              genre_id: data.genres[0].id,
-              id: data.genres[0].id,
-              genre_name: data.genres[0].name,
-              name: data.genres[0].name,
-              slug: data.genres[0].slug,
+              genre_id: data.genre.id,
+              id: data.genre.id,
+              genre_name: data.genre.name,
+              name: data.genre.name,
+              slug: data.genre.slug,
             }
-          : undefined,
-        sub_genre: data.sub_genres?.[0]
+          : data.genres?.[0]
+            ? {
+                genre_id: data.genres[0].id,
+                id: data.genres[0].id,
+                genre_name: data.genres[0].name,
+                name: data.genres[0].name,
+                slug: data.genres[0].slug,
+              }
+            : undefined,
+        // AIDEV-NOTE: sub_genre también puede venir como 'sub_genre' singular
+        sub_genre: data.sub_genre
           ? {
-              genre_id: data.sub_genres[0].id,
-              id: data.sub_genres[0].id,
-              genre_name: data.sub_genres[0].name,
-              name: data.sub_genres[0].name,
-              slug: data.sub_genres[0].slug,
+              genre_id: data.sub_genre.id,
+              id: data.sub_genre.id,
+              genre_name: data.sub_genre.name,
+              name: data.sub_genre.name,
+              slug: data.sub_genre.slug,
             }
-          : undefined,
+          : data.sub_genres?.[0]
+            ? {
+                genre_id: data.sub_genres[0].id,
+                id: data.sub_genres[0].id,
+                genre_name: data.sub_genres[0].name,
+                name: data.sub_genres[0].name,
+                slug: data.sub_genres[0].slug,
+              }
+            : undefined,
         label: data.label
           ? {
               label_id: data.label.id,

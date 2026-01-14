@@ -8,6 +8,7 @@ import { createStore } from './store-helpers';
 import usePlayerStore from './usePlayerStore';
 import router from '../views/router';
 import { TrackCandidatesResult } from '@preload/types/tagger';
+import { GetFilenameWithoutExtension } from '@renderer/lib/utils-library';
 
 const { db, config, covers, logger, library, dialog } = window.Main;
 
@@ -61,7 +62,15 @@ type LibraryState = {
     updateTrackRating: (trackSrc: TrackSrc, rating: number) => Promise<void>;
     deleteTracks: (tracks: Track[]) => Promise<void>;
     setTracklistSort: (colId: string, mode: string) => Promise<void>;
+    filenameToTags: (tracks: Track[]) => Promise<void>;
   };
+};
+
+const filenameToTag = (track: Track) => {
+  const filename = GetFilenameWithoutExtension(track.path);
+  const parts = filename.split(' - ');
+  if (parts.length < 2) return track;
+  return { ...track, title: parts[1], artist: parts[0] };
 };
 
 // AIDEV-NOTE: Initialize tracklistSort from persisted config
@@ -431,15 +440,43 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         logger.error(err as any);
       }
     },
-    /**
-     * AIDEV-NOTE: Save tracklist sort configuration to persistent storage
-     * Updates both local state and config file
-     */
     setTracklistSort: async (colId: string, mode: string): Promise<void> => {
       const tracklistSort = { colId, mode };
       set({ tracklistSort });
       await config.set('tracklistSort', tracklistSort);
       logger.debug('Tracklist sort saved:', tracklistSort);
+    },
+    filenameToTags: async (tracks: Track[]): Promise<void> => {
+      try {
+        const options: Electron.MessageBoxOptions = {
+          buttons: ['Cancel', 'Accept'],
+          title: 'File name to tags?',
+          message: 'Are you sure you want to update tags from file names? ',
+          type: 'warning',
+        };
+
+        const result = await dialog.msgbox(options);
+
+        if (result.response === 1) {
+          for (const track of tracks) {
+            const updatedTrack = filenameToTag(track);
+            await library.updateMetadata(updatedTrack);
+
+            // Update in database
+            await db.tracks.update(updatedTrack);
+
+            // Update UI state
+            set({ updated: updatedTrack });
+          }
+
+          // Revalidate router to refresh the track list
+          router.revalidate();
+
+          logger.info(`Updated ${tracks.length} tracks from filenames`);
+        }
+      } catch (err) {
+        logger.error(err as any);
+      }
     },
   },
 }));
