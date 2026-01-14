@@ -40,6 +40,26 @@ function GlobalKeyBindings() {
           e.stopPropagation();
           playerAPI.jumpTo(player.getCurrentTime() + 10);
           break;
+        case 's':
+          e.preventDefault();
+          e.stopPropagation();
+          playerAPI.jumpTo(player.getCurrentTime() - 10);
+          break;
+        case 'w':
+          e.preventDefault();
+          e.stopPropagation();
+          playerAPI.jumpTo(player.getCurrentTime() + 10);
+          break;
+        case 'a':
+          e.preventDefault();
+          e.stopPropagation();
+          playerAPI.previous();
+          break;
+        case 'd':
+          e.preventDefault();
+          e.stopPropagation();
+          playerAPI.next();
+          break;
         default:
           break;
       }
