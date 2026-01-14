@@ -10,6 +10,8 @@
   --ag-range-selection-border-color: var(--primary-color);
   --ag-border-color: var(--border-color);
   --ag-cell-horizontal-padding: 0.5rem;
+  --ag-font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+  --ag-font-size: 17px;
 
   & .ag-root-wrapper {
     border: none;

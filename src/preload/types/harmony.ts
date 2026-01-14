@@ -120,6 +120,10 @@ export interface Config {
   sleepBlocker: boolean;
   displayNotifications: boolean;
   audioPreCuePosition: number;
+  tracklistSort: {
+    colId: string;
+    mode: string;
+  };
 }
 
 export const enum SearchEngine {

@@ -64,6 +64,10 @@ export default class ConfigModule extends Module {
       sleepBlocker: false,
       displayNotifications: true,
       audioPreCuePosition: 120,
+      tracklistSort: {
+        colId: 'path',
+        mode: 'desc',
+      },
     };
 
     return config;

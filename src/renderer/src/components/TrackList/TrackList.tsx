@@ -35,7 +35,7 @@ const TrackList = (props: Props) => {
   const { tracks, trackPlayingID, playlists, currentPlaylist, width, height } = props;
   const playerAPI = usePlayerAPI();
   const libraryAPI = useLibraryAPI();
-  const { searched, updated, deleting } = useLibraryStore();
+  const { searched, updated, deleting, tracklistSort } = useLibraryStore();
   const gridRef = useRef<AgGridReact>(null);
   const [lastUpdated, setLastUpdated] = useState<Track | null>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
@@ -156,6 +156,15 @@ const TrackList = (props: Props) => {
     setGridApi(params.api);
 
     setRowData(tracks);
+
+    // AIDEV-NOTE: Apply persisted sort configuration on grid initialization
+    if (tracklistSort && tracklistSort.colId && tracklistSort.mode) {
+      params.api.applyColumnState({
+        state: [{ colId: tracklistSort.colId, sort: tracklistSort.mode as 'asc' | 'desc' }],
+        defaultState: { sort: null },
+      });
+      logger.info(`[TracksTable] Applied initial sort: ${tracklistSort.colId} ${tracklistSort.mode}`);
+    }
   };
 
   const onDoubleClick = useCallback(
@@ -196,12 +205,21 @@ const TrackList = (props: Props) => {
     }
   }, []);
 
-  const onSortChanged = useCallback((event: SortChangedEvent) => {
-    const colId = event.columns![0].getColId();
-    const sortMode = event.columns![0].getSort();
-    console.log(`sort changed: ${colId}, mode: ${sortMode}`);
-    // TODO: save sorting
-  }, []);
+  // AIDEV-NOTE: Save sort state when user changes column sorting
+  const onSortChanged = useCallback(
+    (event: SortChangedEvent) => {
+      const sortedColumns = event.api.getColumnState().filter(col => col.sort !== null);
+
+      if (sortedColumns.length > 0) {
+        const colId = sortedColumns[0].colId!;
+        const sortMode = sortedColumns[0].sort!;
+
+        logger.info(`[TracksTable] Sort changed: ${colId}, mode: ${sortMode}`);
+        libraryAPI.setTracklistSort(colId, sortMode);
+      }
+    },
+    [libraryAPI],
+  );
 
   const getRowId = useCallback((params: GetRowIdParams) => {
     return params.data.id;

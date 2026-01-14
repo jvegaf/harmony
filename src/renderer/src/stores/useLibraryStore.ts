@@ -9,7 +9,7 @@ import usePlayerStore from './usePlayerStore';
 import router from '../views/router';
 import { TrackCandidatesResult } from '@preload/types/tagger';
 
-const { db, covers, logger, library, dialog } = window.Main;
+const { db, config, covers, logger, library, dialog } = window.Main;
 
 type LibraryState = {
   search: string;
@@ -39,6 +39,10 @@ type LibraryState = {
     processed: number;
     total: number;
   };
+  tracklistSort: {
+    colId: string;
+    mode: string;
+  };
   api: {
     openHandler: (opts: Electron.OpenDialogOptions) => Promise<void>;
     search: (value: string) => void;
@@ -50,14 +54,18 @@ type LibraryState = {
     highlightPlayingTrack: (highlight: boolean) => void;
     getCover: (track: Track) => Promise<string | null>;
     findCandidates: (tracks: Track[]) => Promise<void>;
+    setTagCandidates: (candidates: TrackCandidatesResult[] | null) => void;
+    applyTrackTagsSelections: (selections: TrackSelection[]) => Promise<void>;
     fixTrack: (trackID: string) => Promise<void>;
     toFix: (total: number) => void;
     updateTrackRating: (trackSrc: TrackSrc, rating: number) => Promise<void>;
     deleteTracks: (tracks: Track[]) => Promise<void>;
-    setTagCandidates: (candidates: TrackCandidatesResult[] | null) => void;
-    applyTrackTagsSelections: (selections: TrackSelection[]) => Promise<void>;
+    setTracklistSort: (colId: string, mode: string) => Promise<void>;
   };
 };
+
+// AIDEV-NOTE: Initialize tracklistSort from persisted config
+const initialTracklistSort = config.__initialConfig.tracklistSort || { colId: 'path', mode: 'desc' };
 
 const useLibraryStore = createStore<LibraryState>((set, get) => ({
   search: '',
@@ -87,6 +95,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     processed: 0,
     total: 0,
   },
+  tracklistSort: initialTracklistSort,
 
   api: {
     openHandler: async (opts: Electron.OpenDialogOptions) => {
@@ -270,57 +279,6 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         });
       }
     },
-    fixTrack: async (trackID: string): Promise<void> => {
-      let track = await db.tracks.findOnlyByID(trackID);
-      const fixedTrack = await library.fixTags(track);
-      track = {
-        ...track,
-        ...fixedTrack,
-      };
-      await db.tracks.update(track);
-      const fixed = get().fix.processed + 1;
-      const totalToFix = get().fix.total;
-
-      set({
-        fix: { processed: get().fix.processed + 1, total: get().fix.total },
-        updated: track,
-        fixing: fixed < totalToFix,
-      });
-    },
-    toFix: (total: number): void => {
-      set({ fixing: true, fix: { processed: 0, total: total } });
-    },
-    updateTrackRating: async (trackSrc: TrackSrc, newRating: number): Promise<void> => {
-      const track = await db.tracks.findOnlyByPath(trackSrc);
-      const rate = { source: 'traktor@native-instruments.de', rating: newRating };
-      const updatedTrack = { ...track, rating: rate };
-      window.Main.library.updateRating({ trackSrc, rating: newRating });
-      window.Main.db.tracks.update(updatedTrack);
-      set({ updated: updatedTrack });
-    },
-    deleteTracks: async (tracks: Track[]) => {
-      usePlayerStore.getState().api.stop();
-      try {
-        const options: Electron.MessageBoxOptions = {
-          buttons: ['Cancel', 'Delete'],
-          title: 'Delete tracks from disk?',
-          message: 'Are you sure you want to delete tracks from disk? ',
-          type: 'warning',
-        };
-
-        const result = await dialog.msgbox(options);
-
-        if (result.response === 1) {
-          set({ deleting: true });
-          await db.tracks.remove(tracks.map(track => track.id));
-          await library.deleteTracks(tracks);
-          set({ deleting: false });
-          router.revalidate();
-        }
-      } catch (err) {
-        logger.error(err as any);
-      }
-    },
     setTagCandidates: (candidates: TrackCandidatesResult[] | null) => {
       set({ trackTagsCandidates: candidates, tagsSelecting: candidates !== null });
     },
@@ -355,7 +313,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
 
         for (let i = 0; i < validSelections.length; i++) {
           const selection = validSelections[i];
-          const track = tracks.find(t => t.id === selection.local_track_id);
+          const track = tracks.find((t: { id: string }) => t.id === selection.local_track_id);
 
           if (!track) {
             logger.error(`Track ${selection.local_track_id} not found`);
@@ -421,6 +379,67 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
           tagsApplyProgress: { processed: 0, total: 0 },
         });
       }
+    },
+    fixTrack: async (trackID: string): Promise<void> => {
+      let track = await db.tracks.findOnlyByID(trackID);
+      const fixedTrack = await library.fixTags(track);
+      track = {
+        ...track,
+        ...fixedTrack,
+      };
+      await db.tracks.update(track);
+      const fixed = get().fix.processed + 1;
+      const totalToFix = get().fix.total;
+
+      set({
+        fix: { processed: get().fix.processed + 1, total: get().fix.total },
+        updated: track,
+        fixing: fixed < totalToFix,
+      });
+    },
+    toFix: (total: number): void => {
+      set({ fixing: true, fix: { processed: 0, total: total } });
+    },
+    updateTrackRating: async (trackSrc: TrackSrc, newRating: number): Promise<void> => {
+      const track = await db.tracks.findOnlyByPath(trackSrc);
+      const rate = { source: 'traktor@native-instruments.de', rating: newRating };
+      const updatedTrack = { ...track, rating: rate };
+      window.Main.library.updateRating({ trackSrc, rating: newRating });
+      window.Main.db.tracks.update(updatedTrack);
+      set({ updated: updatedTrack });
+    },
+    deleteTracks: async (tracks: Track[]) => {
+      usePlayerStore.getState().api.stop();
+      try {
+        const options: Electron.MessageBoxOptions = {
+          buttons: ['Cancel', 'Delete'],
+          title: 'Delete tracks from disk?',
+          message: 'Are you sure you want to delete tracks from disk? ',
+          type: 'warning',
+        };
+
+        const result = await dialog.msgbox(options);
+
+        if (result.response === 1) {
+          set({ deleting: true });
+          await db.tracks.remove(tracks.map(track => track.id));
+          await library.deleteTracks(tracks);
+          set({ deleting: false });
+          router.revalidate();
+        }
+      } catch (err) {
+        logger.error(err as any);
+      }
+    },
+    /**
+     * AIDEV-NOTE: Save tracklist sort configuration to persistent storage
+     * Updates both local state and config file
+     */
+    setTracklistSort: async (colId: string, mode: string): Promise<void> => {
+      const tracklistSort = { colId, mode };
+      set({ tracklistSort });
+      await config.set('tracklistSort', tracklistSort);
+      logger.debug('Tracklist sort saved:', tracklistSort);
     },
   },
 }));

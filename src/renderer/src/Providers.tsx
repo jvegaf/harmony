@@ -12,8 +12,7 @@ export default function Providers({ children }: any) {
 
   const theme = createTheme({
     // Using Spline Sans as the primary font
-    fontFamily:
-      "'Spline Sans', Verdana, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji",
+    fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
     // added source-code-pro and SFMono-Regular
     fontFamilyMonospace:
       'source-code-pro, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
