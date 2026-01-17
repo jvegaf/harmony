@@ -13,6 +13,7 @@
     "paths": {
       "@renderer/*": ["src/renderer/src/*"],
       "@preload/*": ["src/preload/*"]
-    }
+    },
+    "types": ["vitest/globals", "@testing-library/jest-dom"]
   }
 }

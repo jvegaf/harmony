@@ -39,6 +39,19 @@ yarn typecheck:node     # TypeCheck main/preload (tsconfig.node.json)
 yarn typecheck:web      # TypeCheck renderer (tsconfig.web.json)
 ```
 
+### Testing
+
+```bash
+yarn test               # Run tests in watch mode (development)
+yarn test:run           # Run all tests once (CI mode)
+yarn test:ui            # Open Vitest UI (visual test runner)
+yarn test:coverage      # Run tests with coverage report
+```
+
+**Test Framework**: Vitest (preferred over Jest for performance)  
+**Test File Naming**: `*.test.ts`, `*.test.tsx`, `*.spec.ts`, `*.spec.tsx`  
+**Test Location**: Co-located with source files or in `__tests__/` directories
+
 ### Makefile shortcuts
 
 ```bash
@@ -48,8 +61,6 @@ make check              # Same as yarn typecheck
 make clean              # Remove out/ and dist/ folders
 make build/linux        # Clean + build Linux
 ```
-
-**Note**: There are no test files currently in the project. When adding tests, use a `.test.ts` or `.spec.ts` suffix.
 
 ---
 
