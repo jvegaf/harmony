@@ -97,7 +97,7 @@ Add AIDEV documentation when you encounter:
 
 Each document should include:
 
-````markdown
+```markdown
 # [Topic] - Developer Notes
 
 ## Overview
@@ -138,7 +138,7 @@ Key takeaways
 ---
 
 **Last Updated:** YYYY-MM-DD
-````
+```
 
 ---
 

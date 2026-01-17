@@ -92,6 +92,20 @@ class DatabaseModule extends ModuleWindow {
       return this.db.setTracks(playlistID, tracks);
     });
 
+    // AIDEV-NOTE: New optimized IPC handler for track reordering
+    ipcMain.handle(
+      channels.PLAYLIST_REORDER_TRACKS,
+      (
+        _,
+        playlistID: string,
+        tracksToMove: Track[],
+        targetTrack: Track,
+        position: 'above' | 'below',
+      ): Promise<void> => {
+        return this.db.reorderTracks(playlistID, tracksToMove, targetTrack, position);
+      },
+    );
+
     ipcMain.handle(channels.DB_RESET, (): Promise<void> => {
       return this.db.reset();
     });

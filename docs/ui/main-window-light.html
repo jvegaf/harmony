@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta
+      content="width=device-width, initial-scale=1.0"
+      name="viewport"
+    />
     <title>Symphony</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap"
@@ -15,19 +18,19 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
       tailwind.config = {
-        darkMode: "class",
+        darkMode: 'class',
         theme: {
           extend: {
             colors: {
-              primary: "#E54878",
-              "background-light": "#F3F4F6", // light gray
-              "background-dark": "#1A202C", // very dark blue-gray
+              primary: '#E54878',
+              'background-light': '#F3F4F6', // light gray
+              'background-dark': '#1A202C', // very dark blue-gray
             },
             fontFamily: {
-              display: ["Roboto", "sans-serif"],
+              display: ['Roboto', 'sans-serif'],
             },
             borderRadius: {
-              DEFAULT: "0.375rem", // 6px
+              DEFAULT: '0.375rem', // 6px
             },
           },
         },
@@ -54,9 +57,7 @@
       }
     </style>
   </head>
-  <body
-    class="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-300 antialiased"
-  >
+  <body class="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-300 antialiased">
     <div class="flex flex-col h-screen">
       <header
         class="flex items-center justify-between bg-white/5 dark:bg-gray-800/50 p-2 border-b border-gray-200/10 dark:border-gray-700/50 text-xs text-gray-500 dark:text-gray-400"
@@ -66,22 +67,14 @@
         </div>
         <div class="flex items-center space-x-4">
           <div class="flex space-x-1">
-            <button class="bg-primary text-white py-1 px-4 rounded-l">
-              Library
-            </button>
-            <button
-              class="bg-gray-200/20 dark:bg-gray-700 hover:bg-gray-300/30 dark:hover:bg-gray-600 py-1 px-4"
-            >
+            <button class="bg-primary text-white py-1 px-4 rounded-l"> Library </button>
+            <button class="bg-gray-200/20 dark:bg-gray-700 hover:bg-gray-300/30 dark:hover:bg-gray-600 py-1 px-4">
               Settings
             </button>
-            <button
-              class="bg-gray-200/20 dark:bg-gray-700 hover:bg-gray-300/30 dark:hover:bg-gray-600 py-1 px-4"
-            >
+            <button class="bg-gray-200/20 dark:bg-gray-700 hover:bg-gray-300/30 dark:hover:bg-gray-600 py-1 px-4">
               Import
             </button>
-            <button
-              class="bg-gray-200/20 dark:bg-gray-700 hover:bg-gray-300/30 dark:hover:bg-gray-600 py-1 px-4"
-            >
+            <button class="bg-gray-200/20 dark:bg-gray-700 hover:bg-gray-300/30 dark:hover:bg-gray-600 py-1 px-4">
               Export
             </button>
             <button
@@ -92,9 +85,7 @@
           </div>
         </div>
         <div class="flex items-center space-x-2">
-          <div
-            class="w-24 h-2 bg-gray-200/20 dark:bg-gray-700 rounded-full overflow-hidden"
-          >
+          <div class="w-24 h-2 bg-gray-200/20 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
               class="bg-gray-400 dark:bg-gray-500 h-full"
               style="width: 75%"
@@ -106,12 +97,9 @@
         </div>
       </header>
       <div class="flex flex-1 overflow-hidden">
-        <aside
-          class="w-64 bg-gray-100/30 dark:bg-gray-900/40 p-4 space-y-4 flex-shrink-0"
-        >
+        <aside class="w-64 bg-gray-100/30 dark:bg-gray-900/40 p-4 space-y-4 flex-shrink-0">
           <div class="relative">
-            <i
-              class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-lg"
+            <i class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-lg"
               >search</i
             >
             <input
@@ -144,25 +132,16 @@
               class="flex justify-between items-center px-3 py-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
               href="#"
             >
-              <span
-                >Watch Folder
-                <span class="text-gray-500">[Inactive]</span></span
-              >
+              <span>Watch Folder <span class="text-gray-500">[Inactive]</span></span>
             </a>
           </nav>
-          <div
-            class="border-t border-gray-200/50 dark:border-gray-700/50 my-2"
-          ></div>
+          <div class="border-t border-gray-200/50 dark:border-gray-700/50 my-2"></div>
           <div>
             <div class="flex justify-between items-center mb-2">
-              <h3
-                class="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider"
-              >
+              <h3 class="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider">
                 Playlists
               </h3>
-              <button
-                class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-              >
+              <button class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
                 <i class="material-icons text-lg">add</i>
               </button>
             </div>
@@ -177,61 +156,35 @@
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3EDaPAC_WAIrh711uc48R_CNbZOnRjd5IY1Raxqxa_ZkqDlcZPdWgHnMZvS5c_qCsokaff40XI9MtScR23gPgAsbknUxGopp9PrPhg9K8pjWBjoZhtEXFB7s6J4J-KE5OaRzfbvTKS-k05ZrscNzDc7v20hQk7-SrDlQTKuiF9RfeHcKXbYAeBNQ6zymTiSk977u_oEuew5g-M4mYMcUu0ZAxlvrT3H2EQwmefUSavDrOtwzKch_6-6uHJnqIjJlFxkSi7PXSHKw"
               />
               <div class="flex-1">
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                  2NIGHT (Original Mix)
-                </h1>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white"> 2NIGHT (Original Mix) </h1>
                 <p class="text-gray-500 dark:text-gray-400">Will Taylor (UK)</p>
               </div>
-              <div
-                class="flex items-center space-x-2 text-gray-500 dark:text-gray-400"
-              >
-                <button
-                  class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-                >
+              <div class="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
+                <button class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50">
                   <i class="material-icons">pause</i>
                 </button>
-                <button
-                  class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-                >
+                <button class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50">
                   <i class="material-icons">fast_rewind</i>
                 </button>
-                <button
-                  class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-                >
+                <button class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50">
                   <i class="material-icons">fast_forward</i>
                 </button>
-                <button
-                  class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-                >
+                <button class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50">
                   <i class="material-icons">info_outline</i>
                 </button>
-                <button
-                  class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-                >
+                <button class="p-2 rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50">
                   <i class="material-icons">cancel</i>
                 </button>
               </div>
             </div>
             <div class="mt-3 flex space-x-2 text-xs">
-              <div class="bg-gray-200 dark:bg-gray-800 rounded px-2 py-1">
-                132BPM
-              </div>
-              <div
-                class="bg-primary/20 text-primary border border-primary/50 rounded px-2 py-1"
-              >
-                12D
-              </div>
-              <div class="bg-gray-200 dark:bg-gray-800 rounded px-2 py-1">
-                2024
-              </div>
-              <div class="bg-gray-200 dark:bg-gray-800 rounded px-2 py-1">
-                House
-              </div>
+              <div class="bg-gray-200 dark:bg-gray-800 rounded px-2 py-1"> 132BPM </div>
+              <div class="bg-primary/20 text-primary border border-primary/50 rounded px-2 py-1"> 12D </div>
+              <div class="bg-gray-200 dark:bg-gray-800 rounded px-2 py-1"> 2024 </div>
+              <div class="bg-gray-200 dark:bg-gray-800 rounded px-2 py-1"> House </div>
             </div>
             <div class="mt-3 flex items-center space-x-2">
-              <i class="material-icons text-primary text-xl"
-                >play_circle_filled</i
-              >
+              <i class="material-icons text-primary text-xl">play_circle_filled</i>
               <div class="relative flex-1">
                 <img
                   alt="Audio waveform visualization"
@@ -243,16 +196,12 @@
                   style="width: 20%"
                 ></div>
               </div>
-              <div
-                class="flex items-center space-x-1 text-gray-500 dark:text-gray-400 text-xs"
-              >
+              <div class="flex items-center space-x-1 text-gray-500 dark:text-gray-400 text-xs">
                 <i class="material-icons text-lg">remove_circle_outline</i>
                 <i class="material-icons text-lg">add_circle_outline</i>
               </div>
             </div>
-            <div
-              class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1"
-            >
+            <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
               <span>1:13</span>
               <span>5:54</span>
             </div>
@@ -264,37 +213,25 @@
                   Cues
                   <i class="material-icons text-base ml-1">arrow_drop_down</i>
                 </button>
-                <button
-                  class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm"
-                >
+                <button class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm">
                   <i class="material-icons text-base">add</i>
                 </button>
-                <button
-                  class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm"
-                >
+                <button class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm">
                   <i class="material-icons text-base">add</i>
                 </button>
-                <button
-                  class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm"
-                >
+                <button class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm">
                   <i class="material-icons text-base">add</i>
                 </button>
-                <button
-                  class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm"
-                >
+                <button class="bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 w-32 py-1 rounded text-sm">
                   <i class="material-icons text-base">add</i>
                 </button>
               </div>
               <div class="flex items-center space-x-2 text-sm">
-                <button
-                  class="bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded flex items-center"
-                >
+                <button class="bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded flex items-center">
                   Default
                   <i class="material-icons text-base ml-1">arrow_drop_down</i>
                 </button>
-                <div
-                  class="flex items-center bg-gray-200 dark:bg-gray-800 rounded"
-                >
+                <div class="flex items-center bg-gray-200 dark:bg-gray-800 rounded">
                   <button class="px-2 py-1">
                     <i class="material-icons text-base">arrow_left</i>
                   </button>
@@ -316,56 +253,26 @@
                       type="checkbox"
                     />
                   </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Art
-                  </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Added
-                  </th>
-                  <th
-                    class="p-2 font-medium text-gray-800 dark:text-gray-200 flex items-center"
-                  >
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Art </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Added </th>
+                  <th class="p-2 font-medium text-gray-800 dark:text-gray-200 flex items-center">
                     Title
                     <i class="material-icons text-base ml-1">arrow_upward</i>
                   </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Artist
-                  </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Album
-                  </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Time
-                  </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Bpm
-                  </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Key
-                  </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Rating
-                  </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Genre
-                  </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Kind
-                  </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Track#
-                  </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Year
-                  </th>
-                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400">
-                    Comments
-                  </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Artist </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Album </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Time </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Bpm </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Key </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Rating </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Genre </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Kind </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Track# </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Year </th>
+                  <th class="p-2 font-medium text-gray-600 dark:text-gray-400"> Comments </th>
                 </tr>
               </thead>
-              <tbody
-                class="divide-y divide-gray-200/30 dark:divide-gray-700/50"
-              >
+              <tbody class="divide-y divide-gray-200/30 dark:divide-gray-700/50">
                 <tr class="hover:bg-gray-100/50 dark:hover:bg-gray-800/50">
                   <td class="p-2">
                     <input
@@ -430,10 +337,7 @@
                     />
                   </td>
                   <td class="p-2">
-                    <i
-                      class="material-icons text-gray-400 dark:text-gray-600 text-2xl"
-                      >music_note</i
-                    >
+                    <i class="material-icons text-gray-400 dark:text-gray-600 text-2xl">music_note</i>
                   </td>
                   <td class="p-2">25/01...</td>
                   <td class="p-2">Love Song</td>
@@ -457,10 +361,7 @@
                     />
                   </td>
                   <td class="p-2">
-                    <i
-                      class="material-icons text-gray-400 dark:text-gray-600 text-2xl"
-                      >music_note</i
-                    >
+                    <i class="material-icons text-gray-400 dark:text-gray-600 text-2xl">music_note</i>
                   </td>
                   <td class="p-2">25/01...</td>
                   <td class="p-2">01 I'm Talking About It.mp3</td>
@@ -476,9 +377,7 @@
                   <td class="p-2">0</td>
                   <td class="p-2"></td>
                 </tr>
-                <tr
-                  class="bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30"
-                >
+                <tr class="bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30">
                   <td class="p-2">
                     <input
                       checked=""
@@ -494,9 +393,7 @@
                     />
                   </td>
                   <td class="p-2 text-primary font-medium">25/01...</td>
-                  <td class="p-2 text-primary font-medium">
-                    2NIGHT (Original Mix)
-                  </td>
+                  <td class="p-2 text-primary font-medium"> 2NIGHT (Original Mix) </td>
                   <td class="p-2 text-primary font-medium">Will Taylor (UK)</td>
                   <td class="p-2 text-primary font-medium">2NIGHT</td>
                   <td class="p-2 text-primary font-medium">5:54</td>
@@ -517,10 +414,7 @@
                     />
                   </td>
                   <td class="p-2">
-                    <i
-                      class="material-icons text-gray-400 dark:text-gray-600 text-2xl"
-                      >music_note</i
-                    >
+                    <i class="material-icons text-gray-400 dark:text-gray-600 text-2xl">music_note</i>
                   </td>
                   <td class="p-2">25/01...</td>
                   <td class="p-2">2pole - Hyperion Original Mix.mp3</td>
@@ -544,10 +438,7 @@
                     />
                   </td>
                   <td class="p-2">
-                    <i
-                      class="material-icons text-gray-400 dark:text-gray-600 text-2xl"
-                      >music_note</i
-                    >
+                    <i class="material-icons text-gray-400 dark:text-gray-600 text-2xl">music_note</i>
                   </td>
                   <td class="p-2">25/01...</td>
                   <td class="p-2">ANEY - Spend My Life (Original Mix).mp3</td>
@@ -584,8 +475,7 @@
                   <td class="p-2">6:55</td>
                   <td class="p-2">130.00</td>
                   <td class="p-2">
-                    <span
-                      class="bg-primary/20 text-primary border border-primary/50 rounded px-1 text-[10px]"
+                    <span class="bg-primary/20 text-primary border border-primary/50 rounded px-1 text-[10px]"
                       >12D</span
                     >
                   </td>
@@ -604,10 +494,7 @@
                     />
                   </td>
                   <td class="p-2">
-                    <i
-                      class="material-icons text-gray-400 dark:text-gray-600 text-2xl"
-                      >music_note</i
-                    >
+                    <i class="material-icons text-gray-400 dark:text-gray-600 text-2xl">music_note</i>
                   </td>
                   <td class="p-2">25/01...</td>
                   <td class="p-2">Adam Port - Sally.mp3</td>
@@ -644,10 +531,7 @@
                   <td class="p-2">6:53</td>
                   <td class="p-2">122.00</td>
                   <td class="p-2">
-                    <span
-                      class="bg-primary/20 text-primary border border-primary/50 rounded px-1 text-[10px]"
-                      >2M</span
-                    >
+                    <span class="bg-primary/20 text-primary border border-primary/50 rounded px-1 text-[10px]">2M</span>
                   </td>
                   <td class="p-2 text-gray-400 dark:text-gray-600">☆☆☆☆☆</td>
                   <td class="p-2">Jackin House</td>

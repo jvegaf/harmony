@@ -57,10 +57,21 @@ export interface ResultTag {
   tokens?: Maybe<string[]>;
 }
 
+export interface PlaylistTrack {
+  id: string;
+  playlistId: string;
+  trackId: string;
+  order: number;
+  // AIDEV-NOTE: Optional relations for TypeORM eager loading
+  playlist?: Playlist;
+  track?: Track;
+}
+
 export interface Playlist {
   id: string;
   name: string;
   tracks?: Track[];
+  playlistTracks?: PlaylistTrack[];
 }
 
 export interface MatchResult {

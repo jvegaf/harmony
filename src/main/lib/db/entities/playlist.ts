@@ -15,12 +15,12 @@ export const PlaylistEntity = new EntitySchema<Playlist>({
     },
   },
   relations: {
-    tracks: {
-      type: 'many-to-many',
-      target: 'track',
-      eager: true,
-      joinTable: true,
+    playlistTracks: {
+      type: 'one-to-many',
+      target: 'playlistTrack',
+      inverseSide: 'playlist',
       cascade: true,
+      eager: true,
     },
   },
 });

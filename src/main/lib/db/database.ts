@@ -2,11 +2,11 @@ import path from 'path';
 
 import { app } from 'electron';
 import { DataSource, In } from 'typeorm';
-
-import { Playlist, Track, TrackId } from '../../../preload/types/harmony';
-
-import { TrackEntity, PlaylistEntity } from './entities';
 import log from 'electron-log';
+
+import { Playlist, PlaylistTrack, Track, TrackId } from '../../../preload/types/harmony';
+import { TrackEntity, PlaylistEntity, PlaylistTrackEntity } from './entities';
+import makeID from '../../../preload/lib/id-provider';
 
 const pathUserData = app.getPath('userData');
 const dbPath = path.join(pathUserData, 'database/harmony.db');
@@ -18,12 +18,31 @@ export class Database {
     this.init();
   }
 
+  // AIDEV-NOTE: Helper to maintain backward compatibility with existing code
+  // Converts PlaylistTrack[] (with order) to Track[] sorted by order
+  private mapPlaylistToTracks(playlist: Playlist & { playlistTracks?: PlaylistTrack[] }): Playlist {
+    if (!playlist.playlistTracks) {
+      return { ...playlist, tracks: [] };
+    }
+
+    const sortedTracks = playlist.playlistTracks
+      .sort((a, b) => a.order - b.order)
+      .map(pt => pt.track!)
+      .filter(track => track !== undefined);
+
+    return {
+      id: playlist.id,
+      name: playlist.name,
+      tracks: sortedTracks,
+    };
+  }
+
   public async init(): Promise<void> {
     const AppDataSource = new DataSource({
       synchronize: true,
       type: 'sqlite',
       database: dbPath,
-      entities: [TrackEntity, PlaylistEntity],
+      entities: [TrackEntity, PlaylistEntity, PlaylistTrackEntity],
       entitySkipConstructor: true,
     });
     AppDataSource.initialize()
@@ -91,27 +110,49 @@ export class Database {
 
   public async getAllPlaylists(): Promise<Playlist[]> {
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
-    // AIDEV-NOTE: Explicitly load tracks relation to ensure playlist tracks are included
+    // AIDEV-NOTE: Load playlistTracks relation with eager-loaded tracks
     const playlists = await repository.find({
-      relations: ['tracks'],
+      relations: ['playlistTracks'],
     });
 
-    return playlists;
+    // AIDEV-NOTE: Map to legacy format with tracks array for backward compatibility
+    return playlists.map(p => this.mapPlaylistToTracks(p));
   }
 
   public async insertPlaylist(playlist: Playlist): Promise<Playlist> {
-    const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
-    return await repository.save(playlist);
+    const playlistRepo = this.connection.getRepository<Playlist>(PlaylistEntity);
+    const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
+
+    // AIDEV-NOTE: Save playlist first (without tracks)
+    const savedPlaylist = await playlistRepo.save({
+      id: playlist.id,
+      name: playlist.name,
+    });
+
+    // AIDEV-NOTE: If tracks are provided, create PlaylistTracks
+    if (playlist.tracks && playlist.tracks.length > 0) {
+      const playlistTracks = playlist.tracks.map((track, index) => ({
+        id: makeID(),
+        playlistId: savedPlaylist.id,
+        trackId: track.id,
+        order: index,
+      }));
+
+      await playlistTrackRepo.save(playlistTracks);
+    }
+
+    // AIDEV-NOTE: Return the saved playlist with tracks for consistency
+    return this.findPlaylistOnlyByID(savedPlaylist.id);
   }
 
   public async renamePlaylist(playlistID: string, name: string): Promise<void> {
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
-    // AIDEV-NOTE: Load tracks relation to preserve them when saving
+    // AIDEV-NOTE: Load playlistTracks relation to preserve them when saving
     const playlist = await repository.findOne({
       where: {
         id: playlistID,
       },
-      relations: ['tracks'],
+      relations: ['playlistTracks'],
     });
 
     if (!playlist) {
@@ -131,50 +172,102 @@ export class Database {
 
   public async findPlaylistByID(playlistIDs: string[]): Promise<Playlist[]> {
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
-    // AIDEV-NOTE: Explicitly load tracks relation
-    return repository.find({
+    // AIDEV-NOTE: Load playlistTracks relation
+    const playlists = await repository.find({
       where: {
         id: In(playlistIDs),
       },
-      relations: ['tracks'],
+      relations: ['playlistTracks'],
     });
+
+    return playlists.map(p => this.mapPlaylistToTracks(p));
   }
 
   public async findPlaylistOnlyByID(playlistID: string): Promise<Playlist> {
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
-    // AIDEV-NOTE: Explicitly load tracks relation
+    // AIDEV-NOTE: Load playlistTracks relation
     const playlist = await repository.findOne({
       where: {
         id: playlistID,
       },
-      relations: ['tracks'],
+      relations: ['playlistTracks'],
     });
 
     if (!playlist) {
       throw new Error(`Playlist with ID ${playlistID} not found`);
     }
 
-    return playlist;
+    return this.mapPlaylistToTracks(playlist);
   }
 
-  public async setTracks(playlistID: string, tracks: Track[]) {
-    const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
-    // AIDEV-NOTE: Load tracks relation before updating
-    const playlist = await repository.findOne({
-      where: {
-        id: playlistID,
-      },
-      relations: ['tracks'],
-    });
+  public async setTracks(playlistID: string, tracks: Track[]): Promise<void> {
+    const playlistRepo = this.connection.getRepository<Playlist>(PlaylistEntity);
+    const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
 
+    // AIDEV-NOTE: Verify playlist exists
+    const playlist = await playlistRepo.findOne({ where: { id: playlistID } });
     if (!playlist) {
       throw new Error(`Playlist with ID ${playlistID} not found`);
     }
 
-    await repository.save({
-      ...playlist,
-      tracks: tracks,
+    // AIDEV-NOTE: Delete all existing PlaylistTracks for this playlist
+    await playlistTrackRepo.delete({ playlistId: playlistID });
+
+    // AIDEV-NOTE: Create new PlaylistTracks with order indices
+    const playlistTracks = tracks.map((track, index) => ({
+      id: makeID(),
+      playlistId: playlistID,
+      trackId: track.id,
+      order: index,
+    }));
+
+    await playlistTrackRepo.save(playlistTracks);
+  }
+
+  // AIDEV-NOTE: Optimized method for surgical reordering updates
+  // Only updates the 'order' column for affected tracks instead of deleting/recreating all
+  public async reorderTracks(
+    playlistID: string,
+    tracksToMove: Track[],
+    targetTrack: Track,
+    position: 'above' | 'below',
+  ): Promise<void> {
+    const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
+
+    // 1. Load current PlaylistTracks ordered
+    const allPlaylistTracks = await playlistTrackRepo.find({
+      where: { playlistId: playlistID },
+      relations: ['track'],
+      order: { order: 'ASC' },
     });
+
+    // 2. Filter out tracks being moved
+    const trackIdsToMove = tracksToMove.map(t => t.id);
+    const remainingTracks = allPlaylistTracks.filter(pt => !trackIdsToMove.includes(pt.trackId));
+
+    // 3. Find target position
+    let targetIndex = remainingTracks.findIndex(pt => pt.trackId === targetTrack.id);
+    if (targetIndex === -1) {
+      throw new Error('Target track not found in playlist');
+    }
+
+    if (position === 'below') {
+      targetIndex += 1;
+    }
+
+    // 4. Get PlaylistTracks to move
+    const playlistTracksToMove = allPlaylistTracks.filter(pt => trackIdsToMove.includes(pt.trackId));
+
+    // 5. Insert at target position
+    remainingTracks.splice(targetIndex, 0, ...playlistTracksToMove);
+
+    // 6. Update only the order indices (surgical update)
+    const updates = remainingTracks.map((pt, index) => ({
+      ...pt,
+      order: index,
+    }));
+
+    await playlistTrackRepo.save(updates);
   }
 
   public async reset(): Promise<void> {

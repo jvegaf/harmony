@@ -150,22 +150,8 @@ const reorderTracks = async (
   if (tracks.includes(targetTrack)) return;
 
   try {
-    const playlist: Playlist = await db.playlists.findOnlyByID(playlistID);
-
-    const newTracks = playlist.tracks!.filter(track => !tracks.includes(track));
-    let targetIndex = newTracks.indexOf(targetTrack);
-
-    if (targetIndex === -1) {
-      throw new Error(`Could not find targetTrackID in the playlist "${playlist.name}"`);
-    }
-
-    if (position === 'above') {
-      targetIndex -= 1;
-    }
-
-    newTracks.splice(targetIndex + 1, 0, ...tracks);
-
-    await db.playlists.setTracks(playlistID, newTracks);
+    // AIDEV-NOTE: Now uses optimized backend method instead of full reload
+    await db.playlists.reorderTracks(playlistID, tracks, targetTrack, position);
     router.revalidate();
   } catch (err: any) {
     logger.warn(err);

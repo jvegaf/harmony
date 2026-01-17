@@ -53,6 +53,8 @@ const api = {
       findOnlyByID: (playlistID: string) => ipcRenderer.invoke(channels.PLAYLIST_BY_ID, playlistID),
       setTracks: (playlistID: string, tracks: Track[]) =>
         ipcRenderer.invoke(channels.PLAYLIST_SET_TRACKS, playlistID, tracks),
+      reorderTracks: (playlistID: string, tracksToMove: Track[], targetTrack: Track, position: 'above' | 'below') =>
+        ipcRenderer.invoke(channels.PLAYLIST_REORDER_TRACKS, playlistID, tracksToMove, targetTrack, position),
     },
     reset: () => ipcRenderer.invoke(channels.DB_RESET),
   },

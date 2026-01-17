@@ -1,139 +1,277 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Track Information Edit Screen</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#f98806", "background-light": "#f8f7f5", "background-dark": "#231a0f"}, fontFamily: {display: "Spline Sans"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
+<html
+  class=""
+  lang="en"
+  ><head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0"
+      name="viewport"
+    />
+    <title>Track Information Edit Screen</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com"
+      rel="preconnect"
+    />
+    <link
+      crossorigin=""
+      href="https://fonts.gstatic.com"
+      rel="preconnect"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: { primary: '#f98806', 'background-light': '#f8f7f5', 'background-dark': '#231a0f' },
+            fontFamily: { display: 'Spline Sans' },
+            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+      }
     </style>
-</head>
-<body class="font-display bg-background-light dark:bg-background-dark">
-<div class="relative flex h-auto min-h-screen w-full flex-col items-center bg-background-light dark:bg-background-dark p-4 sm:p-6 md:p-8">
-<div class="w-full max-w-5xl rounded-lg bg-[#231a0f] text-white">
-<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#3a3127] px-6 py-4">
-<div class="flex items-center gap-4">
-<div class="size-6 text-primary">
-<span class="material-symbols-outlined text-3xl">music_note</span>
-</div>
-<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Edit Track: Nightcall.mp3</h2>
-</div>
-<div class="hidden md:flex gap-2">
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-primary text-[#181511] text-sm font-bold leading-normal tracking-[0.015em]">
-<span class="truncate">Save Changes</span>
-</button>
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#3a3127] text-white text-sm font-bold leading-normal tracking-[0.015em]">
-<span class="truncate">Cancel</span>
-</button>
-</div>
-</header>
-<main class="p-6 md:p-8">
-<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
-<div class="flex flex-col gap-6 lg:col-span-2">
-<div class="relative group aspect-square w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden bg-[#2a2a2a] rounded-lg" data-alt="album artwork cover for a synthwave music track" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDA2XYYt1N149Ds9mU9hJDHqZU9KUCaCIdGB9hcRD4O8WFMM0FC8n5ECNSV602rRmCkO97IU6u-LsfIjyQFQi-6aNQx5eO7m9VDWwyPoxqzei_nMTuIdWyh6S8QZBGfSU196SLWADS5biNAGFIJofl5m_JMMjSA_E0eQ6-KOr8p4cz4bdQGhEc9kzEiHw6kXmeMLhBIX4MFAHBuWep9VOVR_umxasRgg-xyIcEqQ1rv00VowfJHMdLvPokE5w28vB9sFPbPRAPV1sI");'>
-<div class="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-<div class="flex flex-col items-center text-white">
-<span class="material-symbols-outlined text-4xl">upload_file</span>
-<span class="text-sm font-semibold">Change Art</span>
-</div>
-</div>
-</div>
-<div class="flex flex-col gap-4">
-<label class="flex flex-col w-full">
-<p class="text-white text-base font-medium leading-normal pb-2">Title</p>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal" value="Nightcall"/>
-</label>
-<label class="flex flex-col w-full">
-<p class="text-white text-base font-medium leading-normal pb-2">Artist</p>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal" value="Kavinsky"/>
-</label>
-<label class="flex flex-col w-full">
-<p class="text-white text-base font-medium leading-normal pb-2">Album</p>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal" value="OutRun"/>
-</label>
-<div class="grid grid-cols-2 gap-4">
-<label class="flex flex-col w-full">
-<p class="text-white text-base font-medium leading-normal pb-2">Year</p>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal" type="number" value="2010"/>
-</label>
-<label class="flex flex-col w-full">
-<p class="text-white text-base font-medium leading-normal pb-2">Genre</p>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal" value="Synthwave"/>
-</label>
-</div>
-</div>
-</div>
-<div class="flex flex-col gap-6 lg:col-span-3">
-<div class="grid grid-cols-2 gap-4">
-<label class="flex flex-col w-full">
-<p class="text-white text-base font-medium leading-normal pb-2">BPM</p>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal" type="number" value="100"/>
-</label>
-<label class="flex flex-col w-full">
-<p class="text-white text-base font-medium leading-normal pb-2">Key</p>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal" value="Am"/>
-</label>
-</div>
-<label class="flex flex-col w-full">
-<p class="text-white text-base font-medium leading-normal pb-2">Comments</p>
-<textarea class="form-textarea flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] min-h-24 placeholder:text-[#bbac9b] p-4 text-base font-normal leading-normal">From the movie Drive soundtrack.</textarea>
-</label>
-<div class="flex flex-col gap-2">
-<p class="text-white text-base font-medium leading-normal pb-2">Tags</p>
-<div class="relative">
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 pr-12 text-base font-normal leading-normal" placeholder="Add a tag..."/>
-<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[#bbac9b] pointer-events-none">add</span>
-</div>
-<div class="flex flex-wrap gap-2 pt-2">
-<span class="flex items-center gap-1 rounded-full bg-[#3a3127] px-3 py-1.5 text-sm text-white">Drive <button class="text-white/70 hover:text-white"><span class="material-symbols-outlined !text-sm">close</span></button></span>
-<span class="flex items-center gap-1 rounded-full bg-[#3a3127] px-3 py-1.5 text-sm text-white">Movie <button class="text-white/70 hover:text-white"><span class="material-symbols-outlined !text-sm">close</span></button></span>
-<span class="flex items-center gap-1 rounded-full bg-[#3a3127] px-3 py-1.5 text-sm text-white">Electronic <button class="text-white/70 hover:text-white"><span class="material-symbols-outlined !text-sm">close</span></button></span>
-</div>
-</div>
-<div class="flex flex-col gap-4">
-<h3 class="text-white text-base font-medium leading-normal">Cue Points</h3>
-<div class="flex flex-col gap-2">
-<div class="grid grid-cols-[1fr_2fr_auto] items-center gap-3">
-<input class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80" placeholder="00:00.000" value="00:15.250"/>
-<input class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80" placeholder="Label" value="Intro"/>
-<button class="text-white/50 hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
-</div>
-<div class="grid grid-cols-[1fr_2fr_auto] items-center gap-3">
-<input class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80" placeholder="00:00.000" value="01:30.000"/>
-<input class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80" placeholder="Label" value="Vocal Start"/>
-<button class="text-white/50 hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
-</div>
-<div class="grid grid-cols-[1fr_2fr_auto] items-center gap-3">
-<input class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80" placeholder="00:00.000" value="04:20.500"/>
-<input class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80" placeholder="Label" value="Outro"/>
-<button class="text-white/50 hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
-</div>
-</div>
-<button class="flex w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full h-10 px-4 bg-[#3a3127] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/20">
-<span class="material-symbols-outlined">add</span>
-<span class="truncate">Add Cue Point</span>
-</button>
-</div>
-</div>
-</div>
-</main>
-<footer class="flex md:hidden gap-2 p-6 pt-0">
-<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-4 bg-primary text-[#181511] text-sm font-bold leading-normal tracking-[0.015em]">
-<span class="truncate">Save Changes</span>
-</button>
-<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-4 bg-[#3a3127] text-white text-sm font-bold leading-normal tracking-[0.015em]">
-<span class="truncate">Cancel</span>
-</button>
-</footer>
-</div>
-</div>
-</body></html>
+  </head>
+  <body class="font-display bg-background-light dark:bg-background-dark">
+    <div
+      class="relative flex h-auto min-h-screen w-full flex-col items-center bg-background-light dark:bg-background-dark p-4 sm:p-6 md:p-8"
+    >
+      <div class="w-full max-w-5xl rounded-lg bg-[#231a0f] text-white">
+        <header
+          class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#3a3127] px-6 py-4"
+        >
+          <div class="flex items-center gap-4">
+            <div class="size-6 text-primary">
+              <span class="material-symbols-outlined text-3xl">music_note</span>
+            </div>
+            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Edit Track: Nightcall.mp3</h2>
+          </div>
+          <div class="hidden md:flex gap-2">
+            <button
+              class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-primary text-[#181511] text-sm font-bold leading-normal tracking-[0.015em]"
+            >
+              <span class="truncate">Save Changes</span>
+            </button>
+            <button
+              class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#3a3127] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+            >
+              <span class="truncate">Cancel</span>
+            </button>
+          </div>
+        </header>
+        <main class="p-6 md:p-8">
+          <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
+            <div class="flex flex-col gap-6 lg:col-span-2">
+              <div
+                class="relative group aspect-square w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden bg-[#2a2a2a] rounded-lg"
+                data-alt="album artwork cover for a synthwave music track"
+                style="
+                  background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDA2XYYt1N149Ds9mU9hJDHqZU9KUCaCIdGB9hcRD4O8WFMM0FC8n5ECNSV602rRmCkO97IU6u-LsfIjyQFQi-6aNQx5eO7m9VDWwyPoxqzei_nMTuIdWyh6S8QZBGfSU196SLWADS5biNAGFIJofl5m_JMMjSA_E0eQ6-KOr8p4cz4bdQGhEc9kzEiHw6kXmeMLhBIX4MFAHBuWep9VOVR_umxasRgg-xyIcEqQ1rv00VowfJHMdLvPokE5w28vB9sFPbPRAPV1sI');
+                "
+              >
+                <div
+                  class="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  <div class="flex flex-col items-center text-white">
+                    <span class="material-symbols-outlined text-4xl">upload_file</span>
+                    <span class="text-sm font-semibold">Change Art</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col gap-4">
+                <label class="flex flex-col w-full">
+                  <p class="text-white text-base font-medium leading-normal pb-2">Title</p>
+                  <input
+                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal"
+                    value="Nightcall"
+                  />
+                </label>
+                <label class="flex flex-col w-full">
+                  <p class="text-white text-base font-medium leading-normal pb-2">Artist</p>
+                  <input
+                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal"
+                    value="Kavinsky"
+                  />
+                </label>
+                <label class="flex flex-col w-full">
+                  <p class="text-white text-base font-medium leading-normal pb-2">Album</p>
+                  <input
+                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal"
+                    value="OutRun"
+                  />
+                </label>
+                <div class="grid grid-cols-2 gap-4">
+                  <label class="flex flex-col w-full">
+                    <p class="text-white text-base font-medium leading-normal pb-2">Year</p>
+                    <input
+                      class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal"
+                      type="number"
+                      value="2010"
+                    />
+                  </label>
+                  <label class="flex flex-col w-full">
+                    <p class="text-white text-base font-medium leading-normal pb-2">Genre</p>
+                    <input
+                      class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal"
+                      value="Synthwave"
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-col gap-6 lg:col-span-3">
+              <div class="grid grid-cols-2 gap-4">
+                <label class="flex flex-col w-full">
+                  <p class="text-white text-base font-medium leading-normal pb-2">BPM</p>
+                  <input
+                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal"
+                    type="number"
+                    value="100"
+                  />
+                </label>
+                <label class="flex flex-col w-full">
+                  <p class="text-white text-base font-medium leading-normal pb-2">Key</p>
+                  <input
+                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 text-base font-normal leading-normal"
+                    value="Am"
+                  />
+                </label>
+              </div>
+              <label class="flex flex-col w-full">
+                <p class="text-white text-base font-medium leading-normal pb-2">Comments</p>
+                <textarea
+                  class="form-textarea flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] min-h-24 placeholder:text-[#bbac9b] p-4 text-base font-normal leading-normal"
+                >
+From the movie Drive soundtrack.</textarea
+                >
+              </label>
+              <div class="flex flex-col gap-2">
+                <p class="text-white text-base font-medium leading-normal pb-2">Tags</p>
+                <div class="relative">
+                  <input
+                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-white focus:outline-none focus:ring-2 focus:ring-primary/80 border border-[#55483a] bg-[#2a2a2a] h-14 placeholder:text-[#bbac9b] px-5 pr-12 text-base font-normal leading-normal"
+                    placeholder="Add a tag..."
+                  />
+                  <span
+                    class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[#bbac9b] pointer-events-none"
+                    >add</span
+                  >
+                </div>
+                <div class="flex flex-wrap gap-2 pt-2">
+                  <span class="flex items-center gap-1 rounded-full bg-[#3a3127] px-3 py-1.5 text-sm text-white"
+                    >Drive
+                    <button class="text-white/70 hover:text-white"
+                      ><span class="material-symbols-outlined !text-sm">close</span></button
+                    ></span
+                  >
+                  <span class="flex items-center gap-1 rounded-full bg-[#3a3127] px-3 py-1.5 text-sm text-white"
+                    >Movie
+                    <button class="text-white/70 hover:text-white"
+                      ><span class="material-symbols-outlined !text-sm">close</span></button
+                    ></span
+                  >
+                  <span class="flex items-center gap-1 rounded-full bg-[#3a3127] px-3 py-1.5 text-sm text-white"
+                    >Electronic
+                    <button class="text-white/70 hover:text-white"
+                      ><span class="material-symbols-outlined !text-sm">close</span></button
+                    ></span
+                  >
+                </div>
+              </div>
+              <div class="flex flex-col gap-4">
+                <h3 class="text-white text-base font-medium leading-normal">Cue Points</h3>
+                <div class="flex flex-col gap-2">
+                  <div class="grid grid-cols-[1fr_2fr_auto] items-center gap-3">
+                    <input
+                      class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80"
+                      placeholder="00:00.000"
+                      value="00:15.250"
+                    />
+                    <input
+                      class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80"
+                      placeholder="Label"
+                      value="Intro"
+                    />
+                    <button class="text-white/50 hover:text-red-500"
+                      ><span class="material-symbols-outlined">delete</span></button
+                    >
+                  </div>
+                  <div class="grid grid-cols-[1fr_2fr_auto] items-center gap-3">
+                    <input
+                      class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80"
+                      placeholder="00:00.000"
+                      value="01:30.000"
+                    />
+                    <input
+                      class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80"
+                      placeholder="Label"
+                      value="Vocal Start"
+                    />
+                    <button class="text-white/50 hover:text-red-500"
+                      ><span class="material-symbols-outlined">delete</span></button
+                    >
+                  </div>
+                  <div class="grid grid-cols-[1fr_2fr_auto] items-center gap-3">
+                    <input
+                      class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80"
+                      placeholder="00:00.000"
+                      value="04:20.500"
+                    />
+                    <input
+                      class="form-input w-full rounded-full border border-[#55483a] bg-[#2a2a2a] px-4 py-2 text-sm text-white placeholder:text-[#bbac9b] focus:outline-none focus:ring-2 focus:ring-primary/80"
+                      placeholder="Label"
+                      value="Outro"
+                    />
+                    <button class="text-white/50 hover:text-red-500"
+                      ><span class="material-symbols-outlined">delete</span></button
+                    >
+                  </div>
+                </div>
+                <button
+                  class="flex w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full h-10 px-4 bg-[#3a3127] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/20"
+                >
+                  <span class="material-symbols-outlined">add</span>
+                  <span class="truncate">Add Cue Point</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+        <footer class="flex md:hidden gap-2 p-6 pt-0">
+          <button
+            class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-4 bg-primary text-[#181511] text-sm font-bold leading-normal tracking-[0.015em]"
+          >
+            <span class="truncate">Save Changes</span>
+          </button>
+          <button
+            class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-4 bg-[#3a3127] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+          >
+            <span class="truncate">Cancel</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  </body></html
+>

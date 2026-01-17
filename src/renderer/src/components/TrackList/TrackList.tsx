@@ -43,7 +43,7 @@ type Props = {
 const { menu, logger } = window.Main;
 
 const TrackList = (props: Props) => {
-  const { tracks, trackPlayingID, playlists, currentPlaylist, width, height } = props;
+  const { tracks, trackPlayingID, playlists, currentPlaylist, type, width, height } = props;
   const playerAPI = usePlayerAPI();
   const libraryAPI = useLibraryAPI();
   const { searched, updated, deleting, tracklistSort } = useLibraryStore();
@@ -51,36 +51,60 @@ const TrackList = (props: Props) => {
   const [lastUpdated, setLastUpdated] = useState<Track | null>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [rowData, setRowData] = useState<Track[]>([]);
-  const colDefs = [
-    { field: 'title', minWidth: 150 },
-    { field: 'artist', minWidth: 90 },
-    {
-      field: 'duration',
-      maxWidth: 80,
-      headerName: 'Time',
-      valueFormatter: (p: { value: number | null }) => ParseDuration(p.value),
-    },
-    // { field: 'album', minWidth: 90 },
-    {
-      field: 'path',
-      headerName: 'Crate',
-      valueFormatter: (p: { value: string }) => GetParentFolderName(p.value),
-      minWidth: 80,
-      maxWidth: 100,
-    },
-    {
-      field: 'rating',
-      minWidth: 120,
-      maxWidth: 130,
-      comparator: ratingComparator,
-      cellRenderer: RatingCellRenderer,
-    },
-    { field: 'genre', minWidth: 180, maxWidth: 200 },
-    { field: 'year', maxWidth: 70 },
-    { field: 'bpm', maxWidth: 70 },
-    { field: 'bitrate', valueFormatter: (p: { value: number }) => p.value / 1000 + 'kbps', minWidth: 80, maxWidth: 90 },
-    { field: 'initialKey', headerName: 'Key', maxWidth: 70 },
-  ];
+
+  // AIDEV-NOTE: Column definitions with conditional order column for playlists
+  const colDefs = useMemo(() => {
+    const baseColumns: ColDef[] = [
+      { field: 'title', minWidth: 150 },
+      { field: 'artist', minWidth: 90 },
+      {
+        field: 'duration',
+        maxWidth: 80,
+        headerName: 'Time',
+        valueFormatter: (p: { value: number | null }) => ParseDuration(p.value),
+      },
+      {
+        field: 'path',
+        headerName: 'Crate',
+        valueFormatter: (p: { value: string }) => GetParentFolderName(p.value),
+        minWidth: 80,
+        maxWidth: 100,
+      },
+      {
+        field: 'rating',
+        minWidth: 120,
+        maxWidth: 130,
+        comparator: ratingComparator,
+        cellRenderer: RatingCellRenderer,
+      },
+      { field: 'genre', minWidth: 180, maxWidth: 200 },
+      { field: 'year', maxWidth: 70 },
+      { field: 'bpm', maxWidth: 70 },
+      {
+        field: 'bitrate',
+        valueFormatter: (p: { value: number }) => p.value / 1000 + 'kbps',
+        minWidth: 80,
+        maxWidth: 90,
+      },
+      { field: 'initialKey', headerName: 'Key', maxWidth: 70 },
+    ];
+
+    // AIDEV-NOTE: Add order column at the beginning for playlists
+    if (type === 'playlist') {
+      return [
+        {
+          field: 'playlistOrder',
+          headerName: '#',
+          maxWidth: 60,
+          sortable: true,
+          comparator: (valueA: number, valueB: number) => valueA - valueB,
+        },
+        ...baseColumns,
+      ];
+    }
+
+    return baseColumns;
+  }, [type]);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -88,6 +112,17 @@ const TrackList = (props: Props) => {
       sortable: true,
     };
   }, []);
+
+  // AIDEV-NOTE: Add playlistOrder field to tracks when in playlist view for sortable order column
+  const tracksWithOrder = useMemo(() => {
+    if (type === 'playlist') {
+      return tracks.map((track, index) => ({
+        ...track,
+        playlistOrder: index + 1, // 1-based order
+      }));
+    }
+    return tracks;
+  }, [tracks, type]);
 
   const updateTrackRow = useCallback(updatedTrack => {
     // const rowNode = gridRef.current!.api.getRowNode(updatedTrack.id)!;
@@ -153,7 +188,7 @@ const TrackList = (props: Props) => {
   const onGridReady = (params: GridReadyEvent) => {
     setGridApi(params.api);
 
-    setRowData(tracks);
+    setRowData(tracksWithOrder);
 
     // See docs/aidev-notes/tracklist-sorting.md for sort persistence details
     if (tracklistSort && tracklistSort.colId && tracklistSort.mode) {
@@ -240,6 +275,7 @@ const TrackList = (props: Props) => {
       mode: 'multiRow' as const,
       checkboxes: false,
       enableClickSelection: true,
+      headerCheckbox: false,
     };
   }, []);
 

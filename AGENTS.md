@@ -248,5 +248,4 @@ import icon from '../../resources/icon.png?asset';
 
 ---
 
-
 **Last Updated**: 2026-01-17
