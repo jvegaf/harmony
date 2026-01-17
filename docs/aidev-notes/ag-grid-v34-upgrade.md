@@ -35,15 +35,36 @@ Successfully upgraded Harmony's AG Grid dependency from v32.0.2 to v34.3.1 using
 
 ### Breaking Changes Analysis
 
-**Result**: No breaking changes between v32 and v34.
+**Result**: One breaking change discovered during runtime testing - Module registration requirement.
 
-According to AG Grid v34 release notes and official documentation:
+**AG Grid v33+ Breaking Change**:
 
-- All v32 APIs remain supported in v34
-- Theme system unchanged (`ag-theme-alpine-auto-dark` compatible)
-- Column definitions compatible
-- Event handlers compatible
-- Custom cell renderers compatible
+- AG Grid v33.0 introduced **mandatory module registration** (not documented as breaking in v34 notes)
+- All applications must register modules via `ModuleRegistry.registerModules()`
+- Error #272: "No AG Grid modules are registered!"
+
+**Fix Applied**:
+
+```typescript
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+
+// Register all community features (required as of v33.0)
+ModuleRegistry.registerModules([AllCommunityModule]);
+```
+
+**Impact**:
+
+- Bundle size increased from 2,238 kB to 3,152 kB (+914 kB, +40%)
+- This is expected when using `AllCommunityModule` (includes all features)
+- Future optimization: Use selective module imports to reduce bundle size
+
+**Other Compatibility**:
+
+- ✅ All v32 APIs remain supported in v34
+- ✅ Theme system unchanged (`ag-theme-alpine-auto-dark` compatible)
+- ✅ Column definitions compatible
+- ✅ Event handlers compatible
+- ✅ Custom cell renderers compatible
 
 ### Codemod Execution
 
@@ -210,7 +231,8 @@ yarn build
 
 - Main process: 665.59 kB
 - Preload: 8.66 kB
-- Renderer: 2,238.60 kB (includes AG Grid v34)
+- Renderer: 3,152.63 kB (includes AG Grid v34 + AllCommunityModule)
+- Bundle size increased by ~914 kB due to `AllCommunityModule` registration
 - No build errors or warnings (except existing dynamic import info message)
 
 ---
@@ -265,9 +287,13 @@ yarn build
 
 ### Modified Files
 
-1. **`package.json`** - Updated AG Grid versions + added test scripts
+1. **`package.json`** - Updated AG Grid versions + added test deps & scripts
 2. **`tsconfig.web.json`** - Added Vitest type definitions
 3. **`yarn.lock`** - Dependency lock updates
+4. **`src/renderer/src/components/TrackList/TrackList.tsx`** - Added module registration (v33+ requirement)
+5. **`.github/workflows/ci.yml`** - Added test step
+6. **`AGENTS.md`** - Added testing section
+7. **`docs/aidev-notes/ag-grid-v34-upgrade.md`** - This document
 
 ### New Files
 
@@ -278,13 +304,21 @@ yarn build
 5. **`src/renderer/src/components/TrackList/TrackList.test.tsx`** - Main tests (21 tests)
 6. **`src/renderer/src/components/TrackList/TrackList.performance.test.tsx`** - Performance tests (14 tests)
 
-### Unchanged Files
+### Application Code Changes
 
-**Zero changes required** to existing application code:
+**TrackList.tsx** - Added AG Grid v33+ module registration:
 
-- ✅ `src/renderer/src/components/TrackList/TrackList.tsx` - No changes
+```typescript
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+
+// Register all community features (required as of v33.0)
+ModuleRegistry.registerModules([AllCommunityModule]);
+```
+
+**Other Files**:
+
 - ✅ `src/renderer/src/components/TrackList/TrackList.css` - No changes
-- ✅ All other AG Grid usage - No changes
+- ✅ All other AG Grid usage - No changes (only one grid in app)
 
 ---
 
@@ -461,6 +495,26 @@ User requirement: **"Testing TDD, NO JEST (es más lento que el coyote)"**
 
 **Recommendation**: Evaluate these features for future Harmony enhancements
 
+### Bundle Size Optimization
+
+**Current State**: Using `AllCommunityModule` (+914 kB bundle increase)
+
+**Future Optimization Opportunity**:
+
+1. Use [AG Grid Module Selector](https://www.ag-grid.com/react-data-grid/modules/#selecting-modules) to identify minimal modules needed
+2. Replace `AllCommunityModule` with selective imports:
+   ```typescript
+   import {
+     ClientSideRowModelModule,
+     CsvExportModule,
+     // ... only what Harmony needs
+   } from 'ag-grid-community';
+   ```
+3. Expected savings: 200-400 kB (depends on feature usage)
+4. Recommended after stable release to avoid over-optimization
+
+**Risk**: Low - Module system is stable, easy to refactor later
+
 ---
 
 ## Testing Commands
@@ -534,33 +588,50 @@ If issues arise in production:
 ### What Went Well
 
 1. ✅ **TDD approach caught issues early** - Mock setup revealed IPC dependencies
-2. ✅ **AG Grid backward compatibility** - Zero code changes needed
+2. ✅ **Runtime testing caught module registration requirement** - Error #272 discovered during dev run
 3. ✅ **Vitest performance** - Much faster than Jest (user requirement met)
 4. ✅ **Happy-dom speed** - Faster than jsdom for our use case
 5. ✅ **Test utilities** - `createMockTracks(2600)` made large dataset testing easy
 
 ### Challenges
 
-1. ⚠️ **AG Grid codemod interruption** - Tool is too interactive for automation
-2. ⚠️ **Playlist type definition** - `Playlist.tracks` is `Track[]`, not `TrackId[]` (fixed in tests)
-3. ⚠️ **Import paths** - Needed `@preload` alias instead of relative paths (fixed)
+1. ⚠️ **Hidden breaking change** - AG Grid v33+ requires module registration (not obvious in v34 docs)
+2. ⚠️ **AG Grid codemod interruption** - Tool is too interactive for automation
+3. ⚠️ **Bundle size increase** - `AllCommunityModule` adds ~914 kB (can be optimized later)
+4. ⚠️ **Playlist type definition** - `Playlist.tracks` is `Track[]`, not `TrackId[]` (fixed in tests)
+5. ⚠️ **Import paths** - Needed `@preload` alias instead of relative paths (fixed)
 
 ### Recommendations
 
 1. **Keep TDD infrastructure** - Use Vitest for all future development
-2. **Expand test coverage** - Add tests for other components
-3. **Document patterns** - Update AGENTS.md with testing guidelines
-4. **CI integration** - Add test step to GitHub Actions workflow
+2. **Optimize bundle size** - Use selective module imports instead of `AllCommunityModule`
+3. **Runtime testing essential** - Unit tests alone don't catch all issues (e.g., module registration)
+4. **Expand test coverage** - Add tests for other components
+5. **Document patterns** - Testing guidelines added to AGENTS.md ✅
+6. **CI integration** - Test step added to GitHub Actions ✅
 
 ---
 
 ## Conclusion
 
-AG Grid v34 upgrade completed successfully with **zero breaking changes** and **full test coverage**. The TDD approach with Vitest provided confidence in the upgrade and established a robust testing infrastructure for future development.
+AG Grid v34 upgrade completed successfully with **one breaking change** (module registration) and **full test coverage**. The TDD approach with Vitest provided confidence in the upgrade and established a robust testing infrastructure for future development.
+
+**Key Changes**:
+
+- ✅ Upgraded AG Grid v32.0.2 → v34.3.1
+- ✅ Added module registration (v33+ requirement)
+- ✅ Established Vitest testing infrastructure (35 tests passing)
+- ⚠️ Bundle size increased by ~914 kB (can be optimized with selective modules)
 
 **Upgrade Status**: ✅ **COMPLETE**
 
 **Recommendation**: **MERGE** to main after code review
+
+**Post-Merge Tasks**:
+
+1. Monitor bundle size impact in production
+2. Consider selective module imports to reduce bundle size
+3. Expand test coverage to other components
 
 ---
 

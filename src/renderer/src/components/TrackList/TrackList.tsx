@@ -1,15 +1,21 @@
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {
+  AllCommunityModule,
   CellContextMenuEvent,
   ColDef,
   GetRowIdParams,
   GridApi,
   GridReadyEvent,
+  ModuleRegistry,
   RowDoubleClickedEvent,
   SortChangedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+
+// AIDEV-NOTE: AG Grid v33+ requires module registration
+// Register all community features (required as of v33.0)
+ModuleRegistry.registerModules([AllCommunityModule]);
 import { TrklistCtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '../../../../preload/types/harmony';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
