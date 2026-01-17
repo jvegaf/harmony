@@ -7,6 +7,7 @@ import RootView from './Root';
 import LibraryView from './Library/Library';
 import DetailsView from './Details/Details';
 import SettingsView from './Settings/Settings';
+import PlaylistView from './PLaylist/PlaylistView';
 
 const { logger } = window.Main;
 
@@ -25,20 +26,12 @@ const router = createHashRouter([
         element: <LibraryView />,
         loader: LibraryView.loader,
       },
-      // {
-      //   path: 'playlists',
-      //   id: 'playlists',
-      //   element: <ViewPlaylists />,
-      //   loader: ViewPlaylists.loader,
-      //   children: [
-      //     {
-      //       path: ':playlistID',
-      //       id: 'playlist-details',
-      //       element: <ViewPlaylistDetails />,
-      //       loader: ViewPlaylistDetails.loader,
-      //     },
-      //   ],
-      // },
+      {
+        path: 'playlists/:playlistID',
+        id: 'playlists',
+        element: <PlaylistView />,
+        loader: PlaylistView.loader,
+      },
       {
         path: 'settings',
         id: 'settings',

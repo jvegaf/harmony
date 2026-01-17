@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link, useLoaderData, useRouteLoaderData } from 'react-router-dom';
 
 import * as ViewMessage from '../../elements/ViewMessage/ViewMessage';
@@ -12,49 +12,17 @@ import appStyles from '../Root.module.css';
 import styles from './Library.module.css';
 import TrackList from '../../components/TrackList/TrackList';
 import { useViewportSize } from '../../hooks/useViewPortSize';
-import ProgressModal from '../../components/Modal/ProgressModal/ProgressModal';
-import Footer from '../../components/Footer/Footer';
-import TagCandidatesSelectionModal from '../../components/Modal/TagCandidateSelection/TagCandidatesSelection';
-import { TrackSelection } from '@preload/types/tagger';
-// import SearchBar from '../../components/SearchBar/SearchBar';
 
 const { db } = window.Main;
 
 export default function LibraryView() {
   const trackPlayingID = usePlayingTrackID();
-  const {
-    refreshing,
-    search,
-    trackTagsCandidates,
-    candidatesSearching,
-    candidatesSearchProgress,
-    tagsApplying,
-    tagsApplyProgress,
-    api,
-  } = useLibraryStore();
+  const { refreshing, search } = useLibraryStore();
   const { width, height } = useViewportSize();
-  const [message, setMessage] = useState<string>('');
 
   const { playlists } = useLoaderData() as LibraryLoaderData;
   const { tracks } = useRouteLoaderData('root') as RootLoaderData;
   const filteredTracks = useFilteredTracks(tracks);
-
-  useEffect(() => {
-    if (filteredTracks.length) setMessage(`Total ${filteredTracks.length} tracks`);
-
-    return () => {
-      setMessage('');
-    };
-  }, [filteredTracks]);
-
-  // Handlers para el modal de Beatport
-  const handleSelectionConfirm = (selections: TrackSelection[]) => {
-    api.applyTrackTagsSelections(selections);
-  };
-
-  const handleSelectionCancel = () => {
-    api.setTagCandidates(null);
-  };
 
   const getLibraryComponent = useMemo(() => {
     // Empty library
@@ -98,58 +66,22 @@ export default function LibraryView() {
     // All good !
     return (
       <div className={styles.viewLibrary}>
-        {/* <div>
-          <SearchBar tracks={tracks} />
-        </div> */}
         <TrackList
           type='library'
+          reorderable={false}
           tracks={filteredTracks}
           trackPlayingID={trackPlayingID}
           playlists={playlists}
-          width={width - 256}
-          height={height - 250}
+          width={width}
+          height={height}
         />
-        <div className={styles.footerStyles}>
-          <Footer msg={message} />
-        </div>
       </div>
     );
-  }, [search, refreshing, width, height, filteredTracks, playlists, trackPlayingID, message]);
+  }, [search, refreshing, width, height, filteredTracks, playlists, trackPlayingID]);
 
   return (
     <div className={appStyles.view}>
       <div>{getLibraryComponent}</div>
-
-      {/* Modal de búsqueda de candidatos */}
-      {candidatesSearching && (
-        <ProgressModal
-          title='Buscando Candidatos'
-          message='Buscando matches en Beatport y Traxsource...'
-          processed={candidatesSearchProgress.processed}
-          total={candidatesSearchProgress.total}
-          type='search'
-        />
-      )}
-
-      {/* Modal de aplicación de tags */}
-      {tagsApplying && (
-        <ProgressModal
-          title='Aplicando Tags'
-          message='Actualizando metadata de los tracks...'
-          processed={tagsApplyProgress.processed}
-          total={tagsApplyProgress.total}
-          type='apply'
-        />
-      )}
-
-      {/* Modal de selección de Beatport */}
-      {trackTagsCandidates && trackTagsCandidates.length > 0 && (
-        <TagCandidatesSelectionModal
-          trackCandidates={trackTagsCandidates}
-          onConfirm={handleSelectionConfirm}
-          onCancel={handleSelectionCancel}
-        />
-      )}
     </div>
   );
 }

@@ -1,8 +1,7 @@
 import { ResultTag } from '../../../../preload/types/harmony';
 import { GetStringTokens } from '../../../../preload/lib/utils-id3';
 
-// AIDEV-NOTE: Interface actualizada para manejar respuestas de Beatport API v4
-// genre puede ser opcional si la API no lo incluye
+// See docs/aidev-notes/beatport-integration.md for API v4 response structure
 interface Result {
   mix_name: string;
   name: string;
@@ -27,7 +26,7 @@ const CreateTagResult = (result: Result): ResultTag => {
   }
   const tagTokens = GetStringTokens(tagValues);
 
-  // AIDEV-NOTE: Si genre no está presente, usamos undefined para que el campo sea opcional
+  // See docs/aidev-notes/beatport-integration.md for optional genre handling
   return {
     id: result.id,
     title: tagTrackTitle,

@@ -139,16 +139,33 @@
 }
 
 .playlistItem {
-  padding: 0.375rem 0.75rem;
+  border-color: transparent;
   border-radius: 0.5rem;
+  border-style: solid;
+  border-width: 1px 0;
   color: var(--text-secondary);
-  text-decoration: none;
+  cursor: pointer;
+  display: block;
   font-size: 0.875rem;
+  overflow: hidden;
+  padding: 0.375rem 0.75rem;
+  text-decoration: none;
+  text-overflow: ellipsis;
   transition: background-color 0.15s ease;
-}
+  white-space: nowrap;
 
-.playlistItem:hover {
-  background-color: rgba(55, 65, 81, 0.5);
+  &:hover {
+    background-color: rgba(55, 65, 81, 0.5);
+  }
+
+  &:global(.isActive) {
+    z-index: 10;
+    border-style: solid;
+    border-color: var(--border-color);
+    border-width: 1px 0;
+    background-color: var(--sidebar-item-active-bg);
+    color: var(--primary-color);
+  }
 }
 
 .noPlaylists {

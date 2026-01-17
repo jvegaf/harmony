@@ -91,7 +91,10 @@ export class Database {
 
   public async getAllPlaylists(): Promise<Playlist[]> {
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
-    const playlists = await repository.find();
+    // AIDEV-NOTE: Explicitly load tracks relation to ensure playlist tracks are included
+    const playlists = await repository.find({
+      relations: ['tracks'],
+    });
 
     return playlists;
   }
@@ -103,9 +106,18 @@ export class Database {
 
   public async renamePlaylist(playlistID: string, name: string): Promise<void> {
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
-    const playlist = await repository.findOneByOrFail({
-      id: playlistID,
+    // AIDEV-NOTE: Load tracks relation to preserve them when saving
+    const playlist = await repository.findOne({
+      where: {
+        id: playlistID,
+      },
+      relations: ['tracks'],
     });
+
+    if (!playlist) {
+      throw new Error(`Playlist with ID ${playlistID} not found`);
+    }
+
     await repository.save({
       ...playlist,
       name,
@@ -119,23 +131,46 @@ export class Database {
 
   public async findPlaylistByID(playlistIDs: string[]): Promise<Playlist[]> {
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
-    return repository.findBy({
-      id: In(playlistIDs),
+    // AIDEV-NOTE: Explicitly load tracks relation
+    return repository.find({
+      where: {
+        id: In(playlistIDs),
+      },
+      relations: ['tracks'],
     });
   }
 
   public async findPlaylistOnlyByID(playlistID: string): Promise<Playlist> {
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
-    return repository.findOneByOrFail({
-      id: playlistID,
+    // AIDEV-NOTE: Explicitly load tracks relation
+    const playlist = await repository.findOne({
+      where: {
+        id: playlistID,
+      },
+      relations: ['tracks'],
     });
+
+    if (!playlist) {
+      throw new Error(`Playlist with ID ${playlistID} not found`);
+    }
+
+    return playlist;
   }
 
   public async setTracks(playlistID: string, tracks: Track[]) {
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
-    const playlist = await repository.findOneByOrFail({
-      id: playlistID,
+    // AIDEV-NOTE: Load tracks relation before updating
+    const playlist = await repository.findOne({
+      where: {
+        id: playlistID,
+      },
+      relations: ['tracks'],
     });
+
+    if (!playlist) {
+      throw new Error(`Playlist with ID ${playlistID} not found`);
+    }
+
     await repository.save({
       ...playlist,
       tracks: tracks,

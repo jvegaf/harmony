@@ -1,0 +1,1495 @@
+name: 'GitHub Copilot Setup'
+on:
+  workflow_dispatch:
+    inputs:
+      setup_type:
+        description: 'Type of setup to perform'
+        required: true
+        default: 'initial'
+        type: choice
+        options:
+          - 'initial'
+          - 'update'
+          - 'validate'
+      target_directory:
+        description: 'Target directory for copilot configuration'
+        required: false
+        default: '.github'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  setup-copilot-config:
+    name: 'Setup GitHub Copilot Configuration'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Validate project structure
+        id: validate
+        run: |
+          echo "🔍 Validating project structure for Harmony..."
+
+          # Check for essential Harmony files
+          if [[ ! -f "package.json" ]]; then
+            echo "❌ package.json not found"
+            exit 1
+          fi
+
+          if [[ ! -f "electron.vite.config.ts" ]]; then
+            echo "❌ electron.vite.config.ts not found - this doesn't appear to be an Electron project"
+            exit 1
+          fi
+
+          if [[ ! -d "src/main" || ! -d "src/renderer" || ! -d "src/preload" ]]; then
+            echo "❌ Expected Electron project structure not found"
+            exit 1
+          fi
+
+          echo "✅ Project structure validated"
+
+          # Check if this is specifically Harmony
+          if grep -q '"name": "harmony"' package.json; then
+            echo "harmony_project=true" >> $GITHUB_OUTPUT
+            echo "✅ Confirmed Harmony project"
+          else
+            echo "harmony_project=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Not specifically Harmony, but Electron structure detected"
+          fi
+
+      - name: Create copilot instructions
+        if: ${{ inputs.setup_type == 'initial' || inputs.setup_type == 'update' }}
+        run: |
+          echo "📝 Creating GitHub Copilot instructions..."
+
+          TARGET_DIR="${{ inputs.target_directory }}"
+          mkdir -p "${TARGET_DIR}"
+
+          # Generate copilot-instructions.md
+          cat > "${TARGET_DIR}/copilot-instructions.md" << 'EOF'
+          # Harmony - GitHub Copilot Instructions
+
+          ## Project Overview
+
+          **Harmony** is an Electron-based music manager for old-school DJs, built with TypeScript, React, and Vite. This desktop application manages music libraries, provides DJ tools, and integrates with various music services.
+
+          ## Technology Stack
+
+          - **Frontend**: React 18 with Mantine UI components and React Router
+          - **Backend**: Electron with TypeScript, TypeORM (SQLite), and IPC-based architecture
+          - **Build**: electron-vite, Vite, electron-builder
+          - **Package Manager**: Yarn (required - do not use npm/pnpm)
+          - **Database**: SQLite with TypeORM
+          - **Styling**: CSS Modules + Mantine UI components
+
+          ## Core Development Principles
+
+          ### Architecture Standards
+          - **Three-Process Model**: Main (Node.js/Electron), Preload (IPC bridge), Renderer (React UI)
+          - **Module System**: Base classes in `src/main/modules/` with standardized lifecycle methods
+          - **IPC Communication**: Strongly typed channels defined in `src/preload/lib/ipc-channels.ts`
+          - **Database Layer**: TypeORM entities in `src/main/lib/db/entities/`
+
+          ### Code Quality Standards
+          - **TypeScript Strict Mode**: All code must be TypeScript with strict type checking
+          - **Functional Components**: React functional components with hooks only (no class components)
+          - **Immutable Patterns**: Prefer immutable data structures and pure functions
+          - **Single Responsibility**: Components and modules should have clear, focused purposes
+
+          ### Import Organization
+          1. **Node/Electron built-ins**: `import { app, BrowserWindow } from 'electron';`
+          2. **External packages**: `import log from 'electron-log';`
+          3. **Internal modules by alias**: `@main/*`, `@renderer/*`, `@preload/*`
+          4. **Relative imports**: `import './styles.css';`
+          5. **No blank lines** within categories; **one blank line** between categories
+
+          ### Naming Conventions
+          - **Files**: PascalCase for modules (`DatabaseModule.ts`), camelCase for utilities (`utils-cover.ts`)
+          - **Components**: PascalCase (`AppHeader.tsx`)
+          - **Functions/variables**: camelCase (`initModules`, `trackPlaying`)
+          - **Constants**: UPPER_SNAKE_CASE (`DB_PATH`)
+          - **Types/Interfaces**: PascalCase (`Track`, `PlayerStatus`)
+
+          ### Error Handling & Logging
+          - **Main/Preload**: Always use `electron-log` (never `console.*`)
+          - **Renderer**: `console.*` acceptable, but prefer IPC logging for critical errors
+          - **Async Operations**: Always wrap in try-catch with structured error handling
+          - **IPC Handlers**: Return error info to renderer rather than throwing
+
+          ## Package Manager
+          - **Yarn Only**: This project uses Yarn exclusively. Do not use npm or pnpm commands
+          - **Scripts**: Use `yarn dev`, `yarn build`, `yarn lint`, `yarn typecheck`
+
+          ## Development Workflow
+
+          ### Before Code Changes
+          1. Run `yarn typecheck` to verify type safety
+          2. Run `yarn lint` to check code style
+          3. Understand the three-process architecture and IPC flow
+
+          ### Implementation Standards
+          - **Module Creation**: Extend `BaseModule` or `BaseWindowModule` for main process modules
+          - **IPC Channels**: Define typed channels in `preload/lib/ipc-channels.ts`
+          - **Database**: Use TypeORM entities and repositories, never raw SQL
+          - **UI Components**: Use Mantine UI components with CSS Modules for custom styling
+          - **State Management**: Zustand stores in `src/renderer/src/stores/`
+
+          ## Security Considerations
+          - **IPC Security**: Validate all data passing between main and renderer processes
+          - **File System Access**: Sanitize file paths to prevent directory traversal
+          - **Database Security**: Use parameterized queries through TypeORM
+          - **External APIs**: Validate and sanitize all external music service integrations
+
+          ## Performance Guidelines
+          - **Database**: Use proper indexes and avoid N+1 queries
+          - **React**: Use React.memo, useMemo, useCallback for optimization
+          - **Electron**: Minimize main process blocking operations
+          - **Build**: Leverage Vite's bundling optimizations and code splitting
+
+          ## References
+          - [Harmony AGENTS.md](./AGENTS.md) - Detailed development guidelines
+          - [Electron Documentation](https://www.electronjs.org/docs/)
+          - [React 18 Documentation](https://react.dev/)
+          - [Mantine UI Components](https://mantine.dev/)
+          - [TypeORM Documentation](https://typeorm.io/)
+          EOF
+
+      - name: Create instruction files
+        if: ${{ inputs.setup_type == 'initial' || inputs.setup_type == 'update' }}
+        run: |
+          echo "📁 Creating instruction files..."
+
+          TARGET_DIR="${{ inputs.target_directory }}"
+          mkdir -p "${TARGET_DIR}/instructions"
+
+          # Create TypeScript & React instructions
+          cat > "${TARGET_DIR}/instructions/typescript-react.instructions.md" << 'EOF'
+          ---
+          description: 'TypeScript and React development standards for Harmony'
+          applyTo: '**/*.{ts,tsx,js,jsx}'
+          ---
+
+          # TypeScript & React Development Standards
+
+          ## TypeScript Configuration
+
+          ### Strict Type Checking
+          ```typescript
+          // Always use strict mode - enabled in tsconfig.json
+          // Prefer explicit types for public APIs
+          interface TrackUpdateData {
+            title?: string;
+            artist?: string;
+            rating?: number; // 1-5 stars
+          }
+
+          // Use utility types for common patterns
+          type PartialTrack = Partial<Track>;
+          type TrackId = Pick<Track, 'id'>;
+          type RequiredTrackFields = Required<Pick<Track, 'title' | 'filePath'>>;
+          ```
+
+          ### Error Handling
+          ```typescript
+          // Use branded types for better type safety
+          type TrackId = string & { readonly brand: unique symbol };
+
+          // Proper async error handling
+          async function updateTrack(id: TrackId, data: TrackUpdateData): Promise<Result<Track, TrackError>> {
+            try {
+              const track = await trackRepository.findById(id);
+              if (!track) {
+                return { success: false, error: new TrackNotFoundError(id) };
+              }
+
+              const updated = await trackRepository.update(id, data);
+              return { success: true, data: updated };
+            } catch (error) {
+              log.error('Track update failed:', error);
+              return { success: false, error: new TrackUpdateError(error.message) };
+            }
+          }
+          ```
+
+          ## React Component Standards
+
+          ### Functional Components with TypeScript
+          ```typescript
+          interface TrackListProps {
+            tracks: Track[];
+            selectedTrackIds?: string[];
+            onSelectionChange?: (ids: string[]) => void;
+            loading?: boolean;
+          }
+
+          export const TrackList = memo<TrackListProps>(({
+            tracks,
+            selectedTrackIds = [],
+            onSelectionChange,
+            loading = false
+          }) => {
+            // Use specific hook types
+            const [searchTerm, setSearchTerm] = useState<string>('');
+            const scrollContainer = useRef<HTMLDivElement>(null);
+
+            // Memoize expensive calculations
+            const filteredTracks = useMemo(() =>
+              tracks.filter(track =>
+                track.title.toLowerCase().includes(searchTerm.toLowerCase())
+              ),
+              [tracks, searchTerm]
+            );
+
+            // Stable callback references
+            const handleTrackSelect = useCallback((track: Track) => {
+              const isSelected = selectedTrackIds.includes(track.id);
+              const newSelection = isSelected
+                ? selectedTrackIds.filter(id => id !== track.id)
+                : [...selectedTrackIds, track.id];
+              onSelectionChange?.(newSelection);
+            }, [selectedTrackIds, onSelectionChange]);
+
+            if (loading) {
+              return <Skeleton height={400} />;
+            }
+
+            return (
+              <ScrollArea ref={scrollContainer} className={styles.trackList}>
+                {filteredTracks.map(track => (
+                  <TrackRow
+                    key={track.id}
+                    track={track}
+                    selected={selectedTrackIds.includes(track.id)}
+                    onSelect={handleTrackSelect}
+                  />
+                ))}
+              </ScrollArea>
+            );
+          });
+
+          TrackList.displayName = 'TrackList';
+          ```
+
+          ### Custom Hooks
+          ```typescript
+          // Create reusable logic with custom hooks
+          interface UseTrackSelectionReturn {
+            selectedTrackIds: string[];
+            selectTrack: (id: string) => void;
+            deselectTrack: (id: string) => void;
+            toggleTrack: (id: string) => void;
+            clearSelection: () => void;
+            selectAll: (trackIds: string[]) => void;
+          }
+
+          export function useTrackSelection(initialSelection: string[] = []): UseTrackSelectionReturn {
+            const [selectedTrackIds, setSelectedTrackIds] = useState<string[]>(initialSelection);
+
+            const selectTrack = useCallback((id: string) => {
+              setSelectedTrackIds(prev => prev.includes(id) ? prev : [...prev, id]);
+            }, []);
+
+            const deselectTrack = useCallback((id: string) => {
+              setSelectedTrackIds(prev => prev.filter(trackId => trackId !== id));
+            }, []);
+
+            const toggleTrack = useCallback((id: string) => {
+              setSelectedTrackIds(prev =>
+                prev.includes(id)
+                  ? prev.filter(trackId => trackId !== id)
+                  : [...prev, id]
+              );
+            }, []);
+
+            const clearSelection = useCallback(() => {
+              setSelectedTrackIds([]);
+            }, []);
+
+            const selectAll = useCallback((trackIds: string[]) => {
+              setSelectedTrackIds(trackIds);
+            }, []);
+
+            return {
+              selectedTrackIds,
+              selectTrack,
+              deselectTrack,
+              toggleTrack,
+              clearSelection,
+              selectAll,
+            };
+          }
+          ```
+
+          ## IPC Type Safety
+
+          ### Typed IPC Channels
+          ```typescript
+          // Define channels with full type safety
+          export const IPC_CHANNELS = {
+            TRACK_GET_ALL: 'track:get-all',
+            TRACK_UPDATE: 'track:update',
+            TRACK_DELETE: 'track:delete',
+            PLAYLIST_CREATE: 'playlist:create',
+          } as const;
+
+          export interface IPCRequest<T = unknown> {
+            channel: keyof typeof IPC_CHANNELS;
+            data: T;
+          }
+
+          export interface IPCResponse<T = unknown> {
+            success: boolean;
+            data?: T;
+            error?: string;
+          }
+
+          // Main process handlers
+          ipcMain.handle(IPC_CHANNELS.TRACK_UPDATE, async (
+            event,
+            request: { trackId: string; updates: Partial<Track> }
+          ): Promise<IPCResponse<Track>> => {
+            try {
+              const track = await trackService.update(request.trackId, request.updates);
+              return { success: true, data: track };
+            } catch (error) {
+              return { success: false, error: error.message };
+            }
+          });
+
+          // Renderer process API
+          export const trackAPI = {
+            async updateTrack(trackId: string, updates: Partial<Track>): Promise<Track> {
+              const response = await window.electronAPI.invoke(
+                IPC_CHANNELS.TRACK_UPDATE,
+                { trackId, updates }
+              );
+
+              if (!response.success) {
+                throw new Error(response.error);
+              }
+
+              return response.data!;
+            },
+          };
+          ```
+
+          ## State Management with Zustand
+
+          ```typescript
+          interface TrackStore {
+            tracks: Track[];
+            loading: boolean;
+            error: string | null;
+            selectedTrackIds: string[];
+
+            // Actions
+            setTracks: (tracks: Track[]) => void;
+            addTrack: (track: Track) => void;
+            updateTrack: (id: string, updates: Partial<Track>) => void;
+            removeTrack: (id: string) => void;
+            setLoading: (loading: boolean) => void;
+            setError: (error: string | null) => void;
+            setSelection: (ids: string[]) => void;
+
+            // Async actions
+            loadTracks: () => Promise<void>;
+            saveTrack: (track: Partial<Track>) => Promise<void>;
+          }
+
+          export const useTrackStore = create<TrackStore>()(
+            devtools(
+              (set, get) => ({
+                tracks: [],
+                loading: false,
+                error: null,
+                selectedTrackIds: [],
+
+                setTracks: (tracks) => set({ tracks }),
+
+                addTrack: (track) => set(state => ({
+                  tracks: [...state.tracks, track]
+                })),
+
+                updateTrack: (id, updates) => set(state => ({
+                  tracks: state.tracks.map(track =>
+                    track.id === id ? { ...track, ...updates } : track
+                  )
+                })),
+
+                removeTrack: (id) => set(state => ({
+                  tracks: state.tracks.filter(track => track.id !== id),
+                  selectedTrackIds: state.selectedTrackIds.filter(trackId => trackId !== id)
+                })),
+
+                setLoading: (loading) => set({ loading }),
+                setError: (error) => set({ error }),
+                setSelection: (selectedTrackIds) => set({ selectedTrackIds }),
+
+                loadTracks: async () => {
+                  set({ loading: true, error: null });
+                  try {
+                    const tracks = await trackAPI.getAll();
+                    set({ tracks, loading: false });
+                  } catch (error) {
+                    set({ error: error.message, loading: false });
+                  }
+                },
+
+                saveTrack: async (trackData) => {
+                  try {
+                    const track = await trackAPI.create(trackData);
+                    get().addTrack(track);
+                  } catch (error) {
+                    set({ error: error.message });
+                    throw error;
+                  }
+                },
+              }),
+              { name: 'track-store' }
+            )
+          );
+          ```
+
+          ## Performance Optimization
+
+          ### React Performance
+          ```typescript
+          // Use React.memo for expensive components
+          export const TrackRow = memo<TrackRowProps>(({ track, selected, onSelect }) => {
+            return (
+              <div className={cn(styles.row, { [styles.selected]: selected })}>
+                <span>{track.title}</span>
+                <span>{track.artist}</span>
+                <Button onClick={() => onSelect(track)}>Select</Button>
+              </div>
+            );
+          }, (prevProps, nextProps) => {
+            // Custom equality check for better performance
+            return (
+              prevProps.track.id === nextProps.track.id &&
+              prevProps.selected === nextProps.selected &&
+              prevProps.track.updatedAt === nextProps.track.updatedAt
+            );
+          });
+
+          // Optimize context providers
+          const TrackContext = createContext<TrackStore | null>(null);
+
+          export const TrackProvider = ({ children }: { children: ReactNode }) => {
+            const store = useTrackStore();
+
+            // Only re-render when relevant data changes
+            const contextValue = useMemo(() => store, [
+              store.tracks.length,
+              store.loading,
+              store.error
+            ]);
+
+            return (
+              <TrackContext.Provider value={contextValue}>
+                {children}
+              </TrackContext.Provider>
+            );
+          };
+          ```
+
+          ## Testing Standards
+
+          ### Component Testing
+          ```typescript
+          // Use React Testing Library for component tests
+          import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+          import userEvent from '@testing-library/user-event';
+          import { TrackList } from '../TrackList';
+
+          const mockTracks: Track[] = [
+            { id: '1', title: 'Song 1', artist: 'Artist 1', filePath: '/path/1.mp3' },
+            { id: '2', title: 'Song 2', artist: 'Artist 2', filePath: '/path/2.mp3' },
+          ];
+
+          describe('TrackList', () => {
+            it('renders tracks correctly', () => {
+              render(<TrackList tracks={mockTracks} />);
+
+              expect(screen.getByText('Song 1')).toBeInTheDocument();
+              expect(screen.getByText('Artist 1')).toBeInTheDocument();
+            });
+
+            it('handles track selection', async () => {
+              const user = userEvent.setup();
+              const onSelectionChange = jest.fn();
+
+              render(
+                <TrackList
+                  tracks={mockTracks}
+                  onSelectionChange={onSelectionChange}
+                />
+              );
+
+              await user.click(screen.getByText('Song 1'));
+
+              expect(onSelectionChange).toHaveBeenCalledWith(['1']);
+            });
+          });
+          ```
+
+          Always prioritize type safety, performance, and maintainable code structure in Harmony development.
+          EOF
+
+      - name: Create additional instruction files
+        run: |
+          echo "📄 Creating remaining instruction files..."
+
+          TARGET_DIR="${{ inputs.target_directory }}"
+
+          # Security instructions
+          cat > "${TARGET_DIR}/instructions/security.instructions.md" << 'EOF'
+          ---
+          description: 'Security best practices for Harmony Electron application'
+          applyTo: '**/*.{ts,tsx,js,jsx}'
+          ---
+
+          # Security Best Practices for Harmony
+
+          ## Electron Security Standards
+
+          ### Context Isolation
+          ```typescript
+          // preload/index.ts - Secure IPC bridge
+          import { contextBridge, ipcRenderer } from 'electron';
+          import type { IpcRendererEvent } from 'electron';
+
+          // Define secure API surface
+          export interface ElectronAPI {
+            // Track operations
+            tracks: {
+              getAll: () => Promise<Track[]>;
+              update: (id: string, data: Partial<Track>) => Promise<Track>;
+              delete: (id: string) => Promise<void>;
+            };
+
+            // File operations with validation
+            files: {
+              selectAudioFiles: () => Promise<string[]>;
+              validatePath: (path: string) => Promise<boolean>;
+            };
+
+            // Logging (no sensitive data exposure)
+            logger: {
+              info: (message: string) => void;
+              error: (message: string, error?: Error) => void;
+            };
+          }
+
+          // Expose secure API
+          contextBridge.exposeInMainWorld('electronAPI', {
+            tracks: {
+              getAll: () => ipcRenderer.invoke('tracks:get-all'),
+              update: (id: string, data: Partial<Track>) =>
+                ipcRenderer.invoke('tracks:update', { id, data }),
+              delete: (id: string) => ipcRenderer.invoke('tracks:delete', { id }),
+            },
+
+            files: {
+              selectAudioFiles: () => ipcRenderer.invoke('files:select-audio'),
+              validatePath: (path: string) => ipcRenderer.invoke('files:validate-path', { path }),
+            },
+
+            logger: {
+              info: (message: string) => ipcRenderer.invoke('logger:info', { message }),
+              error: (message: string, error?: Error) =>
+                ipcRenderer.invoke('logger:error', { message, error: error?.message }),
+            },
+          } satisfies ElectronAPI);
+
+          // Type declaration for renderer
+          declare global {
+            interface Window {
+              electronAPI: ElectronAPI;
+            }
+          }
+          ```
+
+          ### Input Validation & Sanitization
+          ```typescript
+          // main/lib/validation.ts
+          import { z } from 'zod';
+          import path from 'path';
+
+          // Define validation schemas
+          export const TrackUpdateSchema = z.object({
+            id: z.string().uuid(),
+            data: z.object({
+              title: z.string().min(1).max(200).optional(),
+              artist: z.string().max(100).optional(),
+              rating: z.number().min(1).max(5).int().optional(),
+              genre: z.string().max(50).optional(),
+            }),
+          });
+
+          export const FilePathSchema = z.object({
+            path: z.string().refine((filePath) => {
+              // Prevent directory traversal
+              const normalized = path.normalize(filePath);
+              return !normalized.includes('..') && path.isAbsolute(normalized);
+            }, 'Invalid file path'),
+          });
+
+          // Validation middleware for IPC handlers
+          export function validateInput<T>(schema: z.ZodSchema<T>) {
+            return (input: unknown): T => {
+              const result = schema.safeParse(input);
+              if (!result.success) {
+                throw new ValidationError('Invalid input', result.error);
+              }
+              return result.data;
+            };
+          }
+
+          // Usage in IPC handlers
+          ipcMain.handle('tracks:update', async (event, rawInput) => {
+            const { id, data } = validateInput(TrackUpdateSchema)(rawInput);
+
+            try {
+              const track = await trackService.update(id, data);
+              return { success: true, data: track };
+            } catch (error) {
+              log.error('Track update failed:', error);
+              return { success: false, error: 'Failed to update track' };
+            }
+          });
+          ```
+
+          ### File System Security
+          ```typescript
+          // main/lib/file-security.ts
+          import path from 'path';
+          import fs from 'fs/promises';
+
+          export class FileSecurityService {
+            private static readonly ALLOWED_EXTENSIONS = new Set([
+              '.mp3', '.flac', '.wav', '.m4a', '.aac', '.ogg', '.wma'
+            ]);
+
+            private static readonly ALLOWED_DIRECTORIES = [
+              // User's music directories
+              path.join(os.homedir(), 'Music'),
+              path.join(os.homedir(), 'Documents'),
+              // Add other safe directories
+            ];
+
+            static async validateAudioFile(filePath: string): Promise<boolean> {
+              try {
+                // Normalize and resolve path
+                const normalizedPath = path.resolve(path.normalize(filePath));
+
+                // Check for directory traversal
+                if (normalizedPath.includes('..')) {
+                  return false;
+                }
+
+                // Verify file extension
+                const extension = path.extname(normalizedPath).toLowerCase();
+                if (!this.ALLOWED_EXTENSIONS.has(extension)) {
+                  return false;
+                }
+
+                // Check if file is in allowed directory
+                const isInAllowedDir = this.ALLOWED_DIRECTORIES.some(allowedDir =>
+                  normalizedPath.startsWith(path.resolve(allowedDir))
+                );
+
+                if (!isInAllowedDir) {
+                  log.warn('File access outside allowed directories:', normalizedPath);
+                  return false;
+                }
+
+                // Verify file exists and is readable
+                await fs.access(normalizedPath, fs.constants.R_OK);
+
+                return true;
+              } catch (error) {
+                log.error('File validation failed:', error);
+                return false;
+              }
+            }
+
+            static sanitizeFilename(filename: string): string {
+              // Remove dangerous characters
+              return filename
+                .replace(/[<>:"/\\|?*]/g, '')
+                .replace(/\0/g, '')
+                .trim()
+                .substring(0, 255);
+            }
+          }
+          ```
+
+          ### Database Security
+          ```typescript
+          // main/lib/db/secure-repository.ts
+          import { Repository, EntityManager } from 'typeorm';
+
+          export abstract class SecureRepository<Entity> {
+            constructor(
+              protected repository: Repository<Entity>,
+              protected entityManager: EntityManager
+            ) {}
+
+            // Prevent SQL injection with parameterized queries
+            protected async findByField<T extends keyof Entity>(
+              field: T,
+              value: Entity[T]
+            ): Promise<Entity[]> {
+              return this.repository.find({
+                where: { [field]: value } as any,
+              });
+            }
+
+            // Sanitize search terms
+            protected sanitizeSearchTerm(term: string): string {
+              return term
+                .replace(/[%_]/g, '\\$&') // Escape SQL wildcards
+                .replace(/[^\w\s-]/g, '') // Remove special characters
+                .trim()
+                .substring(0, 100); // Limit length
+            }
+
+            // Safe text search
+            protected async searchByText(
+              fields: Array<keyof Entity>,
+              searchTerm: string
+            ): Promise<Entity[]> {
+              const sanitizedTerm = this.sanitizeSearchTerm(searchTerm);
+
+              if (!sanitizedTerm) {
+                return [];
+              }
+
+              const queryBuilder = this.repository.createQueryBuilder('entity');
+
+              fields.forEach((field, index) => {
+                const condition = `entity.${String(field)} LIKE :searchTerm`;
+                if (index === 0) {
+                  queryBuilder.where(condition, { searchTerm: `%${sanitizedTerm}%` });
+                } else {
+                  queryBuilder.orWhere(condition, { searchTerm: `%${sanitizedTerm}%` });
+                }
+              });
+
+              return queryBuilder.getMany();
+            }
+          }
+
+          // Track repository with security
+          export class SecureTrackRepository extends SecureRepository<Track> {
+            async searchTracks(query: string): Promise<Track[]> {
+              return this.searchByText(['title', 'artist', 'album'], query);
+            }
+
+            async updateTrack(id: string, updates: Partial<Track>): Promise<Track> {
+              // Validate ID format
+              if (!id.match(/^[a-f0-9-]{36}$/)) {
+                throw new ValidationError('Invalid track ID format');
+              }
+
+              const track = await this.repository.findOne({ where: { id } });
+              if (!track) {
+                throw new NotFoundError('Track not found');
+              }
+
+              // Merge updates safely
+              const updatedTrack = this.repository.merge(track, updates);
+              return this.repository.save(updatedTrack);
+            }
+          }
+          ```
+
+          ### External API Security
+          ```typescript
+          // main/lib/api/secure-client.ts
+          export class SecureAPIClient {
+            private static readonly REQUEST_TIMEOUT = 10000; // 10 seconds
+            private static readonly MAX_RETRIES = 3;
+            private static readonly RATE_LIMIT_WINDOW = 60000; // 1 minute
+            private static readonly MAX_REQUESTS_PER_WINDOW = 100;
+
+            private requestHistory: Map<string, number[]> = new Map();
+
+            async makeRequest<T>(
+              url: string,
+              options: RequestInit = {}
+            ): Promise<T> {
+              // Validate URL
+              this.validateURL(url);
+
+              // Check rate limits
+              await this.checkRateLimit(url);
+
+              // Set security headers
+              const secureOptions: RequestInit = {
+                ...options,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'User-Agent': 'Harmony-Music-Manager/1.0',
+                  ...options.headers,
+                },
+                // Set timeout
+                signal: AbortSignal.timeout(SecureAPIClient.REQUEST_TIMEOUT),
+              };
+
+              try {
+                const response = await fetch(url, secureOptions);
+
+                if (!response.ok) {
+                  throw new APIError(`Request failed: ${response.status}`);
+                }
+
+                return await response.json();
+              } catch (error) {
+                log.error('API request failed:', { url, error });
+                throw error;
+              }
+            }
+
+            private validateURL(url: string): void {
+              try {
+                const parsed = new URL(url);
+
+                // Only allow HTTPS
+                if (parsed.protocol !== 'https:') {
+                  throw new SecurityError('Only HTTPS URLs are allowed');
+                }
+
+                // Validate against allowed domains
+                const allowedDomains = [
+                  'api.beatport.com',
+                  'api.bandcamp.com',
+                  'api.soundcloud.com',
+                ];
+
+                if (!allowedDomains.includes(parsed.hostname)) {
+                  throw new SecurityError('Domain not in allowlist');
+                }
+              } catch (error) {
+                throw new SecurityError('Invalid URL');
+              }
+            }
+
+            private async checkRateLimit(url: string): Promise<void> {
+              const domain = new URL(url).hostname;
+              const now = Date.now();
+
+              if (!this.requestHistory.has(domain)) {
+                this.requestHistory.set(domain, []);
+              }
+
+              const requests = this.requestHistory.get(domain)!;
+
+              // Remove old requests outside the window
+              const windowStart = now - SecureAPIClient.RATE_LIMIT_WINDOW;
+              this.requestHistory.set(
+                domain,
+                requests.filter(timestamp => timestamp > windowStart)
+              );
+
+              // Check if rate limit exceeded
+              if (requests.length >= SecureAPIClient.MAX_REQUESTS_PER_WINDOW) {
+                throw new RateLimitError('Rate limit exceeded for ' + domain);
+              }
+
+              // Record this request
+              requests.push(now);
+            }
+          }
+          ```
+
+          ## Security Testing
+          ```typescript
+          // tests/security/ipc-security.test.ts
+          describe('IPC Security', () => {
+            it('should reject malformed track IDs', async () => {
+              const maliciousId = "../../../etc/passwd";
+
+              const response = await window.electronAPI.tracks.update(maliciousId, {
+                title: 'Test'
+              });
+
+              expect(response).toMatchObject({
+                success: false,
+                error: expect.stringContaining('Invalid')
+              });
+            });
+
+            it('should sanitize search inputs', async () => {
+              const maliciousSearch = "<script>alert('xss')</script>";
+
+              // Should not throw or execute script
+              const results = await window.electronAPI.tracks.search(maliciousSearch);
+              expect(results).toEqual([]);
+            });
+
+            it('should validate file paths', async () => {
+              const dangerousPath = "../../../etc/passwd";
+
+              const isValid = await window.electronAPI.files.validatePath(dangerousPath);
+              expect(isValid).toBe(false);
+            });
+          });
+          ```
+
+          ## Security Configuration
+          ```typescript
+          // main/security-config.ts
+          export const SECURITY_CONFIG = {
+            // Content Security Policy for renderer
+            csp: {
+              defaultSrc: "'self'",
+              scriptSrc: "'self' 'unsafe-inline'",
+              styleSrc: "'self' 'unsafe-inline'",
+              imgSrc: "'self' data: https:",
+              connectSrc: "'self' https:",
+              fontSrc: "'self' data:",
+              mediaSrc: "'self' file:",
+            },
+
+            // File system access restrictions
+            fileSystem: {
+              allowedExtensions: ['.mp3', '.flac', '.wav', '.m4a', '.ogg'],
+              maxFileSize: 100 * 1024 * 1024, // 100MB
+              allowedDirectories: [
+                path.join(os.homedir(), 'Music'),
+                path.join(os.homedir(), 'Documents'),
+              ],
+            },
+
+            // Network security
+            network: {
+              allowedDomains: [
+                'api.beatport.com',
+                'api.bandcamp.com',
+                'api.soundcloud.com',
+              ],
+              requestTimeout: 10000,
+              maxRetries: 3,
+              rateLimitWindow: 60000,
+              maxRequestsPerWindow: 100,
+            },
+          };
+          ```
+
+          Always validate inputs, sanitize outputs, and follow the principle of least privilege in all Harmony security implementations.
+          EOF
+
+      - name: Create prompt files
+        run: |
+          echo "🎯 Creating prompt files..."
+
+          TARGET_DIR="${{ inputs.target_directory }}"
+          mkdir -p "${TARGET_DIR}/prompts"
+
+          # Create component generation prompt
+          cat > "${TARGET_DIR}/prompts/create-component.prompt.md" << 'EOF'
+          ---
+          mode: 'agent'
+          model: Claude Sonnet 4
+          tools: ['codebase', 'create', 'edit']
+          description: 'Generate React components for Harmony with TypeScript and Mantine UI'
+          ---
+
+          # Create React Component for Harmony
+
+          You are an expert React developer working on Harmony, an Electron-based music manager. Generate high-quality, TypeScript-based React components following Harmony's architectural patterns and conventions.
+
+          ## Component Creation Guidelines
+
+          ### 1. Component Structure
+          ```typescript
+          // ComponentName.tsx
+          import { memo, useCallback, useMemo } from 'react';
+          import { Button, Group, Stack, Text } from '@mantine/core';
+          import { IconPlay, IconPause } from '@tabler/icons-react';
+          import styles from './ComponentName.module.css';
+
+          interface ComponentNameProps {
+            /** Descriptive prop documentation */
+            prop1: string;
+            /** Optional props with defaults */
+            prop2?: boolean;
+            /** Event handlers */
+            onAction?: (data: SomeType) => void;
+          }
+
+          /**
+           * Component description and purpose
+           *
+           * @example
+           * ```tsx
+           * <ComponentName
+           *   prop1="value"
+           *   onAction={handleAction}
+           * />
+           * ```
+           */
+          export const ComponentName = memo<ComponentNameProps>(({
+            prop1,
+            prop2 = false,
+            onAction
+          }) => {
+            // Component logic here
+
+            return (
+              <Stack className={styles.container}>
+                {/* Component JSX */}
+              </Stack>
+            );
+          });
+
+          ComponentName.displayName = 'ComponentName';
+          ```
+
+          ### 2. CSS Module Structure
+          ```css
+          /* ComponentName.module.css */
+          .container {
+            /* Component-specific styles */
+            display: flex;
+            flex-direction: column;
+            gap: var(--mantine-spacing-sm);
+          }
+
+          .item {
+            /* Style naming follows BEM-like patterns */
+            padding: var(--mantine-spacing-xs);
+            border-radius: var(--mantine-radius-sm);
+          }
+
+          .item:hover {
+            background-color: var(--mantine-color-gray-0);
+          }
+
+          .item[data-selected="true"] {
+            background-color: var(--mantine-color-blue-0);
+          }
+          ```
+
+          ## Common Component Patterns
+
+          ### Music Library Components
+          - **TrackList**: Virtualized list of tracks with selection
+          - **TrackRow**: Individual track display with metadata
+          - **PlaylistView**: Playlist management interface
+          - **PlayerControls**: Audio playback controls
+          - **LibraryFilter**: Search and filter interface
+          - **ImportDialog**: File import interface
+
+          ### Component Features to Include
+          - **Performance**: Use React.memo, useMemo, useCallback appropriately
+          - **Accessibility**: ARIA labels, keyboard navigation, screen reader support
+          - **Mantine Integration**: Use Mantine components and theme
+          - **TypeScript**: Full type safety with interfaces and generics
+          - **Error Boundaries**: Handle errors gracefully
+          - **Loading States**: Show appropriate loading indicators
+
+          ## Example Components
+
+          ### Track Row Component
+          ```typescript
+          interface TrackRowProps {
+            track: Track;
+            selected: boolean;
+            playing: boolean;
+            onPlay: (track: Track) => void;
+            onSelect: (track: Track) => void;
+            onContextMenu: (track: Track, event: React.MouseEvent) => void;
+          }
+
+          export const TrackRow = memo<TrackRowProps>(({
+            track,
+            selected,
+            playing,
+            onPlay,
+            onSelect,
+            onContextMenu
+          }) => {
+            const handleClick = useCallback(() => {
+              onSelect(track);
+            }, [track, onSelect]);
+
+            const handleDoubleClick = useCallback(() => {
+              onPlay(track);
+            }, [track, onPlay]);
+
+            const handleContextMenu = useCallback((event: React.MouseEvent) => {
+              event.preventDefault();
+              onContextMenu(track, event);
+            }, [track, onContextMenu]);
+
+            const formattedDuration = useMemo(() =>
+              formatDuration(track.duration),
+              [track.duration]
+            );
+
+            return (
+              <tr
+                className={cn(styles.row, {
+                  [styles.selected]: selected,
+                  [styles.playing]: playing,
+                })}
+                onClick={handleClick}
+                onDoubleClick={handleDoubleClick}
+                onContextMenu={handleContextMenu}
+                role="row"
+                aria-selected={selected}
+                tabIndex={0}
+              >
+                <td className={styles.playButton}>
+                  <ActionIcon
+                    variant={playing ? 'filled' : 'subtle'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onPlay(track);
+                    }}
+                    aria-label={playing ? 'Pause track' : 'Play track'}
+                  >
+                    {playing ? <IconPause size={16} /> : <IconPlay size={16} />}
+                  </ActionIcon>
+                </td>
+
+                <td className={styles.title}>
+                  <Text truncate weight={500}>
+                    {track.title}
+                  </Text>
+                </td>
+
+                <td className={styles.artist}>
+                  <Text truncate color="dimmed">
+                    {track.artist || 'Unknown Artist'}
+                  </Text>
+                </td>
+
+                <td className={styles.duration}>
+                  <Text size="sm" color="dimmed">
+                    {formattedDuration}
+                  </Text>
+                </td>
+
+                {track.bpm && (
+                  <td className={styles.bpm}>
+                    <Text size="sm" color="dimmed">
+                      {track.bpm} BPM
+                    </Text>
+                  </td>
+                )}
+              </tr>
+            );
+          });
+          ```
+
+          ### Custom Hook Example
+          ```typescript
+          // useTrackPlayer.ts
+          interface UseTrackPlayerReturn {
+            currentTrack: Track | null;
+            isPlaying: boolean;
+            isPaused: boolean;
+            duration: number;
+            currentTime: number;
+            volume: number;
+
+            play: (track?: Track) => Promise<void>;
+            pause: () => void;
+            stop: () => void;
+            seekTo: (time: number) => void;
+            setVolume: (volume: number) => void;
+            next: () => void;
+            previous: () => void;
+          }
+
+          export function useTrackPlayer(): UseTrackPlayerReturn {
+            const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [currentTime, setCurrentTime] = useState(0);
+            const [duration, setDuration] = useState(0);
+            const [volume, setVolume] = useState(1);
+
+            const audioRef = useRef<HTMLAudioElement | null>(null);
+
+            const play = useCallback(async (track?: Track) => {
+              if (track && track !== currentTrack) {
+                setCurrentTrack(track);
+                if (audioRef.current) {
+                  audioRef.current.src = `file://${track.filePath}`;
+                  audioRef.current.load();
+                }
+              }
+
+              if (audioRef.current) {
+                try {
+                  await audioRef.current.play();
+                  setIsPlaying(true);
+                } catch (error) {
+                  console.error('Failed to play track:', error);
+                  // Handle audio playback error
+                }
+              }
+            }, [currentTrack]);
+
+            // ... other methods
+
+            return {
+              currentTrack,
+              isPlaying,
+              isPaused: !isPlaying && currentTrack !== null,
+              duration,
+              currentTime,
+              volume,
+              play,
+              pause,
+              stop,
+              seekTo,
+              setVolume,
+              next,
+              previous,
+            };
+          }
+          ```
+
+          ## Implementation Steps
+
+          1. **Analyze Requirements**: Understand the component's purpose and data needs
+          2. **Design Interface**: Define TypeScript interfaces for props and state
+          3. **Choose Mantine Components**: Select appropriate UI components from Mantine
+          4. **Implement Logic**: Add component logic with proper hooks and optimization
+          5. **Style Component**: Create CSS module with responsive, accessible styles
+          6. **Add Testing**: Include component tests with React Testing Library
+          7. **Document Usage**: Provide JSDoc comments and usage examples
+
+          Ask me what type of component you'd like me to create, and I'll generate a complete implementation following these guidelines and Harmony's conventions!
+          EOF
+
+      - name: Create chat modes
+        run: |
+          echo "💬 Creating chat mode files..."
+
+          TARGET_DIR="${{ inputs.target_directory }}"
+          mkdir -p "${TARGET_DIR}/chatmodes"
+
+          # Create architect chat mode
+          cat > "${TARGET_DIR}/chatmodes/architect.chatmode.md" << 'EOF'
+          ---
+          mode: 'architect'
+          role: 'Technical Architect'
+          model: Claude Sonnet 4
+          expertise: ['system-design', 'software-architecture', 'scalability', 'maintainability']
+          description: 'System architecture and design guidance for Harmony'
+          ---
+
+          # Architect Mode - Technical Architecture Expert
+
+          I'm your technical architect specialized in Electron desktop applications, focusing on the Harmony music manager project. I help design robust, scalable, and maintainable system architectures.
+
+          ## My Expertise
+
+          ### System Architecture
+          - **Multi-process Electron applications** with secure IPC communication
+          - **Modular design patterns** for scalable desktop software
+          - **Database architecture** with TypeORM and SQLite optimization
+          - **Plugin and extension systems** for music applications
+          - **Cross-platform desktop development** considerations
+
+          ### Technology Stack Optimization
+          - **TypeScript architecture** with strict type safety
+          - **React application structure** with efficient state management
+          - **Audio processing pipelines** and media handling
+          - **File system management** for large music libraries
+          - **Performance optimization** for desktop applications
+
+          ### Integration Design
+          - **Music service APIs** (Beatport, Bandcamp, SoundCloud, etc.)
+          - **Audio format support** and metadata extraction
+          - **Database schema design** for music metadata
+          - **Real-time audio analysis** and DJ tools
+          - **Import/export systems** for music libraries
+
+          ## How I Help
+
+          ### Architecture Review and Design
+          ```
+          🏗️ I analyze your architectural needs and provide:
+          • System design recommendations
+          • Component interaction diagrams
+          • Database schema optimization
+          • Performance bottleneck identification
+          • Scalability planning
+          • Security architecture review
+          ```
+
+          ### Technology Decisions
+          ```
+          🔧 I help choose the right technologies:
+          • Framework and library selection
+          • Database design decisions
+          • Audio processing library evaluation
+          • State management strategy
+          • Build and deployment optimization
+          • Testing architecture planning
+          ```
+
+          ## Let's Design Together
+
+          I'm here to help you make informed architectural decisions for Harmony. Whether you need guidance on:
+
+          - 🏗️ **System design** for new features
+          - 📊 **Database architecture** optimization
+          - ⚡ **Performance** improvements
+          - 🔧 **Technology integration** strategies
+          - 📱 **Cross-platform** considerations
+          - 🔐 **Security architecture** planning
+
+          **How can I help architect your next feature or improvement?**
+          EOF
+
+      - name: Validate configuration
+        if: ${{ inputs.setup_type == 'validate' || inputs.setup_type == 'initial' }}
+        run: |
+          echo "✅ Validating GitHub Copilot configuration..."
+
+          TARGET_DIR="${{ inputs.target_directory }}"
+
+          # Check main instruction file
+          if [[ ! -f "${TARGET_DIR}/copilot-instructions.md" ]]; then
+            echo "❌ Missing copilot-instructions.md"
+            exit 1
+          fi
+
+          # Check instructions directory
+          if [[ ! -d "${TARGET_DIR}/instructions" ]]; then
+            echo "❌ Missing instructions directory"
+            exit 1
+          fi
+
+          # Check for key instruction files
+          required_files=(
+            "instructions/typescript-react.instructions.md"
+            "instructions/security.instructions.md"
+            "prompts/create-component.prompt.md"
+            "chatmodes/architect.chatmode.md"
+          )
+
+          for file in "${required_files[@]}"; do
+            if [[ ! -f "${TARGET_DIR}/${file}" ]]; then
+              echo "❌ Missing required file: ${file}"
+              exit 1
+            fi
+          done
+
+          echo "✅ All required configuration files present"
+
+          # Validate file structure
+          echo "📊 Configuration summary:"
+          echo "├── copilot-instructions.md"
+          echo "├── instructions/"
+          find "${TARGET_DIR}/instructions" -name "*.md" -type f | sed 's|^|│   ├── |'
+          echo "├── prompts/"
+          find "${TARGET_DIR}/prompts" -name "*.md" -type f | sed 's|^|│   ├── |'
+          echo "└── chatmodes/"
+          find "${TARGET_DIR}/chatmodes" -name "*.md" -type f | sed 's|^|│   └── |'
+
+      - name: Create summary report
+        id: report
+        run: |
+          echo "📋 Generating setup summary..."
+
+          TARGET_DIR="${{ inputs.target_directory }}"
+
+          # Count created files
+          instruction_count=$(find "${TARGET_DIR}/instructions" -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+          prompt_count=$(find "${TARGET_DIR}/prompts" -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+          chatmode_count=$(find "${TARGET_DIR}/chatmodes" -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+
+          total_files=$((instruction_count + prompt_count + chatmode_count + 1)) # +1 for main instructions
+
+          cat > github_copilot_setup_summary.md << EOF
+          # GitHub Copilot Setup Summary
+
+          ## Configuration Overview
+          - **Setup Type**: ${{ inputs.setup_type }}
+          - **Target Directory**: ${TARGET_DIR}
+          - **Project**: Harmony (Electron Music Manager)
+          - **Harmony Project Detected**: ${{ steps.validate.outputs.harmony_project }}
+
+          ## Created Files
+          - **Main Instructions**: 1 file
+          - **Instruction Files**: ${instruction_count} files
+          - **Prompt Files**: ${prompt_count} files
+          - **Chat Modes**: ${chatmode_count} files
+          - **Total Configuration Files**: ${total_files} files
+
+          ## Key Features Configured
+          - ✅ TypeScript & React development standards
+          - ✅ Security best practices for Electron
+          - ✅ Component generation prompts
+          - ✅ Architecture guidance chat mode
+          - ✅ Performance optimization guidelines
+          - ✅ Testing standards and patterns
+
+          ## Next Steps
+          1. Review the generated configuration files
+          2. Customize prompts and instructions as needed
+          3. Test GitHub Copilot with the new configuration
+          4. Add additional prompt files for specific use cases
+          5. Configure team-specific chat modes if needed
+
+          ## Usage
+          - GitHub Copilot will automatically use \`${TARGET_DIR}/copilot-instructions.md\`
+          - Instruction files apply automatically based on file patterns
+          - Use \`@architect\` to activate architect chat mode
+          - Trigger prompts via \`/create-component\` and similar commands
+
+          ---
+          Generated by GitHub Copilot Setup Workflow
+          Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          EOF
+
+          echo "files_created=${total_files}" >> $GITHUB_OUTPUT
+          echo "setup_complete=true" >> $GITHUB_OUTPUT
+
+      - name: Upload setup artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-copilot-configuration
+          path: |
+            ${{ inputs.target_directory }}/
+            github_copilot_setup_summary.md
+          retention-days: 30
+
+      - name: Display completion message
+        run: |
+          echo "🎉 GitHub Copilot setup complete!"
+          echo ""
+          echo "📊 Summary:"
+          echo "  • Files created: ${{ steps.report.outputs.files_created }}"
+          echo "  • Setup type: ${{ inputs.setup_type }}"
+          echo "  • Target directory: ${{ inputs.target_directory }}"
+          echo ""
+          echo "✅ Configuration is ready for use with GitHub Copilot"
+          echo ""
+          echo "📖 Next steps:"
+          echo "  1. Review generated files in ${{ inputs.target_directory }}/"
+          echo "  2. Customize instructions and prompts as needed"
+          echo "  3. Test Copilot integration in your development workflow"
+          echo ""
+          echo "🔗 Documentation and setup summary uploaded as workflow artifact"

@@ -1,16 +1,20 @@
 import { Modal, Text, Progress, Stack } from '@mantine/core';
-import useLibraryStore from '../../stores/useLibraryStore';
 
-function ProgressModal() {
-  const { fixing, fix } = useLibraryStore();
-  const { processed, total } = fix;
+type ProgressModalProps = {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  processed: number;
+  total: number;
+};
 
+function ProgressModal({ isOpen, title, message, processed, total }: ProgressModalProps) {
   return (
     <div>
       <Modal
-        opened={fixing}
+        opened={isOpen}
         onClose={close}
-        title='Fixing tracks'
+        title={title}
         centered
       >
         <Stack
@@ -18,7 +22,7 @@ function ProgressModal() {
           justify='center'
         >
           <Text ta='center'>
-            Fixed {processed} tracks of {total}
+            {message} ({processed} / {total})
           </Text>
           <Progress value={(processed / total) * 100} />
         </Stack>

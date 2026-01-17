@@ -4,6 +4,7 @@ import makeID from '../../../preload/lib/id-provider';
 
 import usePlayerStore from './usePlayerStore';
 import { Playlist, Track } from '../../../preload/types/harmony';
+import useLibraryStore from './useLibraryStore';
 
 const { db, logger } = window.Main;
 const { ipcRenderer } = window.ElectronAPI;
@@ -35,6 +36,7 @@ const create = async (name: string, tracks: Track[] = [], redirect = false): Pro
 
     const doc = await db.playlists.insert(playlist);
     router.revalidate();
+    useLibraryStore.getState().api.setRenamingPlaylist(doc.id);
 
     if (redirect) router.navigate(`/playlists/${doc.id}`);
     // else toast({ description: `The playlist "${name}" was created` });
@@ -65,8 +67,10 @@ const rename = async (playlistID: string, name: string): Promise<void> => {
  * Delete a playlist
  */
 const remove = async (playlistID: string): Promise<void> => {
+  logger.debug('calling remove playlist api');
   try {
     await db.playlists.remove(playlistID);
+    router.revalidate();
     // FIX these when there is no more playlists
   } catch (err: any) {
     logger.warn(err);
@@ -126,6 +130,7 @@ const duplicate = async (playlistID: string): Promise<void> => {
 
     await db.playlists.insert(newPlaylist);
     router.revalidate();
+    useLibraryStore.getState().api.setRenamingPlaylist(newPlaylist.id);
   } catch (err: any) {
     logger.warn(err);
   }

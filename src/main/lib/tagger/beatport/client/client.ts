@@ -346,8 +346,7 @@ export class BeatportClient {
                   name: artist.artist_name,
                   slug: artist.slug,
                 })) || [],
-              // AIDEV-NOTE: En scraping, genre puede venir como array o como objeto
-              // Intentamos primero como array, luego como objeto simple
+              // See docs/aidev-notes/beatport-integration.md for genre field handling
               genre: track.genre?.[0]
                 ? {
                     genre_id: track.genre[0].genre_id,
@@ -523,8 +522,7 @@ export class BeatportClient {
             name: artist.name,
             slug: artist.slug,
           })) || [],
-        // AIDEV-NOTE: La API v4 devuelve 'genre' (singular) directamente, no 'genres' (plural)
-        // Intentamos primero data.genre, luego data.genres[0] como fallback
+        // See docs/aidev-notes/beatport-integration.md for API v4 genre structure
         genre: data.genre
           ? {
               genre_id: data.genre.id,
@@ -542,7 +540,7 @@ export class BeatportClient {
                 slug: data.genres[0].slug,
               }
             : undefined,
-        // AIDEV-NOTE: sub_genre también puede venir como 'sub_genre' singular
+        // See docs/aidev-notes/beatport-integration.md for sub_genre field handling
         sub_genre: data.sub_genre
           ? {
               genre_id: data.sub_genre.id,

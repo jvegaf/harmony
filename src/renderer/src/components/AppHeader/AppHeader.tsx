@@ -25,7 +25,11 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
 
   const isActiveTab = (tab: Tab) => {
     if (tab.path === '/') {
-      return location.pathname === '/' || location.pathname.startsWith('/details');
+      return (
+        location.pathname === '/' ||
+        location.pathname.startsWith('/details') ||
+        location.pathname.startsWith('/playlists')
+      );
     }
     return location.pathname === tab.path;
   };

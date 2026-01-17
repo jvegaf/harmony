@@ -12,6 +12,7 @@ import { SanitizedTitle } from '../../preload/utils';
 class ContextMenuModule extends ModuleWindow {
   async load(): Promise<void> {
     ipcMain.removeAllListeners(channels.TRKLIST_MENU_SHOW);
+    ipcMain.removeAllListeners(channels.PLAYLIST_MENU_SHOW);
     ipcMain.removeAllListeners(channels.COMMON_MENU_SHOW);
 
     ipcMain.on(channels.TRKLIST_MENU_SHOW, (event: IpcMainEvent, payload: TrklistCtxMenuPayload) => {
@@ -186,6 +187,27 @@ class ContextMenuModule extends ModuleWindow {
       );
 
       const menu = Menu.buildFromTemplate(template);
+      menu.popup(BrowserWindow.fromWebContents(event.sender) as PopupOptions);
+    });
+
+    ipcMain.on(channels.PLAYLIST_MENU_SHOW, (event: IpcMainEvent, playlistId: string) => {
+      const playListTemplate: MenuItemConstructorOptions[] = [];
+      playListTemplate.push(
+        {
+          label: 'Rename',
+          click: () => event.sender.send(channels.CMD_PLAYLIST_RENAME, playlistId),
+        },
+        { label: 'Duplicate', click: () => event.sender.send(channels.CMD_PLAYLIST_DUPLICATE, playlistId) },
+        {
+          type: 'separator',
+        },
+        {
+          label: 'Delete',
+          click: () => event.sender.send(channels.CMD_PLAYLIST_REMOVE, playlistId),
+        },
+      );
+
+      const menu = Menu.buildFromTemplate(playListTemplate);
       menu.popup(BrowserWindow.fromWebContents(event.sender) as PopupOptions);
     });
 

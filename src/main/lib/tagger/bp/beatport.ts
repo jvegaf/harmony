@@ -7,7 +7,7 @@ import BeatportToken from './BeaportToken';
 import { BuildBeatportQuery } from '../querybuilder';
 import GetTagResults from './bpTagMapper';
 
-// AIDEV-NOTE: facets=genre,fieldType asegura que la API incluya genre y sub_genre en la respuesta
+// See docs/aidev-notes/beatport-integration.md for API facets configuration
 const URI_BASE = 'https://api.beatport.com/v4/catalog/search/?facets=genre,fieldType&q=';
 
 let bpToken: BeatportToken | null = null;

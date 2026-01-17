@@ -10,7 +10,7 @@ import {
   SortChangedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { TrklistCtxMenuPayload, Playlist, Track, TrackId } from '../../../../preload/types/harmony';
+import { TrklistCtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '../../../../preload/types/harmony';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import './TrackList.css';
@@ -19,8 +19,19 @@ import { ParseDuration } from '../../../../preload/utils';
 import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
 import { GetParentFolderName, ratingComparator } from '../../lib/utils-library';
 
+const RatingCellRenderer = (props: { data: { path: string }; value: TrackRating }) => {
+  return (
+    <TrackRatingComponent
+      trackSrc={props.data.path}
+      rating={props.value}
+      size='md'
+    />
+  );
+};
+
 type Props = {
   type: string;
+  reorderable?: boolean;
   tracks: Track[];
   trackPlayingID: string | null;
   playlists: Playlist[];
@@ -62,17 +73,7 @@ const TrackList = (props: Props) => {
       minWidth: 120,
       maxWidth: 130,
       comparator: ratingComparator,
-      cellRenderer: props => {
-        return (
-          <>
-            <TrackRatingComponent
-              trackSrc={props.data.path}
-              rating={props.value}
-              size='md'
-            />
-          </>
-        );
-      },
+      cellRenderer: RatingCellRenderer,
     },
     { field: 'genre', minWidth: 180, maxWidth: 200 },
     { field: 'year', maxWidth: 70 },
@@ -88,20 +89,17 @@ const TrackList = (props: Props) => {
     };
   }, []);
 
-  const updateTrackRow = useCallback(
-    updatedTrack => {
-      // const rowNode = gridRef.current!.api.getRowNode(updatedTrack.id)!;
-      const rowNode = gridRef.current?.api.getRowNode(updatedTrack.id);
-      if (!rowNode) {
-        logger.error(`[TracksTable] track not found: ${updatedTrack.title}`);
-        return;
-      }
-      rowNode.updateData(updatedTrack);
-      logger.info(`[TracksTable] updated track: ${updatedTrack.title}`);
-      setLastUpdated(updatedTrack);
-    },
-    [gridRef],
-  );
+  const updateTrackRow = useCallback(updatedTrack => {
+    // const rowNode = gridRef.current!.api.getRowNode(updatedTrack.id)!;
+    const rowNode = gridRef.current?.api.getRowNode(updatedTrack.id);
+    if (!rowNode) {
+      logger.error(`[TracksTable] track not found: ${updatedTrack.title}`);
+      return;
+    }
+    rowNode.updateData(updatedTrack);
+    logger.info(`[TracksTable] updated track: ${updatedTrack.title}`);
+    setLastUpdated(updatedTrack);
+  }, []);
 
   const goTo = useCallback(
     (trackID: string) => {
@@ -120,14 +118,14 @@ const TrackList = (props: Props) => {
 
       libraryAPI.setSearched(null);
     },
-    [gridRef, libraryAPI],
+    [libraryAPI],
   );
 
   useEffect(() => {
     if (gridApi && updated !== null && updated !== lastUpdated) {
       updateTrackRow(updated);
     }
-  }, [gridApi, updated, lastUpdated]);
+  }, [gridApi, updated, lastUpdated, updateTrackRow]);
 
   useEffect(() => {
     if (deleting) {
@@ -140,7 +138,7 @@ const TrackList = (props: Props) => {
     if (gridApi) {
       gridApi.sizeColumnsToFit();
     }
-  }, [gridApi, width]);
+  }, [gridApi]);
 
   useEffect(() => {
     if (searched) {
@@ -150,14 +148,14 @@ const TrackList = (props: Props) => {
     return () => {
       libraryAPI.setSearched(null);
     };
-  }, [searched]);
+  }, [searched, goTo, libraryAPI]);
 
   const onGridReady = (params: GridReadyEvent) => {
     setGridApi(params.api);
 
     setRowData(tracks);
 
-    // AIDEV-NOTE: Apply persisted sort configuration on grid initialization
+    // See docs/aidev-notes/tracklist-sorting.md for sort persistence details
     if (tracklistSort && tracklistSort.colId && tracklistSort.mode) {
       params.api.applyColumnState({
         state: [{ colId: tracklistSort.colId, sort: tracklistSort.mode as 'asc' | 'desc' }],
@@ -178,22 +176,25 @@ const TrackList = (props: Props) => {
     [playerAPI],
   );
 
-  const onShowCtxtMenu = useCallback((event: CellContextMenuEvent) => {
-    event.event?.preventDefault();
-    if (!event.node.isSelected()) {
-      event.node.setSelected(true, true);
-    }
+  const onShowCtxtMenu = useCallback(
+    (event: CellContextMenuEvent) => {
+      event.event?.preventDefault();
+      if (!event.node.isSelected()) {
+        event.node.setSelected(true, true);
+      }
 
-    const selected = event.api.getSelectedRows() as Track[];
+      const selected = event.api.getSelectedRows() as Track[];
 
-    const payload: TrklistCtxMenuPayload = {
-      selected,
-      playlists,
-      currentPlaylist: currentPlaylist || null,
-    };
+      const payload: TrklistCtxMenuPayload = {
+        selected,
+        playlists,
+        currentPlaylist: currentPlaylist || null,
+      };
 
-    menu.tracklist(payload);
-  }, []);
+      menu.tracklist(payload);
+    },
+    [playlists, currentPlaylist],
+  );
 
   const onKeyPress = useCallback((event: { ctrlKey: boolean; key: string; preventDefault: () => void }) => {
     event.preventDefault();
@@ -205,7 +206,7 @@ const TrackList = (props: Props) => {
     }
   }, []);
 
-  // AIDEV-NOTE: Save sort state when user changes column sorting
+  // See docs/aidev-notes/tracklist-sorting.md for sort persistence details
   const onSortChanged = useCallback(
     (event: SortChangedEvent) => {
       const sortedColumns = event.api.getColumnState().filter(col => col.sort !== null);
@@ -234,6 +235,14 @@ const TrackList = (props: Props) => {
     };
   }, [trackPlayingID]);
 
+  const rowSelection = useMemo(() => {
+    return {
+      mode: 'multiRow' as const,
+      checkboxes: false,
+      enableClickSelection: true,
+    };
+  }, []);
+
   return (
     <div
       style={{
@@ -245,7 +254,7 @@ const TrackList = (props: Props) => {
     >
       <AgGridReact
         ref={gridRef}
-        rowSelection='multiple'
+        rowSelection={rowSelection}
         rowData={rowData}
         rowClassRules={rowClassRules}
         columnDefs={colDefs}

@@ -2,22 +2,26 @@ import { app, shell, BrowserWindow } from 'electron';
 import { installExtension, REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
-import icon from '../../resources/icon.png?asset';
+
 import log from 'electron-log';
+
 import ApplicationMenuModule from './modules/ApplicationMenuModule';
-import PowerModule from './modules/PowerMonitorModule';
-import ThumbarModule from './modules/ThumbarModule';
-import DockMenuModule from './modules/DockMenuDarwinModule';
-import SleepBlockerModule from './modules/SleepBlockerModule';
+import ConfigModule from './modules/ConfigModule';
+import ContextMenuModule from './modules/ContextMenuModule';
+import DatabaseModule from './modules/DatabaseModule';
 import DialogsModule from './modules/DialogsModule';
+import DockMenuModule from './modules/DockMenuDarwinModule';
 import IPCCoverModule from './modules/IPCCoverModule';
 import IPCLibraryModule from './modules/IPCLibraryModule';
-import * as ModulesManager from './lib/modules-manager';
-import IPCTaggerModule from './modules/IPCTaggerModule';
-import DatabaseModule from './modules/DatabaseModule';
 import IPCLoggerModule from './modules/IPCLoggerModule';
-import ContextMenuModule from './modules/ContextMenuModule';
-import ConfigModule from './modules/ConfigModule';
+import IPCPlaylistModule from './modules/IPCPlaylistModule';
+import IPCTaggerModule from './modules/IPCTaggerModule';
+import PowerModule from './modules/PowerMonitorModule';
+import SleepBlockerModule from './modules/SleepBlockerModule';
+import ThumbarModule from './modules/ThumbarModule';
+import * as ModulesManager from './lib/modules-manager';
+
+import icon from '../../resources/icon.png?asset';
 
 log.initialize();
 log.info('Starting Harmony...');
@@ -40,6 +44,7 @@ async function initModules(window: BrowserWindow): Promise<void> {
     new ContextMenuModule(window),
     new IPCCoverModule(window),
     new IPCLibraryModule(window),
+    new IPCPlaylistModule(window),
     new IPCTaggerModule(window),
     new IPCLoggerModule(window),
   ).catch(log.error);

@@ -78,6 +78,9 @@ const api = {
     updateMetadata: async (track: Track) => ipcRenderer.send(channels.TRACK_UPDATE_METADATA, track),
     deleteTracks: async (tracks: Track[]) => ipcRenderer.send(channels.TRACKS_DELETE, tracks),
   },
+  playlists: {
+    resolveM3U: (m3uPath: string) => ipcRenderer.invoke(channels.PLAYLISTS_RESOLVE_M3U, m3uPath),
+  },
   dialog: {
     open: async (opts: Electron.OpenDialogOptions) => ipcRenderer.invoke(channels.DIALOG_OPEN, opts),
     msgbox: async (opts: Electron.MessageBoxOptions) => ipcRenderer.invoke(channels.DIALOG_MESSAGE_BOX, opts),
@@ -94,6 +97,7 @@ const api = {
   menu: {
     tracklist: (payload: TrklistCtxMenuPayload) => ipcRenderer.send(channels.TRKLIST_MENU_SHOW, payload),
     common: () => ipcRenderer.send(channels.COMMON_MENU_SHOW),
+    playlist: (playlistId: string) => ipcRenderer.send(channels.PLAYLIST_MENU_SHOW, playlistId),
   },
   shell: {
     openExternal: shell.openExternal,

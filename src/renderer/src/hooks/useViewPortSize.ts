@@ -6,6 +6,8 @@ export interface IViewportSize {
 }
 
 export const useViewportSize = (debounceTime = 250) => {
+  const heightOffset = 220;
+  const widthoffset = 256;
   const [viewportSize, setViewportSize] = useState<IViewportSize>({
     width: 0,
     height: 0,
@@ -25,8 +27,8 @@ export const useViewportSize = (debounceTime = 250) => {
   useEffect(() => {
     const debouncedHandleResize = debounce(() => {
       setViewportSize({
-        width: window.innerWidth, //document.documentElement.clientWidth - doesn't work
-        height: window.innerHeight, //document.documentElement.clientHeight - doesn't work
+        width: window.innerWidth - widthoffset, //document.documentElement.clientWidth - doesn't work
+        height: window.innerHeight - heightOffset, //document.documentElement.clientHeight - doesn't work
       });
     }, debounceTime);
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Outlet, useRouteLoaderData } from 'react-router-dom';
 
 import AppEvents from '../components/Events/AppEvents';
@@ -14,16 +14,21 @@ import AppHeader from '../components/AppHeader/AppHeader';
 import Sidebar from '../components/Sidebar/Sidebar';
 import NowPlayingBar from '../components/NowPlayingBar/NowPlayingBar';
 import usePlayingTrack from '../hooks/usePlayingTrack';
-import { useLibraryAPI } from '../stores/useLibraryStore';
+import useLibraryStore, { useLibraryAPI } from '../stores/useLibraryStore';
 import styles from './Root.module.css';
 import { LoaderData } from './router';
-import { Playlist, Track } from '../../../preload/types/harmony';
+import { Track } from '../../../preload/types/harmony';
+import { TrackSelection } from '../../../preload/types/tagger';
+import ProgressModal from '../components/Modal/ProgressModal';
+import TagCandidatesSelectionModal from '../components/Modal/TagCandidateSelection/TagCandidatesSelection';
 
 const { db, config } = window.Main;
 
 export default function ViewRoot() {
   const trackPlaying = usePlayingTrack();
   const libraryAPI = useLibraryAPI();
+  const { trackTagsCandidates, candidatesSearching, candidatesSearchProgress, tagsApplying, tagsApplyProgress, api } =
+    useLibraryStore();
 
   useEffect(() => {
     AppActions.init();
@@ -33,6 +38,14 @@ export default function ViewRoot() {
     libraryAPI.search(query);
   };
 
+  // Handlers para el modal de Beatport
+  const handleSelectionConfirm = (selections: TrackSelection[]) => {
+    api.applyTrackTagsSelections(selections);
+  };
+
+  const handleSelectionCancel = () => {
+    api.setTagCandidates(null);
+  };
   return (
     <div className={styles.root}>
       {/** Bunch of global event handlers */}
@@ -44,6 +57,36 @@ export default function ViewRoot() {
       <GlobalKeyBindings />
       <IPCMenuEvents />
 
+      {/* Modal de búsqueda de candidatos */}
+      {candidatesSearching && (
+        <ProgressModal
+          isOpen={candidatesSearching}
+          title='Buscando Candidatos'
+          message='Buscando matches en Beatport y Traxsource...'
+          processed={candidatesSearchProgress.processed}
+          total={candidatesSearchProgress.total}
+        />
+      )}
+
+      {/* Modal de aplicación de tags */}
+      {tagsApplying && (
+        <ProgressModal
+          isOpen={tagsApplying}
+          title='Aplicando Tags'
+          message='Actualizando metadata de los tracks...'
+          processed={tagsApplyProgress.processed}
+          total={tagsApplyProgress.total}
+        />
+      )}
+
+      {/* Modal de selección de Beatport */}
+      {trackTagsCandidates && trackTagsCandidates.length > 0 && (
+        <TagCandidatesSelectionModal
+          trackCandidates={trackTagsCandidates}
+          onConfirm={handleSelectionConfirm}
+          onCancel={handleSelectionCancel}
+        />
+      )}
       {/** App Header */}
       <AppHeader />
 
@@ -69,18 +112,9 @@ export default function ViewRoot() {
 
 // Wrapper component to get data from route loader
 function SidebarWrapper({ onSearch }: { onSearch: (query: string) => void }) {
-  const routeData = useRouteLoaderData('root') as RootLoaderData | undefined;
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const { playlists, tracks } = useRouteLoaderData('root') as RootLoaderData;
 
-  useEffect(() => {
-    const loadPlaylists = async () => {
-      const loadedPlaylists = await db.playlists.getAll();
-      setPlaylists(loadedPlaylists);
-    };
-    loadPlaylists();
-  }, []);
-
-  const trackCount = routeData?.tracks?.length ?? 0;
+  const trackCount = tracks?.length ?? 0;
 
   return (
     <Sidebar
@@ -93,10 +127,7 @@ function SidebarWrapper({ onSearch }: { onSearch: (query: string) => void }) {
 
 // Wrapper component to get config from route loader
 function NowPlayingBarWrapper({ track }: { track: Track | null }) {
-  const routeData = useRouteLoaderData('root') as RootLoaderData | undefined;
-  const appConfig = routeData?.appConfig;
-
-  if (!appConfig) return null;
+  const { appConfig } = useRouteLoaderData('root') as RootLoaderData;
 
   return (
     <NowPlayingBar
@@ -112,6 +143,8 @@ ViewRoot.loader = async () => {
   // this can be slow, think about caching it or something, especially when
   // we revalidate routing
   const tracks = await db.tracks.getAll();
+  const playlists = await db.playlists.getAll();
   const appConfig = await config.getAll();
-  return { tracks, appConfig };
+
+  return { tracks, playlists, appConfig };
 };
