@@ -63,6 +63,28 @@ By consolidating these notes into dedicated documents, we:
 
 ---
 
+### 3. [Playlist Track Drag & Drop](./playlist-drag-drop.md)
+
+**Topics:**
+
+- Unmanaged row dragging with AG Grid v34.3.1
+- Conditional drag enablement based on sort state
+- Visual drop position indicators
+- Backend integration with `reorderTracks()` API
+- Single-track vs multi-track drag considerations
+
+**Key Files Covered:**
+
+- `src/renderer/src/components/TrackList/TrackList.tsx`
+- `src/renderer/src/stores/PlaylistsAPI.ts`
+- `src/main/lib/db/database.ts`
+
+**AIDEV Notes Extracted:** 2
+
+**Testing Guide:** [Manual Testing Checklist](./TESTING-drag-drop.md)
+
+---
+
 ## Guidelines for Maintaining AIDEV Documentation
 
 ### When to Add AIDEV Notes
@@ -144,10 +166,11 @@ Key takeaways
 
 ## Statistics
 
-- **Total AIDEV Notes Documented:** 8
-- **Documents Created:** 2
-- **Source Files Covered:** 5
-- **Last Sync:** 2026-01-17
+- **Total AIDEV Notes Documented:** 10
+- **Documents Created:** 3
+- **Testing Guides:** 1
+- **Source Files Covered:** 7
+- **Last Sync:** 2026-01-18
 
 ---
 
@@ -183,4 +206,4 @@ rg "src/path/to/file.ts" docs/aidev-notes/
 
 **Maintained By:** Development Team  
 **First Created:** 2026-01-17  
-**Last Updated:** 2026-01-17
+**Last Updated:** 2026-01-18

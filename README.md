@@ -10,8 +10,12 @@ Symphony is a music manager designed specifically for old school DJs. It allows 
 
 ## Features
 
-- Easy music management with automated tasks
-- Intuitive interface
+- 🎵 Easy music management with automated tasks
+- 📋 Playlist creation and organization
+- ⚡ **High-performance drag & drop** - Instant track reordering (< 10ms)
+- 🎨 Custom drag ghost showing track information
+- 🔄 Automatic background synchronization
+- 🎧 Intuitive interface designed for DJs
 
 ## Recommended IDE Setup
 

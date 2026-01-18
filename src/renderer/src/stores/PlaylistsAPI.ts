@@ -5,6 +5,7 @@ import makeID from '../../../preload/lib/id-provider';
 import usePlayerStore from './usePlayerStore';
 import { Playlist, Track } from '../../../preload/types/harmony';
 import useLibraryStore from './useLibraryStore';
+import { perfLogger } from '../lib/performance-logger';
 
 const { db, logger } = window.Main;
 const { ipcRenderer } = window.ElectronAPI;
@@ -150,11 +151,26 @@ const reorderTracks = async (
   if (tracks.includes(targetTrack)) return;
 
   try {
+    perfLogger.measure('PlaylistsAPI.reorderTracks entered');
+
+    perfLogger.measure('Before IPC call (db.playlists.reorderTracks)');
+
     // AIDEV-NOTE: Now uses optimized backend method instead of full reload
     await db.playlists.reorderTracks(playlistID, tracks, targetTrack, position);
-    router.revalidate();
+
+    perfLogger.measure('After IPC call completed', {
+      playlistID,
+      tracksCount: tracks.length,
+    });
+
+    // OPTIMIZATION 3: Removed router.revalidate() - not needed with optimistic UI
+    // The UI is already updated optimistically in TrackList component
+    // Backend sync happens in background, no need to reload data
+    perfLogger.measure('Skipped router.revalidate (using optimistic UI)');
   } catch (err: any) {
     logger.warn(err);
+    perfLogger.measure('Error in reorderTracks', { error: String(err) });
+    throw err; // Re-throw so optimistic UI can handle error with router.revalidate()
   }
 };
 
