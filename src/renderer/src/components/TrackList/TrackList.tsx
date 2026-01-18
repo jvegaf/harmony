@@ -82,6 +82,7 @@ const TrackList = (props: Props) => {
         maxWidth: 130,
         comparator: ratingComparator,
         cellRenderer: RatingCellRenderer,
+        valueFormatter: (p: { value: TrackRating }) => String(p.value || 0),
       },
       { field: 'genre', minWidth: 180, maxWidth: 200 },
       { field: 'year', maxWidth: 70 },
@@ -296,6 +297,7 @@ const TrackList = (props: Props) => {
     >
       <AgGridReact
         ref={gridRef}
+        theme='legacy'
         rowSelection={rowSelection}
         rowData={rowData}
         rowClassRules={rowClassRules}
