@@ -62,8 +62,6 @@ type Props = {
   trackPlayingID: string | null;
   playlists: Playlist[];
   currentPlaylist?: string;
-  width: number;
-  height: number;
 };
 
 const { menu, logger } = window.Main;
@@ -257,10 +255,8 @@ const TrackList = (props: Props) => {
   // AIDEV-NOTE: CRITICAL FIX - Update rowData when tracks change (e.g., switching playlists)
   // Without this, the grid shows stale data when navigating between playlists
   useEffect(() => {
-    if (gridApi) {
-      setRowData(tracksWithOrder);
-    }
-  }, [tracksWithOrder, gridApi]);
+    setRowData(tracksWithOrder);
+  }, [tracksWithOrder]);
 
   const onGridReady = (params: GridReadyEvent) => {
     setGridApi(params.api);

@@ -109,8 +109,8 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
 
   const handlePlaylistClick = useCallback(
     (playlistId: string) => {
-      logger.debug('Navigating to playlist:', `playlists/${playlistId}`);
-      navigate(`playlists/${playlistId}`);
+      logger.debug('Navigating to playlist:', `/playlists/${playlistId}`);
+      navigate(`/playlists/${playlistId}`);
     },
     [navigate],
   );
@@ -203,23 +203,24 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
       <div className={styles.divider} />
 
       {/* Playlists Section */}
+      <div className={styles.playlistsHeader}>
+        <h3 className={styles.playlistsTitle}>Playlists</h3>
+        <button
+          type='button'
+          onClick={createPlaylist}
+          className={styles.addPlaylistBtn}
+        >
+          <IconPlus size={18} />
+        </button>
+      </div>
       <div className={styles.playlistsSection}>
-        <div className={styles.playlistsHeader}>
-          <h3 className={styles.playlistsTitle}>Playlists</h3>
-          <button
-            type='button'
-            onClick={createPlaylist}
-            className={styles.addPlaylistBtn}
-          >
-            <IconPlus size={18} />
-          </button>
+        <div className={styles.playlistsContainerWrapper}>
+          {playlists.length > 0 ? (
+            <div className={styles.playlistsList}>{nav}</div>
+          ) : (
+            <p className={styles.noPlaylists}></p>
+          )}
         </div>
-
-        {playlists.length > 0 ? (
-          <div className={styles.playlistsList}>{nav}</div>
-        ) : (
-          <p className={styles.noPlaylists}></p>
-        )}
       </div>
     </aside>
   );

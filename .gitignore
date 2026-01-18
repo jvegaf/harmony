@@ -13,3 +13,4 @@ out
 !.yarn/versions
 .opencode/plugin
 opencode.json
+tsconfig.web.tsbuildinfo

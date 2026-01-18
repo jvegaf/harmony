@@ -7,13 +7,11 @@ import { LoaderData } from '../router';
 import { RootLoaderData } from '../Root';
 import * as ViewMessage from '../../elements/ViewMessage/ViewMessage';
 import TrackList from '@renderer/components/TrackList/TrackList';
-import { useViewportSize } from '@renderer/hooks/useViewPortSize';
 import { perfLogger } from '../../lib/performance-logger';
 
 const { db } = window.Main;
 
 export default function PlaylistView() {
-  const { width, height } = useViewportSize();
   const { playlistTracks } = useLoaderData() as PlaylistLoaderData;
   const { playlistID } = useParams();
   const trackPlayingID = usePlayingTrackID();
@@ -75,8 +73,6 @@ export default function PlaylistView() {
       trackPlayingID={trackPlayingID}
       playlists={playlists}
       currentPlaylist={playlistID}
-      width={width}
-      height={height}
     />
   );
 }
