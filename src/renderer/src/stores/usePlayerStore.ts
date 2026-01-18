@@ -9,6 +9,7 @@ type PlayerState = {
   queue: TrackId[];
   queueCursor: number;
   isPreCueing: boolean;
+  isPruneMode: boolean;
   isMuted: boolean;
   volume: number;
   api: {
@@ -25,6 +26,7 @@ type PlayerState = {
     jumpTo: (to: number) => void;
     setOutputDevice: (deviceId: string) => void;
     togglePreCue: () => void;
+    setPruneMode: (enabled: boolean) => void;
   };
 };
 
@@ -36,6 +38,7 @@ const playerStore = createStore<PlayerState>((set, get) => ({
   queue: [],
   queueCursor: 0,
   isPreCueing: false,
+  isPruneMode: false,
   isMuted: false,
   volume: 1,
 
@@ -173,6 +176,9 @@ const playerStore = createStore<PlayerState>((set, get) => ({
         return;
       }
       set({ isPreCueing: true });
+    },
+    setPruneMode: (enabled: boolean) => {
+      set({ isPruneMode: enabled });
     },
   },
 }));

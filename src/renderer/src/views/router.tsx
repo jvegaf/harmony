@@ -8,6 +8,8 @@ import LibraryView from './Library/Library';
 import DetailsView from './Details/Details';
 import SettingsView from './Settings/Settings';
 import PlaylistView from './PLaylist/PlaylistView';
+import PruneView from './Prune/PruneView';
+import PreparationView from './Preparation/PreparationView';
 
 const { logger } = window.Main;
 
@@ -37,6 +39,18 @@ const router = createHashRouter([
         id: 'settings',
         element: <SettingsView />,
         loader: SettingsView.loader,
+      },
+      {
+        path: 'prune',
+        id: 'prune',
+        element: <PruneView />,
+        loader: PruneView.loader,
+      },
+      {
+        path: 'preparation',
+        id: 'preparation',
+        element: <PreparationView />,
+        loader: PreparationView.loader,
       },
       {
         path: 'details/:trackID',

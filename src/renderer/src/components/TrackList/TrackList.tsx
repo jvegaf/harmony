@@ -1,5 +1,3 @@
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {
   AllCommunityModule,
   CellContextMenuEvent,
@@ -7,6 +5,7 @@ import {
   GetRowIdParams,
   GridApi,
   GridReadyEvent,
+  IRowDragItem,
   ModuleRegistry,
   RowDoubleClickedEvent,
   RowDragCancelEvent,
@@ -17,19 +16,34 @@ import {
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 
-// AIDEV-NOTE: AG Grid v33+ requires module registration
-// Register all community features (required as of v33.0)
 ModuleRegistry.registerModules([AllCommunityModule]);
+
 import { TrklistCtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '../../../../preload/types/harmony';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
-import './TrackList.css';
 import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
 import { ParseDuration } from '../../../../preload/utils';
 import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
 import { GetParentFolderName, ratingComparator } from '../../lib/utils-library';
 import PlaylistsAPI from '../../stores/PlaylistsAPI';
 import { perfLogger } from '../../lib/performance-logger';
+import { themeQuartz, iconSetMaterial } from 'ag-grid-community';
+import styles from './TrackList.module.css';
+
+const harmonyTheme = themeQuartz.withPart(iconSetMaterial).withParams({
+  backgroundColor: 'transparent',
+  foregroundColor: 'var(--text-secondary)',
+  headerTextColor: 'var(--text-muted)',
+  headerBackgroundColor: 'rgba(31, 41, 55, 0.8)',
+  rowHeight: 40,
+  oddRowBackgroundColor: 'transparent',
+  rowHoverColor: 'rgba(55, 65, 81, 0.5)',
+  selectedRowBackgroundColor: 'rgba(250, 137, 5, 0.15)',
+  rangeSelectionBorderColor: 'var(--primary-color)',
+  borderColor: 'var(--border-color)',
+  cellHorizontalPadding: 8,
+  fontSize: 16,
+});
 
 const RatingCellRenderer = (props: { data: { path: string }; value: TrackRating }) => {
   return (
@@ -55,7 +69,7 @@ type Props = {
 const { menu, logger } = window.Main;
 
 const TrackList = (props: Props) => {
-  const { tracks, trackPlayingID, playlists, currentPlaylist, type, width, height } = props;
+  const { tracks, trackPlayingID, playlists, currentPlaylist, type } = props;
   const playerAPI = usePlayerAPI();
   const libraryAPI = useLibraryAPI();
   const { searched, updated, deleting, tracklistSort } = useLibraryStore();
@@ -65,6 +79,7 @@ const TrackList = (props: Props) => {
   const [rowData, setRowData] = useState<Track[]>([]);
   const [isDragEnabled, setIsDragEnabled] = useState<boolean>(false);
 
+  const gridStyle = useMemo(() => ({ height: '100%', width: '100%' }), []);
   // AIDEV-NOTE: Helper to check if drag should be enabled
   // Drag is only enabled in playlist view when sorted by playlistOrder or no sorting
   const checkDragEnabled = useCallback(() => {
@@ -89,7 +104,11 @@ const TrackList = (props: Props) => {
   // AIDEV-NOTE: Column definitions with conditional order column for playlists
   const colDefs = useMemo(() => {
     const baseColumns: ColDef[] = [
-      { field: 'title', minWidth: 150 },
+      {
+        field: 'title',
+        minWidth: 150,
+        // rowDrag: isDragEnabled, // Enable drag handle in this column
+      },
       { field: 'artist', minWidth: 90 },
       {
         field: 'duration',
@@ -133,7 +152,6 @@ const TrackList = (props: Props) => {
           maxWidth: 60,
           sortable: true,
           comparator: (valueA: number, valueB: number) => valueA - valueB,
-          rowDrag: isDragEnabled, // Enable drag handle in this column
         },
         ...baseColumns,
       ];
@@ -147,16 +165,21 @@ const TrackList = (props: Props) => {
       resizable: true,
       sortable: true,
       // Custom drag ghost text for entire row drag
-      rowDragText: (params: any) => {
-        const track = params.rowNode?.data;
-        if (!track) return 'Track';
-
-        const title = track.title || 'Unknown Title';
-        const artist = track.artist || 'Unknown Artist';
-
-        return `🎵 ${title} - ${artist}`;
-      },
     };
+  }, []);
+
+  const rowDragText = useCallback(function (params: IRowDragItem) {
+    // keep double equals here because data can be a string or number
+    // if (params.rowNode!.data.year == '2012') {
+    //   return params.defaultTextValue + ' (London Olympics)';
+    // }
+    const track = params.rowNode!.data;
+    if (!track) return 'Track';
+
+    const title = track.title || 'Unknown Title';
+    const artist = track.artist || 'Unknown Artist';
+
+    return `🎵 ${title} - ${artist}`;
   }, []);
 
   // AIDEV-NOTE: Add playlistOrder field to tracks when in playlist view for sortable order column
@@ -503,38 +526,45 @@ const TrackList = (props: Props) => {
 
   return (
     <section
-      style={{
-        height: height,
-        width: width,
-      }}
-      className='ag-theme-alpine-auto-dark ag-theme-harmony'
+      className={styles.trackListContainer}
       aria-label='Track list'
       tabIndex={-1}
       onKeyDown={e => onKeyPress(e)}
     >
-      <AgGridReact
-        ref={gridRef}
-        theme='legacy'
-        rowSelection={rowSelection}
-        rowData={rowData}
-        rowClassRules={rowClassRules}
-        columnDefs={colDefs}
-        defaultColDef={defaultColDef}
-        onGridReady={onGridReady}
-        getRowId={getRowId}
-        onSortChanged={onSortChanged}
-        onRowDoubleClicked={e => onDoubleClick(e)}
-        onCellContextMenu={e => onShowCtxtMenu(e)}
-        suppressCellFocus
-        rowDragEntireRow={isDragEnabled}
-        suppressRowDrag={!isDragEnabled}
-        onRowDragMove={onRowDragMove}
-        onRowDragEnd={onRowDragEnd}
-        onRowDragLeave={onRowDragLeave}
-        onRowDragCancel={onRowDragCancel}
-      />
+      <div
+        id='grid-wrapper'
+        style={{ width: '100%', height: '100%' }}
+      >
+        <div style={gridStyle}>
+          <AgGridReact
+            ref={gridRef}
+            theme={harmonyTheme}
+            rowSelection={rowSelection}
+            rowData={rowData}
+            rowClassRules={rowClassRules}
+            columnDefs={colDefs}
+            defaultColDef={defaultColDef}
+            onGridReady={onGridReady}
+            getRowId={getRowId}
+            onSortChanged={onSortChanged}
+            onRowDoubleClicked={e => onDoubleClick(e)}
+            onCellContextMenu={e => onShowCtxtMenu(e)}
+            suppressCellFocus
+            rowDragText={rowDragText}
+            rowDragEntireRow={isDragEnabled}
+            suppressRowDrag={!isDragEnabled}
+            onRowDragMove={onRowDragMove}
+            onRowDragEnd={onRowDragEnd}
+            onRowDragLeave={onRowDragLeave}
+            onRowDragCancel={onRowDragCancel}
+          />
+        </div>
+      </div>
     </section>
   );
 };
+
+// AIDEV-NOTE: Export styles for external use (e.g., custom cell renderers)
+export { styles as TrackListStyles };
 
 export default TrackList;

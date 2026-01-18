@@ -55,6 +55,18 @@ const api = {
         ipcRenderer.invoke(channels.PLAYLIST_SET_TRACKS, playlistID, tracks),
       reorderTracks: (playlistID: string, tracksToMove: Track[], targetTrack: Track, position: 'above' | 'below') =>
         ipcRenderer.invoke(channels.PLAYLIST_REORDER_TRACKS, playlistID, tracksToMove, targetTrack, position),
+      // Prune Mode - To Delete Playlist API
+      getToDeletePlaylist: () => ipcRenderer.invoke(channels.PLAYLIST_TO_DELETE_GET),
+      addTrackToToDelete: (trackId: TrackId) => ipcRenderer.invoke(channels.PLAYLIST_TO_DELETE_ADD_TRACK, trackId),
+      removeTrackFromToDelete: (trackId: TrackId) =>
+        ipcRenderer.invoke(channels.PLAYLIST_TO_DELETE_REMOVE_TRACK, trackId),
+      clearToDelete: () => ipcRenderer.invoke(channels.PLAYLIST_TO_DELETE_CLEAR),
+      // Preparation Mode - Set Preparation Playlist API
+      getPreparationPlaylist: () => ipcRenderer.invoke(channels.PLAYLIST_PREPARATION_GET),
+      addTrackToPreparation: (trackId: TrackId) => ipcRenderer.invoke(channels.PLAYLIST_PREPARATION_ADD_TRACK, trackId),
+      removeTrackFromPreparation: (trackId: TrackId) =>
+        ipcRenderer.invoke(channels.PLAYLIST_PREPARATION_REMOVE_TRACK, trackId),
+      clearPreparation: () => ipcRenderer.invoke(channels.PLAYLIST_PREPARATION_CLEAR),
     },
     reset: () => ipcRenderer.invoke(channels.DB_RESET),
   },

@@ -70,6 +70,16 @@ const rename = async (playlistID: string, name: string): Promise<void> => {
 const remove = async (playlistID: string): Promise<void> => {
   logger.debug('calling remove playlist api');
   try {
+    // AIDEV-NOTE: Check if user is currently viewing the playlist being deleted
+    // If so, navigate away to prevent app crash due to lost reference
+    const currentPath = router.state.location.pathname;
+    const isViewingPlaylist = currentPath === `/playlists/${playlistID}`;
+
+    if (isViewingPlaylist) {
+      logger.info(`User is viewing playlist ${playlistID}, navigating to library before deletion`);
+      await router.navigate('/');
+    }
+
     await db.playlists.remove(playlistID);
     router.revalidate();
     // FIX these when there is no more playlists

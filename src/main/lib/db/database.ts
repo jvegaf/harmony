@@ -277,6 +277,184 @@ export class Database {
     await playlistRepo.clear();
     await trackRepo.clear();
   }
+
+  // AIDEV-NOTE: Prune Mode - To Delete Playlist Methods
+  // Special internal playlist with ID '__TO_DELETE__' for tracks marked for deletion
+  private readonly TO_DELETE_PLAYLIST_ID = '__TO_DELETE__';
+  private readonly TO_DELETE_PLAYLIST_NAME = 'To Delete';
+
+  public async getOrCreateToDeletePlaylist(): Promise<Playlist> {
+    const playlistRepo = this.connection.getRepository<Playlist>(PlaylistEntity);
+
+    let playlist = await playlistRepo.findOne({
+      where: { id: this.TO_DELETE_PLAYLIST_ID },
+      relations: ['playlistTracks'],
+    });
+
+    if (!playlist) {
+      // Create the playlist if it doesn't exist
+      playlist = await playlistRepo.save({
+        id: this.TO_DELETE_PLAYLIST_ID,
+        name: this.TO_DELETE_PLAYLIST_NAME,
+      });
+      // Load relations after creation
+      playlist = await playlistRepo.findOne({
+        where: { id: this.TO_DELETE_PLAYLIST_ID },
+        relations: ['playlistTracks'],
+      });
+    }
+
+    return this.mapPlaylistToTracks(playlist!);
+  }
+
+  public async addTrackToToDeletePlaylist(trackId: TrackId): Promise<void> {
+    const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
+
+    // Ensure playlist exists
+    await this.getOrCreateToDeletePlaylist();
+
+    // Check if track already exists in playlist
+    const existing = await playlistTrackRepo.findOne({
+      where: {
+        playlistId: this.TO_DELETE_PLAYLIST_ID,
+        trackId,
+      },
+    });
+
+    if (existing) {
+      log.info(`[db] Track ${trackId} already in To Delete playlist`);
+      return;
+    }
+
+    // Get current max order
+    const maxOrder = await playlistTrackRepo
+      .createQueryBuilder('pt')
+      .where('pt.playlistId = :playlistId', { playlistId: this.TO_DELETE_PLAYLIST_ID })
+      .select('MAX(pt.order)', 'max')
+      .getRawOne();
+
+    const nextOrder = (maxOrder?.max ?? -1) + 1;
+
+    // Add track at the end
+    await playlistTrackRepo.save({
+      id: makeID(),
+      playlistId: this.TO_DELETE_PLAYLIST_ID,
+      trackId,
+      order: nextOrder,
+    });
+
+    log.info(`[db] Track ${trackId} added to To Delete playlist at position ${nextOrder}`);
+  }
+
+  public async removeTrackFromToDeletePlaylist(trackId: TrackId): Promise<void> {
+    const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
+
+    await playlistTrackRepo.delete({
+      playlistId: this.TO_DELETE_PLAYLIST_ID,
+      trackId,
+    });
+
+    log.info(`[db] Track ${trackId} removed from To Delete playlist`);
+  }
+
+  public async clearToDeletePlaylist(): Promise<void> {
+    const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
+
+    await playlistTrackRepo.delete({
+      playlistId: this.TO_DELETE_PLAYLIST_ID,
+    });
+
+    log.info('[db] To Delete playlist cleared');
+  }
+
+  // AIDEV-NOTE: Preparation Mode - Set Preparation Playlist Methods
+  // Special internal playlist with ID '__PREPARATION__' for tracks selected for a set
+  private readonly PREPARATION_PLAYLIST_ID = '__PREPARATION__';
+  private readonly PREPARATION_PLAYLIST_NAME = 'Set Preparation';
+
+  public async getOrCreatePreparationPlaylist(): Promise<Playlist> {
+    const playlistRepo = this.connection.getRepository<Playlist>(PlaylistEntity);
+
+    let playlist = await playlistRepo.findOne({
+      where: { id: this.PREPARATION_PLAYLIST_ID },
+      relations: ['playlistTracks'],
+    });
+
+    if (!playlist) {
+      // Create the playlist if it doesn't exist
+      playlist = await playlistRepo.save({
+        id: this.PREPARATION_PLAYLIST_ID,
+        name: this.PREPARATION_PLAYLIST_NAME,
+      });
+      // Load relations after creation
+      playlist = await playlistRepo.findOne({
+        where: { id: this.PREPARATION_PLAYLIST_ID },
+        relations: ['playlistTracks'],
+      });
+    }
+
+    return this.mapPlaylistToTracks(playlist!);
+  }
+
+  public async addTrackToPreparationPlaylist(trackId: TrackId): Promise<void> {
+    const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
+
+    // Ensure playlist exists
+    await this.getOrCreatePreparationPlaylist();
+
+    // Check if track already exists in playlist
+    const existing = await playlistTrackRepo.findOne({
+      where: {
+        playlistId: this.PREPARATION_PLAYLIST_ID,
+        trackId,
+      },
+    });
+
+    if (existing) {
+      log.info(`[db] Track ${trackId} already in Preparation playlist`);
+      return;
+    }
+
+    // Get current max order
+    const maxOrder = await playlistTrackRepo
+      .createQueryBuilder('pt')
+      .where('pt.playlistId = :playlistId', { playlistId: this.PREPARATION_PLAYLIST_ID })
+      .select('MAX(pt.order)', 'max')
+      .getRawOne();
+
+    const nextOrder = (maxOrder?.max ?? -1) + 1;
+
+    // Add track at the end
+    await playlistTrackRepo.save({
+      id: makeID(),
+      playlistId: this.PREPARATION_PLAYLIST_ID,
+      trackId,
+      order: nextOrder,
+    });
+
+    log.info(`[db] Track ${trackId} added to Preparation playlist at position ${nextOrder}`);
+  }
+
+  public async removeTrackFromPreparationPlaylist(trackId: TrackId): Promise<void> {
+    const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
+
+    await playlistTrackRepo.delete({
+      playlistId: this.PREPARATION_PLAYLIST_ID,
+      trackId,
+    });
+
+    log.info(`[db] Track ${trackId} removed from Preparation playlist`);
+  }
+
+  public async clearPreparationPlaylist(): Promise<void> {
+    const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
+
+    await playlistTrackRepo.delete({
+      playlistId: this.PREPARATION_PLAYLIST_ID,
+    });
+
+    log.info('[db] Preparation playlist cleared');
+  }
 }
 
 export type DatabaseType = typeof Database;

@@ -18,7 +18,8 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
   const tabs: Tab[] = [
     { id: 'library', label: 'Library', path: '/' },
     { id: 'settings', label: 'Settings', path: '/settings' },
-    { id: 'import', label: 'Import', path: '/import' },
+    { id: 'prune', label: 'Prune', path: '/prune' },
+    { id: 'preparation', label: 'Preparation', path: '/preparation' },
     { id: 'export', label: 'Export', path: '/export' },
     { id: 'tools', label: 'Tools', path: '/tools' },
   ];
@@ -31,11 +32,17 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
         location.pathname.startsWith('/playlists')
       );
     }
+    if (tab.path === '/prune') {
+      return location.pathname === '/prune';
+    }
+    if (tab.path === '/preparation') {
+      return location.pathname === '/preparation';
+    }
     return location.pathname === tab.path;
   };
 
   const handleTabClick = (tab: Tab) => {
-    if (tab.path === '/import' || tab.path === '/export' || tab.path === '/tools') {
+    if (tab.path === '/export' || tab.path === '/tools') {
       // TODO: Implement these features
       return;
     }
@@ -62,6 +69,7 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
           {tabs.map((tab, index) => (
             <button
               key={tab.id}
+              type='button'
               className={`${styles.tab} ${isActiveTab(tab) ? styles.tabActive : ''} ${
                 index === 0 ? styles.tabFirst : ''
               } ${index === tabs.length - 1 ? styles.tabLast : ''}`}

@@ -23,6 +23,7 @@ function WavePlayer({ config }: WavePlayerProps) {
   const playingTrack = usePlayerStore.use.playingTrack();
   const playerStatus = usePlayerStore.use.playerStatus();
   const isPreCueing = usePlayerStore.use.isPreCueing();
+  const isPruneMode = usePlayerStore.use.isPruneMode();
   const audioVolume = usePlayerStore.use.volume();
   const isMuted = usePlayerStore.use.isMuted();
   const playerAPI = usePlayerAPI();
@@ -120,6 +121,24 @@ function WavePlayer({ config }: WavePlayerProps) {
       wavesurfer.on('play', () => wavesurfer.skip(audioPreCuePosition));
     }
   }, [wavesurfer, isPreCueing]);
+
+  // AIDEV-NOTE: Handle Prune Mode - start tracks at 50% position
+  useEffect(() => {
+    if (!wavesurfer) return;
+    if (!isPruneMode) return;
+
+    const handleReady = () => {
+      const duration = wavesurfer.getDuration();
+      if (duration > 0) {
+        wavesurfer.seekTo(0.5); // Jump to 50% of track
+      }
+    };
+    wavesurfer.on('ready', handleReady);
+
+    return () => {
+      wavesurfer.un('ready', handleReady);
+    };
+  }, [wavesurfer, isPruneMode]);
 
   useEffect(() => {
     if (!wavesurfer) return;

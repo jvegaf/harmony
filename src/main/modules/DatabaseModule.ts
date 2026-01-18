@@ -109,6 +109,40 @@ class DatabaseModule extends ModuleWindow {
     ipcMain.handle(channels.DB_RESET, (): Promise<void> => {
       return this.db.reset();
     });
+
+    // AIDEV-NOTE: Prune Mode - To Delete Playlist IPC Handlers
+    ipcMain.handle(channels.PLAYLIST_TO_DELETE_GET, (): Promise<Playlist> => {
+      return this.db.getOrCreateToDeletePlaylist();
+    });
+
+    ipcMain.handle(channels.PLAYLIST_TO_DELETE_ADD_TRACK, (_, trackId: TrackId): Promise<void> => {
+      return this.db.addTrackToToDeletePlaylist(trackId);
+    });
+
+    ipcMain.handle(channels.PLAYLIST_TO_DELETE_REMOVE_TRACK, (_, trackId: TrackId): Promise<void> => {
+      return this.db.removeTrackFromToDeletePlaylist(trackId);
+    });
+
+    ipcMain.handle(channels.PLAYLIST_TO_DELETE_CLEAR, (): Promise<void> => {
+      return this.db.clearToDeletePlaylist();
+    });
+
+    // AIDEV-NOTE: Preparation Mode - Set Preparation Playlist IPC Handlers
+    ipcMain.handle(channels.PLAYLIST_PREPARATION_GET, (): Promise<Playlist> => {
+      return this.db.getOrCreatePreparationPlaylist();
+    });
+
+    ipcMain.handle(channels.PLAYLIST_PREPARATION_ADD_TRACK, (_, trackId: TrackId): Promise<void> => {
+      return this.db.addTrackToPreparationPlaylist(trackId);
+    });
+
+    ipcMain.handle(channels.PLAYLIST_PREPARATION_REMOVE_TRACK, (_, trackId: TrackId): Promise<void> => {
+      return this.db.removeTrackFromPreparationPlaylist(trackId);
+    });
+
+    ipcMain.handle(channels.PLAYLIST_PREPARATION_CLEAR, (): Promise<void> => {
+      return this.db.clearPreparationPlaylist();
+    });
   }
 }
 
