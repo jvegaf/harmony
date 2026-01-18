@@ -7,7 +7,6 @@
   gap: 1rem;
   flex-shrink: 0;
   height: 100%;
-  overflow-y: auto;
 }
 
 /* Search */
@@ -97,13 +96,13 @@
 /* Playlists Section */
 .playlistsSection {
   flex: 1;
+  overflow-y: auto;
 }
 
 .playlistsHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
 }
 
 .playlistsTitle {

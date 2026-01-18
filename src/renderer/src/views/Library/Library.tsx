@@ -11,14 +11,12 @@ import { LoaderData } from '../router';
 import appStyles from '../Root.module.css';
 import styles from './Library.module.css';
 import TrackList from '../../components/TrackList/TrackList';
-import { useViewportSize } from '../../hooks/useViewPortSize';
 
 const { db } = window.Main;
 
 export default function LibraryView() {
   const trackPlayingID = usePlayingTrackID();
   const { refreshing, search } = useLibraryStore();
-  const { width, height } = useViewportSize();
 
   const { playlists } = useLoaderData() as LibraryLoaderData;
   const { tracks } = useRouteLoaderData('root') as RootLoaderData;
@@ -72,18 +70,12 @@ export default function LibraryView() {
           tracks={filteredTracks}
           trackPlayingID={trackPlayingID}
           playlists={playlists}
-          width={width}
-          height={height}
         />
       </div>
     );
-  }, [search, refreshing, width, height, filteredTracks, playlists, trackPlayingID]);
+  }, [search, refreshing, filteredTracks, playlists, trackPlayingID]);
 
-  return (
-    <div className={appStyles.view}>
-      <div>{getLibraryComponent}</div>
-    </div>
-  );
+  return <div className={appStyles.view}>{getLibraryComponent}</div>;
 }
 
 export type LibraryLoaderData = LoaderData<typeof LibraryView.loader>;
