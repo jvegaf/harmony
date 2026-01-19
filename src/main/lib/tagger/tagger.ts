@@ -7,10 +7,12 @@ import { Traxsource } from './traxsource/traxsource';
 import { ProviderOrchestrator } from './providers/orchestrator';
 import { createBeatportProvider } from './beatport/provider';
 import { createTraxsourceProvider } from './traxsource/provider';
+import { createBandcampProvider } from './bandcamp';
 import { TrackCandidatesResult, TrackCandidatesResultUtils, TrackSelection } from '@preload/types/tagger';
 import { TrackCandidateUtils } from '@preload/types/tagger/candidate';
 import { BeatportClient } from './beatport/client/client';
 import { BeatportTrackUtils } from '@preload/types/beatport';
+import { analyzeAudio } from '../audio-analysis';
 
 // import { SearchTags } from './beatport/beatport';
 // import { BandcampSearchResult, search } from './bandcamp/bandcamp';
@@ -107,11 +109,14 @@ export const FixTags = async (track: Track): Promise<Track> => {
  * @returns Lista de TrackCandidatesResult con top 4 candidatos de todos los providers
  */
 export const FindCandidates = async (tracks: Track[]): Promise<TrackCandidatesResult[]> => {
-  //   Crear orchestrator con ambos providers
-  const orchestrator = new ProviderOrchestrator([createBeatportProvider(), createTraxsourceProvider()], {
-    maxCandidates: 4, // Top 4 globales
-    minScore: 0.3, // Score mínimo 30%
-  });
+  //   Crear orchestrator con todos los providers (Beatport, Traxsource, Bandcamp)
+  const orchestrator = new ProviderOrchestrator(
+    [createBeatportProvider(), createTraxsourceProvider(), createBandcampProvider()],
+    {
+      maxCandidates: 4, // Top 4 globales
+      minScore: 0.3, // Score mínimo 30%
+    },
+  );
 
   const allTrackCandidates: TrackCandidatesResult[] = [];
 
@@ -165,8 +170,11 @@ export const FindCandidates = async (tracks: Track[]): Promise<TrackCandidatesRe
  * Aplica las selecciones de tags del usuario a los tracks locales
  *
  *   Esta función toma las selecciones del usuario (qué candidato usar para cada track)
- * y aplica los tags completos desde el provider correspondiente (Beatport o Traxsource).
+ * y aplica los tags completos desde el provider correspondiente (Beatport, Traxsource, o Bandcamp).
  * Ignora tracks con selected_candidate_id null ("No está disponible").
+ *
+ * AIDEV-NOTE: Para Bandcamp, automáticamente ejecuta audio analysis para detectar BPM/Key
+ * ya que Bandcamp no proporciona esta metadata.
  *
  * @param selections Lista de selecciones del usuario
  * @param tracks Lista de tracks locales a actualizar
@@ -178,6 +186,7 @@ export const ApplyTagSelections = async (
 ): Promise<{ updated: Track[]; errors: Array<{ trackId: string; error: string }> }> => {
   const beatportClient = BeatportClient.new();
   const traxsourceClient = new Traxsource();
+  const bandcampProvider = createBandcampProvider();
 
   const updated: Track[] = [];
   const errors: Array<{ trackId: string; error: string }> = [];
@@ -206,6 +215,7 @@ export const ApplyTagSelections = async (
 
       // Obtener tags completos desde el provider correspondiente
       let resultTag: ResultTag;
+      let needsAudioAnalysis = false;
 
       if (source === 'beatport') {
         // Obtener track completo de Beatport
@@ -252,12 +262,69 @@ export const ApplyTagSelections = async (
           duration: extendedTrack.duration,
           art: extendedTrack.art || extendedTrack.thumbnail,
         };
+      } else if (source === 'bandcamp') {
+        // AIDEV-NOTE: Bandcamp requires special handling:
+        // 1. The 'id' is actually the full track URL
+        // 2. Bandcamp doesn't provide BPM/Key, so we need audio analysis
+        const trackUrl = id; // The ID is the full URL for Bandcamp
+        const trackDetails = await bandcampProvider.getTrackDetails(trackUrl);
+
+        if (!trackDetails) {
+          throw new Error(`Failed to fetch Bandcamp track: ${trackUrl}`);
+        }
+
+        // Convert to ResultTag (BPM and Key will be undefined)
+        resultTag = {
+          title: trackDetails.title,
+          artist: trackDetails.artists[0],
+          artists: trackDetails.artists,
+          album: trackDetails.label, // Use label as album fallback
+          year: trackDetails.release_date?.substring(0, 4),
+          genre: trackDetails.genre,
+          duration: trackDetails.duration_secs,
+          art: trackDetails.artwork_url,
+          // BPM and Key are undefined - will be filled by audio analysis
+        };
+
+        // Flag for audio analysis since Bandcamp doesn't provide BPM/Key
+        needsAudioAnalysis = true;
       } else {
         throw new Error(`Unknown provider: ${source}`);
       }
 
       // Aplicar los tags al track local usando el updater existente
-      const updatedTrack = await Update(localTrack, resultTag);
+      let updatedTrack = await Update(localTrack, resultTag);
+
+      // AIDEV-NOTE: Auto-analyze audio for Bandcamp tracks to get BPM/Key/Waveform
+      if (needsAudioAnalysis) {
+        log.info(`[Bandcamp] Running audio analysis for ${updatedTrack.title}...`);
+        try {
+          const analysisResult = await analyzeAudio(localTrack.path, {
+            detectBpm: true,
+            detectKey: true,
+            generateWaveform: true,
+            waveformBins: 300,
+          });
+
+          // Apply analysis results to track
+          if (analysisResult.bpm) {
+            updatedTrack = { ...updatedTrack, bpm: analysisResult.bpm };
+            log.info(`[Bandcamp] Detected BPM: ${analysisResult.bpm}`);
+          }
+          if (analysisResult.key) {
+            updatedTrack = { ...updatedTrack, initialKey: analysisResult.key };
+            log.info(`[Bandcamp] Detected Key: ${analysisResult.key}`);
+          }
+          if (analysisResult.waveformPeaks) {
+            updatedTrack = { ...updatedTrack, waveformPeaks: analysisResult.waveformPeaks };
+            log.info(`[Bandcamp] Generated waveform: ${analysisResult.waveformPeaks.length} peaks`);
+          }
+        } catch (analysisError) {
+          // Log but don't fail - partial tags are better than none
+          log.warn(`[Bandcamp] Audio analysis failed: ${analysisError}`);
+        }
+      }
+
       updated.push(updatedTrack);
 
       log.info(`Tags applied successfully for ${updatedTrack.title}`);

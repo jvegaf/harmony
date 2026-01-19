@@ -1,7 +1,7 @@
 /**
  * Provider de música electrónica
  */
-export type ProviderSource = 'beatport' | 'traxsource';
+export type ProviderSource = 'beatport' | 'traxsource' | 'bandcamp';
 
 /**
  * Candidato de track desde un provider (Beatport o Traxsource)
