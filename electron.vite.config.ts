@@ -12,6 +12,16 @@ export default defineConfig({
         '@preload': resolve('src/preload'),
       },
     },
+    build: {
+      rollupOptions: {
+        // AIDEV-NOTE: Include the analysis worker as a separate entry point
+        // This ensures it gets compiled alongside the main process bundle
+        input: {
+          index: resolve('src/main/index.ts'),
+          'analysis-worker': resolve('src/main/lib/audio-analysis/analysis-worker.ts'),
+        },
+      },
+    },
   },
   preload: {
     plugins: [externalizeDepsPlugin()],

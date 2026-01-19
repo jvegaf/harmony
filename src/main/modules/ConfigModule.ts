@@ -4,6 +4,7 @@
 
 import { app, ipcMain } from 'electron';
 import Store from 'electron-store';
+import { cpus } from 'os';
 
 import channels from '../../preload/lib/ipc-channels';
 
@@ -64,6 +65,7 @@ export default class ConfigModule extends Module {
       sleepBlocker: false,
       displayNotifications: true,
       audioPreCuePosition: 120,
+      audioAnalysisWorkers: Math.max(1, cpus().length - 1),
       tracklistSort: {
         colId: 'path',
         mode: 'desc',

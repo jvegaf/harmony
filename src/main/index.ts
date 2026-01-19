@@ -16,6 +16,7 @@ import IPCLibraryModule from './modules/IPCLibraryModule';
 import IPCLoggerModule from './modules/IPCLoggerModule';
 import IPCPlaylistModule from './modules/IPCPlaylistModule';
 import IPCTaggerModule from './modules/IPCTaggerModule';
+import IPCAudioAnalysisModule from './modules/IPCAudioAnalysisModule';
 import PowerModule from './modules/PowerMonitorModule';
 import SleepBlockerModule from './modules/SleepBlockerModule';
 import ThumbarModule from './modules/ThumbarModule';
@@ -46,6 +47,7 @@ async function initModules(window: BrowserWindow): Promise<void> {
     new IPCLibraryModule(window),
     new IPCPlaylistModule(window),
     new IPCTaggerModule(window),
+    new IPCAudioAnalysisModule(window),
     new IPCLoggerModule(window),
   ).catch(log.error);
 }

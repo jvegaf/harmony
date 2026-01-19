@@ -57,5 +57,9 @@ export const TrackEntity = new EntitySchema<Track>({
       type: 'json',
       nullable: true,
     },
+    waveformPeaks: {
+      type: 'json',
+      nullable: true,
+    },
   },
 });

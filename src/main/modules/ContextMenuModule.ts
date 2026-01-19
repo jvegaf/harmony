@@ -166,6 +166,12 @@ class ContextMenuModule extends ModuleWindow {
             event.sender.send(channels.CMD_FIND_CANDIDATES, selected);
           },
         },
+        {
+          label: 'Analyze Audio',
+          click: () => {
+            event.sender.send(channels.CMD_ANALYZE_AUDIO, selected);
+          },
+        },
         // {
         //   type: 'separator',
         // },
@@ -198,6 +204,7 @@ class ContextMenuModule extends ModuleWindow {
           click: () => event.sender.send(channels.CMD_PLAYLIST_RENAME, playlistId),
         },
         { label: 'Duplicate', click: () => event.sender.send(channels.CMD_PLAYLIST_DUPLICATE, playlistId) },
+        { label: 'Export', click: () => event.sender.send(channels.CMD_PLAYLIST_EXPORT, playlistId) },
         {
           type: 'separator',
         },

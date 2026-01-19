@@ -14,10 +14,12 @@ type Props = {
 function SettingsAudio({ config }: Props) {
   const playerAPI = usePlayerAPI();
   const [positionValue, setPositionValue] = useState<number>(0);
+  const [workersValue, setWorkersValue] = useState<number>(0);
 
   useEffect(() => {
     setPositionValue(config.audioPreCuePosition);
-  }, []);
+    setWorkersValue(config.audioAnalysisWorkers || 4);
+  }, [config]);
 
   return (
     <div className={styles.settingsContainer}>
@@ -44,6 +46,29 @@ function SettingsAudio({ config }: Props) {
                 }
                 setPositionValue(value);
                 playerAPI.setAudioPreCuePosition(value);
+              }
+            }}
+          />
+        </Setting.Action>
+      </Setting.Section>
+      <Setting.Section>
+        <Setting.Description>Audio Analysis Workers (1-16)</Setting.Description>
+        <Setting.Action>
+          <NumberInput
+            allowNegative={false}
+            min={1}
+            max={16}
+            step={1}
+            value={workersValue}
+            onChange={value => {
+              if (value !== null) {
+                if (typeof value === 'string') {
+                  value = Number.parseInt(value);
+                }
+                // Clamp between 1 and 16
+                const clampedValue = Math.max(1, Math.min(16, value));
+                setWorkersValue(clampedValue);
+                window.Main.config.set('audioAnalysisWorkers', clampedValue);
               }
             }}
           />

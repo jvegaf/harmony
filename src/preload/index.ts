@@ -117,6 +117,22 @@ const api = {
     openExternal: shell.openExternal,
     openUserDataDirectory: () => shell.openPath(app.getPath('userData')),
   },
+  audioAnalysis: {
+    analyze: (filePath: string, options?: any) => ipcRenderer.invoke(channels.AUDIO_ANALYZE, { filePath, options }),
+    analyzeBatch: (filePaths: string[], options?: any) =>
+      ipcRenderer.invoke(channels.AUDIO_ANALYZE_BATCH, { filePaths, options }),
+    onProgress: (callback: (progress: any) => void) => {
+      const listener = (_: any, progress: any) => callback(progress);
+      ipcRenderer.on(channels.AUDIO_ANALYSIS_PROGRESS, listener);
+      return () => ipcRenderer.removeListener(channels.AUDIO_ANALYSIS_PROGRESS, listener);
+    },
+    // AIDEV-NOTE: Listen for individual track completion events for real-time UI updates
+    onTrackComplete: (callback: (track: Track) => void) => {
+      const listener = (_: any, track: Track) => callback(track);
+      ipcRenderer.on(channels.AUDIO_ANALYSIS_TRACK_COMPLETE, listener);
+      return () => ipcRenderer.removeListener(channels.AUDIO_ANALYSIS_TRACK_COMPLETE, listener);
+    },
+  },
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

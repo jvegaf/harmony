@@ -64,7 +64,8 @@ function WavePlayer({ config }: WavePlayerProps) {
       url: audioUrl,
     };
   }, [audioUrl]);
-  const wavesurfer = useWavesurfer(containerRef, optionsMemo);
+  // AIDEV-NOTE: Pass playingTrack to useWavesurfer so it can use cached waveform peaks from DB
+  const wavesurfer = useWavesurfer(containerRef, optionsMemo, playingTrack);
   // Initialize wavesurfer when the container mounts
   // or any of the props change
   useEffect(() => {

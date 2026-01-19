@@ -40,6 +40,8 @@ export interface Track {
   bitrate?: number;
   rating?: TrackRating;
   comment?: string;
+  /** Waveform peaks for visualization (~300 values, normalized 0-1) */
+  waveformPeaks?: number[];
 }
 
 export interface ResultTag {
@@ -131,6 +133,8 @@ export interface Config {
   sleepBlocker: boolean;
   displayNotifications: boolean;
   audioPreCuePosition: number;
+  /** Number of parallel workers for audio analysis (1-16). Default: CPU cores - 1 */
+  audioAnalysisWorkers: number;
   tracklistSort: {
     colId: string;
     mode: string;
