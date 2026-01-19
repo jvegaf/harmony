@@ -17,6 +17,7 @@ import IPCLoggerModule from './modules/IPCLoggerModule';
 import IPCPlaylistModule from './modules/IPCPlaylistModule';
 import IPCTaggerModule from './modules/IPCTaggerModule';
 import IPCAudioAnalysisModule from './modules/IPCAudioAnalysisModule';
+import IPCTraktorModule from './modules/IPCTraktorModule';
 import PowerModule from './modules/PowerMonitorModule';
 import SleepBlockerModule from './modules/SleepBlockerModule';
 import ThumbarModule from './modules/ThumbarModule';
@@ -48,6 +49,7 @@ async function initModules(window: BrowserWindow): Promise<void> {
     new IPCPlaylistModule(window),
     new IPCTaggerModule(window),
     new IPCAudioAnalysisModule(window),
+    new IPCTraktorModule(window),
     new IPCLoggerModule(window),
   ).catch(log.error);
 }

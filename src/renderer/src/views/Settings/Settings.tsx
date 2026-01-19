@@ -6,7 +6,8 @@ import { ActionIcon, Tabs } from '@mantine/core';
 import Keybinding from 'react-keybinding-component';
 import SettingsLibrary from './SettingsLibrary';
 import SettingsAudio from './SettingsAudio';
-import { IconDeviceSpeaker, IconPencilCog, IconVinyl } from '@tabler/icons-react';
+import SettingsTraktor from './SettingsTraktor';
+import { IconDeviceSpeaker, IconPencilCog, IconVinyl, IconDisc } from '@tabler/icons-react';
 import { MdArrowBack } from 'react-icons/md';
 import SettingsLog from './SettingsLog';
 import { RootLoaderData } from '../Root';
@@ -66,6 +67,12 @@ export default function SettingsView() {
             >
               Logs
             </Tabs.Tab>
+            <Tabs.Tab
+              value='traktor'
+              leftSection={<IconDisc size={14} />}
+            >
+              Traktor
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value='library'>
@@ -76,6 +83,9 @@ export default function SettingsView() {
           </Tabs.Panel>
           <Tabs.Panel value='logs'>
             <SettingsLog />
+          </Tabs.Panel>
+          <Tabs.Panel value='traktor'>
+            <SettingsTraktor />
           </Tabs.Panel>
         </Tabs>
       </div>

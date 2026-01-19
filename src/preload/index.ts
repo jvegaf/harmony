@@ -10,6 +10,8 @@ import {
   UpdateRatingPayload,
   Config,
 } from './types/harmony';
+import type { TraktorConfig, TraktorSyncProgress, TraktorNMLInfo } from './types/traktor';
+import type { SyncPlan, SyncResult, SyncOptions } from '../main/lib/traktor';
 import parseUri from './lib/utils-uri';
 
 const config = {
@@ -131,6 +133,36 @@ const api = {
       const listener = (_: any, track: Track) => callback(track);
       ipcRenderer.on(channels.AUDIO_ANALYSIS_TRACK_COMPLETE, listener);
       return () => ipcRenderer.removeListener(channels.AUDIO_ANALYSIS_TRACK_COMPLETE, listener);
+    },
+  },
+  /**
+   * Traktor NML integration API
+   * AIDEV-NOTE: Provides sync between Harmony and Traktor's collection.nml
+   */
+  traktor: {
+    /** Get current Traktor configuration */
+    getConfig: (): Promise<TraktorConfig> => ipcRenderer.invoke(channels.TRAKTOR_GET_CONFIG),
+    /** Update Traktor configuration */
+    setConfig: (config: Partial<TraktorConfig>): Promise<TraktorConfig> =>
+      ipcRenderer.invoke(channels.TRAKTOR_SET_CONFIG, config),
+    /** Open file dialog to select collection.nml path */
+    selectNmlPath: (): Promise<string | null> => ipcRenderer.invoke(channels.TRAKTOR_SELECT_NML_PATH),
+    /** Parse NML file and return summary info */
+    parseNml: (nmlPath?: string): Promise<TraktorNMLInfo> => ipcRenderer.invoke(channels.TRAKTOR_PARSE_NML, nmlPath),
+    /** Get sync preview showing what will change */
+    getSyncPreview: (nmlPath?: string, options?: Partial<SyncOptions>): Promise<SyncPlan> =>
+      ipcRenderer.invoke(channels.TRAKTOR_GET_SYNC_PREVIEW, nmlPath, options),
+    /** Execute sync and persist to database */
+    executeSync: (nmlPath?: string, options?: Partial<SyncOptions>): Promise<SyncResult> =>
+      ipcRenderer.invoke(channels.TRAKTOR_EXECUTE_SYNC, nmlPath, options),
+    /** Export Harmony changes back to NML file */
+    exportToNml: (nmlPath?: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(channels.TRAKTOR_EXPORT_TO_NML, nmlPath),
+    /** Listen for sync progress updates */
+    onProgress: (callback: (progress: TraktorSyncProgress) => void) => {
+      const listener = (_: any, progress: TraktorSyncProgress) => callback(progress);
+      ipcRenderer.on(channels.TRAKTOR_SYNC_PROGRESS, listener);
+      return () => ipcRenderer.removeListener(channels.TRAKTOR_SYNC_PROGRESS, listener);
     },
   },
 };

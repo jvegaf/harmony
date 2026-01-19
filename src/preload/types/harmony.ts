@@ -74,6 +74,28 @@ export interface Playlist {
   name: string;
   tracks?: Track[];
   playlistTracks?: PlaylistTrack[];
+  /** AIDEV-NOTE: Optional folder ID for Traktor playlist hierarchy support */
+  folderId?: string;
+  folder?: Folder;
+}
+
+/**
+ * Folder for organizing playlists in a hierarchical structure.
+ * Supports nested folders via parentId for Traktor-style folder trees.
+ *
+ * AIDEV-NOTE: Used for Traktor bidirectional sync to preserve
+ * the complete playlist folder hierarchy from collection.nml
+ */
+export interface Folder {
+  id: string;
+  name: string;
+  /** Parent folder ID for nesting. Null = root level folder */
+  parentId?: string | null;
+  /** Full path in the folder tree (e.g., "DJ Sets/House/Deep House") */
+  path?: string;
+  parent?: Folder;
+  children?: Folder[];
+  playlists?: Playlist[];
 }
 
 export interface MatchResult {

@@ -999,6 +999,35 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
+"@oozcitak/dom@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@oozcitak/dom/-/dom-2.0.2.tgz#0f447f0b736aa6f36c5556ba811a44e56c71c26c"
+  integrity sha512-GjpKhkSYC3Mj4+lfwEyI1dqnsKTgwGy48ytZEhm4A/xnH/8z9M3ZVXKr/YGQi3uCLs1AEBS+x5T2JPiueEDW8w==
+  dependencies:
+    "@oozcitak/infra" "^2.0.2"
+    "@oozcitak/url" "^3.0.0"
+    "@oozcitak/util" "^10.0.0"
+
+"@oozcitak/infra@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@oozcitak/infra/-/infra-2.0.2.tgz#e2f1cc0eeca3ac5cd551f0326a5f66f00cf1138b"
+  integrity sha512-2g+E7hoE2dgCz/APPOEK5s3rMhJvNxSMBrP+U+j1OWsIbtSpWxxlUjq1lU8RIsFJNYv7NMlnVsCuHcUzJW+8vA==
+  dependencies:
+    "@oozcitak/util" "^10.0.0"
+
+"@oozcitak/url@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@oozcitak/url/-/url-3.0.0.tgz#a03c959c67e28aba9e29b2d35cd50d26cb5f2cc4"
+  integrity sha512-ZKfET8Ak1wsLAiLWNfFkZc/BraDccuTJKR6svTYc7sVjbR+Iu0vtXdiDMY4o6jaFl5TW2TlS7jbLl4VovtAJWQ==
+  dependencies:
+    "@oozcitak/infra" "^2.0.2"
+    "@oozcitak/util" "^10.0.0"
+
+"@oozcitak/util@^10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/@oozcitak/util/-/util-10.0.0.tgz#f6b40472d96c210094a556ee5ccb8e77f1bd30af"
+  integrity sha512-hAX0pT/73190NLqBPPWSdBVGtbY6VOhWYK3qqHqtXQ1gK7kS2yz4+ivsN07hpJ6I3aeMtKP6J6npsEKOAzuTLA==
+
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
@@ -4204,6 +4233,13 @@ fast-uri@^3.0.1:
   version "3.0.5"
   resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.0.5.tgz#19f5f9691d0dab9b85861a7bb5d98fca961da9cd"
   integrity sha512-5JnBCWpFlMo0a3ciDy/JckMzzv1U9coZrIhedq+HXxxUfDTAiS0LA8OKVao4G9BxmCVck/jtA5r3KAtRWEyD8Q==
+
+fast-xml-parser@^5.3.3:
+  version "5.3.3"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.3.3.tgz#84b678e44eb81207c8585795152b4b1c94738b4d"
+  integrity sha512-2O3dkPAAC6JavuMm8+4+pgTk+5hoAs+CjZ+sWcQLkX9+/tHRuTkQh/Oaifr8qDmZ8iEHb771Ea6G8CdwkrgvYA==
+  dependencies:
+    strnum "^2.1.0"
 
 fastq@^1.6.0:
   version "1.18.0"
@@ -7830,6 +7866,11 @@ strip-literal@^2.0.0:
   dependencies:
     js-tokens "^9.0.1"
 
+strnum@^2.1.0:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/strnum/-/strnum-2.1.2.tgz#a5e00ba66ab25f9cafa3726b567ce7a49170937a"
+  integrity sha512-l63NF9y/cLROq/yqKXSLtcMeeyOfnSQlfMSlzFt/K73oIaD8DGaQWd7Z34X9GPiKqP5rbSh84Hl4bOlLcjiSrQ==
+
 strtok3@^6.2.4, strtok3@^6.3.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/strtok3/-/strtok3-6.3.0.tgz#358b80ffe6d5d5620e19a073aa78ce947a90f9a0"
@@ -8689,6 +8730,16 @@ xml-name-validator@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/xml-name-validator/-/xml-name-validator-5.0.0.tgz#82be9b957f7afdacf961e5980f1bf227c0bf7673"
   integrity sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==
+
+xmlbuilder2@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/xmlbuilder2/-/xmlbuilder2-4.0.3.tgz#91660fa6d30f19d716f8b1194c567686d4402c63"
+  integrity sha512-bx8Q1STctnNaaDymWnkfQLKofs0mGNN7rLLapJlGuV3VlvegD7Ls4ggMjE3aUSWItCCzU0PEv45lI87iSigiCA==
+  dependencies:
+    "@oozcitak/dom" "^2.0.2"
+    "@oozcitak/infra" "^2.0.2"
+    "@oozcitak/util" "^10.0.0"
+    js-yaml "^4.1.1"
 
 xmlbuilder@>=11.0.1, xmlbuilder@^15.1.1:
   version "15.1.1"

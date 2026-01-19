@@ -13,6 +13,11 @@ export const PlaylistEntity = new EntitySchema<Playlist>({
       type: String,
       nullable: false,
     },
+    // AIDEV-NOTE: Optional folder ID for Traktor playlist hierarchy support
+    folderId: {
+      type: String,
+      nullable: true,
+    },
   },
   relations: {
     playlistTracks: {
@@ -21,6 +26,12 @@ export const PlaylistEntity = new EntitySchema<Playlist>({
       inverseSide: 'playlist',
       cascade: true,
       eager: true,
+    },
+    folder: {
+      type: 'many-to-one',
+      target: 'folder',
+      joinColumn: { name: 'folderId' },
+      nullable: true,
     },
   },
 });

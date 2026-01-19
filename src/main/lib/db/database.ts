@@ -4,8 +4,9 @@ import { app } from 'electron';
 import { DataSource, In } from 'typeorm';
 import log from 'electron-log';
 
-import { Playlist, PlaylistTrack, Track, TrackId } from '../../../preload/types/harmony';
-import { TrackEntity, PlaylistEntity, PlaylistTrackEntity } from './entities';
+import { Playlist, PlaylistTrack, Track, TrackId, Folder } from '../../../preload/types/harmony';
+import { CuePoint } from '../../../preload/types/cue-point';
+import { TrackEntity, PlaylistEntity, PlaylistTrackEntity, CuePointEntity, FolderEntity } from './entities';
 import makeID from '../../../preload/lib/id-provider';
 
 const pathUserData = app.getPath('userData');
@@ -42,7 +43,7 @@ export class Database {
       synchronize: true,
       type: 'sqlite',
       database: dbPath,
-      entities: [TrackEntity, PlaylistEntity, PlaylistTrackEntity],
+      entities: [TrackEntity, PlaylistEntity, PlaylistTrackEntity, CuePointEntity, FolderEntity],
       entitySkipConstructor: true,
     });
     AppDataSource.initialize()
@@ -454,6 +455,186 @@ export class Database {
     });
 
     log.info('[db] Preparation playlist cleared');
+  }
+
+  // ============================================================================
+  // AIDEV-NOTE: CuePoint Methods - For Traktor bidirectional sync
+  // ============================================================================
+
+  /**
+   * Get all cue points for a specific track
+   */
+  public async getCuePointsByTrackId(trackId: TrackId): Promise<CuePoint[]> {
+    const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
+    return repository.find({
+      where: { trackId },
+      order: { positionMs: 'ASC' },
+    });
+  }
+
+  /**
+   * Get cue points for multiple tracks at once (batch operation)
+   */
+  public async getCuePointsByTrackIds(trackIds: TrackId[]): Promise<CuePoint[]> {
+    if (trackIds.length === 0) return [];
+    const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
+    return repository.find({
+      where: { trackId: In(trackIds) },
+      order: { trackId: 'ASC', positionMs: 'ASC' },
+    });
+  }
+
+  /**
+   * Insert or update cue points (upsert)
+   */
+  public async saveCuePoints(cuePoints: CuePoint[]): Promise<void> {
+    if (cuePoints.length === 0) return;
+    const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
+    await repository.save(cuePoints);
+    log.info(`[db] Saved ${cuePoints.length} cue points`);
+  }
+
+  /**
+   * Delete all cue points for a track
+   */
+  public async deleteCuePointsByTrackId(trackId: TrackId): Promise<void> {
+    const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
+    await repository.delete({ trackId });
+    log.info(`[db] Deleted cue points for track ${trackId}`);
+  }
+
+  /**
+   * Delete specific cue points by ID
+   */
+  public async deleteCuePoints(cuePointIds: string[]): Promise<void> {
+    if (cuePointIds.length === 0) return;
+    const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
+    await repository.delete(cuePointIds);
+    log.info(`[db] Deleted ${cuePointIds.length} cue points`);
+  }
+
+  /**
+   * Replace all cue points for a track (delete existing, insert new)
+   * AIDEV-NOTE: Useful for Traktor sync - complete replacement strategy
+   */
+  public async replaceCuePointsForTrack(trackId: TrackId, cuePoints: CuePoint[]): Promise<void> {
+    const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
+
+    // Delete existing
+    await repository.delete({ trackId });
+
+    // Insert new if any
+    if (cuePoints.length > 0) {
+      await repository.save(cuePoints);
+    }
+
+    log.info(`[db] Replaced cue points for track ${trackId} with ${cuePoints.length} new cue points`);
+  }
+
+  // ============================================================================
+  // AIDEV-NOTE: Folder Methods - For Traktor playlist hierarchy
+  // ============================================================================
+
+  /**
+   * Get all folders with optional parent/children relations
+   */
+  public async getAllFolders(): Promise<Folder[]> {
+    const repository = this.connection.getRepository<Folder>(FolderEntity);
+    return repository.find({
+      order: { path: 'ASC' },
+    });
+  }
+
+  /**
+   * Get folder tree structure (root folders with children)
+   */
+  public async getFolderTree(): Promise<Folder[]> {
+    const repository = this.connection.getRepository<Folder>(FolderEntity);
+    // Get root folders (no parent)
+    return repository.find({
+      where: { parentId: null as any },
+      relations: ['children', 'playlists'],
+      order: { name: 'ASC' },
+    });
+  }
+
+  /**
+   * Get a folder by ID
+   */
+  public async getFolderById(folderId: string): Promise<Folder | null> {
+    const repository = this.connection.getRepository<Folder>(FolderEntity);
+    return repository.findOne({
+      where: { id: folderId },
+      relations: ['children', 'playlists'],
+    });
+  }
+
+  /**
+   * Get folder by path
+   */
+  public async getFolderByPath(path: string): Promise<Folder | null> {
+    const repository = this.connection.getRepository<Folder>(FolderEntity);
+    return repository.findOne({
+      where: { path },
+    });
+  }
+
+  /**
+   * Insert or update folders
+   */
+  public async saveFolders(folders: Folder[]): Promise<void> {
+    if (folders.length === 0) return;
+    const repository = this.connection.getRepository<Folder>(FolderEntity);
+    await repository.save(folders);
+    log.info(`[db] Saved ${folders.length} folders`);
+  }
+
+  /**
+   * Create a single folder
+   */
+  public async createFolder(folder: Folder): Promise<Folder> {
+    const repository = this.connection.getRepository<Folder>(FolderEntity);
+    return repository.save(folder);
+  }
+
+  /**
+   * Delete a folder by ID
+   * AIDEV-NOTE: Cascades to child folders if configured, but playlists should be reassigned first
+   */
+  public async deleteFolder(folderId: string): Promise<void> {
+    const repository = this.connection.getRepository<Folder>(FolderEntity);
+    await repository.delete(folderId);
+    log.info(`[db] Deleted folder ${folderId}`);
+  }
+
+  /**
+   * Delete all folders (for clean sync)
+   */
+  public async clearAllFolders(): Promise<void> {
+    const repository = this.connection.getRepository<Folder>(FolderEntity);
+    await repository.clear();
+    log.info('[db] Cleared all folders');
+  }
+
+  /**
+   * Get playlists by folder ID
+   */
+  public async getPlaylistsByFolderId(folderId: string): Promise<Playlist[]> {
+    const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
+    const playlists = await repository.find({
+      where: { folderId },
+      relations: ['playlistTracks'],
+    });
+    return playlists.map(p => this.mapPlaylistToTracks(p));
+  }
+
+  /**
+   * Update playlist's folder assignment
+   */
+  public async setPlaylistFolder(playlistId: string, folderId: string | null): Promise<void> {
+    const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
+    await repository.update(playlistId, { folderId: folderId as any });
+    log.info(`[db] Playlist ${playlistId} moved to folder ${folderId ?? 'root'}`);
   }
 }
 

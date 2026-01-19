@@ -1,0 +1,506 @@
+/**
+ * Traktor NML Writer
+ *
+ * Writes changes back to Traktor's collection.nml format.
+ *
+ * AIDEV-NOTE: Strategy for writing:
+ * 1. Work with parsed NML structure (preserve original data)
+ * 2. Update only the fields that have changed
+ * 3. Generate valid XML that Traktor can read
+ * 4. Preserve cue points, analysis data, and other metadata
+ */
+
+import { writeFile } from 'fs/promises';
+
+import type { Track } from '../../../preload/types/harmony';
+import type { CuePoint } from '../../../preload/types/cue-point';
+import type { TraktorNML, TraktorEntry, TraktorCue, TraktorNode } from './types/nml-types';
+import { mapSystemPathToTraktor, mapHarmonyRatingToTraktor } from './mappers/track-mapper';
+import { mapHarmonyKeyToTraktor } from './mappers/key-mapper';
+import { mapHarmonyCueToTraktor } from './mappers/cue-mapper';
+
+/**
+ * Escape XML special characters
+ */
+export function escapeXml(str: string): string {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+/**
+ * Format a Date as Traktor date string (YYYY/M/D - no zero padding)
+ */
+export function formatTraktorDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // 0-indexed
+  const day = date.getDate();
+  return `${year}/${month}/${day}`;
+}
+
+/**
+ * Build XML for a single CUE_V2 element
+ */
+export function buildCueXml(cue: CuePoint): string {
+  const traktorCue = mapHarmonyCueToTraktor(cue);
+  const attrs: string[] = [];
+
+  if (traktorCue.NAME) {
+    attrs.push(`NAME="${escapeXml(traktorCue.NAME)}"`);
+  }
+  if (traktorCue.DISPL_ORDER) {
+    attrs.push(`DISPL_ORDER="${traktorCue.DISPL_ORDER}"`);
+  }
+  attrs.push(`TYPE="${traktorCue.TYPE}"`);
+  attrs.push(`START="${traktorCue.START}"`);
+  if (traktorCue.LEN) {
+    attrs.push(`LEN="${traktorCue.LEN}"`);
+  }
+  if (traktorCue.REPEATS) {
+    attrs.push(`REPEATS="${traktorCue.REPEATS}"`);
+  }
+  if (traktorCue.HOTCUE !== undefined) {
+    attrs.push(`HOTCUE="${traktorCue.HOTCUE}"`);
+  }
+
+  return `<CUE_V2 ${attrs.join(' ')}></CUE_V2>`;
+}
+
+/**
+ * Build XML for a complete ENTRY element from a Harmony Track
+ */
+export function buildEntryXml(track: Track, cuePoints?: CuePoint[]): string {
+  const { dir, file } = mapSystemPathToTraktor(track.path);
+  const lines: string[] = [];
+
+  // Entry opening with attributes
+  const entryAttrs: string[] = [];
+  if (track.title) {
+    entryAttrs.push(`TITLE="${escapeXml(track.title)}"`);
+  }
+  if (track.artist) {
+    entryAttrs.push(`ARTIST="${escapeXml(track.artist)}"`);
+  }
+  // Add modification date
+  entryAttrs.push(`MODIFIED_DATE="${formatTraktorDate(new Date())}"`);
+  entryAttrs.push(`MODIFIED_TIME="${Math.floor(Date.now() / 1000) % 86400}"`);
+
+  lines.push(`<ENTRY ${entryAttrs.join(' ')}>`);
+
+  // LOCATION element
+  lines.push(`  <LOCATION DIR="${escapeXml(dir)}" FILE="${escapeXml(file)}" VOLUME=""></LOCATION>`);
+
+  // ALBUM element
+  if (track.album) {
+    lines.push(`  <ALBUM TITLE="${escapeXml(track.album)}"></ALBUM>`);
+  }
+
+  // INFO element
+  const infoAttrs: string[] = [];
+  if (track.bitrate) {
+    infoAttrs.push(`BITRATE="${track.bitrate * 1000}"`);
+  }
+  if (track.genre) {
+    infoAttrs.push(`GENRE="${escapeXml(track.genre)}"`);
+  }
+  if (track.comment) {
+    infoAttrs.push(`COMMENT="${escapeXml(track.comment)}"`);
+  }
+  if (track.initialKey) {
+    const traktorKey = mapHarmonyKeyToTraktor(track.initialKey);
+    if (traktorKey) {
+      infoAttrs.push(`KEY="${traktorKey}"`);
+    }
+  }
+  if (track.duration) {
+    infoAttrs.push(`PLAYTIME="${track.duration}"`);
+  }
+  if (track.rating?.rating) {
+    infoAttrs.push(`RANKING="${mapHarmonyRatingToTraktor(track.rating.rating)}"`);
+  }
+  if (track.year) {
+    infoAttrs.push(`RELEASE_DATE="${track.year}/1/1"`);
+  }
+  if (infoAttrs.length > 0) {
+    lines.push(`  <INFO ${infoAttrs.join(' ')}></INFO>`);
+  }
+
+  // TEMPO element
+  if (track.bpm) {
+    lines.push(`  <TEMPO BPM="${track.bpm}" BPM_QUALITY="100.000000"></TEMPO>`);
+  }
+
+  // CUE_V2 elements
+  if (cuePoints && cuePoints.length > 0) {
+    for (const cue of cuePoints) {
+      lines.push(`  ${buildCueXml(cue)}`);
+    }
+  }
+
+  lines.push('</ENTRY>');
+  return lines.join('\n');
+}
+
+/**
+ * Writer for Traktor NML files.
+ *
+ * AIDEV-NOTE: The writer preserves the original structure and only updates
+ * changed entries. This ensures Traktor can still read all analysis data,
+ * cue points, and other metadata.
+ */
+export class TraktorNMLWriter {
+  /**
+   * Update a single track in the NML structure
+   *
+   * @param nml - Original parsed NML
+   * @param track - Track with updated data
+   * @param cuePoints - Optional updated cue points (if undefined, preserves original)
+   * @returns Updated NML structure (does not modify original)
+   */
+  updateTrack(nml: TraktorNML, track: Track, cuePoints?: CuePoint[]): TraktorNML {
+    const { dir, file } = mapSystemPathToTraktor(track.path);
+
+    // Deep clone the NML to avoid mutating original
+    const updatedNml: TraktorNML = JSON.parse(JSON.stringify(nml));
+
+    // Find the entry to update
+    const entryIndex = updatedNml.NML.COLLECTION.ENTRY.findIndex(entry => {
+      return entry.LOCATION.DIR === dir && entry.LOCATION.FILE === file;
+    });
+
+    if (entryIndex === -1) {
+      // Track not found, add as new entry
+      const newEntry = this.buildEntryFromTrack(track, cuePoints);
+      updatedNml.NML.COLLECTION.ENTRY.push(newEntry);
+      updatedNml.NML.COLLECTION.ENTRIES = String(updatedNml.NML.COLLECTION.ENTRY.length);
+    } else {
+      // Update existing entry
+      const entry = updatedNml.NML.COLLECTION.ENTRY[entryIndex];
+      this.updateEntryFromTrack(entry, track, cuePoints);
+    }
+
+    return updatedNml;
+  }
+
+  /**
+   * Update multiple tracks in the NML structure
+   */
+  updateTracks(nml: TraktorNML, updates: Array<{ track: Track; cuePoints?: CuePoint[] }>): TraktorNML {
+    let updatedNml = nml;
+    for (const { track, cuePoints } of updates) {
+      updatedNml = this.updateTrack(updatedNml, track, cuePoints);
+    }
+    return updatedNml;
+  }
+
+  /**
+   * Build a new TraktorEntry from a Harmony Track
+   */
+  private buildEntryFromTrack(track: Track, cuePoints?: CuePoint[]): TraktorEntry {
+    const { dir, file } = mapSystemPathToTraktor(track.path);
+
+    const entry: TraktorEntry = {
+      TITLE: track.title,
+      ARTIST: track.artist,
+      MODIFIED_DATE: formatTraktorDate(new Date()),
+      MODIFIED_TIME: String(Math.floor(Date.now() / 1000) % 86400),
+      LOCATION: {
+        DIR: dir,
+        FILE: file,
+        VOLUME: '',
+      },
+    };
+
+    if (track.album) {
+      entry.ALBUM = { TITLE: track.album };
+    }
+
+    // Build INFO
+    entry.INFO = {};
+    if (track.bitrate) entry.INFO.BITRATE = String(track.bitrate * 1000);
+    if (track.genre) entry.INFO.GENRE = track.genre;
+    if (track.comment) entry.INFO.COMMENT = track.comment;
+    if (track.initialKey) {
+      const traktorKey = mapHarmonyKeyToTraktor(track.initialKey);
+      if (traktorKey) entry.INFO.KEY = traktorKey;
+    }
+    if (track.duration) entry.INFO.PLAYTIME = String(track.duration);
+    if (track.rating?.rating) {
+      entry.INFO.RANKING = mapHarmonyRatingToTraktor(track.rating.rating);
+    }
+    if (track.year) entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
+
+    // Build TEMPO
+    if (track.bpm) {
+      entry.TEMPO = {
+        BPM: String(track.bpm),
+        BPM_QUALITY: '100.000000',
+      };
+    }
+
+    // Build CUE_V2
+    if (cuePoints && cuePoints.length > 0) {
+      entry.CUE_V2 = cuePoints.map(cue => mapHarmonyCueToTraktor(cue));
+    }
+
+    return entry;
+  }
+
+  /**
+   * Update an existing entry with data from a Track
+   * Preserves fields not in Track (like AUDIO_ID, LOUDNESS, etc.)
+   */
+  private updateEntryFromTrack(entry: TraktorEntry, track: Track, cuePoints?: CuePoint[]): void {
+    // Update top-level attributes
+    if (track.title) entry.TITLE = track.title;
+    if (track.artist) entry.ARTIST = track.artist;
+    entry.MODIFIED_DATE = formatTraktorDate(new Date());
+    entry.MODIFIED_TIME = String(Math.floor(Date.now() / 1000) % 86400);
+
+    // Update ALBUM
+    if (track.album) {
+      entry.ALBUM = entry.ALBUM || {};
+      entry.ALBUM.TITLE = track.album;
+    }
+
+    // Update INFO (preserve existing fields)
+    entry.INFO = entry.INFO || {};
+    if (track.bitrate) entry.INFO.BITRATE = String(track.bitrate * 1000);
+    if (track.genre) entry.INFO.GENRE = track.genre;
+    if (track.comment !== undefined) entry.INFO.COMMENT = track.comment;
+    if (track.initialKey) {
+      const traktorKey = mapHarmonyKeyToTraktor(track.initialKey);
+      if (traktorKey) entry.INFO.KEY = traktorKey;
+    }
+    if (track.duration) entry.INFO.PLAYTIME = String(track.duration);
+    if (track.rating?.rating) {
+      entry.INFO.RANKING = mapHarmonyRatingToTraktor(track.rating.rating);
+    }
+    if (track.year) entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
+
+    // Update TEMPO
+    if (track.bpm) {
+      entry.TEMPO = entry.TEMPO || { BPM: '0' };
+      entry.TEMPO.BPM = String(track.bpm);
+    }
+
+    // Update cue points only if explicitly provided
+    if (cuePoints !== undefined) {
+      entry.CUE_V2 = cuePoints.map(cue => mapHarmonyCueToTraktor(cue));
+    }
+  }
+
+  /**
+   * Convert NML structure to XML string
+   */
+  toXml(nml: TraktorNML): string {
+    const lines: string[] = [];
+
+    // XML declaration
+    lines.push('<?xml version="1.0" encoding="UTF-8" standalone="no" ?>');
+
+    // NML root
+    lines.push(`<NML VERSION="${nml.NML.VERSION}">`);
+
+    // HEAD
+    lines.push(
+      `  <HEAD COMPANY="${escapeXml(nml.NML.HEAD.COMPANY)}" PROGRAM="${escapeXml(nml.NML.HEAD.PROGRAM)}"></HEAD>`,
+    );
+
+    // MUSICFOLDERS (preserve as empty if not used)
+    lines.push('  <MUSICFOLDERS></MUSICFOLDERS>');
+
+    // COLLECTION
+    lines.push(`  <COLLECTION ENTRIES="${nml.NML.COLLECTION.ENTRIES}">`);
+    for (const entry of nml.NML.COLLECTION.ENTRY) {
+      lines.push(this.entryToXml(entry, '    '));
+    }
+    lines.push('  </COLLECTION>');
+
+    // PLAYLISTS (if present)
+    if (nml.NML.PLAYLISTS) {
+      lines.push('  <PLAYLISTS>');
+      lines.push(this.nodeToXml(nml.NML.PLAYLISTS.NODE, '    '));
+      lines.push('  </PLAYLISTS>');
+    }
+
+    lines.push('</NML>');
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Write NML to file
+   */
+  async writeToFile(nml: TraktorNML, filePath: string): Promise<void> {
+    const xml = this.toXml(nml);
+    await writeFile(filePath, xml, 'utf-8');
+  }
+
+  /**
+   * Convert a single entry to XML
+   */
+  private entryToXml(entry: TraktorEntry, indent: string): string {
+    const lines: string[] = [];
+
+    // Entry opening
+    const entryAttrs: string[] = [];
+    if (entry.MODIFIED_DATE) entryAttrs.push(`MODIFIED_DATE="${entry.MODIFIED_DATE}"`);
+    if (entry.MODIFIED_TIME) entryAttrs.push(`MODIFIED_TIME="${entry.MODIFIED_TIME}"`);
+    if (entry.AUDIO_ID) entryAttrs.push(`AUDIO_ID="${entry.AUDIO_ID}"`);
+    if (entry.TITLE) entryAttrs.push(`TITLE="${escapeXml(entry.TITLE)}"`);
+    if (entry.ARTIST) entryAttrs.push(`ARTIST="${escapeXml(entry.ARTIST)}"`);
+
+    lines.push(`${indent}<ENTRY ${entryAttrs.join(' ')}>`);
+
+    // LOCATION
+    lines.push(
+      `${indent}  <LOCATION DIR="${escapeXml(entry.LOCATION.DIR)}" FILE="${escapeXml(entry.LOCATION.FILE)}" VOLUME="${escapeXml(entry.LOCATION.VOLUME)}"${entry.LOCATION.VOLUMEID ? ` VOLUMEID="${entry.LOCATION.VOLUMEID}"` : ''}></LOCATION>`,
+    );
+
+    // ALBUM
+    if (entry.ALBUM) {
+      const albumAttrs: string[] = [];
+      if (entry.ALBUM.TITLE) albumAttrs.push(`TITLE="${escapeXml(entry.ALBUM.TITLE)}"`);
+      if (entry.ALBUM.TRACK) albumAttrs.push(`TRACK="${entry.ALBUM.TRACK}"`);
+      if (entry.ALBUM.OF_TRACKS) albumAttrs.push(`OF_TRACKS="${entry.ALBUM.OF_TRACKS}"`);
+      lines.push(`${indent}  <ALBUM ${albumAttrs.join(' ')}></ALBUM>`);
+    }
+
+    // MODIFICATION_INFO
+    if (entry.MODIFICATION_INFO) {
+      lines.push(
+        `${indent}  <MODIFICATION_INFO AUTHOR_TYPE="${entry.MODIFICATION_INFO.AUTHOR_TYPE || 'user'}"></MODIFICATION_INFO>`,
+      );
+    }
+
+    // INFO
+    if (entry.INFO) {
+      const infoAttrs: string[] = [];
+      if (entry.INFO.BITRATE) infoAttrs.push(`BITRATE="${entry.INFO.BITRATE}"`);
+      if (entry.INFO.GENRE) infoAttrs.push(`GENRE="${escapeXml(entry.INFO.GENRE)}"`);
+      if (entry.INFO.LABEL) infoAttrs.push(`LABEL="${escapeXml(entry.INFO.LABEL)}"`);
+      if (entry.INFO.COMMENT) infoAttrs.push(`COMMENT="${escapeXml(entry.INFO.COMMENT)}"`);
+      if (entry.INFO.COVERARTID) infoAttrs.push(`COVERARTID="${entry.INFO.COVERARTID}"`);
+      if (entry.INFO.KEY) infoAttrs.push(`KEY="${entry.INFO.KEY}"`);
+      if (entry.INFO.PLAYTIME) infoAttrs.push(`PLAYTIME="${entry.INFO.PLAYTIME}"`);
+      if (entry.INFO.PLAYTIME_FLOAT) infoAttrs.push(`PLAYTIME_FLOAT="${entry.INFO.PLAYTIME_FLOAT}"`);
+      if (entry.INFO.RANKING) infoAttrs.push(`RANKING="${entry.INFO.RANKING}"`);
+      if (entry.INFO.IMPORT_DATE) infoAttrs.push(`IMPORT_DATE="${entry.INFO.IMPORT_DATE}"`);
+      if (entry.INFO.RELEASE_DATE) infoAttrs.push(`RELEASE_DATE="${entry.INFO.RELEASE_DATE}"`);
+      if (entry.INFO.LAST_PLAYED) infoAttrs.push(`LAST_PLAYED="${entry.INFO.LAST_PLAYED}"`);
+      if (entry.INFO.PLAYCOUNT) infoAttrs.push(`PLAYCOUNT="${entry.INFO.PLAYCOUNT}"`);
+      if (entry.INFO.FLAGS) infoAttrs.push(`FLAGS="${entry.INFO.FLAGS}"`);
+      if (entry.INFO.FILESIZE) infoAttrs.push(`FILESIZE="${entry.INFO.FILESIZE}"`);
+      if (infoAttrs.length > 0) {
+        lines.push(`${indent}  <INFO ${infoAttrs.join(' ')}></INFO>`);
+      }
+    }
+
+    // TEMPO
+    if (entry.TEMPO) {
+      lines.push(
+        `${indent}  <TEMPO BPM="${entry.TEMPO.BPM}"${entry.TEMPO.BPM_QUALITY ? ` BPM_QUALITY="${entry.TEMPO.BPM_QUALITY}"` : ''}></TEMPO>`,
+      );
+    }
+
+    // LOUDNESS
+    if (entry.LOUDNESS) {
+      const loudAttrs: string[] = [];
+      if (entry.LOUDNESS.PEAK_DB) loudAttrs.push(`PEAK_DB="${entry.LOUDNESS.PEAK_DB}"`);
+      if (entry.LOUDNESS.PERCEIVED_DB) loudAttrs.push(`PERCEIVED_DB="${entry.LOUDNESS.PERCEIVED_DB}"`);
+      if (entry.LOUDNESS.ANALYZED_DB) loudAttrs.push(`ANALYZED_DB="${entry.LOUDNESS.ANALYZED_DB}"`);
+      if (loudAttrs.length > 0) {
+        lines.push(`${indent}  <LOUDNESS ${loudAttrs.join(' ')}></LOUDNESS>`);
+      }
+    }
+
+    // MUSICAL_KEY
+    if (entry.MUSICAL_KEY) {
+      lines.push(`${indent}  <MUSICAL_KEY VALUE="${entry.MUSICAL_KEY.VALUE}"></MUSICAL_KEY>`);
+    }
+
+    // CUE_V2
+    if (entry.CUE_V2) {
+      const cues = Array.isArray(entry.CUE_V2) ? entry.CUE_V2 : [entry.CUE_V2];
+      for (const cue of cues) {
+        lines.push(`${indent}  ${this.cueToXml(cue)}`);
+      }
+    }
+
+    // PRIMARYKEY
+    if (entry.PRIMARYKEY) {
+      lines.push(
+        `${indent}  <PRIMARYKEY TYPE="${entry.PRIMARYKEY.TYPE || 'TRACK'}" KEY="${escapeXml(entry.PRIMARYKEY.KEY || '')}"></PRIMARYKEY>`,
+      );
+    }
+
+    lines.push(`${indent}</ENTRY>`);
+    return lines.join('\n');
+  }
+
+  /**
+   * Convert a TraktorCue to XML
+   */
+  private cueToXml(cue: TraktorCue): string {
+    const attrs: string[] = [];
+
+    if (cue.NAME) attrs.push(`NAME="${escapeXml(cue.NAME)}"`);
+    if (cue.DISPL_ORDER) attrs.push(`DISPL_ORDER="${cue.DISPL_ORDER}"`);
+    attrs.push(`TYPE="${cue.TYPE}"`);
+    attrs.push(`START="${cue.START}"`);
+    if (cue.LEN) attrs.push(`LEN="${cue.LEN}"`);
+    if (cue.REPEATS) attrs.push(`REPEATS="${cue.REPEATS}"`);
+    if (cue.HOTCUE !== undefined) attrs.push(`HOTCUE="${cue.HOTCUE}"`);
+
+    return `<CUE_V2 ${attrs.join(' ')}></CUE_V2>`;
+  }
+
+  /**
+   * Convert a playlist node to XML (recursive)
+   */
+  private nodeToXml(node: TraktorNode, indent: string): string {
+    const lines: string[] = [];
+
+    lines.push(`${indent}<NODE TYPE="${node.TYPE}" NAME="${escapeXml(node.NAME)}">`);
+
+    // SUBNODES
+    if (node.SUBNODES) {
+      const count = node.SUBNODES.COUNT || '0';
+      lines.push(`${indent}  <SUBNODES COUNT="${count}">`);
+
+      if (node.SUBNODES.NODE) {
+        const nodes = Array.isArray(node.SUBNODES.NODE) ? node.SUBNODES.NODE : [node.SUBNODES.NODE];
+        for (const childNode of nodes) {
+          lines.push(this.nodeToXml(childNode, `${indent}    `));
+        }
+      }
+
+      lines.push(`${indent}  </SUBNODES>`);
+    }
+
+    // PLAYLIST data
+    if (node.PLAYLIST) {
+      const pl = node.PLAYLIST;
+      lines.push(`${indent}  <PLAYLIST ENTRIES="${pl.ENTRIES}" TYPE="${pl.TYPE}" UUID="${pl.UUID}">`);
+
+      if (pl.ENTRY) {
+        const entries = Array.isArray(pl.ENTRY) ? pl.ENTRY : [pl.ENTRY];
+        for (const entry of entries) {
+          lines.push(
+            `${indent}    <ENTRY><PRIMARYKEY TYPE="${entry.PRIMARYKEY.TYPE || 'TRACK'}" KEY="${escapeXml(entry.PRIMARYKEY.KEY || '')}"></PRIMARYKEY></ENTRY>`,
+          );
+        }
+      }
+
+      lines.push(`${indent}  </PLAYLIST>`);
+    }
+
+    lines.push(`${indent}</NODE>`);
+    return lines.join('\n');
+  }
+}
