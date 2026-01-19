@@ -33,8 +33,6 @@ describe('TrackList Component - AG Grid v34 Upgrade', () => {
     tracks: mockTracks,
     trackPlayingID: null,
     playlists: mockPlaylists,
-    width: 800,
-    height: 600,
   };
 
   beforeEach(() => {
@@ -96,12 +94,13 @@ describe('TrackList Component - AG Grid v34 Upgrade', () => {
       expect(container).toBeTruthy();
     });
 
-    it('should handle width and height props', () => {
+    it('should handle reorderable prop for playlists', () => {
       const { container } = renderWithProviders(
         <TrackList
           {...defaultProps}
-          width={1200}
-          height={800}
+          type='playlist'
+          reorderable={true}
+          currentPlaylist='playlist-1'
         />,
       );
       expect(container).toBeTruthy();
@@ -184,8 +183,6 @@ describe('TrackList Component - AG Grid v34 Upgrade', () => {
         tracks: mockTracks,
         trackPlayingID: null,
         playlists: [],
-        width: 800,
-        height: 600,
       };
 
       const { container } = renderWithProviders(<TrackList {...minimalProps} />);
@@ -220,8 +217,6 @@ describe('TrackList Integration - AG Grid v34 Features', () => {
     tracks: mockTracks,
     trackPlayingID: null,
     playlists: mockPlaylists,
-    width: 800,
-    height: 600,
   };
 
   beforeEach(() => {

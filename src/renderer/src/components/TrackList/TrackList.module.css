@@ -12,14 +12,14 @@
 :global(.ag-root-wrapper) {
   border: none;
   background-color: transparent;
-  font-family:
-    'Inter',
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    Segoe UI,
-    Roboto,
-    sans-serif;
+  /* font-family: */
+  /*   'Inter', */
+  /*   system-ui, */
+  /*   -apple-system, */
+  /*   BlinkMacSystemFont, */
+  /*   Segoe UI, */
+  /*   Roboto, */
+  /*   sans-serif; */
 }
 
 /* Header styling refinements */

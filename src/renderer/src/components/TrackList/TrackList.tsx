@@ -31,6 +31,7 @@ import { themeQuartz, iconSetMaterial } from 'ag-grid-community';
 import styles from './TrackList.module.css';
 
 const harmonyTheme = themeQuartz.withPart(iconSetMaterial).withParams({
+  fontFamily: { googleFont: 'Inter' },
   backgroundColor: 'transparent',
   foregroundColor: 'var(--text-secondary)',
   headerTextColor: 'var(--text-muted)',

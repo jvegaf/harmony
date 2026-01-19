@@ -30,8 +30,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={largeTracks}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -48,8 +46,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={largeTracks}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -61,8 +57,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={updatedTracks}
           trackPlayingID={updatedTracks[100].id}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -80,8 +74,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           playlists={mockPlaylists}
           currentPlaylist='large-playlist'
           reorderable={true}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -100,8 +92,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={tracks}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -123,8 +113,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={tracks}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -144,8 +132,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={tracks}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -159,8 +145,6 @@ describe('TrackList Performance - AG Grid v34', () => {
             tracks={tracks}
             trackPlayingID={tracks[i * 100].id}
             playlists={mockPlaylists}
-            width={1200}
-            height={800}
           />,
         );
       }
@@ -183,8 +167,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={tracks}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -202,8 +184,6 @@ describe('TrackList Performance - AG Grid v34', () => {
             tracks={tracks}
             trackPlayingID={null}
             playlists={mockPlaylists}
-            width={1200}
-            height={800}
           />,
         );
 
@@ -225,8 +205,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={largeTracks}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -237,8 +215,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={[]}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -254,8 +230,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={smallTracks}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -267,8 +241,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={largeTracks}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -286,8 +258,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={largeTracks}
           trackPlayingID={playingTrackId}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -299,8 +269,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={largeTracks}
           trackPlayingID={newPlayingId}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -321,8 +289,6 @@ describe('TrackList Performance - AG Grid v34', () => {
             tracks={largeTracks}
             trackPlayingID={null}
             playlists={mockPlaylists}
-            width={1200}
-            height={800}
           />,
         );
       }).not.toThrow();
@@ -337,8 +303,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={largeTracks}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
@@ -357,8 +321,6 @@ describe('TrackList Performance - AG Grid v34', () => {
           tracks={largeTracks}
           trackPlayingID={null}
           playlists={mockPlaylists}
-          width={1200}
-          height={800}
         />,
       );
 
