@@ -14,9 +14,11 @@ const dbPath = path.join(pathUserData, 'database/harmony.db');
 
 export class Database {
   private connection!: DataSource;
+  private initPromise: Promise<void> | null = null;
 
   public constructor() {
-    this.init();
+    // Start initialization but don't block constructor
+    this.initPromise = this.init();
   }
 
   // AIDEV-NOTE: Helper to maintain backward compatibility with existing code
@@ -38,7 +40,7 @@ export class Database {
     };
   }
 
-  public async init(): Promise<void> {
+  private async init(): Promise<void> {
     const AppDataSource = new DataSource({
       synchronize: true,
       type: 'sqlite',
@@ -46,18 +48,31 @@ export class Database {
       entities: [TrackEntity, PlaylistEntity, PlaylistTrackEntity, CuePointEntity, FolderEntity],
       entitySkipConstructor: true,
     });
-    AppDataSource.initialize()
-      .then(() => {
-        log.info('Data Source has been initialized!');
-        log.info('database path: ', dbPath);
-      })
-      .catch((err: any) => {
-        log.error(`Error during Data Source initialization ${err}`);
-      });
-    this.connection = AppDataSource;
+
+    try {
+      await AppDataSource.initialize();
+      log.info('Data Source has been initialized!');
+      log.info('database path: ', dbPath);
+      this.connection = AppDataSource;
+    } catch (err: any) {
+      log.error(`Error during Data Source initialization ${err}`);
+      throw err;
+    }
+  }
+
+  /**
+   * Ensures the database connection is initialized before use
+   * @private
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (this.initPromise) {
+      await this.initPromise;
+      this.initPromise = null; // Clear after first use
+    }
   }
 
   public async getAllTracks(): Promise<Track[]> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Track>(TrackEntity);
     const tracks = await repository.find();
 
@@ -65,16 +80,19 @@ export class Database {
   }
 
   public async insertTracks(tracks: Track[]): Promise<void> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Track>(TrackEntity);
     await repository.save(tracks);
   }
 
   public async updateTrack(track: Track): Promise<void> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Track>(TrackEntity);
     await repository.save(track);
   }
 
   public async removeTracks(trackIDs: TrackId[]): Promise<void> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Track>(TrackEntity);
     log.info('[db] tracks to remove: ', trackIDs.length);
     await repository.delete(trackIDs);
@@ -82,6 +100,7 @@ export class Database {
   }
 
   public async findTracksByID(tracksIDs: string[]): Promise<Track[]> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Track>(TrackEntity);
     return repository.findBy({
       id: In(tracksIDs),
@@ -89,6 +108,7 @@ export class Database {
   }
 
   public async findTracksByPath(paths: string[]): Promise<Track[]> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Track>(TrackEntity);
     return repository.findBy({
       path: In(paths),
@@ -96,6 +116,7 @@ export class Database {
   }
 
   public async findTrackByID(trackID: string): Promise<Track> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Track>(TrackEntity);
     return repository.findOneByOrFail({
       id: trackID,
@@ -103,6 +124,7 @@ export class Database {
   }
 
   public async findTrackByPath(path: string): Promise<Track> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Track>(TrackEntity);
     return repository.findOneByOrFail({
       path: path,
@@ -110,6 +132,7 @@ export class Database {
   }
 
   public async getAllPlaylists(): Promise<Playlist[]> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
     // AIDEV-NOTE: Load playlistTracks relation with eager-loaded tracks
     const playlists = await repository.find({
@@ -121,6 +144,7 @@ export class Database {
   }
 
   public async insertPlaylist(playlist: Playlist): Promise<Playlist> {
+    await this.ensureInitialized();
     const playlistRepo = this.connection.getRepository<Playlist>(PlaylistEntity);
     const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
 
@@ -147,6 +171,7 @@ export class Database {
   }
 
   public async renamePlaylist(playlistID: string, name: string): Promise<void> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
     // AIDEV-NOTE: Load playlistTracks relation to preserve them when saving
     const playlist = await repository.findOne({
@@ -167,11 +192,13 @@ export class Database {
   }
 
   public async removePlaylist(playlistID: string): Promise<void> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
     await repository.delete(playlistID);
   }
 
   public async findPlaylistByID(playlistIDs: string[]): Promise<Playlist[]> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
     // AIDEV-NOTE: Load playlistTracks relation
     const playlists = await repository.find({
@@ -185,6 +212,7 @@ export class Database {
   }
 
   public async findPlaylistOnlyByID(playlistID: string): Promise<Playlist> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
     // AIDEV-NOTE: Load playlistTracks relation
     const playlist = await repository.findOne({
@@ -202,6 +230,7 @@ export class Database {
   }
 
   public async setTracks(playlistID: string, tracks: Track[]): Promise<void> {
+    await this.ensureInitialized();
     const playlistRepo = this.connection.getRepository<Playlist>(PlaylistEntity);
     const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
 
@@ -233,6 +262,7 @@ export class Database {
     targetTrack: Track,
     position: 'above' | 'below',
   ): Promise<void> {
+    await this.ensureInitialized();
     const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
 
     // 1. Load current PlaylistTracks ordered
@@ -272,6 +302,7 @@ export class Database {
   }
 
   public async reset(): Promise<void> {
+    await this.ensureInitialized();
     const playlistRepo = this.connection.getRepository<Playlist>(PlaylistEntity);
     const trackRepo = this.connection.getRepository<Track>(TrackEntity);
 
@@ -285,6 +316,7 @@ export class Database {
   private readonly TO_DELETE_PLAYLIST_NAME = 'To Delete';
 
   public async getOrCreateToDeletePlaylist(): Promise<Playlist> {
+    await this.ensureInitialized();
     const playlistRepo = this.connection.getRepository<Playlist>(PlaylistEntity);
 
     let playlist = await playlistRepo.findOne({
@@ -309,6 +341,7 @@ export class Database {
   }
 
   public async addTrackToToDeletePlaylist(trackId: TrackId): Promise<void> {
+    await this.ensureInitialized();
     const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
 
     // Ensure playlist exists
@@ -348,6 +381,7 @@ export class Database {
   }
 
   public async removeTrackFromToDeletePlaylist(trackId: TrackId): Promise<void> {
+    await this.ensureInitialized();
     const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
 
     await playlistTrackRepo.delete({
@@ -359,6 +393,7 @@ export class Database {
   }
 
   public async clearToDeletePlaylist(): Promise<void> {
+    await this.ensureInitialized();
     const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
 
     await playlistTrackRepo.delete({
@@ -374,6 +409,7 @@ export class Database {
   private readonly PREPARATION_PLAYLIST_NAME = 'Set Preparation';
 
   public async getOrCreatePreparationPlaylist(): Promise<Playlist> {
+    await this.ensureInitialized();
     const playlistRepo = this.connection.getRepository<Playlist>(PlaylistEntity);
 
     let playlist = await playlistRepo.findOne({
@@ -398,6 +434,7 @@ export class Database {
   }
 
   public async addTrackToPreparationPlaylist(trackId: TrackId): Promise<void> {
+    await this.ensureInitialized();
     const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
 
     // Ensure playlist exists
@@ -437,6 +474,7 @@ export class Database {
   }
 
   public async removeTrackFromPreparationPlaylist(trackId: TrackId): Promise<void> {
+    await this.ensureInitialized();
     const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
 
     await playlistTrackRepo.delete({
@@ -448,6 +486,7 @@ export class Database {
   }
 
   public async clearPreparationPlaylist(): Promise<void> {
+    await this.ensureInitialized();
     const playlistTrackRepo = this.connection.getRepository<PlaylistTrack>(PlaylistTrackEntity);
 
     await playlistTrackRepo.delete({
@@ -465,6 +504,7 @@ export class Database {
    * Get all cue points for a specific track
    */
   public async getCuePointsByTrackId(trackId: TrackId): Promise<CuePoint[]> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
     return repository.find({
       where: { trackId },
@@ -477,6 +517,7 @@ export class Database {
    */
   public async getCuePointsByTrackIds(trackIds: TrackId[]): Promise<CuePoint[]> {
     if (trackIds.length === 0) return [];
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
     return repository.find({
       where: { trackId: In(trackIds) },
@@ -489,6 +530,7 @@ export class Database {
    */
   public async saveCuePoints(cuePoints: CuePoint[]): Promise<void> {
     if (cuePoints.length === 0) return;
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
     await repository.save(cuePoints);
     log.info(`[db] Saved ${cuePoints.length} cue points`);
@@ -498,6 +540,7 @@ export class Database {
    * Delete all cue points for a track
    */
   public async deleteCuePointsByTrackId(trackId: TrackId): Promise<void> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
     await repository.delete({ trackId });
     log.info(`[db] Deleted cue points for track ${trackId}`);
@@ -508,6 +551,7 @@ export class Database {
    */
   public async deleteCuePoints(cuePointIds: string[]): Promise<void> {
     if (cuePointIds.length === 0) return;
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
     await repository.delete(cuePointIds);
     log.info(`[db] Deleted ${cuePointIds.length} cue points`);
@@ -518,6 +562,7 @@ export class Database {
    * AIDEV-NOTE: Useful for Traktor sync - complete replacement strategy
    */
   public async replaceCuePointsForTrack(trackId: TrackId, cuePoints: CuePoint[]): Promise<void> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
 
     // Delete existing
@@ -539,6 +584,7 @@ export class Database {
    * Get all folders with optional parent/children relations
    */
   public async getAllFolders(): Promise<Folder[]> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Folder>(FolderEntity);
     return repository.find({
       order: { path: 'ASC' },
@@ -549,6 +595,7 @@ export class Database {
    * Get folder tree structure (root folders with children)
    */
   public async getFolderTree(): Promise<Folder[]> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Folder>(FolderEntity);
     // Get root folders (no parent)
     return repository.find({
@@ -562,6 +609,7 @@ export class Database {
    * Get a folder by ID
    */
   public async getFolderById(folderId: string): Promise<Folder | null> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Folder>(FolderEntity);
     return repository.findOne({
       where: { id: folderId },
@@ -573,6 +621,7 @@ export class Database {
    * Get folder by path
    */
   public async getFolderByPath(path: string): Promise<Folder | null> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Folder>(FolderEntity);
     return repository.findOne({
       where: { path },
@@ -584,6 +633,7 @@ export class Database {
    */
   public async saveFolders(folders: Folder[]): Promise<void> {
     if (folders.length === 0) return;
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Folder>(FolderEntity);
     await repository.save(folders);
     log.info(`[db] Saved ${folders.length} folders`);
@@ -593,6 +643,7 @@ export class Database {
    * Create a single folder
    */
   public async createFolder(folder: Folder): Promise<Folder> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Folder>(FolderEntity);
     return repository.save(folder);
   }
@@ -602,6 +653,7 @@ export class Database {
    * AIDEV-NOTE: Cascades to child folders if configured, but playlists should be reassigned first
    */
   public async deleteFolder(folderId: string): Promise<void> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Folder>(FolderEntity);
     await repository.delete(folderId);
     log.info(`[db] Deleted folder ${folderId}`);
@@ -611,6 +663,7 @@ export class Database {
    * Delete all folders (for clean sync)
    */
   public async clearAllFolders(): Promise<void> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Folder>(FolderEntity);
     await repository.clear();
     log.info('[db] Cleared all folders');
@@ -620,6 +673,7 @@ export class Database {
    * Get playlists by folder ID
    */
   public async getPlaylistsByFolderId(folderId: string): Promise<Playlist[]> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
     const playlists = await repository.find({
       where: { folderId },
@@ -632,6 +686,7 @@ export class Database {
    * Update playlist's folder assignment
    */
   public async setPlaylistFolder(playlistId: string, folderId: string | null): Promise<void> {
+    await this.ensureInitialized();
     const repository = this.connection.getRepository<Playlist>(PlaylistEntity);
     await repository.update(playlistId, { folderId: folderId as any });
     log.info(`[db] Playlist ${playlistId} moved to folder ${folderId ?? 'root'}`);

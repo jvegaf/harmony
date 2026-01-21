@@ -76,8 +76,8 @@ class IPCLibraryModule extends ModuleWindow {
       UpdateTrackRating(payload),
     );
     ipcMain.on(channels.TRACK_UPDATE_METADATA, (_: IpcMainEvent, track: Track) => PersistTrack(track));
-    ipcMain.on(channels.TRACKS_DELETE, (_: IpcMainEvent, trackFiles: TrackSrc[]) => {
-      trackFiles.forEach(tf => RemoveFile(tf));
+    ipcMain.on(channels.TRACKS_DELETE, (_: IpcMainEvent, trackFiles: Track[]) => {
+      trackFiles.forEach(t => RemoveFile(t.path));
     });
   }
 
