@@ -7,7 +7,7 @@ import { globby } from 'globby';
 import * as mmd from 'music-metadata';
 import queue from 'queue';
 
-import { Track, TrackSrc, UpdateRatingPayload } from '../../preload/types/harmony';
+import { Track, UpdateRatingPayload } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
 import channels from '../../preload/lib/ipc-channels';
