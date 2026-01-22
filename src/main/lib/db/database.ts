@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 
 import { app } from 'electron';
 import { DataSource, In } from 'typeorm';
@@ -12,13 +13,26 @@ import makeID from '../../../preload/lib/id-provider';
 const pathUserData = app.getPath('userData');
 const dbPath = path.join(pathUserData, 'database/harmony.db');
 
+// AIDEV-NOTE: Singleton instance to prevent multiple Database connections
+let databaseInstance: Database | null = null;
+
 export class Database {
   private connection!: DataSource;
   private initPromise: Promise<void> | null = null;
+  private static isInitializing = false;
 
-  public constructor() {
+  private constructor() {
+    // Private constructor to enforce singleton pattern
     // Start initialization but don't block constructor
     this.initPromise = this.init();
+  }
+
+  // AIDEV-NOTE: Singleton accessor - ensures only one Database instance exists
+  public static getInstance(): Database {
+    if (!databaseInstance) {
+      databaseInstance = new Database();
+    }
+    return databaseInstance;
   }
 
   // AIDEV-NOTE: Helper to maintain backward compatibility with existing code
@@ -40,23 +54,77 @@ export class Database {
     };
   }
 
-  private async init(): Promise<void> {
-    const AppDataSource = new DataSource({
-      synchronize: true,
-      type: 'sqlite',
-      database: dbPath,
-      entities: [TrackEntity, PlaylistEntity, PlaylistTrackEntity, CuePointEntity, FolderEntity],
-      entitySkipConstructor: true,
-    });
+  // AIDEV-NOTE: Clean up stale journal files that may cause SQLITE_BUSY errors
+  // This happens when a previous session crashed during a transaction
+  private cleanJournalFiles(): void {
+    const journalPath = `${dbPath}-journal`;
+    const walPath = `${dbPath}-wal`;
+    const shmPath = `${dbPath}-shm`;
 
     try {
+      if (fs.existsSync(journalPath)) {
+        log.warn(`[db] Found stale journal file, removing: ${journalPath}`);
+        fs.unlinkSync(journalPath);
+      }
+      if (fs.existsSync(walPath)) {
+        log.info(`[db] Found existing WAL file: ${walPath}`);
+      }
+      if (fs.existsSync(shmPath)) {
+        log.info(`[db] Found existing SHM file: ${shmPath}`);
+      }
+    } catch (err) {
+      log.error(`[db] Error cleaning journal files: ${err}`);
+      // Don't throw - continue with initialization
+    }
+  }
+
+  private async init(): Promise<void> {
+    // AIDEV-NOTE: Prevent multiple simultaneous initializations
+    if (Database.isInitializing) {
+      log.warn('[db] Database initialization already in progress, waiting...');
+      return;
+    }
+
+    Database.isInitializing = true;
+
+    try {
+      // Clean up stale journal files before connecting
+      this.cleanJournalFiles();
+
+      // AIDEV-NOTE: SQLite WAL mode configuration for better concurrency
+      // WAL mode allows multiple readers and one writer simultaneously
+      const AppDataSource = new DataSource({
+        synchronize: true,
+        type: 'sqlite',
+        database: dbPath,
+        entities: [TrackEntity, PlaylistEntity, PlaylistTrackEntity, CuePointEntity, FolderEntity],
+        entitySkipConstructor: true,
+        // AIDEV-NOTE: Enable WAL mode and set pragmas for better concurrency
+        extra: {
+          // Set busy timeout to 10 seconds (10000ms)
+          // This gives SQLite time to retry if database is locked
+          busyTimeout: 10000,
+        },
+      });
+
       await AppDataSource.initialize();
-      log.info('Data Source has been initialized!');
-      log.info('database path: ', dbPath);
+
+      // AIDEV-NOTE: Enable WAL mode after connection is established
+      // WAL mode must be enabled with a PRAGMA statement
+      await AppDataSource.query('PRAGMA journal_mode = WAL');
+      await AppDataSource.query('PRAGMA synchronous = NORMAL');
+      await AppDataSource.query('PRAGMA cache_size = 10000');
+      await AppDataSource.query('PRAGMA temp_store = MEMORY');
+
+      log.info('[db] Data Source has been initialized with WAL mode!');
+      log.info('[db] Database path:', dbPath);
+
       this.connection = AppDataSource;
     } catch (err: any) {
-      log.error(`Error during Data Source initialization ${err}`);
+      log.error(`[db] Error during Data Source initialization: ${err}`);
       throw err;
+    } finally {
+      Database.isInitializing = false;
     }
   }
 

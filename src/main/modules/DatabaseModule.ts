@@ -14,7 +14,8 @@ class DatabaseModule extends ModuleWindow {
 
   constructor(window: Electron.BrowserWindow) {
     super(window);
-    this.db = new Database();
+    // AIDEV-NOTE: Use singleton instance to prevent multiple database connections
+    this.db = Database.getInstance();
   }
 
   async load(): Promise<void> {
