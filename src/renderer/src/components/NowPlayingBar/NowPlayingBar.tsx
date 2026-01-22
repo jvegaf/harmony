@@ -4,7 +4,7 @@ import {
   IconPlayerPlayFilled,
   IconRewindBackward10,
   IconRewindForward10,
-  IconInfoCircle,
+  IconHeadphones,
   IconX,
 } from '@tabler/icons-react';
 import { Track, PlayerStatus, Config } from '../../../../preload/types/harmony';
@@ -29,7 +29,7 @@ function Tag({ label, variant = 'default' }: TagProps) {
 
 export default function NowPlayingBar({ track, config }: NowPlayingBarProps) {
   const playerAPI = usePlayerAPI();
-  const { playerStatus } = usePlayerStore();
+  const { playerStatus, isPreCueing } = usePlayerStore();
 
   const tags = useMemo(() => {
     if (!track) return [];
@@ -94,8 +94,12 @@ export default function NowPlayingBar({ track, config }: NowPlayingBarProps) {
             <button
               type='button'
               className={styles.actionButton}
+              onClick={() => playerAPI.togglePreCue()}
             >
-              <IconInfoCircle size={20} />
+              <IconHeadphones
+                size={20}
+                style={{ color: isPreCueing ? '#fa8905' : '' }}
+              />
             </button>
             <button
               type='button'
