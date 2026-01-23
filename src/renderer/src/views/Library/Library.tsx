@@ -4,7 +4,6 @@ import { Link, useLoaderData, useRouteLoaderData } from 'react-router-dom';
 import * as ViewMessage from '../../elements/ViewMessage/ViewMessage';
 import useLibraryStore from '../../stores/useLibraryStore';
 import usePlayingTrackID from '../../hooks/usePlayingTrackID';
-import useFilteredTracks from '../../hooks/useFilteredTracks';
 
 import { RootLoaderData } from '../Root';
 import { LoaderData } from '../router';
@@ -20,11 +19,10 @@ export default function LibraryView() {
 
   const { playlists } = useLoaderData() as LibraryLoaderData;
   const { tracks } = useRouteLoaderData('root') as RootLoaderData;
-  const filteredTracks = useFilteredTracks(tracks);
 
   const getLibraryComponent = useMemo(() => {
     // Empty library
-    if (filteredTracks.length === 0 && search === '') {
+    if (tracks.length === 0 && search === '') {
       if (refreshing) {
         return (
           <ViewMessage.Notice>
@@ -52,28 +50,19 @@ export default function LibraryView() {
       );
     }
 
-    // Empty search
-    if (filteredTracks.length === 0) {
-      return (
-        <ViewMessage.Notice>
-          <p>Your search returned no results</p>
-        </ViewMessage.Notice>
-      );
-    }
-
     // All good !
     return (
       <div className={styles.viewLibrary}>
         <TrackList
           type='library'
           reorderable={false}
-          tracks={filteredTracks}
+          tracks={tracks}
           trackPlayingID={trackPlayingID}
           playlists={playlists}
         />
       </div>
     );
-  }, [search, refreshing, filteredTracks, playlists, trackPlayingID]);
+  }, [search, refreshing, tracks, playlists, trackPlayingID]);
 
   return <div className={appStyles.view}>{getLibraryComponent}</div>;
 }

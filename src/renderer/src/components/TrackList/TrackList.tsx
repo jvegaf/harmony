@@ -7,6 +7,7 @@ import {
   GridReadyEvent,
   IRowDragItem,
   ModuleRegistry,
+  RowClassParams,
   RowDoubleClickedEvent,
   RowDragCancelEvent,
   RowDragEndEvent,
@@ -71,7 +72,7 @@ const TrackList = (props: Props) => {
   const { tracks, trackPlayingID, playlists, currentPlaylist, type } = props;
   const playerAPI = usePlayerAPI();
   const libraryAPI = useLibraryAPI();
-  const { searched, updated, deleting, tracklistSort } = useLibraryStore();
+  const { search, updated, deleting, tracklistSort } = useLibraryStore();
   const gridRef = useRef<AgGridReact>(null);
   const [lastUpdated, setLastUpdated] = useState<Track | null>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
@@ -192,7 +193,7 @@ const TrackList = (props: Props) => {
     return tracks;
   }, [tracks, type]);
 
-  const updateTrackRow = useCallback(updatedTrack => {
+  const updateTrackRow = useCallback((updatedTrack: Track) => {
     // const rowNode = gridRef.current!.api.getRowNode(updatedTrack.id)!;
     const rowNode = gridRef.current?.api.getRowNode(updatedTrack.id);
     if (!rowNode) {
@@ -203,26 +204,6 @@ const TrackList = (props: Props) => {
     logger.info(`[TracksTable] updated track: ${updatedTrack.title}`);
     setLastUpdated(updatedTrack);
   }, []);
-
-  const goTo = useCallback(
-    (trackID: string) => {
-      const rowNode = gridRef.current!.api.getRowNode(trackID);
-      if (!rowNode) {
-        logger.error(`[TracksTable] track not found: ${trackID}`);
-        return;
-      }
-
-      gridRef.current!.api.deselectAll();
-      rowNode.setSelected(true);
-      // rowNode.setFocused ? rowNode.setFocused(true) : rowNode.setSelected(true, true);
-      gridRef.current!.api.ensureNodeVisible(rowNode);
-
-      logger.info(`[TracksTable] selected track: ${trackID}`);
-
-      libraryAPI.setSearched(null);
-    },
-    [libraryAPI],
-  );
 
   useEffect(() => {
     if (gridApi && updated !== null && updated !== lastUpdated) {
@@ -242,16 +223,6 @@ const TrackList = (props: Props) => {
       gridApi.sizeColumnsToFit();
     }
   }, [gridApi]);
-
-  useEffect(() => {
-    if (searched) {
-      goTo(searched.id);
-    }
-
-    return () => {
-      libraryAPI.setSearched(null);
-    };
-  }, [searched, goTo, libraryAPI]);
 
   // AIDEV-NOTE: CRITICAL FIX - Update rowData when tracks change (e.g., switching playlists)
   // Without this, the grid shows stale data when navigating between playlists
@@ -505,7 +476,7 @@ const TrackList = (props: Props) => {
 
   const rowClassRules = useMemo(() => {
     return {
-      'playing-style': params => {
+      'playing-style': (params: RowClassParams) => {
         const trackId = params.data.id;
         return trackId === trackPlayingID;
       },
@@ -547,6 +518,7 @@ const TrackList = (props: Props) => {
             onRowDoubleClicked={e => onDoubleClick(e)}
             onCellContextMenu={e => onShowCtxtMenu(e)}
             suppressCellFocus
+            quickFilterText={search}
             rowDragText={rowDragText}
             rowDragEntireRow={isDragEnabled}
             suppressRowDrag={!isDragEnabled}

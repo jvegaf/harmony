@@ -4,8 +4,8 @@ import { useMemo } from 'react';
 import { RootLoaderData } from '../views/Root';
 // import { PlaylistLoaderData } from '../views/ViewPlaylistDetails';
 
-import useFilteredTracks from './useFilteredTracks';
 import { Track } from '../../../preload/types/harmony';
+import { PlaylistLoaderData } from '@renderer/views/PLaylist/PlaylistView';
 
 type Maybe<T> = T | undefined;
 
@@ -15,13 +15,13 @@ type Maybe<T> = T | undefined;
 export default function useCurrentViewTracks(): Track[] {
   // TODO: how to support Settings page? Should we?
   const rootData = useRouteLoaderData('root') as Maybe<RootLoaderData>;
-  const filteredLibraryTracks = useFilteredTracks((rootData && rootData.tracks) ?? []);
-  // const playlistData = useRouteLoaderData('playlist-details') as Maybe<PlaylistLoaderData>;
+  const filteredLibraryTracks = (rootData && rootData.tracks) ?? [];
+  const playlistData = useRouteLoaderData('playlists') as Maybe<PlaylistLoaderData>;
 
   const tracks = useMemo(() => {
-    // if (playlistData) {
-    //   return playlistData.playlistTracks;
-    // }
+    if (playlistData) {
+      return playlistData.playlistTracks;
+    }
 
     if (rootData) {
       return filteredLibraryTracks;

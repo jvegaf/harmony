@@ -1,7 +1,4 @@
 import usePlayingTrackID from '@renderer/hooks/usePlayingTrackID';
-import { filterTracks } from '@renderer/lib/utils-library';
-import useLibraryStore from '@renderer/stores/useLibraryStore';
-import { useMemo } from 'react';
 import { Link, LoaderFunctionArgs, useLoaderData, useParams, useRouteLoaderData } from 'react-router-dom';
 import { LoaderData } from '../router';
 import { RootLoaderData } from '../Root';
@@ -19,36 +16,7 @@ export default function PlaylistView() {
   // OPTIMIZATION: Get playlists from parent loader (RootView) instead of reloading
   const { playlists } = useRouteLoaderData('root') as RootLoaderData;
 
-  const search = useLibraryStore(state => state.search);
-  const filteredTracks = useMemo(() => filterTracks(playlistTracks, search), [playlistTracks, search]);
-
   if (playlistTracks.length === 0) {
-    return (
-      <ViewMessage.Notice>
-        <p>Empty playlist</p>
-        <ViewMessage.Sub>
-          You can add tracks from the{' '}
-          <Link
-            to='/'
-            draggable={false}
-          >
-            library view
-          </Link>
-        </ViewMessage.Sub>
-      </ViewMessage.Notice>
-    );
-  }
-
-  if (filteredTracks.length === 0 && search.length > 0) {
-    return (
-      <ViewMessage.Notice>
-        <p>Your search returned no results</p>
-      </ViewMessage.Notice>
-    );
-  }
-
-  // A bit hacky though
-  if (filteredTracks && filteredTracks.length === 0) {
     return (
       <ViewMessage.Notice>
         <p>Empty playlist</p>

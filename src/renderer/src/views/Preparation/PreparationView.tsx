@@ -2,11 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useRouteLoaderData } from 'react-router-dom';
 import Keybinding from 'react-keybinding-component';
 
-import { Playlist } from '../../../../preload/types/harmony';
+import { Playlist, Track } from '../../../../preload/types/harmony';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import usePlayerStore from '../../stores/usePlayerStore';
 import { RootLoaderData } from '../Root';
-import useFilteredTracks from '../../hooks/useFilteredTracks';
 import styles from './PreparationView.module.css';
 
 const { db } = window.Main;
@@ -17,7 +16,6 @@ export default function PreparationView() {
   const { playingTrack, queue, queueCursor } = usePlayerStore();
 
   const { tracks } = useRouteLoaderData('root') as RootLoaderData;
-  const filteredTracks = useFilteredTracks(tracks);
 
   const [preparationPlaylist, setPreparationPlaylist] = useState<Playlist | null>(null);
   const [pressedK, setPressedK] = useState(false);
@@ -38,10 +36,9 @@ export default function PreparationView() {
     loadPreparationPlaylist();
   }, []);
 
-  // AIDEV-NOTE: Start playback on mount with filtered tracks
   useEffect(() => {
     const startPreparationMode = async () => {
-      if (filteredTracks.length === 0) {
+      if (tracks.length === 0) {
         return;
       }
 
@@ -49,7 +46,7 @@ export default function PreparationView() {
       playerAPI.setPruneMode(true);
 
       // Start playing from the beginning
-      const trackIds = filteredTracks.map(t => t.id);
+      const trackIds = tracks.map((t: Track) => t.id);
       await playerAPI.start(trackIds, 0);
     };
 
@@ -94,7 +91,7 @@ export default function PreparationView() {
 
       // Advance to next track
       if (!isAtEnd) {
-        await playerAPI.next();
+        playerAPI.next();
       }
     } catch (error) {
       console.error('Failed to add track to preparation:', error);
@@ -113,7 +110,7 @@ export default function PreparationView() {
 
     // Advance to next track
     if (!isAtEnd) {
-      await playerAPI.next();
+      playerAPI.next();
     }
   }, [isAtEnd, playerAPI]);
 
@@ -157,7 +154,7 @@ export default function PreparationView() {
   );
 
   // AIDEV-NOTE: Handle empty library
-  if (filteredTracks.length === 0) {
+  if (tracks.length === 0) {
     return (
       <div className={styles.container}>
         <div className={styles.preparationOverlay}>
