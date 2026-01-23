@@ -30,6 +30,18 @@ function GlobalKeyBindings() {
             navigate('/settings');
           }
           break;
+        case 'k':
+          // AIDEV-NOTE: Ctrl+K focuses the search input in the Sidebar
+          if (isCtrlKey(e)) {
+            e.preventDefault();
+            e.stopPropagation();
+            const searchInput = document.querySelector<HTMLInputElement>('[data-search-input="true"]');
+            if (searchInput) {
+              searchInput.focus();
+              searchInput.select();
+            }
+          }
+          break;
         case 'ArrowLeft':
           e.preventDefault();
           e.stopPropagation();

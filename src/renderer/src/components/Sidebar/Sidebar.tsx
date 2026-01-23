@@ -48,6 +48,15 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
     onSearch(value);
   };
 
+  // AIDEV-NOTE: Handle Escape key to clear search and remove focus
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setSearchQuery('');
+      onSearch('');
+      e.currentTarget.blur();
+    }
+  };
+
   const handleNavClick = (itemId: string) => {
     if (itemId === 'all-tracks' || itemId === 'queue' || itemId === 'recently-added') {
       navigate('/');
@@ -163,9 +172,11 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
         <input
           type='text'
           className={styles.searchInput}
-          placeholder='Search... All Tracks'
+          placeholder='Search...       [ctrl+k]'
           value={searchQuery}
           onChange={handleSearchChange}
+          onKeyDown={handleSearchKeyDown}
+          data-search-input='true'
         />
       </div>
 
