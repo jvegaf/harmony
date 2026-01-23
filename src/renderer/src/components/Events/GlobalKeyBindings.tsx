@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import { isCtrlKey } from '../../lib/utils-events';
-import player from '../../lib/player';
 
 /**
  * Handle app-level IPC Navigation events
@@ -45,22 +44,22 @@ function GlobalKeyBindings() {
         case 'ArrowLeft':
           e.preventDefault();
           e.stopPropagation();
-          playerAPI.jumpTo(player.getCurrentTime() - 10);
+          playerAPI.jumpTo(-10);
           break;
         case 'ArrowRight':
           e.preventDefault();
           e.stopPropagation();
-          playerAPI.jumpTo(player.getCurrentTime() + 10);
+          playerAPI.jumpTo(10);
           break;
         case 's':
           e.preventDefault();
           e.stopPropagation();
-          playerAPI.jumpTo(player.getCurrentTime() - 10);
+          playerAPI.jumpTo(-10);
           break;
         case 'w':
           e.preventDefault();
           e.stopPropagation();
-          playerAPI.jumpTo(player.getCurrentTime() + 10);
+          playerAPI.jumpTo(10);
           break;
         case 'a':
           e.preventDefault();

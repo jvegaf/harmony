@@ -20,16 +20,11 @@ function WavePlayer({ config }: WavePlayerProps) {
   const { audioPreCuePosition } = config;
   const containerRef = useRef<HTMLInputElement>(null);
   const hoverRef = useRef<HTMLInputElement>(null);
-  const playingTrack = usePlayerStore.use.playingTrack();
-  const playerStatus = usePlayerStore.use.playerStatus();
-  const isPreCueing = usePlayerStore.use.isPreCueing();
-  const isPruneMode = usePlayerStore.use.isPruneMode();
-  const audioVolume = usePlayerStore.use.volume();
-  const isMuted = usePlayerStore.use.isMuted();
+  const { position, playingTrack, playerStatus, isPreCueing, isPruneMode, volume, isMuted } = usePlayerStore();
   const playerAPI = usePlayerAPI();
   const [audioUrl, setAudioUrl] = useState('');
   const [time, setTime] = useState<string>('0:00');
-  const [duration, setDuration] = useState<string>('0:00');
+  const [totalDuration, setTotalDuration] = useState<string>('0:00');
 
   const optionsMemo = useMemo((): Omit<WaveSurferOptions, 'container'> => {
     let gradient, progressGradient;
@@ -77,7 +72,7 @@ function WavePlayer({ config }: WavePlayerProps) {
 
     const subscriptions = [
       wavesurfer.on('decode', duration => {
-        setDuration(formatTime(duration));
+        setTotalDuration(formatTime(duration));
       }),
       wavesurfer.on('timeupdate', currentTime => {
         setTime(formatTime(currentTime));
@@ -91,6 +86,13 @@ function WavePlayer({ config }: WavePlayerProps) {
       subscriptions.forEach(unsub => unsub());
     };
   }, [wavesurfer]);
+
+  useEffect(() => {
+    if (!wavesurfer) return;
+    if (position === 0) return;
+    wavesurfer.skip(position);
+    playerAPI.jumpTo(0);
+  }, [wavesurfer, position]);
 
   useEffect(() => {
     if (playingTrack !== null) {
@@ -118,42 +120,24 @@ function WavePlayer({ config }: WavePlayerProps) {
 
   useEffect(() => {
     if (!wavesurfer) return;
-    if (isPreCueing) {
+    if (isPreCueing || isPruneMode) {
       wavesurfer.on('play', () => wavesurfer.skip(audioPreCuePosition));
     }
-  }, [wavesurfer, isPreCueing]);
-
-  // AIDEV-NOTE: Handle Prune Mode - start tracks at 50% position
-  useEffect(() => {
-    if (!wavesurfer) return;
-    if (!isPruneMode) return;
-
-    const handleReady = () => {
-      const duration = wavesurfer.getDuration();
-      if (duration > 0) {
-        wavesurfer.seekTo(0.5); // Jump to 50% of track
-      }
-    };
-    wavesurfer.on('ready', handleReady);
-
-    return () => {
-      wavesurfer.un('ready', handleReady);
-    };
-  }, [wavesurfer, isPruneMode]);
+  }, [wavesurfer, isPreCueing, isPruneMode]);
 
   useEffect(() => {
     if (!wavesurfer) return;
     if (isMuted) {
       wavesurfer.setVolume(0);
     } else {
-      wavesurfer.setVolume(audioVolume);
+      wavesurfer.setVolume(volume);
     }
   }, [wavesurfer, isMuted]);
 
   useEffect(() => {
     if (!wavesurfer) return;
-    wavesurfer.setVolume(audioVolume);
-  }, [wavesurfer, audioVolume]);
+    wavesurfer.setVolume(volume);
+  }, [wavesurfer, volume]);
 
   return (
     <div className='wave-player-root'>
@@ -163,7 +147,7 @@ function WavePlayer({ config }: WavePlayerProps) {
           className='wave-form-container'
         >
           <div className='time'>{time}</div>
-          <div className='duration'>{duration}</div>
+          <div className='duration'>{totalDuration}</div>
           <div
             ref={hoverRef}
             className='hover-wave'

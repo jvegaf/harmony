@@ -5,6 +5,7 @@ import createSelectors from './selectors';
 
 type PlayerState = {
   playerStatus: PlayerStatus;
+  position: number;
   playingTrack: Track | null;
   queue: TrackId[];
   queueCursor: number;
@@ -34,6 +35,7 @@ const { db, config, logger } = window.Main;
 
 const playerStore = createStore<PlayerState>((set, get) => ({
   playerStatus: PlayerStatus.STOP,
+  position: 0,
   playingTrack: null,
   queue: [],
   queueCursor: 0,
@@ -155,9 +157,9 @@ const playerStore = createStore<PlayerState>((set, get) => ({
     },
 
     jumpTo: to => {
-      // player.setCurrentTime(to);
-      logger.info(`Jumping to ${to}`);
+      set({ position: to });
     },
+
     setOutputDevice: async (deviceId = 'default') => {
       if (deviceId) {
         try {
