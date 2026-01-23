@@ -7,7 +7,8 @@ import Keybinding from 'react-keybinding-component';
 import SettingsLibrary from './SettingsLibrary';
 import SettingsAudio from './SettingsAudio';
 import SettingsTraktor from './SettingsTraktor';
-import { IconDeviceSpeaker, IconPencilCog, IconVinyl, IconDisc } from '@tabler/icons-react';
+import SettingsGeneral from './SettingsGeneral';
+import { IconDeviceSpeaker, IconPencilCog, IconVinyl, IconDisc, IconSettings } from '@tabler/icons-react';
 import { MdArrowBack } from 'react-icons/md';
 import SettingsLog from './SettingsLog';
 import { RootLoaderData } from '../Root';
@@ -43,12 +44,18 @@ export default function SettingsView() {
           </ActionIcon>
         </div>
         <Tabs
-          defaultValue='library'
+          defaultValue='general'
           // orientation='vertical'
           variant='pills'
           radius='xs'
         >
           <Tabs.List classNames={styles}>
+            <Tabs.Tab
+              value='general'
+              leftSection={<IconSettings size={14} />}
+            >
+              General
+            </Tabs.Tab>
             <Tabs.Tab
               value='library'
               leftSection={<IconVinyl size={12} />}
@@ -75,6 +82,9 @@ export default function SettingsView() {
             </Tabs.Tab>
           </Tabs.List>
 
+          <Tabs.Panel value='general'>
+            <SettingsGeneral />
+          </Tabs.Panel>
           <Tabs.Panel value='library'>
             <SettingsLibrary />
           </Tabs.Panel>

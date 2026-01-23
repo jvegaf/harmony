@@ -43,7 +43,7 @@ async function initModules(window: BrowserWindow): Promise<void> {
     new SleepBlockerModule(window),
     new DialogsModule(window),
     // Modules used to handle IPC APIs
-    new ContextMenuModule(window),
+    new ContextMenuModule(window, configModule),
     new IPCCoverModule(window),
     new IPCLibraryModule(window),
     new IPCPlaylistModule(window),

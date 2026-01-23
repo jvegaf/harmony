@@ -1,15 +1,25 @@
 import { BrowserWindow, ipcMain, IpcMainEvent, Menu, MenuItemConstructorOptions, PopupOptions, shell } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
-import { TrklistCtxMenuPayload } from '../../preload/types/harmony';
+import { SearchEngineConfig, TrklistCtxMenuPayload } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
+import ConfigModule from './ConfigModule';
 import { SanitizedTitle } from '../../preload/utils';
 
 /**
- * Module in charge of returning the track with tags fixed
+ * Module in charge of context menus for tracks, playlists, and common actions.
+ * AIDEV-NOTE: Search engines are now loaded dynamically from ConfigModule.
+ * Users can configure custom search engines via Settings > General.
  */
 class ContextMenuModule extends ModuleWindow {
+  private configModule: ConfigModule;
+
+  constructor(window: Electron.BrowserWindow, configModule: ConfigModule) {
+    super(window);
+    this.configModule = configModule;
+  }
+
   async load(): Promise<void> {
     ipcMain.removeAllListeners(channels.TRKLIST_MENU_SHOW);
     ipcMain.removeAllListeners(channels.PLAYLIST_MENU_SHOW);
@@ -81,27 +91,21 @@ class ContextMenuModule extends ModuleWindow {
 
       if (selectedCount < 2) {
         const track = selected[0];
+        // AIDEV-NOTE: Use sanitized query for all search engines (removes remix info, etc.)
         const sanitizedQuery = encodeURIComponent(`${track.artist} ${SanitizedTitle(track.title)}`);
-        const query = encodeURIComponent(`${track.artist} ${track.title}`);
 
-        searchInTemplate.push({
-          label: 'Search in Beatport',
-          click: () => {
-            shell.openExternal(`https://www.beatport.com/search/tracks?q=${sanitizedQuery}`);
-          },
+        // Build search menu from configured search engines
+        const searchEngines = this.configModule.getConfig().get('searchEngines') || [];
+        searchEngines.forEach((engine: SearchEngineConfig) => {
+          const url = engine.urlTemplate.replace('{query}', sanitizedQuery);
+          searchInTemplate.push({
+            label: `Search in ${engine.name}`,
+            click: () => {
+              shell.openExternal(url);
+            },
+          });
         });
-        searchInTemplate.push({
-          label: 'Search in TraxxSource',
-          click: () => {
-            shell.openExternal(`https://www.traxsource.com/search/tracks?term=${sanitizedQuery}`);
-          },
-        });
-        searchInTemplate.push({
-          label: 'Search in Google',
-          click: () => {
-            shell.openExternal(`https://www.google.com/search?q=${query}`);
-          },
-        });
+
         track.artist &&
           template.push({
             label: `Search for "${track.artist}" `,

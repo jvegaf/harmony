@@ -70,6 +70,27 @@ export default class ConfigModule extends Module {
         colId: 'path',
         mode: 'desc',
       },
+      // AIDEV-NOTE: Default search engines for context menu. Users can add custom ones via Settings > General.
+      searchEngines: [
+        {
+          id: 'default-beatport',
+          name: 'Beatport',
+          urlTemplate: 'https://www.beatport.com/search/tracks?q={query}',
+          isDefault: true,
+        },
+        {
+          id: 'default-traxsource',
+          name: 'TraxxSource',
+          urlTemplate: 'https://www.traxsource.com/search/tracks?term={query}',
+          isDefault: true,
+        },
+        {
+          id: 'default-google',
+          name: 'Google',
+          urlTemplate: 'https://www.google.com/search?q={query}',
+          isDefault: true,
+        },
+      ],
     };
 
     return config;

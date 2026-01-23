@@ -148,6 +148,22 @@ export type UpdateRatingPayload = {
   rating: number;
 };
 
+/**
+ * Configuration for a custom search engine in the context menu.
+ * AIDEV-NOTE: Users can add custom search engines via Settings > General.
+ * The urlTemplate must contain {query} placeholder which gets replaced with the search term.
+ */
+export interface SearchEngineConfig {
+  /** Unique identifier for the search engine */
+  id: string;
+  /** Display name shown in the context menu */
+  name: string;
+  /** URL template with {query} placeholder, e.g. 'https://google.com/search?q={query}' */
+  urlTemplate: string;
+  /** If true, this engine cannot be deleted (Beatport, TraxxSource, Google) */
+  isDefault: boolean;
+}
+
 export interface Config {
   audioVolume: number;
   audioOutputDevice: string;
@@ -161,6 +177,8 @@ export interface Config {
     colId: string;
     mode: string;
   };
+  /** Custom search engines for track context menu */
+  searchEngines: SearchEngineConfig[];
 }
 
 export const enum SearchEngine {
