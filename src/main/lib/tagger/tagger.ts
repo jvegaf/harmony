@@ -221,6 +221,9 @@ export const ApplyTagSelections = async (
         // Obtener track completo de Beatport
         const beatportTrack = await beatportClient.getTrack(parseInt(id, 10));
 
+        const artUrl = BeatportTrackUtils.getArtworkUrl(beatportTrack, 500);
+        log.info(`Beatport artwork URL: ${artUrl}`);
+
         // Convertir BeatportTrack a ResultTag
         resultTag = {
           id: beatportTrack.id,
@@ -233,7 +236,7 @@ export const ApplyTagSelections = async (
           key: BeatportTrackUtils.getKeyName(beatportTrack),
           genre: BeatportTrackUtils.getGenreName(beatportTrack),
           duration: BeatportTrackUtils.getDurationSecs(beatportTrack),
-          art: BeatportTrackUtils.getArtworkUrl(beatportTrack, 500),
+          art: artUrl,
         };
       } else if (source === 'traxsource') {
         // Buscar el track completo de Traxsource
@@ -247,6 +250,8 @@ export const ApplyTagSelections = async (
 
         // Extender con datos completos (artwork, album, etc.)
         const extendedTrack = await traxsourceClient.extendTrack(txTrack);
+
+        log.info(`Traxsource artwork URL: ${extendedTrack.art || extendedTrack.thumbnail}`);
 
         // Convertir TXTrack a ResultTag
         resultTag = {
@@ -268,6 +273,8 @@ export const ApplyTagSelections = async (
         // 2. Bandcamp doesn't provide BPM/Key, so we need audio analysis
         const trackUrl = id; // The ID is the full URL for Bandcamp
         const trackDetails = await bandcampProvider.getTrackDetails(trackUrl);
+
+        log.info(`Bandcamp artwork URL: ${trackDetails?.artwork_url}`);
 
         if (!trackDetails) {
           throw new Error(`Failed to fetch Bandcamp track: ${trackUrl}`);

@@ -1,6 +1,8 @@
 import { ResultTag, Track } from '../../../preload/types/harmony';
 import log from 'electron-log';
 import PersistTrack from './saver';
+import FetchArtwork from '../artwork/fetcher';
+import PersistArtwork from '../artwork/saver';
 
 const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
   if (!tag) return track;
@@ -18,6 +20,10 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
 
   try {
     PersistTrack(newTrack);
+    log.info(`art: ${tag.art}`);
+    if (!tag.art) return newTrack;
+    const artwork = await FetchArtwork(tag.art);
+    PersistArtwork(newTrack.path, artwork!);
   } catch (error) {
     log.error('update error: ', error);
   }
