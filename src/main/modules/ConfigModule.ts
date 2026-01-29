@@ -91,6 +91,14 @@ export default class ConfigModule extends Module {
           isDefault: true,
         },
       ],
+      // AIDEV-NOTE: Traktor NML integration configuration, persisted to settings
+      traktorConfig: {
+        nmlPath: '',
+        syncStrategy: 'smart_merge',
+        cueStrategy: 'SMART_MERGE',
+        syncOnStartup: false,
+        autoBackup: true,
+      },
     };
 
     return config;

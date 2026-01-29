@@ -15,6 +15,7 @@ import {
   mapHarmonyCueToTraktor,
   mapTraktorCueType,
   extractBeatGrid,
+  generateCueId,
 } from '../mappers/cue-mapper';
 import type { TraktorCue, TraktorEntry } from '../types/nml-types';
 import { CueType } from '../../../../preload/types/cue-point';
@@ -336,6 +337,110 @@ describe('Cue Mapper', () => {
         expect(grid?.bpm).toBe(123);
         expect(grid?.firstBeatMs).toBeCloseTo(53.82373, 2);
       }
+    });
+  });
+
+  describe('generateCueId()', () => {
+    it('should generate unique IDs for cues with same position but different hotcueSlot', () => {
+      const trackId = 'track-123';
+      const position = 48963.828772;
+      const type = CueType.HOT_CUE;
+
+      const id1 = generateCueId(trackId, position, type, 1);
+      const id2 = generateCueId(trackId, position, type, 2);
+
+      expect(id1).not.toBe(id2);
+      expect(id1).toMatch(/^cue-[a-z0-9]+$/);
+      expect(id2).toMatch(/^cue-[a-z0-9]+$/);
+    });
+
+    it('should generate same ID for identical inputs (idempotent)', () => {
+      const trackId = 'track-abc';
+      const position = 1000;
+      const type = CueType.HOT_CUE;
+      const slot = 3;
+
+      const id1 = generateCueId(trackId, position, type, slot);
+      const id2 = generateCueId(trackId, position, type, slot);
+
+      expect(id1).toBe(id2);
+    });
+
+    it('should generate valid ID for GRID cue without hotcueSlot', () => {
+      const trackId = 'track-xyz';
+      const position = 53.82373;
+      const type = CueType.GRID;
+
+      const id = generateCueId(trackId, position, type);
+
+      expect(id).toMatch(/^cue-[a-z0-9]+$/);
+      expect(id.length).toBeGreaterThan(4);
+    });
+
+    it('should generate different IDs for different types at same position', () => {
+      const trackId = 'track-123';
+      const position = 5000;
+
+      const hotCueId = generateCueId(trackId, position, CueType.HOT_CUE, 1);
+      const loopId = generateCueId(trackId, position, CueType.LOOP, 1);
+
+      expect(hotCueId).not.toBe(loopId);
+    });
+
+    it('should handle undefined hotcueSlot consistently', () => {
+      const trackId = 'track-123';
+      const position = 100;
+      const type = CueType.GRID;
+
+      const id1 = generateCueId(trackId, position, type, undefined);
+      const id2 = generateCueId(trackId, position, type);
+
+      expect(id1).toBe(id2);
+    });
+  });
+
+  describe('mapTraktorCueToHarmony() - hotcueSlot uniqueness fix', () => {
+    it('should generate unique IDs for cues at same position with different hotcue slots', () => {
+      // This test verifies the fix for SQLITE_CONSTRAINT: UNIQUE constraint failed: cue_point.id
+      // when Traktor has multiple hot cues at the same position with different slots
+      const cue1: TraktorCue = {
+        TYPE: '0',
+        START: '48963.828772',
+        HOTCUE: '1',
+      };
+      const cue2: TraktorCue = {
+        TYPE: '0',
+        START: '48963.828772',
+        HOTCUE: '2',
+      };
+
+      const harmonyCue1 = mapTraktorCueToHarmony(cue1, 'track-xyz');
+      const harmonyCue2 = mapTraktorCueToHarmony(cue2, 'track-xyz');
+
+      expect(harmonyCue1.id).not.toBe(harmonyCue2.id);
+      expect(harmonyCue1.hotcueSlot).toBe(1);
+      expect(harmonyCue2.hotcueSlot).toBe(2);
+    });
+
+    it('should generate unique IDs for AutoGrid cues at same position', () => {
+      // Traktor can have multiple AutoGrid cues at same position (hot_cue + grid)
+      const hotCue: TraktorCue = {
+        NAME: 'AutoGrid',
+        TYPE: '0',
+        START: '364.815186',
+        HOTCUE: '0',
+      };
+      const gridCue: TraktorCue = {
+        NAME: 'AutoGrid',
+        TYPE: '4',
+        START: '364.815186',
+        HOTCUE: '-1',
+      };
+
+      const harmonyCue1 = mapTraktorCueToHarmony(hotCue, 'track-abc');
+      const harmonyCue2 = mapTraktorCueToHarmony(gridCue, 'track-abc');
+
+      expect(harmonyCue1.id).not.toBe(harmonyCue2.id);
     });
   });
 });

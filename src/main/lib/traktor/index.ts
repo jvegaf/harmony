@@ -17,6 +17,7 @@ export {
   mapTraktorCuesToHarmony,
   extractBeatGrid,
   mapHarmonyCueToTraktor,
+  generateCueId,
 } from './mappers/cue-mapper';
 export * from './mappers/playlist-mapper';
 

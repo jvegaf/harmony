@@ -30,6 +30,8 @@ import {
   mapTraktorEntryToTrack,
   mapTraktorCuesToHarmony,
   MergeStrategy,
+  mapTraktorNodeToFolderTree,
+  flattenPlaylistTree,
   type SyncOptions,
 } from '../lib/traktor';
 import type {
@@ -43,37 +45,44 @@ import type { Track } from '../../preload/types/harmony';
 import type { CuePoint } from '../../preload/types/cue-point';
 
 import ModuleWindow from './BaseWindowModule';
-
-/**
- * Default Traktor configuration
- */
-const DEFAULT_TRAKTOR_CONFIG: TraktorConfig = {
-  nmlPath: '',
-  syncStrategy: 'smart_merge',
-  cueStrategy: 'SMART_MERGE',
-  syncOnStartup: false,
-  autoBackup: true,
-};
+import ConfigModule from './ConfigModule';
 
 /**
  * Module providing IPC handlers for Traktor NML integration
  */
 export default class IPCTraktorModule extends ModuleWindow {
   protected db: Database;
-  private config: TraktorConfig;
+  private configModule: ConfigModule;
 
-  constructor(window: Electron.BrowserWindow) {
+  constructor(window: Electron.BrowserWindow, configModule: ConfigModule) {
     super(window);
     // AIDEV-NOTE: Use singleton instance to prevent multiple database connections
     this.db = Database.getInstance();
-    this.config = { ...DEFAULT_TRAKTOR_CONFIG };
+    this.configModule = configModule;
+  }
+
+  /**
+   * Get the current Traktor config from persistent storage
+   */
+  private getConfig(): TraktorConfig {
+    return this.configModule.getConfig().get('traktorConfig');
+  }
+
+  /**
+   * Update and persist Traktor config
+   */
+  private setConfig(newConfig: Partial<TraktorConfig>): TraktorConfig {
+    const current = this.getConfig();
+    const updated = { ...current, ...newConfig };
+    this.configModule.getConfig().set('traktorConfig', updated);
+    return updated;
   }
 
   async load(): Promise<void> {
     // Get Traktor configuration
     ipcMain.handle(channels.TRAKTOR_GET_CONFIG, async (): Promise<TraktorConfig> => {
       log.debug('[IPCTraktor] Getting config');
-      return this.config;
+      return this.getConfig();
     });
 
     // Set Traktor configuration
@@ -81,8 +90,7 @@ export default class IPCTraktorModule extends ModuleWindow {
       channels.TRAKTOR_SET_CONFIG,
       async (_e, newConfig: Partial<TraktorConfig>): Promise<TraktorConfig> => {
         log.info('[IPCTraktor] Updating config:', newConfig);
-        this.config = { ...this.config, ...newConfig };
-        return this.config;
+        return this.setConfig(newConfig);
       },
     );
 
@@ -107,15 +115,15 @@ export default class IPCTraktorModule extends ModuleWindow {
       const nmlPath = result.filePaths[0];
       log.info('[IPCTraktor] Selected NML path:', nmlPath);
 
-      // Update config with new path
-      this.config.nmlPath = nmlPath;
+      // Update and persist config with new path
+      this.setConfig({ nmlPath });
 
       return nmlPath;
     });
 
     // Parse NML file and return info
     ipcMain.handle(channels.TRAKTOR_PARSE_NML, async (_e, nmlPath?: string): Promise<TraktorNMLInfo> => {
-      const pathToUse = nmlPath || this.config.nmlPath;
+      const pathToUse = nmlPath || this.getConfig().nmlPath;
 
       if (!pathToUse) {
         throw new Error('No NML path configured');
@@ -184,7 +192,8 @@ export default class IPCTraktorModule extends ModuleWindow {
     ipcMain.handle(
       channels.TRAKTOR_GET_SYNC_PREVIEW,
       async (_e, nmlPath?: string, options?: Partial<SyncOptions>): Promise<TraktorSyncPlan> => {
-        const pathToUse = nmlPath || this.config.nmlPath;
+        const config = this.getConfig();
+        const pathToUse = nmlPath || config.nmlPath;
 
         if (!pathToUse) {
           throw new Error('No NML path configured');
@@ -237,8 +246,8 @@ export default class IPCTraktorModule extends ModuleWindow {
 
           // Prepare sync engine with options
           const syncOptions: SyncOptions = {
-            strategy: this.mapStrategyToEnum(options?.strategy || this.config.syncStrategy),
-            cueStrategy: options?.cueStrategy || this.config.cueStrategy,
+            strategy: this.mapStrategyToEnum(options?.strategy || config.syncStrategy),
+            cueStrategy: options?.cueStrategy || config.cueStrategy,
             caseInsensitivePaths: process.platform !== 'linux', // Case-insensitive on Windows/macOS
           };
 
@@ -262,7 +271,8 @@ export default class IPCTraktorModule extends ModuleWindow {
     ipcMain.handle(
       channels.TRAKTOR_EXECUTE_SYNC,
       async (_e, nmlPath?: string, options?: Partial<SyncOptions>): Promise<TraktorSyncResult> => {
-        const pathToUse = nmlPath || this.config.nmlPath;
+        const config = this.getConfig();
+        const pathToUse = nmlPath || config.nmlPath;
 
         if (!pathToUse) {
           throw new Error('No NML path configured');
@@ -312,8 +322,8 @@ export default class IPCTraktorModule extends ModuleWindow {
 
           // Execute sync
           const syncOptions: SyncOptions = {
-            strategy: this.mapStrategyToEnum(options?.strategy || this.config.syncStrategy),
-            cueStrategy: options?.cueStrategy || this.config.cueStrategy,
+            strategy: this.mapStrategyToEnum(options?.strategy || config.syncStrategy),
+            cueStrategy: options?.cueStrategy || config.cueStrategy,
             caseInsensitivePaths: process.platform !== 'linux',
           };
 
@@ -398,12 +408,97 @@ export default class IPCTraktorModule extends ModuleWindow {
             result.stats.tracksImported = validTracks.length;
           }
 
+          // AIDEV-NOTE: Import playlists from Traktor
+          let playlistsImported = 0;
+          if (nml.NML.PLAYLISTS?.NODE) {
+            this.sendProgress({
+              phase: 'saving',
+              message: 'Importing playlists from Traktor...',
+              progress: 90,
+            });
+
+            try {
+              // Build tree from Traktor's playlist structure
+              const folderTree = mapTraktorNodeToFolderTree(nml.NML.PLAYLISTS.NODE);
+              const traktorPlaylists = flattenPlaylistTree(folderTree);
+
+              // Get existing playlists to avoid duplicates
+              const existingPlaylists = await this.db.getAllPlaylists();
+              const existingPlaylistIds = new Set(existingPlaylists.map(p => p.id));
+              const existingPlaylistNames = new Set(existingPlaylists.map(p => p.name.toLowerCase()));
+
+              // Build path-to-track map for resolving playlist entries
+              const allTracks = await this.db.getAllTracks();
+              const tracksByPath = new Map<string, Track>();
+              for (const track of allTracks) {
+                tracksByPath.set(this.normalizePath(track.path), track);
+              }
+
+              // Import playlists that don't already exist
+              for (const traktorPlaylist of traktorPlaylists) {
+                // Skip if playlist already exists (by ID or name)
+                if (existingPlaylistIds.has(traktorPlaylist.id)) {
+                  log.debug('[IPCTraktor] Skipping playlist (ID exists):', traktorPlaylist.name);
+                  continue;
+                }
+                if (existingPlaylistNames.has(traktorPlaylist.name.toLowerCase())) {
+                  log.debug('[IPCTraktor] Skipping playlist (name exists):', traktorPlaylist.name);
+                  continue;
+                }
+
+                // Resolve track paths to Harmony tracks
+                const playlistTracks: Track[] = [];
+                if (traktorPlaylist.trackPaths) {
+                  for (const trackPath of traktorPlaylist.trackPaths) {
+                    const normalizedPath = this.normalizePath(trackPath);
+                    const track = tracksByPath.get(normalizedPath);
+                    if (track) {
+                      playlistTracks.push(track);
+                    }
+                  }
+                }
+
+                // Only import if playlist has at least one track that exists in Harmony
+                if (playlistTracks.length > 0) {
+                  await this.db.insertPlaylist({
+                    id: traktorPlaylist.id,
+                    name: traktorPlaylist.name,
+                    tracks: playlistTracks,
+                  });
+                  playlistsImported++;
+                  log.info(
+                    '[IPCTraktor] Imported playlist:',
+                    traktorPlaylist.name,
+                    'with',
+                    playlistTracks.length,
+                    'tracks',
+                  );
+                } else {
+                  log.debug('[IPCTraktor] Skipping empty playlist:', traktorPlaylist.name);
+                }
+              }
+
+              if (playlistsImported > 0) {
+                log.info('[IPCTraktor] Imported', playlistsImported, 'playlists from Traktor');
+              }
+            } catch (playlistError) {
+              log.error('[IPCTraktor] Error importing playlists:', playlistError);
+              // Don't fail the whole sync if playlist import fails
+            }
+          }
+
           this.sendProgress({ phase: 'complete', message: 'Sync complete!', progress: 100 });
 
-          log.info('[IPCTraktor] Sync complete:', result.stats);
+          // Add playlistsImported to stats
+          const statsWithPlaylists = {
+            ...result.stats,
+            playlistsImported,
+          };
+
+          log.info('[IPCTraktor] Sync complete:', statsWithPlaylists);
 
           // Return serializable version for IPC
-          return { stats: result.stats };
+          return { stats: statsWithPlaylists };
         } catch (error) {
           log.error('[IPCTraktor] Sync failed:', error);
           throw error;
@@ -413,7 +508,8 @@ export default class IPCTraktorModule extends ModuleWindow {
 
     // Export to NML
     ipcMain.handle(channels.TRAKTOR_EXPORT_TO_NML, async (_e, nmlPath?: string): Promise<{ success: boolean }> => {
-      const pathToUse = nmlPath || this.config.nmlPath;
+      const config = this.getConfig();
+      const pathToUse = nmlPath || config.nmlPath;
 
       if (!pathToUse) {
         throw new Error('No NML path configured');
@@ -422,7 +518,15 @@ export default class IPCTraktorModule extends ModuleWindow {
       log.info('[IPCTraktor] Exporting to NML:', pathToUse);
 
       try {
-        this.sendProgress({ phase: 'loading', message: 'Loading Harmony data...', progress: 0 });
+        this.sendProgress({ phase: 'loading', message: 'Cleaning up duplicate cue points...', progress: 0 });
+
+        // Clean up any duplicate cue points from previous imports
+        const duplicatesRemoved = await this.db.cleanupDuplicateCuePoints();
+        if (duplicatesRemoved > 0) {
+          log.info(`[IPCTraktor] Removed ${duplicatesRemoved} duplicate cue points before export`);
+        }
+
+        this.sendProgress({ phase: 'loading', message: 'Loading Harmony data...', progress: 5 });
 
         // Parse existing NML to preserve structure
         const parser = new TraktorNMLParser();
@@ -437,11 +541,18 @@ export default class IPCTraktorModule extends ModuleWindow {
         const allTrackIds = harmonyTracks.map(t => t.id);
         const harmonyCues = await this.db.getCuePointsByTrackIds(allTrackIds);
 
-        // Group cues by track ID
+        // Group cues by track ID, deduplicating by position+type+hotcue
         const cuesByTrackId = new Map<string, CuePoint[]>();
         for (const cue of harmonyCues) {
           const existing = cuesByTrackId.get(cue.trackId) || [];
-          existing.push(cue);
+          // Deduplicate: check if we already have a cue at same position+type+hotcue
+          const duplicateKey = `${cue.positionMs}-${cue.type}-${cue.hotcueSlot ?? -1}`;
+          const isDuplicate = existing.some(
+            c => `${c.positionMs}-${c.type}-${c.hotcueSlot ?? -1}` === duplicateKey,
+          );
+          if (!isDuplicate) {
+            existing.push(cue);
+          }
           cuesByTrackId.set(cue.trackId, existing);
         }
 
@@ -472,7 +583,7 @@ export default class IPCTraktorModule extends ModuleWindow {
         this.sendProgress({ phase: 'writing', message: 'Writing NML file...', progress: 75 });
 
         // Create backup if enabled
-        if (this.config.autoBackup) {
+        if (config.autoBackup) {
           const backupPath = `${pathToUse}.backup.${Date.now()}.nml`;
           const fs = await import('fs/promises');
           await fs.copyFile(pathToUse, backupPath);

@@ -154,6 +154,9 @@ export default function SettingsTraktor() {
       if (result.stats.cuePointsAdded > 0) {
         parts.push(`${result.stats.cuePointsAdded} cue points`);
       }
+      if (result.stats.playlistsImported > 0) {
+        parts.push(`Imported ${result.stats.playlistsImported} playlists`);
+      }
       const message = parts.length > 0 ? parts.join(', ') : 'No changes needed';
 
       setLastSyncResult(message);

@@ -595,13 +595,24 @@ export class Database {
 
   /**
    * Insert or update cue points (upsert)
+   * AIDEV-NOTE: Deduplicates by ID before saving to prevent UNIQUE constraint violations
    */
   public async saveCuePoints(cuePoints: CuePoint[]): Promise<void> {
     if (cuePoints.length === 0) return;
     await this.ensureInitialized();
+
+    // Deduplicate by ID to prevent UNIQUE constraint violations
+    const uniqueCues = Array.from(new Map(cuePoints.map(c => [c.id, c])).values());
+    const duplicatesRemoved = cuePoints.length - uniqueCues.length;
+
     const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
-    await repository.save(cuePoints);
-    log.info(`[db] Saved ${cuePoints.length} cue points`);
+    await repository.save(uniqueCues);
+
+    if (duplicatesRemoved > 0) {
+      log.warn(`[db] Saved ${uniqueCues.length} cue points (${duplicatesRemoved} duplicates removed)`);
+    } else {
+      log.info(`[db] Saved ${uniqueCues.length} cue points`);
+    }
   }
 
   /**
@@ -623,6 +634,41 @@ export class Database {
     const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
     await repository.delete(cuePointIds);
     log.info(`[db] Deleted ${cuePointIds.length} cue points`);
+  }
+
+  /**
+   * Remove duplicate cue points from the database.
+   * Duplicates are cue points with same trackId + positionMs + type + hotcueSlot.
+   * Keeps the first cue point and deletes the rest.
+   * @returns Number of duplicate cue points removed
+   */
+  public async cleanupDuplicateCuePoints(): Promise<number> {
+    await this.ensureInitialized();
+    const repository = this.connection.getRepository<CuePoint>(CuePointEntity);
+
+    // Get all cue points
+    const allCues = await repository.find({ order: { trackId: 'ASC', positionMs: 'ASC' } });
+
+    // Find duplicates: group by trackId+positionMs+type+hotcueSlot
+    const seen = new Map<string, string>(); // key -> first cue id
+    const duplicateIds: string[] = [];
+
+    for (const cue of allCues) {
+      const key = `${cue.trackId}-${cue.positionMs}-${cue.type}-${cue.hotcueSlot ?? -1}`;
+      if (seen.has(key)) {
+        // This is a duplicate, mark for deletion
+        duplicateIds.push(cue.id);
+      } else {
+        seen.set(key, cue.id);
+      }
+    }
+
+    if (duplicateIds.length > 0) {
+      await repository.delete(duplicateIds);
+      log.info(`[db] Cleaned up ${duplicateIds.length} duplicate cue points`);
+    }
+
+    return duplicateIds.length;
   }
 
   /**

@@ -49,7 +49,7 @@ async function initModules(window: BrowserWindow): Promise<void> {
     new IPCPlaylistModule(window),
     new IPCTaggerModule(window),
     new IPCAudioAnalysisModule(window),
-    new IPCTraktorModule(window),
+    new IPCTraktorModule(window, configModule),
     new IPCLoggerModule(window),
   ).catch(log.error);
 }

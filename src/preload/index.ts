@@ -10,8 +10,8 @@ import {
   UpdateRatingPayload,
   Config,
 } from './types/harmony';
-import type { TraktorConfig, TraktorSyncProgress, TraktorNMLInfo } from './types/traktor';
-import type { SyncPlan, SyncResult, SyncOptions } from '../main/lib/traktor';
+import type { TraktorConfig, TraktorSyncProgress, TraktorNMLInfo, TraktorSyncResult } from './types/traktor';
+import type { SyncPlan, SyncOptions } from '../main/lib/traktor';
 import parseUri from './lib/utils-uri';
 
 const config = {
@@ -153,7 +153,7 @@ const api = {
     getSyncPreview: (nmlPath?: string, options?: Partial<SyncOptions>): Promise<SyncPlan> =>
       ipcRenderer.invoke(channels.TRAKTOR_GET_SYNC_PREVIEW, nmlPath, options),
     /** Execute sync and persist to database */
-    executeSync: (nmlPath?: string, options?: Partial<SyncOptions>): Promise<SyncResult> =>
+    executeSync: (nmlPath?: string, options?: Partial<SyncOptions>): Promise<TraktorSyncResult> =>
       ipcRenderer.invoke(channels.TRAKTOR_EXECUTE_SYNC, nmlPath, options),
     /** Export Harmony changes back to NML file */
     exportToNml: (nmlPath?: string): Promise<{ success: boolean }> =>

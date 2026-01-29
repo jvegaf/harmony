@@ -74,11 +74,12 @@ function mapHarmonyCueType(type: CueType): string {
  * @param trackId - Parent track ID
  * @param position - Position in ms
  * @param type - Cue type
+ * @param hotcueSlot - Optional hotcue slot number (needed for uniqueness when multiple cues at same position)
  * @returns Unique cue ID
  */
-function generateCueId(trackId: string, position: number, type: CueType): string {
-  // Simple hash-based ID
-  const input = `${trackId}-${position}-${type}`;
+export function generateCueId(trackId: string, position: number, type: CueType, hotcueSlot?: number): string {
+  // Include hotcueSlot in hash to ensure uniqueness for cues at same position with different slots
+  const input = `${trackId}-${position}-${type}-${hotcueSlot ?? 'none'}`;
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
     const char = input.charCodeAt(i);
@@ -98,9 +99,11 @@ function generateCueId(trackId: string, position: number, type: CueType): string
 export function mapTraktorCueToHarmony(traktorCue: TraktorCue, trackId: string): CuePoint {
   const type = mapTraktorCueType(traktorCue.TYPE);
   const positionMs = parseFloat(traktorCue.START);
+  // Parse hotcueSlot early to include in ID generation for uniqueness
+  const hotcueSlot = traktorCue.HOTCUE ? parseInt(traktorCue.HOTCUE, 10) : undefined;
 
   const cue: CuePoint = {
-    id: generateCueId(trackId, positionMs, type),
+    id: generateCueId(trackId, positionMs, type, hotcueSlot),
     trackId,
     type,
     positionMs,
@@ -118,11 +121,8 @@ export function mapTraktorCueToHarmony(traktorCue: TraktorCue, trackId: string):
     }
   }
 
-  if (traktorCue.HOTCUE) {
-    const slot = parseInt(traktorCue.HOTCUE, 10);
-    if (!isNaN(slot)) {
-      cue.hotcueSlot = slot;
-    }
+  if (hotcueSlot !== undefined && !isNaN(hotcueSlot)) {
+    cue.hotcueSlot = hotcueSlot;
   }
 
   if (traktorCue.DISPL_ORDER) {

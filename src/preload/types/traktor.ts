@@ -88,6 +88,7 @@ export interface TraktorSyncResultStats {
   tracksUpdated: number;
   tracksImported: number;
   cuePointsAdded: number;
+  playlistsImported: number;
   fieldsUpdated: Record<string, number>;
 }
 

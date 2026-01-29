@@ -179,6 +179,14 @@ export interface Config {
   };
   /** Custom search engines for track context menu */
   searchEngines: SearchEngineConfig[];
+  /** Traktor NML integration configuration */
+  traktorConfig: {
+    nmlPath: string;
+    syncStrategy: 'traktor_wins' | 'harmony_wins' | 'smart_merge';
+    cueStrategy: 'SMART_MERGE' | 'REPLACE';
+    syncOnStartup: boolean;
+    autoBackup: boolean;
+  };
 }
 
 export const enum SearchEngine {
