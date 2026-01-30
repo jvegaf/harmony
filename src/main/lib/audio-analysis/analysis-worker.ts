@@ -24,6 +24,7 @@ import { unlink } from 'fs/promises';
 
 import wav from 'node-wav';
 import * as essentiaJs from 'essentia.js';
+import { logger } from '../log/logger';
 
 // Types (duplicated here since worker threads can't easily share imports)
 interface AudioAnalysisResult {
@@ -94,7 +95,7 @@ async function initializeEssentia(): Promise<void> {
  */
 function log(message: string): void {
   // Can't use electron-log in worker threads, so we'll use console
-  console.log(`[AudioWorker] ${message}`);
+  logger.info(`[AudioWorker] ${message}`);
 }
 
 /**

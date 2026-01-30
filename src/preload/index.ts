@@ -31,6 +31,8 @@ const api = {
   app: {
     ready: () => ipcRenderer.send(channels.APP_READY),
     restart: () => ipcRenderer.send(channels.APP_RESTART),
+    maximize: () => ipcRenderer.send(channels.APP_MAXIMIZE),
+    minimize: () => ipcRenderer.send(channels.APP_MINIMIZE),
     close: () => ipcRenderer.send(channels.APP_CLOSE),
     getLogs: () => ipcRenderer.invoke(channels.APP_GET_LOGS),
   },

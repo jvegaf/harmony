@@ -1,5 +1,6 @@
 /**
- * Example of Module, other modules should extent this class
+ * Base module for modules that need access to the BrowserWindow.
+ * Other modules should extend this class.
  */
 
 import Module from './BaseModule';

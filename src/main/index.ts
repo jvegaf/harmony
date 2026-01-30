@@ -11,6 +11,7 @@ import ContextMenuModule from './modules/ContextMenuModule';
 import DatabaseModule from './modules/DatabaseModule';
 import DialogsModule from './modules/DialogsModule';
 import DockMenuModule from './modules/DockMenuDarwinModule';
+import IPCAppWindowModule from './modules/IPCAppWindowModule';
 import IPCCoverModule from './modules/IPCCoverModule';
 import IPCLibraryModule from './modules/IPCLibraryModule';
 import IPCLoggerModule from './modules/IPCLoggerModule';
@@ -43,6 +44,7 @@ async function initModules(window: BrowserWindow): Promise<void> {
     new SleepBlockerModule(window),
     new DialogsModule(window),
     // Modules used to handle IPC APIs
+    new IPCAppWindowModule(window),
     new ContextMenuModule(window, configModule),
     new IPCCoverModule(window),
     new IPCLibraryModule(window),
@@ -82,8 +84,6 @@ app.whenReady().then(() => {
     show: false,
     autoHideMenuBar: true,
     titleBarStyle: 'hidden',
-    // expose window controls in Windows/Linux
-    ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

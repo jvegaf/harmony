@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './AppHeader.module.css';
+import { IconMinus, IconSquare, IconX } from '@tabler/icons-react';
 
 type Tab = {
   id: string;
@@ -10,6 +11,8 @@ type Tab = {
 type AppHeaderProps = {
   analysisProgress?: { current: number; total: number } | null;
 };
+
+const { app } = window.Main;
 
 export default function AppHeader({ analysisProgress }: AppHeaderProps) {
   const navigate = useNavigate();
@@ -92,6 +95,29 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
               }}
             />
           </div>
+        </div>
+        <div className={styles.windowControls}>
+          <button
+            type='button'
+            className={styles.windowControl}
+            onClick={() => app.minimize()}
+          >
+            <IconMinus size={14} />
+          </button>
+          <button
+            type='button'
+            className={styles.windowControl}
+            onClick={() => app.maximize()}
+          >
+            <IconSquare size={12} />
+          </button>
+          <button
+            type='button'
+            className={styles.windowControl}
+            onClick={() => app.close()}
+          >
+            <IconX size={14} />
+          </button>
         </div>
       </div>
     </header>

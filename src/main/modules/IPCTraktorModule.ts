@@ -547,9 +547,7 @@ export default class IPCTraktorModule extends ModuleWindow {
           const existing = cuesByTrackId.get(cue.trackId) || [];
           // Deduplicate: check if we already have a cue at same position+type+hotcue
           const duplicateKey = `${cue.positionMs}-${cue.type}-${cue.hotcueSlot ?? -1}`;
-          const isDuplicate = existing.some(
-            c => `${c.positionMs}-${c.type}-${c.hotcueSlot ?? -1}` === duplicateKey,
-          );
+          const isDuplicate = existing.some(c => `${c.positionMs}-${c.type}-${c.hotcueSlot ?? -1}` === duplicateKey);
           if (!isDuplicate) {
             existing.push(cue);
           }

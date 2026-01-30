@@ -1,7 +1,7 @@
 import { app, ipcMain } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
-import { rendererLogger } from '../lib/log/logger';
+import { logger, rendererLogger } from '../lib/log/logger';
 
 import ModuleWindow from './BaseWindowModule';
 import { LogProps, LogLevel } from '../../preload/types/harmony';
@@ -33,11 +33,11 @@ class IPCLoggerModule extends ModuleWindow {
     });
 
     ipcMain.handle(channels.APP_GET_LOGS, async _ => {
-      console.log('get logs from main process');
+      logger.info('Fetching application logs');
       const pathUserData = app.getPath('userData');
       const logPath = path.join(pathUserData, 'logs/main.log');
       const logs = await getLogsFromFile(logPath);
-      console.log('logs size: ', logs.length);
+      logger.info(`Fetched ${logs.length} log entries`);
       return logs;
     });
   }

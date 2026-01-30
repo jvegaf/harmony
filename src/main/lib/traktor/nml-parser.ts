@@ -40,7 +40,6 @@ import type {
  * ```typescript
  * const parser = new TraktorNMLParser();
  * const nml = await parser.parse('/path/to/collection.nml');
- * console.log(nml.NML.COLLECTION.ENTRY.length);
  * ```
  */
 export class TraktorNMLParser {
