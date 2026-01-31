@@ -1,0 +1,459 @@
+/**
+ * DuplicateFinderTool Styles
+ * AIDEV-NOTE: Styles for the duplicate finder UI.
+ * Dark theme consistent with Harmony.
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  padding: 20px 24px;
+  background-color: var(--second-bg-dark);
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* Header section */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 16px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.duplicateCount {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background-color: rgba(250, 137, 5, 0.15);
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Scan button - more subtle */
+.scanButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: rgba(75, 85, 99, 0.6);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background-color: rgba(75, 85, 99, 0.9);
+    border-color: var(--text-muted);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Delete button - prominent red */
+.deleteButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background-color: #b91c1c;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Progress section */
+.progressContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  gap: 16px;
+}
+
+.progressMessage {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Empty state */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 16px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 40px;
+}
+
+.emptyIcon {
+  opacity: 0.3;
+}
+
+.emptyText {
+  font-size: 0.95rem;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+/* Results container */
+.resultsContainer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  gap: 20px;
+  padding-right: 8px;
+}
+
+/* Duplicate group styles */
+.duplicateGroup {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(31, 41, 55, 0.5);
+  border-radius: 8px;
+  overflow: visible;
+  border: 1px solid var(--border-color);
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background-color: rgba(31, 41, 55, 0.8);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.groupTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.groupBadge {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background-color: rgba(250, 137, 5, 0.2);
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.groupSimilarity {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Table header */
+.tableHeader {
+  display: grid;
+  grid-template-columns: 400px 1fr 60px 55px 55px 55px 40px 40px 45px;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: rgba(31, 41, 55, 0.6);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Track row */
+.trackRow {
+  display: grid;
+  grid-template-columns: 400px 1fr 60px 55px 55px 55px 40px 40px 45px;
+  gap: 8px;
+  padding: 12px 16px;
+  min-height: 56px;
+  align-items: center;
+  transition: background-color 0.15s ease;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+  }
+}
+
+.trackRowFirst {
+  background-color: rgba(34, 197, 94, 0.08);
+}
+
+.trackRowSelected {
+  background-color: rgba(34, 197, 94, 0.06);
+}
+
+/* Waveform cell */
+.waveformCell {
+  width: 400px;
+  height: 44px;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border-color: var(--primary-color);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+}
+
+/* Track info cell */
+.trackInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 2px 0;
+}
+
+.trackName {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trackPath {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Cell styles */
+.cell {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.cellFormat {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.formatFlac,
+.formatAiff,
+.formatWav {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.formatMp3,
+.formatAac,
+.formatOgg {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.cellSize,
+.cellTime,
+.cellCues,
+.cellPlists,
+.cellBitrate {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+}
+
+/* Bitrate quality colors */
+.bitrateHigh {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.bitrateMedium {
+  color: #eab308;
+  font-weight: 500;
+}
+
+.bitrateLow {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+/* Keep checkbox cell */
+.keepCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.keepCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #22c55e;
+  cursor: pointer;
+}
+
+/* Scrollbar styles */
+.resultsContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.resultsContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.resultsContainer::-webkit-scrollbar-thumb {
+  background-color: rgba(107, 114, 128, 0.4);
+  border-radius: 3px;
+}
+
+.resultsContainer::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.6);
+}
+
+/* No waveform placeholder */
+.noWaveform {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 4px;
+}
+
+/* Waveform placeholder bars */
+.waveformPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  height: 100%;
+  width: 100%;
+  padding: 4px;
+}
+
+.waveformPlaceholder span {
+  width: 2px;
+  background-color: rgba(107, 114, 128, 0.4);
+  border-radius: 1px;
+}
+
+/* Confirmation modal */
+.confirmationContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.confirmationWarning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.confirmationWarningIcon {
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.confirmationText {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.confirmationStats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: rgba(31, 41, 55, 0.5);
+  border-radius: 6px;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.statLabel {
+  color: var(--text-muted);
+}
+
+.statValue {
+  color: var(--text-primary);
+  font-weight: 500;
+}

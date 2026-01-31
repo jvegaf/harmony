@@ -10,6 +10,7 @@ import SettingsView from './Settings/Settings';
 import PlaylistView from './PLaylist/PlaylistView';
 import PruneView from './Prune/PruneView';
 import PreparationView from './Preparation/PreparationView';
+import ToolsView from './Tools/ToolsView';
 
 const { logger } = window.Main;
 
@@ -56,6 +57,11 @@ const router = createHashRouter([
         path: 'details/:trackID',
         element: <DetailsView />,
         loader: DetailsView.loader,
+      },
+      {
+        path: 'tools',
+        element: <ToolsView />,
+        loader: ToolsView.loader,
       },
     ],
   },

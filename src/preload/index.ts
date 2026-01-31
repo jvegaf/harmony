@@ -12,6 +12,7 @@ import {
 } from './types/harmony';
 import type { TraktorConfig, TraktorSyncProgress, TraktorNMLInfo, TraktorSyncResult } from './types/traktor';
 import type { SyncPlan, SyncOptions } from '../main/lib/traktor';
+import type { DuplicateScanProgress, DuplicateScanResult, TrackFileInfo } from './types/duplicates';
 import parseUri from './lib/utils-uri';
 
 const config = {
@@ -165,6 +166,24 @@ const api = {
       const listener = (_: any, progress: TraktorSyncProgress) => callback(progress);
       ipcRenderer.on(channels.TRAKTOR_SYNC_PROGRESS, listener);
       return () => ipcRenderer.removeListener(channels.TRAKTOR_SYNC_PROGRESS, listener);
+    },
+  },
+  /**
+   * Duplicate Finder API
+   * AIDEV-NOTE: Detects and manages duplicate tracks in the library
+   */
+  duplicates: {
+    /** Scan library for duplicates using configured criteria */
+    find: (config: Config['duplicateFinderConfig']): Promise<DuplicateScanResult> =>
+      ipcRenderer.invoke(channels.DUPLICATES_FIND, config),
+    /** Get file info for a specific track */
+    getFileInfo: (trackId: string): Promise<TrackFileInfo> =>
+      ipcRenderer.invoke(channels.DUPLICATES_GET_FILE_INFO, trackId),
+    /** Listen for scan progress updates */
+    onProgress: (callback: (progress: DuplicateScanProgress) => void) => {
+      const listener = (_: any, progress: DuplicateScanProgress) => callback(progress);
+      ipcRenderer.on(channels.DUPLICATES_SCAN_PROGRESS, listener);
+      return () => ipcRenderer.removeListener(channels.DUPLICATES_SCAN_PROGRESS, listener);
     },
   },
 };

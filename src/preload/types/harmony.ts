@@ -199,6 +199,28 @@ export interface Config {
     syncOnStartup: boolean;
     autoBackup: boolean;
   };
+  /**
+   * Duplicate finder configuration.
+   * AIDEV-NOTE: Configures which detection criteria are enabled and their parameters.
+   * Users can toggle individual criteria in Settings > Duplicates panel.
+   */
+  duplicateFinderConfig: {
+    /** Individual detection criteria - each can be toggled independently */
+    criteria: {
+      /** Compare normalized title using fuzzy matching */
+      title: boolean;
+      /** Compare normalized artist using fuzzy matching */
+      artist: boolean;
+      /** Compare duration within tolerance */
+      duration: boolean;
+      /** Compare audio fingerprint (requires more resources, future feature) */
+      fingerprint: boolean;
+    };
+    /** Tolerance in seconds for duration comparison (default: 2) */
+    durationToleranceSeconds: number;
+    /** Similarity threshold for fuzzy matching 0-1 (default: 0.85) */
+    similarityThreshold: number;
+  };
 }
 
 export const enum SearchEngine {

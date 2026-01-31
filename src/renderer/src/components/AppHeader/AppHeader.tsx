@@ -21,9 +21,8 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
   const tabs: Tab[] = [
     { id: 'library', label: 'Library', path: '/' },
     { id: 'settings', label: 'Settings', path: '/settings' },
-    { id: 'prune', label: 'Prune', path: '/prune' },
     { id: 'preparation', label: 'Preparation', path: '/preparation' },
-    { id: 'export', label: 'Export', path: '/export' },
+    { id: 'prune', label: 'Prune', path: '/prune' },
     { id: 'tools', label: 'Tools', path: '/tools' },
   ];
 
@@ -45,10 +44,6 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
   };
 
   const handleTabClick = (tab: Tab) => {
-    if (tab.path === '/export' || tab.path === '/tools') {
-      // TODO: Implement these features
-      return;
-    }
     navigate(tab.path);
   };
 

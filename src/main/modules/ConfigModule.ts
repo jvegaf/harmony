@@ -99,6 +99,17 @@ export default class ConfigModule extends Module {
         syncOnStartup: false,
         autoBackup: true,
       },
+      // AIDEV-NOTE: Duplicate finder configuration, persisted to settings
+      duplicateFinderConfig: {
+        criteria: {
+          title: true,
+          artist: true,
+          duration: true,
+          fingerprint: false, // Disabled by default - requires more resources
+        },
+        durationToleranceSeconds: 2,
+        similarityThreshold: 0.85,
+      },
     };
 
     return config;

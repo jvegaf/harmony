@@ -8,9 +8,17 @@ import SettingsLibrary from './SettingsLibrary';
 import SettingsAudio from './SettingsAudio';
 import SettingsTraktor from './SettingsTraktor';
 import SettingsGeneral from './SettingsGeneral';
-import { IconDeviceSpeaker, IconPencilCog, IconVinyl, IconDisc, IconSettings } from '@tabler/icons-react';
+import {
+  IconDeviceSpeaker,
+  IconPencilCog,
+  IconVinyl,
+  IconDisc,
+  IconSettings,
+  IconLayersIntersect,
+} from '@tabler/icons-react';
 import { MdArrowBack } from 'react-icons/md';
 import SettingsLog from './SettingsLog';
+import SettingsDuplicates from './SettingsDuplicates';
 import { RootLoaderData } from '../Root';
 
 export default function SettingsView() {
@@ -80,6 +88,12 @@ export default function SettingsView() {
             >
               Traktor
             </Tabs.Tab>
+            <Tabs.Tab
+              value='duplicates'
+              leftSection={<IconLayersIntersect size={14} />}
+            >
+              Duplicates
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value='general'>
@@ -96,6 +110,9 @@ export default function SettingsView() {
           </Tabs.Panel>
           <Tabs.Panel value='traktor'>
             <SettingsTraktor />
+          </Tabs.Panel>
+          <Tabs.Panel value='duplicates'>
+            <SettingsDuplicates />
           </Tabs.Panel>
         </Tabs>
       </div>

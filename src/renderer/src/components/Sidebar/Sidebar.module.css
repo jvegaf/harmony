@@ -1,6 +1,6 @@
 .sidebar {
   width: 16rem;
-  background-color: var(--sidebar-bg);
+  background-color: var(--hm-primary-bg);
   padding: 1rem;
   display: flex;
   flex-direction: column;
