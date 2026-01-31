@@ -443,4 +443,76 @@ describe('Cue Mapper', () => {
       expect(harmonyCue1.id).not.toBe(harmonyCue2.id);
     });
   });
+
+  describe('GRID BPM preservation (round-trip)', () => {
+    it('should preserve GRID.BPM when mapping Traktor -> Harmony', () => {
+      const traktorCue: TraktorCue = {
+        NAME: 'AutoGrid',
+        TYPE: '4',
+        START: '53.823734',
+        LEN: '0.000000',
+        REPEATS: '-1',
+        HOTCUE: '-1',
+        GRID: { BPM: '123.000061' },
+      };
+
+      const harmonyCue = mapTraktorCueToHarmony(traktorCue, 'track-123');
+
+      expect(harmonyCue.gridBpm).toBe('123.000061');
+      expect(harmonyCue.type).toBe(CueType.GRID);
+    });
+
+    it('should restore GRID.BPM when mapping Harmony -> Traktor', () => {
+      const harmonyCue = {
+        id: 'cue-grid',
+        trackId: 'track-123',
+        type: CueType.GRID,
+        positionMs: 53.823734,
+        name: 'AutoGrid',
+        gridBpm: '123.000061',
+      };
+
+      const traktorCue = mapHarmonyCueToTraktor(harmonyCue);
+
+      expect(traktorCue.GRID).toBeDefined();
+      expect(traktorCue.GRID?.BPM).toBe('123.000061');
+      expect(traktorCue.TYPE).toBe('4');
+    });
+
+    it('should complete round-trip: Traktor -> Harmony -> Traktor preserves GRID.BPM', () => {
+      const originalTraktorCue: TraktorCue = {
+        NAME: 'AutoGrid',
+        DISPL_ORDER: '0',
+        TYPE: '4',
+        START: '53.823734',
+        LEN: '0.000000',
+        REPEATS: '-1',
+        HOTCUE: '-1',
+        GRID: { BPM: '123.000061' },
+      };
+
+      // Round-trip: Traktor -> Harmony -> Traktor
+      const harmonyCue = mapTraktorCueToHarmony(originalTraktorCue, 'track-test');
+      const restoredTraktorCue = mapHarmonyCueToTraktor(harmonyCue);
+
+      expect(restoredTraktorCue.GRID).toBeDefined();
+      expect(restoredTraktorCue.GRID?.BPM).toBe('123.000061');
+      expect(restoredTraktorCue.TYPE).toBe('4');
+      expect(restoredTraktorCue.NAME).toBe('AutoGrid');
+    });
+
+    it('should not create GRID for cues without gridBpm', () => {
+      const harmonyCue = {
+        id: 'cue-hot',
+        trackId: 'track-123',
+        type: CueType.HOT_CUE,
+        positionMs: 1000,
+        hotcueSlot: 0,
+      };
+
+      const traktorCue = mapHarmonyCueToTraktor(harmonyCue);
+
+      expect(traktorCue.GRID).toBeUndefined();
+    });
+  });
 });

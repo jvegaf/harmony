@@ -18,7 +18,23 @@ export interface TraktorNML {
     COLLECTION: TraktorCollection;
     PLAYLISTS?: TraktorPlaylists;
     SORTING_ORDER?: TraktorSortingOrder[];
+    INDEXING?: TraktorIndexing; // AIDEV-NOTE: Traktor uses this for sorting info, must be preserved
   };
+}
+
+/**
+ * INDEXING section at the end of NML file.
+ * Contains SORTING_INFO elements that Traktor uses for collection ordering.
+ *
+ * AIDEV-NOTE: This section appears at the end of the NML file and must be preserved
+ * for proper Traktor compatibility. Without it, Traktor may have issues reading the file.
+ */
+export interface TraktorIndexing {
+  SORTING_INFO?: TraktorSortingInfo | TraktorSortingInfo[];
+}
+
+export interface TraktorSortingInfo {
+  PATH: string; // e.g., "$COLLECTION", "Native Instruments"
 }
 
 export interface TraktorHead {
@@ -93,6 +109,7 @@ export interface TraktorInfo {
   PLAYCOUNT?: string; // Number of plays
   FLAGS?: string; // Internal flags
   FILESIZE?: string; // File size in KB
+  COLOR?: string; // Track color in Traktor (1-16)
 }
 
 export interface TraktorTempo {
@@ -120,6 +137,9 @@ export interface TraktorMusicalKey {
  * - 3 = Load
  * - 4 = Grid (beatgrid marker)
  * - 5 = Loop
+ *
+ * AIDEV-NOTE: TYPE=4 (Grid/AutoGrid) cues contain a nested <GRID BPM="..."> element
+ * that stores the precise BPM for beatgrid alignment. This must be preserved.
  */
 export interface TraktorCue {
   NAME?: string; // e.g., "AutoGrid", "Intro"
@@ -129,6 +149,7 @@ export interface TraktorCue {
   LEN?: string; // Length in milliseconds (for loops)
   REPEATS?: string; // Loop repeats, -1 for infinite
   HOTCUE?: string; // Hotcue slot number 0-7
+  GRID?: { BPM: string }; // Nested GRID element for TYPE=4 (AutoGrid) with precise BPM
 }
 
 export interface TraktorPrimaryKey {

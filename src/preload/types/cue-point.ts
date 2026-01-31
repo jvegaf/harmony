@@ -48,6 +48,12 @@ export interface CuePoint {
   color?: string;
   /** Display order for UI */
   order?: number;
+  /**
+   * Precise BPM for grid markers (TYPE=GRID).
+   * AIDEV-NOTE: Traktor stores this in a nested <GRID BPM="..."> element.
+   * Must be preserved for beatgrid alignment precision.
+   */
+  gridBpm?: string;
 }
 
 /**

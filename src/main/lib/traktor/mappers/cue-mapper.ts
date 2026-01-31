@@ -132,6 +132,12 @@ export function mapTraktorCueToHarmony(traktorCue: TraktorCue, trackId: string):
     }
   }
 
+  // AIDEV-NOTE: Preserve GRID.BPM for grid cues (TYPE=4)
+  // This is critical for beatgrid precision in Traktor round-trips
+  if (traktorCue.GRID?.BPM) {
+    cue.gridBpm = traktorCue.GRID.BPM;
+  }
+
   return cue;
 }
 
@@ -195,6 +201,12 @@ export function mapHarmonyCueToTraktor(cue: CuePoint): TraktorCue {
 
   if (cue.hotcueSlot !== undefined) {
     traktor.HOTCUE = String(cue.hotcueSlot);
+  }
+
+  // AIDEV-NOTE: Restore GRID element for grid cues (TYPE=4)
+  // This preserves beatgrid precision during Traktor round-trips
+  if (cue.gridBpm) {
+    traktor.GRID = { BPM: cue.gridBpm };
   }
 
   return traktor;

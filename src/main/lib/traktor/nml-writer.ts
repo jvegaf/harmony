@@ -328,6 +328,22 @@ export class TraktorNMLWriter {
       lines.push('  </PLAYLISTS>');
     }
 
+    // AIDEV-NOTE: INDEXING section must be preserved for Traktor compatibility
+    // It contains SORTING_INFO elements used for collection ordering
+    if (nml.NML.INDEXING) {
+      lines.push('  <INDEXING>');
+      const sortingInfos = nml.NML.INDEXING.SORTING_INFO;
+      if (sortingInfos) {
+        const infos = Array.isArray(sortingInfos) ? sortingInfos : [sortingInfos];
+        for (const info of infos) {
+          if (info?.PATH !== undefined) {
+            lines.push(`<SORTING_INFO PATH="${escapeXml(info.PATH)}"></SORTING_INFO>`);
+          }
+        }
+      }
+      lines.push('  </INDEXING>');
+    }
+
     lines.push('</NML>');
 
     return lines.join('\n');
@@ -396,6 +412,7 @@ export class TraktorNMLWriter {
       if (entry.INFO.PLAYCOUNT) infoAttrs.push(`PLAYCOUNT="${entry.INFO.PLAYCOUNT}"`);
       if (entry.INFO.FLAGS) infoAttrs.push(`FLAGS="${entry.INFO.FLAGS}"`);
       if (entry.INFO.FILESIZE) infoAttrs.push(`FILESIZE="${entry.INFO.FILESIZE}"`);
+      if (entry.INFO.COLOR) infoAttrs.push(`COLOR="${entry.INFO.COLOR}"`);
       if (infoAttrs.length > 0) {
         lines.push(`${indent}  <INFO ${infoAttrs.join(' ')}></INFO>`);
       }
@@ -445,17 +462,28 @@ export class TraktorNMLWriter {
 
   /**
    * Convert a TraktorCue to XML
+   *
+   * AIDEV-NOTE: Critical for Traktor compatibility:
+   * - NAME must ALWAYS be present (use "n.n." for unnamed cues)
+   * - TYPE=4 (AutoGrid) cues must include nested <GRID BPM="..."> element
    */
   private cueToXml(cue: TraktorCue): string {
     const attrs: string[] = [];
 
-    if (cue.NAME) attrs.push(`NAME="${escapeXml(cue.NAME)}"`);
-    if (cue.DISPL_ORDER) attrs.push(`DISPL_ORDER="${cue.DISPL_ORDER}"`);
+    // AIDEV-NOTE: NAME is required by Traktor - use "n.n." (no name) as default
+    attrs.push(`NAME="${escapeXml(cue.NAME || 'n.n.')}"`);
+    if (cue.DISPL_ORDER !== undefined) attrs.push(`DISPL_ORDER="${cue.DISPL_ORDER}"`);
     attrs.push(`TYPE="${cue.TYPE}"`);
     attrs.push(`START="${cue.START}"`);
-    if (cue.LEN) attrs.push(`LEN="${cue.LEN}"`);
-    if (cue.REPEATS) attrs.push(`REPEATS="${cue.REPEATS}"`);
+    if (cue.LEN !== undefined) attrs.push(`LEN="${cue.LEN}"`);
+    if (cue.REPEATS !== undefined) attrs.push(`REPEATS="${cue.REPEATS}"`);
     if (cue.HOTCUE !== undefined) attrs.push(`HOTCUE="${cue.HOTCUE}"`);
+
+    // AIDEV-NOTE: TYPE=4 (Grid/AutoGrid) cues contain a nested GRID element with precise BPM
+    // This is critical for beatgrid alignment - without it Traktor loses sync precision
+    if (cue.GRID?.BPM) {
+      return `<CUE_V2 ${attrs.join(' ')}><GRID BPM="${cue.GRID.BPM}"></GRID>\n</CUE_V2>`;
+    }
 
     return `<CUE_V2 ${attrs.join(' ')}></CUE_V2>`;
   }

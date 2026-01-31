@@ -329,5 +329,117 @@ describe('nml-writer', () => {
       // Should have same number of tracks
       expect(trackCount2).toBe(trackCount1);
     });
+
+    it('should always include NAME attribute in cues (n.n. as default)', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = {
+        NML: {
+          VERSION: '19',
+          HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
+          MUSICFOLDERS: {},
+          COLLECTION: {
+            ENTRIES: '1',
+            ENTRY: [
+              {
+                LOCATION: { DIR: '/:Test/:', FILE: 'test.mp3', VOLUME: '' },
+                CUE_V2: [
+                  { TYPE: '0', START: '1000.000000' }, // No NAME - should get n.n.
+                  { TYPE: '0', START: '2000.000000', NAME: 'Intro' }, // Has NAME
+                ],
+              },
+            ],
+          },
+        },
+      };
+
+      const xml = writer.toXml(nml);
+
+      // Both cues should have NAME attribute
+      expect(xml).toContain('NAME="n.n."');
+      expect(xml).toContain('NAME="Intro"');
+    });
+
+    it('should include GRID element for AutoGrid cues (TYPE=4)', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = {
+        NML: {
+          VERSION: '19',
+          HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
+          MUSICFOLDERS: {},
+          COLLECTION: {
+            ENTRIES: '1',
+            ENTRY: [
+              {
+                LOCATION: { DIR: '/:Test/:', FILE: 'test.mp3', VOLUME: '' },
+                CUE_V2: [
+                  {
+                    NAME: 'AutoGrid',
+                    TYPE: '4',
+                    START: '53.823734',
+                    LEN: '0.000000',
+                    REPEATS: '-1',
+                    HOTCUE: '-1',
+                    GRID: { BPM: '123.000061' },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      };
+
+      const xml = writer.toXml(nml);
+
+      // Should contain GRID element with precise BPM
+      expect(xml).toContain('<GRID BPM="123.000061"></GRID>');
+      expect(xml).toContain('NAME="AutoGrid"');
+      expect(xml).toContain('TYPE="4"');
+    });
+
+    it('should preserve INDEXING section', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = {
+        NML: {
+          VERSION: '19',
+          HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
+          MUSICFOLDERS: {},
+          COLLECTION: { ENTRIES: '0', ENTRY: [] },
+          INDEXING: {
+            SORTING_INFO: [{ PATH: '$COLLECTION' }, { PATH: 'Native Instruments' }],
+          },
+        },
+      };
+
+      const xml = writer.toXml(nml);
+
+      expect(xml).toContain('<INDEXING>');
+      expect(xml).toContain('</INDEXING>');
+      expect(xml).toContain('PATH="$COLLECTION"');
+      expect(xml).toContain('PATH="Native Instruments"');
+    });
+
+    it('should preserve COLOR in INFO element', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = {
+        NML: {
+          VERSION: '19',
+          HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
+          MUSICFOLDERS: {},
+          COLLECTION: {
+            ENTRIES: '1',
+            ENTRY: [
+              {
+                LOCATION: { DIR: '/:Test/:', FILE: 'test.mp3', VOLUME: '' },
+                INFO: { BITRATE: '320000', COLOR: '5' },
+              },
+            ],
+          },
+        },
+      };
+
+      const xml = writer.toXml(nml);
+
+      expect(xml).toContain('COLOR="5"');
+    });
   });
 });
