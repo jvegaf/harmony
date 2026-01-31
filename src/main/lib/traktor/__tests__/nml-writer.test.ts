@@ -442,4 +442,54 @@ describe('nml-writer', () => {
       expect(xml).toContain('COLOR="5"');
     });
   });
+
+  describe('bpmPrecise and releaseDate preservation', () => {
+    it('should use bpmPrecise when available instead of rounded bpm', () => {
+      const track = createTrack({
+        bpm: 123,
+        bpmPrecise: '123.000061',
+      });
+
+      const xml = buildEntryXml(track);
+
+      // Should use precise BPM, not rounded
+      expect(xml).toContain('BPM="123.000061"');
+      expect(xml).not.toContain('BPM="123"');
+    });
+
+    it('should fall back to bpm when bpmPrecise is not available', () => {
+      const track = createTrack({
+        bpm: 128,
+        // No bpmPrecise
+      });
+
+      const xml = buildEntryXml(track);
+
+      expect(xml).toContain('BPM="128"');
+    });
+
+    it('should use releaseDate when available instead of year/1/1', () => {
+      const track = createTrack({
+        year: 2025,
+        releaseDate: '2025/10/15',
+      });
+
+      const xml = buildEntryXml(track);
+
+      // Should use full date, not year/1/1
+      expect(xml).toContain('RELEASE_DATE="2025/10/15"');
+      expect(xml).not.toContain('RELEASE_DATE="2025/1/1"');
+    });
+
+    it('should fall back to year/1/1 when releaseDate is not available', () => {
+      const track = createTrack({
+        year: 2024,
+        // No releaseDate
+      });
+
+      const xml = buildEntryXml(track);
+
+      expect(xml).toContain('RELEASE_DATE="2024/1/1"');
+    });
+  });
 });

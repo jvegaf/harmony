@@ -30,6 +30,12 @@ export interface Track {
   album?: string;
   artist?: string;
   bpm?: number;
+  /**
+   * Precise BPM as string for round-trip preservation.
+   * AIDEV-NOTE: Traktor stores BPM with high precision (e.g., "123.000061").
+   * This field preserves the original value for re-export.
+   */
+  bpmPrecise?: string;
   genre?: string;
   initialKey?: string;
   duration: number;
@@ -37,6 +43,12 @@ export interface Track {
   path: TrackSrc;
   title: string;
   year?: number;
+  /**
+   * Full release date string for round-trip preservation.
+   * AIDEV-NOTE: Traktor uses "YYYY/M/D" format. This preserves month/day
+   * that would otherwise be lost when only storing `year`.
+   */
+  releaseDate?: string;
   bitrate?: number;
   rating?: TrackRating;
   comment?: string;

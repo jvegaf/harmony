@@ -357,4 +357,60 @@ describe('Track Mapper', () => {
       expect(tracks.length).toBeGreaterThan(100);
     });
   });
+
+  describe('bpmPrecise and releaseDate preservation', () => {
+    let entries: TraktorEntry[];
+
+    beforeAll(async () => {
+      const parser = new TraktorNMLParser();
+      const nml = await parser.parse(FIXTURE_PATH);
+      entries = nml.NML.COLLECTION.ENTRY;
+    });
+
+    it('should preserve precise BPM in bpmPrecise field', () => {
+      const entry = entries[0]; // Has BPM=123.000061
+      const track = mapTraktorEntryToTrack(entry);
+
+      // bpm should be rounded integer
+      expect(track.bpm).toBe(123);
+      // bpmPrecise should preserve original value
+      expect(track.bpmPrecise).toBe('123.000061');
+    });
+
+    it('should preserve full release date in releaseDate field', () => {
+      // Find an entry with a release date
+      const entryWithDate = entries.find(e => e.INFO?.RELEASE_DATE);
+      if (entryWithDate) {
+        const track = mapTraktorEntryToTrack(entryWithDate);
+
+        // releaseDate should preserve the full date
+        expect(track.releaseDate).toBeDefined();
+        expect(track.releaseDate).toMatch(/^\d{4}\/\d{1,2}\/\d{1,2}$/);
+      }
+    });
+
+    it('should handle entries without TEMPO (no bpmPrecise)', () => {
+      const minimalEntry: TraktorEntry = {
+        LOCATION: { DIR: '/:test/:', FILE: 'test.mp3', VOLUME: '' },
+        TITLE: 'No BPM Track',
+      };
+
+      const track = mapTraktorEntryToTrack(minimalEntry);
+
+      expect(track.bpm).toBeUndefined();
+      expect(track.bpmPrecise).toBeUndefined();
+    });
+
+    it('should handle entries without RELEASE_DATE (no releaseDate)', () => {
+      const minimalEntry: TraktorEntry = {
+        LOCATION: { DIR: '/:test/:', FILE: 'test.mp3', VOLUME: '' },
+        TITLE: 'No Date Track',
+      };
+
+      const track = mapTraktorEntryToTrack(minimalEntry);
+
+      expect(track.year).toBeUndefined();
+      expect(track.releaseDate).toBeUndefined();
+    });
+  });
 });

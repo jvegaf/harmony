@@ -122,16 +122,20 @@ export function buildEntryXml(track: Track, cuePoints?: CuePoint[]): string {
   if (track.rating?.rating) {
     infoAttrs.push(`RANKING="${mapHarmonyRatingToTraktor(track.rating.rating)}"`);
   }
-  if (track.year) {
+  // AIDEV-NOTE: Use releaseDate for full precision, fallback to year/1/1
+  if (track.releaseDate) {
+    infoAttrs.push(`RELEASE_DATE="${track.releaseDate}"`);
+  } else if (track.year) {
     infoAttrs.push(`RELEASE_DATE="${track.year}/1/1"`);
   }
   if (infoAttrs.length > 0) {
     lines.push(`  <INFO ${infoAttrs.join(' ')}></INFO>`);
   }
 
-  // TEMPO element
-  if (track.bpm) {
-    lines.push(`  <TEMPO BPM="${track.bpm}" BPM_QUALITY="100.000000"></TEMPO>`);
+  // TEMPO element - AIDEV-NOTE: Use bpmPrecise for full precision when available
+  const bpmValue = track.bpmPrecise || (track.bpm ? String(track.bpm) : undefined);
+  if (bpmValue) {
+    lines.push(`  <TEMPO BPM="${bpmValue}" BPM_QUALITY="100.000000"></TEMPO>`);
   }
 
   // CUE_V2 elements
@@ -232,12 +236,18 @@ export class TraktorNMLWriter {
     if (track.rating?.rating) {
       entry.INFO.RANKING = mapHarmonyRatingToTraktor(track.rating.rating);
     }
-    if (track.year) entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
+    // AIDEV-NOTE: Use releaseDate for full precision, fallback to year/1/1
+    if (track.releaseDate) {
+      entry.INFO.RELEASE_DATE = track.releaseDate;
+    } else if (track.year) {
+      entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
+    }
 
-    // Build TEMPO
-    if (track.bpm) {
+    // Build TEMPO - AIDEV-NOTE: Use bpmPrecise for full precision when available
+    const bpmValue = track.bpmPrecise || (track.bpm ? String(track.bpm) : undefined);
+    if (bpmValue) {
       entry.TEMPO = {
-        BPM: String(track.bpm),
+        BPM: bpmValue,
         BPM_QUALITY: '100.000000',
       };
     }
@@ -280,12 +290,18 @@ export class TraktorNMLWriter {
     if (track.rating?.rating) {
       entry.INFO.RANKING = mapHarmonyRatingToTraktor(track.rating.rating);
     }
-    if (track.year) entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
+    // AIDEV-NOTE: Use releaseDate for full precision, fallback to year/1/1
+    if (track.releaseDate) {
+      entry.INFO.RELEASE_DATE = track.releaseDate;
+    } else if (track.year) {
+      entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
+    }
 
-    // Update TEMPO
-    if (track.bpm) {
+    // Update TEMPO - AIDEV-NOTE: Use bpmPrecise for full precision when available
+    const bpmValue = track.bpmPrecise || (track.bpm ? String(track.bpm) : undefined);
+    if (bpmValue) {
       entry.TEMPO = entry.TEMPO || { BPM: '0' };
-      entry.TEMPO.BPM = String(track.bpm);
+      entry.TEMPO.BPM = bpmValue;
     }
 
     // Update cue points only if explicitly provided

@@ -165,10 +165,13 @@ export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
 
   // Extract year from RELEASE_DATE
   let year: number | undefined;
+  let releaseDate: string | undefined;
   if (info?.RELEASE_DATE) {
-    const releaseDate = parseTraktorDate(info.RELEASE_DATE);
-    if (releaseDate) {
-      year = releaseDate.getFullYear();
+    // AIDEV-NOTE: Preserve full release date for round-trip
+    releaseDate = info.RELEASE_DATE;
+    const parsedDate = parseTraktorDate(info.RELEASE_DATE);
+    if (parsedDate) {
+      year = parsedDate.getFullYear();
     }
   }
 
@@ -195,9 +198,11 @@ export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
     album: entry.ALBUM?.TITLE,
     genre: info?.GENRE,
     year,
+    releaseDate, // AIDEV-NOTE: Preserve full date for round-trip
     duration: info?.PLAYTIME ? parseInt(info.PLAYTIME, 10) : 0,
     bitrate,
     bpm: tempo?.BPM ? mapTraktorBpm(tempo.BPM) : undefined,
+    bpmPrecise: tempo?.BPM, // AIDEV-NOTE: Preserve precise BPM for round-trip
     initialKey,
     rating,
     comment: info?.COMMENT,
@@ -210,12 +215,19 @@ export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
  *
  * AIDEV-NOTE: This returns partial data that needs to be merged
  * with existing NML entry data. Full entry construction is in the writer.
+ * Uses bpmPrecise and releaseDate when available for round-trip accuracy.
  *
  * @param track - Harmony Track object
  * @returns Partial Traktor entry data
  */
 export function mapTrackToTraktorEntry(track: Track): Partial<TraktorEntry> {
   const { dir, file } = mapSystemPathToTraktor(track.path);
+
+  // AIDEV-NOTE: Use releaseDate if available, otherwise fallback to year/1/1
+  const releaseDate = track.releaseDate || (track.year ? `${track.year}/1/1` : undefined);
+
+  // AIDEV-NOTE: Use bpmPrecise if available for full precision, otherwise use rounded bpm
+  const bpmValue = track.bpmPrecise || (track.bpm ? String(track.bpm) : undefined);
 
   return {
     TITLE: track.title,
@@ -230,14 +242,14 @@ export function mapTrackToTraktorEntry(track: Track): Partial<TraktorEntry> {
       GENRE: track.genre,
       COMMENT: track.comment,
       RANKING: track.rating ? mapHarmonyRatingToTraktor(track.rating.rating) : undefined,
-      RELEASE_DATE: track.year ? `${track.year}/1/1` : undefined,
+      RELEASE_DATE: releaseDate,
       PLAYTIME: track.duration ? String(track.duration) : undefined,
       BITRATE: track.bitrate ? String(track.bitrate * 1000) : undefined,
       // KEY: would need reverse key mapping
     },
-    TEMPO: track.bpm
+    TEMPO: bpmValue
       ? {
-          BPM: String(track.bpm),
+          BPM: bpmValue,
         }
       : undefined,
   };
