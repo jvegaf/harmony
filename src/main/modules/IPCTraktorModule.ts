@@ -578,6 +578,16 @@ export default class IPCTraktorModule extends ModuleWindow {
           }
         }
 
+        this.sendProgress({ phase: 'writing', message: 'Syncing playlists...', progress: 65 });
+
+        // AIDEV-NOTE: Merge Harmony playlists into NML (add new + update existing)
+        // This ensures playlists created in Harmony are exported to Traktor
+        const harmonyPlaylists = await this.db.getAllPlaylists();
+        if (harmonyPlaylists.length > 0) {
+          updatedNml = writer.mergePlaylistsFromHarmony(updatedNml, harmonyPlaylists);
+          log.info('[IPCTraktor] Merged', harmonyPlaylists.length, 'playlists into NML');
+        }
+
         this.sendProgress({ phase: 'writing', message: 'Writing NML file...', progress: 75 });
 
         // Create backup if enabled

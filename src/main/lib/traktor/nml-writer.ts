@@ -18,6 +18,7 @@ import type { TraktorNML, TraktorEntry, TraktorCue, TraktorNode } from './types/
 import { mapSystemPathToTraktor, mapHarmonyRatingToTraktor } from './mappers/track-mapper';
 import { mapHarmonyKeyToTraktor } from './mappers/key-mapper';
 import { mapHarmonyCueToTraktor } from './mappers/cue-mapper';
+import { mapHarmonyPlaylistToTraktor } from './mappers/playlist-mapper';
 
 /**
  * Escape XML special characters
@@ -327,9 +328,6 @@ export class TraktorNMLWriter {
       `  <HEAD COMPANY="${escapeXml(nml.NML.HEAD.COMPANY)}" PROGRAM="${escapeXml(nml.NML.HEAD.PROGRAM)}"></HEAD>`,
     );
 
-    // MUSICFOLDERS (preserve as empty if not used)
-    lines.push('  <MUSICFOLDERS></MUSICFOLDERS>');
-
     // COLLECTION
     lines.push(`  <COLLECTION ENTRIES="${nml.NML.COLLECTION.ENTRIES}">`);
     for (const entry of nml.NML.COLLECTION.ENTRY) {
@@ -546,5 +544,165 @@ export class TraktorNMLWriter {
 
     lines.push(`${indent}</NODE>`);
     return lines.join('\n');
+  }
+
+  // ===========================================================================
+  // Playlist Management Methods
+  // ===========================================================================
+
+  /**
+   * Add a new playlist to the NML PLAYLISTS tree.
+   * Adds to $ROOT level by default.
+   *
+   * @param nml - Original parsed NML
+   * @param playlist - Playlist with id, name, and trackPaths
+   * @returns Updated NML structure (does not modify original)
+   */
+  addPlaylist(nml: TraktorNML, playlist: { id: string; name: string; trackPaths: string[] }): TraktorNML {
+    // Deep clone
+    const updatedNml: TraktorNML = JSON.parse(JSON.stringify(nml));
+
+    // Ensure PLAYLISTS structure exists
+    if (!updatedNml.NML.PLAYLISTS) {
+      updatedNml.NML.PLAYLISTS = {
+        NODE: {
+          TYPE: 'FOLDER',
+          NAME: '$ROOT',
+          SUBNODES: { COUNT: '0' },
+        },
+      };
+    }
+
+    // Create Traktor node from playlist
+    const traktorNode = mapHarmonyPlaylistToTraktor(playlist);
+
+    // Add to $ROOT subnodes
+    const root = updatedNml.NML.PLAYLISTS.NODE;
+    if (!root.SUBNODES) {
+      root.SUBNODES = { COUNT: '0' };
+    }
+
+    const existingNodes = root.SUBNODES.NODE
+      ? Array.isArray(root.SUBNODES.NODE)
+        ? root.SUBNODES.NODE
+        : [root.SUBNODES.NODE]
+      : [];
+
+    existingNodes.push(traktorNode);
+    root.SUBNODES.NODE = existingNodes;
+    root.SUBNODES.COUNT = String(existingNodes.length);
+
+    return updatedNml;
+  }
+
+  /**
+   * Update an existing playlist's track list in the NML.
+   *
+   * @param nml - Original parsed NML
+   * @param playlist - Playlist with id, name, and trackPaths
+   * @returns Updated NML structure (does not modify original)
+   */
+  updatePlaylist(nml: TraktorNML, playlist: { id: string; name: string; trackPaths: string[] }): TraktorNML {
+    // Deep clone
+    const updatedNml: TraktorNML = JSON.parse(JSON.stringify(nml));
+
+    if (!updatedNml.NML.PLAYLISTS) {
+      return updatedNml;
+    }
+
+    // Create updated Traktor node
+    const updatedNode = mapHarmonyPlaylistToTraktor(playlist);
+
+    // Find and replace the playlist by UUID
+    const findAndUpdate = (node: TraktorNode): boolean => {
+      if (node.TYPE === 'PLAYLIST' && node.PLAYLIST?.UUID === playlist.id) {
+        // Update in place
+        node.PLAYLIST = updatedNode.PLAYLIST;
+        node.NAME = playlist.name;
+        return true;
+      }
+
+      // Recurse into subnodes
+      if (node.SUBNODES?.NODE) {
+        const children = Array.isArray(node.SUBNODES.NODE) ? node.SUBNODES.NODE : [node.SUBNODES.NODE];
+        for (const child of children) {
+          if (findAndUpdate(child)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    };
+
+    findAndUpdate(updatedNml.NML.PLAYLISTS.NODE);
+
+    return updatedNml;
+  }
+
+  /**
+   * Merge Harmony playlists into NML structure.
+   * - Adds playlists that exist in Harmony but not in NML
+   * - Updates playlists that exist in both
+   * - Preserves playlists that only exist in NML
+   *
+   * @param nml - Original parsed NML
+   * @param harmonyPlaylists - Array of Harmony playlists with tracks
+   * @returns Updated NML structure
+   */
+  mergePlaylistsFromHarmony(
+    nml: TraktorNML,
+    harmonyPlaylists: Array<{ id: string; name: string; tracks?: Track[] }>,
+  ): TraktorNML {
+    let updatedNml = nml;
+
+    // Get existing playlist UUIDs from NML
+    const existingUUIDs = this.getPlaylistUUIDsFromNml(nml);
+
+    for (const playlist of harmonyPlaylists) {
+      const trackPaths = playlist.tracks?.map(t => t.path) || [];
+
+      if (existingUUIDs.has(playlist.id)) {
+        // Update existing
+        updatedNml = this.updatePlaylist(updatedNml, { id: playlist.id, name: playlist.name, trackPaths });
+      } else {
+        // Add new
+        updatedNml = this.addPlaylist(updatedNml, { id: playlist.id, name: playlist.name, trackPaths });
+      }
+    }
+
+    return updatedNml;
+  }
+
+  /**
+   * Extract all playlist UUIDs from NML structure
+   *
+   * @param nml - Parsed NML structure
+   * @returns Set of playlist UUIDs
+   */
+  private getPlaylistUUIDsFromNml(nml: TraktorNML): Set<string> {
+    const uuids = new Set<string>();
+
+    if (!nml.NML.PLAYLISTS) {
+      return uuids;
+    }
+
+    // Recursive traversal of PLAYLISTS tree
+    const collectUUIDs = (node: TraktorNode): void => {
+      if (node.TYPE === 'PLAYLIST' && node.PLAYLIST?.UUID) {
+        uuids.add(node.PLAYLIST.UUID);
+      }
+
+      if (node.SUBNODES?.NODE) {
+        const children = Array.isArray(node.SUBNODES.NODE) ? node.SUBNODES.NODE : [node.SUBNODES.NODE];
+        for (const child of children) {
+          collectUUIDs(child);
+        }
+      }
+    };
+
+    collectUUIDs(nml.NML.PLAYLISTS.NODE);
+
+    return uuids;
   }
 }

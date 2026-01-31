@@ -14,7 +14,6 @@ export interface TraktorNML {
   NML: {
     VERSION: string;
     HEAD: TraktorHead;
-    MUSICFOLDERS: TraktorMusicFolders;
     COLLECTION: TraktorCollection;
     PLAYLISTS?: TraktorPlaylists;
     SORTING_ORDER?: TraktorSortingOrder[];
@@ -40,11 +39,6 @@ export interface TraktorSortingInfo {
 export interface TraktorHead {
   COMPANY: string;
   PROGRAM: string;
-}
-
-export interface TraktorMusicFolders {
-  // Can be empty or contain folder definitions
-  [key: string]: unknown;
 }
 
 // ============================================================================

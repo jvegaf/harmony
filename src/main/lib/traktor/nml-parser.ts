@@ -96,7 +96,6 @@ export class TraktorNMLParser {
       NML: {
         VERSION: this.getAttr(rawNML, 'VERSION') || '',
         HEAD: this.transformHead(rawNML.HEAD as Record<string, unknown>),
-        MUSICFOLDERS: (rawNML.MUSICFOLDERS || {}) as Record<string, unknown>,
         COLLECTION: this.transformCollection(rawNML.COLLECTION as Record<string, unknown>),
         PLAYLISTS: rawNML.PLAYLISTS ? this.transformPlaylists(rawNML.PLAYLISTS as Record<string, unknown>) : undefined,
         SORTING_ORDER: undefined, // Not commonly used, can add if needed

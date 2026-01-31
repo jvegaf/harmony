@@ -336,7 +336,6 @@ describe('nml-writer', () => {
         NML: {
           VERSION: '19',
           HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
-          MUSICFOLDERS: {},
           COLLECTION: {
             ENTRIES: '1',
             ENTRY: [
@@ -365,7 +364,6 @@ describe('nml-writer', () => {
         NML: {
           VERSION: '19',
           HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
-          MUSICFOLDERS: {},
           COLLECTION: {
             ENTRIES: '1',
             ENTRY: [
@@ -402,7 +400,6 @@ describe('nml-writer', () => {
         NML: {
           VERSION: '19',
           HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
-          MUSICFOLDERS: {},
           COLLECTION: { ENTRIES: '0', ENTRY: [] },
           INDEXING: {
             SORTING_INFO: [{ PATH: '$COLLECTION' }, { PATH: 'Native Instruments' }],
@@ -424,7 +421,6 @@ describe('nml-writer', () => {
         NML: {
           VERSION: '19',
           HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
-          MUSICFOLDERS: {},
           COLLECTION: {
             ENTRIES: '1',
             ENTRY: [
@@ -490,6 +486,158 @@ describe('nml-writer', () => {
       const xml = buildEntryXml(track);
 
       expect(xml).toContain('RELEASE_DATE="2024/1/1"');
+    });
+  });
+
+  describe('playlist management', () => {
+    // Helper to create a minimal NML structure
+    function createMinimalNml() {
+      return {
+        NML: {
+          VERSION: '19',
+          HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
+          COLLECTION: { ENTRIES: '0', ENTRY: [] },
+        },
+      };
+    }
+
+    // Helper to create NML with existing playlists
+    function createNmlWithPlaylists() {
+      return {
+        NML: {
+          VERSION: '19',
+          HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
+          COLLECTION: { ENTRIES: '0', ENTRY: [] },
+          PLAYLISTS: {
+            NODE: {
+              TYPE: 'FOLDER' as const,
+              NAME: '$ROOT',
+              SUBNODES: {
+                COUNT: '1',
+                NODE: {
+                  TYPE: 'PLAYLIST' as const,
+                  NAME: 'Existing Playlist',
+                  PLAYLIST: {
+                    ENTRIES: '1',
+                    TYPE: 'LIST',
+                    UUID: 'existing-uuid',
+                    ENTRY: [{ PRIMARYKEY: { TYPE: 'TRACK', KEY: 'C:/:Test/:track.mp3' } }],
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+
+    it('should add new playlist to NML without existing playlists', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = createMinimalNml();
+
+      const updatedNml = writer.addPlaylist(nml, {
+        id: 'new-playlist-id',
+        name: 'My New Playlist',
+        trackPaths: ['/Users/test/Music/track1.mp3', '/Users/test/Music/track2.mp3'],
+      });
+
+      // Should create PLAYLISTS structure
+      expect(updatedNml.NML.PLAYLISTS).toBeDefined();
+      expect(updatedNml.NML.PLAYLISTS!.NODE.NAME).toBe('$ROOT');
+      expect(updatedNml.NML.PLAYLISTS!.NODE.SUBNODES?.COUNT).toBe('1');
+
+      // Should have the new playlist
+      const nodes = updatedNml.NML.PLAYLISTS!.NODE.SUBNODES!.NODE;
+      const newPlaylist = Array.isArray(nodes) ? nodes[0] : nodes;
+      expect(newPlaylist?.NAME).toBe('My New Playlist');
+      expect(newPlaylist?.PLAYLIST?.UUID).toBe('new-playlist-id');
+      expect(newPlaylist?.PLAYLIST?.ENTRIES).toBe('2');
+    });
+
+    it('should add new playlist to NML with existing playlists', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = createNmlWithPlaylists();
+
+      const updatedNml = writer.addPlaylist(nml, {
+        id: 'second-playlist-id',
+        name: 'Second Playlist',
+        trackPaths: ['/Users/test/Music/track.mp3'],
+      });
+
+      // Should have 2 playlists now
+      expect(updatedNml.NML.PLAYLISTS!.NODE.SUBNODES?.COUNT).toBe('2');
+
+      const nodes = updatedNml.NML.PLAYLISTS!.NODE.SUBNODES!.NODE;
+      expect(Array.isArray(nodes)).toBe(true);
+      expect((nodes as unknown[]).length).toBe(2);
+    });
+
+    it('should update existing playlist tracks', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = createNmlWithPlaylists();
+
+      const updatedNml = writer.updatePlaylist(nml, {
+        id: 'existing-uuid',
+        name: 'Updated Playlist Name',
+        trackPaths: ['/Users/test/Music/new-track.mp3', '/Users/test/Music/another.mp3'],
+      });
+
+      // Should still have 1 playlist
+      expect(updatedNml.NML.PLAYLISTS!.NODE.SUBNODES?.COUNT).toBe('1');
+
+      const nodes = updatedNml.NML.PLAYLISTS!.NODE.SUBNODES!.NODE;
+      const playlist = Array.isArray(nodes) ? nodes[0] : nodes;
+      expect(playlist?.NAME).toBe('Updated Playlist Name');
+      expect(playlist?.PLAYLIST?.ENTRIES).toBe('2');
+      expect(playlist?.PLAYLIST?.UUID).toBe('existing-uuid');
+    });
+
+    it('should preserve playlists that only exist in Traktor', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = createNmlWithPlaylists();
+
+      // Merge with a different Harmony playlist (not existing-uuid)
+      const updatedNml = writer.mergePlaylistsFromHarmony(nml, [
+        { id: 'harmony-only-id', name: 'Harmony Playlist', tracks: [] },
+      ]);
+
+      // Should have 2 playlists - existing Traktor one + new Harmony one
+      expect(updatedNml.NML.PLAYLISTS!.NODE.SUBNODES?.COUNT).toBe('2');
+    });
+
+    it('should merge playlists correctly (add new + update existing)', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = createNmlWithPlaylists();
+
+      const updatedNml = writer.mergePlaylistsFromHarmony(nml, [
+        // This should update the existing playlist
+        {
+          id: 'existing-uuid',
+          name: 'Updated Name',
+          tracks: [{ id: '1', path: '/Music/updated.mp3', title: 'Updated', duration: 100 }],
+        },
+        // This should be added as new
+        {
+          id: 'new-id',
+          name: 'Brand New',
+          tracks: [{ id: '2', path: '/Music/new.mp3', title: 'New', duration: 100 }],
+        },
+      ]);
+
+      // Should have 2 playlists
+      expect(updatedNml.NML.PLAYLISTS!.NODE.SUBNODES?.COUNT).toBe('2');
+
+      const nodes = updatedNml.NML.PLAYLISTS!.NODE.SUBNODES!.NODE as unknown[];
+      expect(nodes.length).toBe(2);
+    });
+
+    it('should not include MUSICFOLDERS in output', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = createMinimalNml();
+
+      const xml = writer.toXml(nml);
+
+      expect(xml).not.toContain('MUSICFOLDERS');
     });
   });
 });
