@@ -335,6 +335,10 @@ export class TraktorNMLWriter {
     }
     lines.push('  </COLLECTION>');
 
+    // SETS - Remix Sets container (typically empty, Harmony doesn't manage Remix Sets)
+    // AIDEV-NOTE: SETS element is required for full Traktor NML compatibility
+    lines.push('  <SETS ENTRIES="0"></SETS>');
+
     // PLAYLISTS (if present)
     if (nml.NML.PLAYLISTS) {
       lines.push('  <PLAYLISTS>');
@@ -343,7 +347,7 @@ export class TraktorNMLWriter {
     }
 
     // AIDEV-NOTE: INDEXING section must be preserved for Traktor compatibility
-    // It contains SORTING_INFO elements used for collection ordering
+    // It contains SORTING_INFO elements with optional CRITERIA for collection ordering
     if (nml.NML.INDEXING) {
       lines.push('  <INDEXING>');
       const sortingInfos = nml.NML.INDEXING.SORTING_INFO;
@@ -351,7 +355,17 @@ export class TraktorNMLWriter {
         const infos = Array.isArray(sortingInfos) ? sortingInfos : [sortingInfos];
         for (const info of infos) {
           if (info?.PATH !== undefined) {
-            lines.push(`<SORTING_INFO PATH="${escapeXml(info.PATH)}"></SORTING_INFO>`);
+            if (info.CRITERIA) {
+              // SORTING_INFO with nested CRITERIA element
+              lines.push(`    <SORTING_INFO PATH="${escapeXml(info.PATH)}">`);
+              lines.push(
+                `      <CRITERIA ATTRIBUTE="${escapeXml(info.CRITERIA.ATTRIBUTE)}" DIRECTION="${info.CRITERIA.DIRECTION}"></CRITERIA>`,
+              );
+              lines.push('    </SORTING_INFO>');
+            } else {
+              // Simple SORTING_INFO without CRITERIA
+              lines.push(`    <SORTING_INFO PATH="${escapeXml(info.PATH)}"></SORTING_INFO>`);
+            }
           }
         }
       }

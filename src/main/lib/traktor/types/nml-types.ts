@@ -34,6 +34,16 @@ export interface TraktorIndexing {
 
 export interface TraktorSortingInfo {
   PATH: string; // e.g., "$COLLECTION", "Native Instruments"
+  CRITERIA?: TraktorCriteria; // Optional sorting criteria
+}
+
+/**
+ * Sorting criteria for a SORTING_INFO element.
+ * Stores the column and direction used to sort a view.
+ */
+export interface TraktorCriteria {
+  ATTRIBUTE: string; // Column to sort by: "TITLE", "ARTIST", "BPM", etc.
+  DIRECTION: string; // "UP" (ascending) or "DOWN" (descending)
 }
 
 export interface TraktorHead {

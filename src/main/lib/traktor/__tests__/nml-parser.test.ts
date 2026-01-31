@@ -278,4 +278,78 @@ describe('TraktorNMLParser', () => {
       expect(nml.NML.COLLECTION.ENTRY.length).toBeGreaterThan(100);
     });
   });
+
+  describe('parseXml() - INDEXING section', () => {
+    it('should parse empty INDEXING section', () => {
+      const parser = new TraktorNMLParser();
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>
+        <NML VERSION="19">
+          <HEAD COMPANY="www.native-instruments.com" PROGRAM="Traktor"></HEAD>
+          <COLLECTION ENTRIES="0"></COLLECTION>
+          <INDEXING></INDEXING>
+        </NML>`;
+
+      const nml = parser.parseXml(xml);
+
+      expect(nml.NML.INDEXING).toBeDefined();
+    });
+
+    it('should parse INDEXING with SORTING_INFO entries', () => {
+      const parser = new TraktorNMLParser();
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>
+        <NML VERSION="19">
+          <HEAD COMPANY="www.native-instruments.com" PROGRAM="Traktor"></HEAD>
+          <COLLECTION ENTRIES="0"></COLLECTION>
+          <INDEXING>
+            <SORTING_INFO PATH="$COLLECTION"></SORTING_INFO>
+            <SORTING_INFO PATH="Native Instruments"></SORTING_INFO>
+          </INDEXING>
+        </NML>`;
+
+      const nml = parser.parseXml(xml);
+
+      expect(nml.NML.INDEXING).toBeDefined();
+      expect(nml.NML.INDEXING?.SORTING_INFO).toBeDefined();
+      const sortingInfos = nml.NML.INDEXING?.SORTING_INFO;
+      expect(Array.isArray(sortingInfos)).toBe(true);
+      if (Array.isArray(sortingInfos)) {
+        expect(sortingInfos.length).toBe(2);
+        expect(sortingInfos[0].PATH).toBe('$COLLECTION');
+        expect(sortingInfos[1].PATH).toBe('Native Instruments');
+      }
+    });
+
+    it('should parse SORTING_INFO with CRITERIA element', () => {
+      const parser = new TraktorNMLParser();
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>
+        <NML VERSION="19">
+          <HEAD COMPANY="www.native-instruments.com" PROGRAM="Traktor"></HEAD>
+          <COLLECTION ENTRIES="0"></COLLECTION>
+          <INDEXING>
+            <SORTING_INFO PATH="$COLLECTION">
+              <CRITERIA ATTRIBUTE="BPM" DIRECTION="UP"></CRITERIA>
+            </SORTING_INFO>
+          </INDEXING>
+        </NML>`;
+
+      const nml = parser.parseXml(xml);
+
+      expect(nml.NML.INDEXING).toBeDefined();
+      const sortingInfos = nml.NML.INDEXING?.SORTING_INFO;
+      expect(sortingInfos).toBeDefined();
+      const info = Array.isArray(sortingInfos) ? sortingInfos[0] : sortingInfos;
+      expect(info?.PATH).toBe('$COLLECTION');
+      expect(info?.CRITERIA).toBeDefined();
+      expect(info?.CRITERIA?.ATTRIBUTE).toBe('BPM');
+      expect(info?.CRITERIA?.DIRECTION).toBe('UP');
+    });
+
+    it('should parse INDEXING from fixture file', async () => {
+      const parser = new TraktorNMLParser();
+      const nml = await parser.parse(FIXTURE_PATH);
+
+      // Fixture has empty INDEXING, which should still be defined
+      expect(nml.NML.INDEXING).toBeDefined();
+    });
+  });
 });

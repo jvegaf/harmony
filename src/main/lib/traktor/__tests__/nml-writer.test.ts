@@ -415,6 +415,79 @@ describe('nml-writer', () => {
       expect(xml).toContain('PATH="Native Instruments"');
     });
 
+    it('should include SETS element after COLLECTION', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = {
+        NML: {
+          VERSION: '19',
+          HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
+          COLLECTION: { ENTRIES: '0', ENTRY: [] },
+        },
+      };
+
+      const xml = writer.toXml(nml);
+
+      // SETS should appear after COLLECTION
+      expect(xml).toContain('<SETS ENTRIES="0"></SETS>');
+      const collectionEnd = xml.indexOf('</COLLECTION>');
+      const setsStart = xml.indexOf('<SETS');
+      expect(setsStart).toBeGreaterThan(collectionEnd);
+    });
+
+    it('should write INDEXING with CRITERIA when present', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = {
+        NML: {
+          VERSION: '19',
+          HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
+          COLLECTION: { ENTRIES: '0', ENTRY: [] },
+          INDEXING: {
+            SORTING_INFO: [
+              {
+                PATH: '$COLLECTION',
+                CRITERIA: { ATTRIBUTE: 'BPM', DIRECTION: 'UP' },
+              },
+              {
+                PATH: 'My Playlist',
+                CRITERIA: { ATTRIBUTE: 'TITLE', DIRECTION: 'DOWN' },
+              },
+            ],
+          },
+        },
+      };
+
+      const xml = writer.toXml(nml);
+
+      // Should have INDEXING with nested structure
+      expect(xml).toContain('<INDEXING>');
+      expect(xml).toContain('<SORTING_INFO PATH="$COLLECTION">');
+      expect(xml).toContain('<CRITERIA ATTRIBUTE="BPM" DIRECTION="UP"></CRITERIA>');
+      expect(xml).toContain('</SORTING_INFO>');
+      expect(xml).toContain('<SORTING_INFO PATH="My Playlist">');
+      expect(xml).toContain('<CRITERIA ATTRIBUTE="TITLE" DIRECTION="DOWN"></CRITERIA>');
+      expect(xml).toContain('</INDEXING>');
+    });
+
+    it('should handle SORTING_INFO without CRITERIA (self-closing)', () => {
+      const writer = new TraktorNMLWriter();
+      const nml = {
+        NML: {
+          VERSION: '19',
+          HEAD: { COMPANY: 'www.native-instruments.com', PROGRAM: 'Traktor' },
+          COLLECTION: { ENTRIES: '0', ENTRY: [] },
+          INDEXING: {
+            SORTING_INFO: [{ PATH: 'Simple Path' }],
+          },
+        },
+      };
+
+      const xml = writer.toXml(nml);
+
+      // Should have self-closing SORTING_INFO without nested elements
+      expect(xml).toContain('<SORTING_INFO PATH="Simple Path"></SORTING_INFO>');
+      expect(xml).not.toContain('<CRITERIA');
+    });
+
     it('should preserve COLOR in INFO element', () => {
       const writer = new TraktorNMLWriter();
       const nml = {

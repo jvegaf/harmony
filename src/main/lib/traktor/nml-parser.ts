@@ -31,6 +31,8 @@ import type {
   TraktorPlaylistData,
   TraktorPlaylistEntry,
   TraktorPrimaryKey,
+  TraktorIndexing,
+  TraktorSortingInfo,
 } from './types/nml-types';
 
 /**
@@ -99,6 +101,9 @@ export class TraktorNMLParser {
         COLLECTION: this.transformCollection(rawNML.COLLECTION as Record<string, unknown>),
         PLAYLISTS: rawNML.PLAYLISTS ? this.transformPlaylists(rawNML.PLAYLISTS as Record<string, unknown>) : undefined,
         SORTING_ORDER: undefined, // Not commonly used, can add if needed
+        // AIDEV-NOTE: INDEXING may be an empty string "" for <INDEXING></INDEXING>
+        // Check for !== undefined to preserve empty INDEXING sections
+        INDEXING: rawNML.INDEXING !== undefined ? this.transformIndexing(rawNML.INDEXING) : undefined,
       },
     };
   }
@@ -295,6 +300,47 @@ export class TraktorNMLParser {
   private transformPlaylistEntry(raw: Record<string, unknown>): TraktorPlaylistEntry {
     return {
       PRIMARYKEY: this.transformPrimaryKey(raw.PRIMARYKEY as Record<string, unknown>),
+    };
+  }
+
+  /**
+   * Transform INDEXING section with SORTING_INFO elements.
+   *
+   * AIDEV-NOTE: INDEXING contains sorting preferences for collection views.
+   * Each SORTING_INFO may have an optional CRITERIA child with ATTRIBUTE and DIRECTION.
+   * Empty INDEXING elements (from XML like <INDEXING></INDEXING>) are parsed as "" by fast-xml-parser.
+   */
+  private transformIndexing(raw: unknown): TraktorIndexing {
+    // Handle empty INDEXING element (parsed as empty string by fast-xml-parser)
+    if (!raw || typeof raw !== 'object') {
+      return {};
+    }
+
+    const rawObj = raw as Record<string, unknown>;
+    const sortingInfo = rawObj.SORTING_INFO;
+    if (!sortingInfo) {
+      return {};
+    }
+
+    const infos = Array.isArray(sortingInfo) ? sortingInfo : [sortingInfo];
+    return {
+      SORTING_INFO: infos.map(info => {
+        const infoRecord = info as Record<string, unknown>;
+        const result: TraktorSortingInfo = {
+          PATH: this.getAttr(infoRecord, 'PATH') || '',
+        };
+
+        // CRITERIA is a child element, not an attribute
+        if (infoRecord.CRITERIA) {
+          const criteria = infoRecord.CRITERIA as Record<string, unknown>;
+          result.CRITERIA = {
+            ATTRIBUTE: this.getAttr(criteria, 'ATTRIBUTE') || '',
+            DIRECTION: this.getAttr(criteria, 'DIRECTION') || 'UP',
+          };
+        }
+
+        return result;
+      }),
     };
   }
 
