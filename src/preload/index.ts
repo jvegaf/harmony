@@ -179,6 +179,11 @@ const api = {
     /** Get file info for a specific track */
     getFileInfo: (trackId: string): Promise<TrackFileInfo> =>
       ipcRenderer.invoke(channels.DUPLICATES_GET_FILE_INFO, trackId),
+    /** Get cached scan results if available and valid */
+    getCache: (config: Config['duplicateFinderConfig']): Promise<DuplicateScanResult | null> =>
+      ipcRenderer.invoke(channels.DUPLICATES_GET_CACHE, config),
+    /** Invalidate the cache (called when tracks are added/removed) */
+    invalidateCache: (): Promise<void> => ipcRenderer.invoke(channels.DUPLICATES_INVALIDATE_CACHE),
     /** Listen for scan progress updates */
     onProgress: (callback: (progress: DuplicateScanProgress) => void) => {
       const listener = (_: any, progress: DuplicateScanProgress) => callback(progress);

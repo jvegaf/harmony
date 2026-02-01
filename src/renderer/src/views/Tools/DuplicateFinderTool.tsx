@@ -1,16 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Button, Modal, Progress, Text } from '@mantine/core';
-import { IconAlertTriangle, IconCopy, IconSearch, IconTrash, IconWaveSine } from '@tabler/icons-react';
+import { IconAlertTriangle, IconCopy, IconSearch, IconTrash } from '@tabler/icons-react';
 
 import type { DuplicateScanProgress, DuplicateScanResult } from '../../../../preload/types/duplicates';
 import type { TrackId, Track } from '../../../../preload/types/harmony';
 
-import { usePlayerAPI } from '../../stores/usePlayerStore';
 import DuplicateGroup from './DuplicateGroup';
 import styles from './DuplicateFinderTool.module.css';
 
-const { config, duplicates, db, library, logger, audioAnalysis } = window.Main;
+const { config, duplicates, db, library, logger } = window.Main;
 
 /**
  * DuplicateFinderTool - Main component for finding and managing duplicate tracks
@@ -30,11 +29,9 @@ export default function DuplicateFinderTool() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Waveform analysis state
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisProgress, setAnalysisProgress] = useState<{ completed: number; total: number } | null>(null);
-
-  const playerAPI = usePlayerAPI();
+  // AIDEV-NOTE: Track which duplicate is currently active (only one plays at a time)
+  // Each WavePlayer manages its own playback independently
+  const [activePlayingId, setActivePlayingId] = useState<TrackId | null>(null);
 
   // Listen for scan progress updates
   useEffect(() => {
@@ -47,49 +44,41 @@ export default function DuplicateFinderTool() {
     };
   }, []);
 
-  // Listen for audio analysis progress and track completion
-  useEffect(() => {
-    const unsubProgress = audioAnalysis.onProgress((progress: { completed: number; total: number }) => {
-      setAnalysisProgress(progress);
-    });
-
-    // AIDEV-NOTE: When a track completes analysis, update it in the scan results
-    // This allows waveforms to appear in real-time as analysis completes
-    const unsubTrackComplete = audioAnalysis.onTrackComplete((updatedTrack: Track) => {
-      setScanResult(prev => {
-        if (!prev) return prev;
-        // Update the track in all groups where it appears
-        const updatedGroups = prev.groups.map(group => ({
-          ...group,
-          tracks: group.tracks.map(trackInfo =>
-            trackInfo.track.id === updatedTrack.id ? { ...trackInfo, track: updatedTrack } : trackInfo,
-          ),
-        }));
-        return { ...prev, groups: updatedGroups };
-      });
-    });
-
-    return () => {
-      unsubProgress();
-      unsubTrackComplete();
-    };
-  }, []);
-
   /**
    * Start scanning for duplicates
+   * AIDEV-NOTE: Now checks cache first before scanning
    */
   const handleScan = useCallback(async () => {
     setIsScanning(true);
     setScanProgress({ phase: 'loading', progress: 0, message: 'Starting scan...' });
     setScanResult(null);
     setKeeperIds(new Set());
+    setActivePlayingId(null); // Reset active player on new scan
 
     try {
       // Get current duplicate finder config
       const dupConfig = await config.get('duplicateFinderConfig');
 
-      // Run the scan
-      const result = await duplicates.find(dupConfig);
+      // Check cache first
+      setScanProgress({ phase: 'loading', progress: 10, message: 'Checking cache...' });
+      const cachedResult = await duplicates.getCache(dupConfig);
+
+      let result: DuplicateScanResult;
+
+      if (cachedResult) {
+        // Use cached results
+        logger.info('Using cached duplicate scan results');
+        result = cachedResult;
+
+        // Simulate progress for UX (cache is instant but we show progress)
+        setScanProgress({ phase: 'loading', progress: 50, message: 'Loading cached results...' });
+        await new Promise(resolve => setTimeout(resolve, 200));
+        setScanProgress({ phase: 'complete', progress: 100, message: 'Cache loaded' });
+      } else {
+        // Run fresh scan
+        logger.info('No valid cache, running fresh scan');
+        result = await duplicates.find(dupConfig);
+      }
 
       // Pre-select suggested keepers
       const initialKeepers = new Set<TrackId>();
@@ -123,14 +112,12 @@ export default function DuplicateFinderTool() {
   }, []);
 
   /**
-   * Play a track for preview
+   * Set a track as the active player (only one can be active at a time)
+   * AIDEV-NOTE: When a track becomes active, all others will pause automatically
    */
-  const handlePlayTrack = useCallback(
-    (trackId: TrackId) => {
-      playerAPI.start([trackId], 0);
-    },
-    [playerAPI],
-  );
+  const handleSetActiveTrack = useCallback((trackId: TrackId) => {
+    setActivePlayingId(trackId);
+  }, []);
 
   /**
    * Get tracks to delete (all tracks not in keeperIds)
@@ -191,8 +178,8 @@ export default function DuplicateFinderTool() {
     setIsDeleting(true);
 
     try {
-      // Stop playback if any deleted track is playing
-      playerAPI.stop();
+      // Stop any active playback
+      setActivePlayingId(null);
 
       // Remove from database
       await db.tracks.remove(tracksToDelete.map(t => t.id));
@@ -210,7 +197,7 @@ export default function DuplicateFinderTool() {
     } finally {
       setIsDeleting(false);
     }
-  }, [getTracksToDelete, playerAPI]);
+  }, [getTracksToDelete]);
 
   /**
    * Deselect all tracks (mark none as keepers)
@@ -230,63 +217,6 @@ export default function DuplicateFinderTool() {
     }
     setKeeperIds(suggested);
   }, [scanResult]);
-
-  /**
-   * Get all unique tracks from scan results that are missing waveform data
-   * AIDEV-NOTE: Returns tracks that have no waveformPeaks or empty peaks array
-   */
-  const tracksMissingWaveforms = useMemo(() => {
-    if (!scanResult) return [];
-
-    const seen = new Set<TrackId>();
-    const missing: Track[] = [];
-
-    for (const group of scanResult.groups) {
-      for (const trackInfo of group.tracks) {
-        const track = trackInfo.track;
-        if (!seen.has(track.id)) {
-          seen.add(track.id);
-          if (!track.waveformPeaks || track.waveformPeaks.length === 0) {
-            missing.push(track);
-          }
-        }
-      }
-    }
-    return missing;
-  }, [scanResult]);
-
-  /**
-   * Analyze tracks missing waveforms to generate waveform data
-   * AIDEV-NOTE: Uses batch audio analysis API which updates tracks in DB
-   * and emits events for real-time UI updates
-   */
-  const handleAnalyzeWaveforms = useCallback(async () => {
-    if (tracksMissingWaveforms.length === 0) return;
-
-    setIsAnalyzing(true);
-    setAnalysisProgress({ completed: 0, total: tracksMissingWaveforms.length });
-
-    try {
-      const filePaths = tracksMissingWaveforms.map(t => t.path);
-
-      logger.info(`Starting waveform analysis for ${filePaths.length} tracks`);
-
-      // AIDEV-NOTE: analyzeBatch will emit progress events that we listen to above
-      // and track completion events that update the UI in real-time
-      await audioAnalysis.analyzeBatch(filePaths, {
-        generateWaveform: true,
-        detectBpm: false, // Only generate waveforms, skip BPM detection
-        detectKey: false, // Skip key detection
-      });
-
-      logger.info('Waveform analysis complete');
-    } catch (error) {
-      logger.error('Waveform analysis failed:', error);
-    } finally {
-      setIsAnalyzing(false);
-      setAnalysisProgress(null);
-    }
-  }, [tracksMissingWaveforms]);
 
   // Calculate stats for display
   const tracksToDelete = getTracksToDelete();
@@ -336,20 +266,6 @@ export default function DuplicateFinderTool() {
                 <IconTrash size={16} />
                 Delete {tracksToDelete.length} Duplicates
               </button>
-              {tracksMissingWaveforms.length > 0 && (
-                <Button
-                  variant='subtle'
-                  size='xs'
-                  leftSection={<IconWaveSine size={14} />}
-                  onClick={handleAnalyzeWaveforms}
-                  disabled={isAnalyzing}
-                  title={`Analyze ${tracksMissingWaveforms.length} tracks to generate waveform previews`}
-                >
-                  {isAnalyzing
-                    ? `Analyzing ${analysisProgress?.completed ?? 0}/${analysisProgress?.total ?? 0}`
-                    : `Analyze ${tracksMissingWaveforms.length} Waveforms`}
-                </Button>
-              )}
             </>
           )}
           <button
@@ -374,22 +290,6 @@ export default function DuplicateFinderTool() {
             style={{ width: '100%', maxWidth: 400 }}
           />
           <Text className={styles.progressMessage}>{scanProgress.message}</Text>
-        </div>
-      )}
-
-      {/* Waveform Analysis Progress indicator */}
-      {isAnalyzing && analysisProgress && (
-        <div className={styles.progressContainer}>
-          <Progress
-            value={(analysisProgress.completed / analysisProgress.total) * 100}
-            size='lg'
-            radius='xl'
-            color='orange'
-            style={{ width: '100%', maxWidth: 400 }}
-          />
-          <Text className={styles.progressMessage}>
-            Analyzing waveforms: {analysisProgress.completed} / {analysisProgress.total}
-          </Text>
         </div>
       )}
 
@@ -438,8 +338,9 @@ export default function DuplicateFinderTool() {
               key={group.id}
               group={group}
               keeperIds={keeperIds}
+              activePlayingId={activePlayingId}
               onKeepChange={handleKeepChange}
-              onPlayTrack={handlePlayTrack}
+              onSetActiveTrack={handleSetActiveTrack}
             />
           ))}
         </div>

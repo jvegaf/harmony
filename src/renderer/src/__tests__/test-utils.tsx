@@ -13,7 +13,7 @@ export const createMockTrack = (overrides?: Partial<Track>): Track => ({
   genre: 'Electronic',
   year: 2024,
   bpm: 128,
-  bitrate: 320000,
+  bitrate: 320, // kbps (not bps)
   initialKey: 'Am',
   rating: undefined,
   ...overrides,

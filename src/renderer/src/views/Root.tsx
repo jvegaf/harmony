@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Outlet, useRouteLoaderData } from 'react-router-dom';
+import { Outlet, useLocation, useRouteLoaderData } from 'react-router-dom';
 
 import AppEvents from '../components/Events/AppEvents';
 import GlobalKeyBindings from '../components/Events/GlobalKeyBindings';
@@ -27,8 +27,12 @@ const { db, config } = window.Main;
 export default function ViewRoot() {
   const trackPlaying = usePlayingTrack();
   const libraryAPI = useLibraryAPI();
+  const location = useLocation();
   const { trackTagsCandidates, candidatesSearching, candidatesSearchProgress, tagsApplying, tagsApplyProgress, api } =
     useLibraryStore();
+
+  // AIDEV-NOTE: Hide NowPlayingBar when in tools view to give more space to duplicate finder
+  const isToolsView = location.pathname.startsWith('/tools');
 
   useEffect(() => {
     AppActions.init();
@@ -97,8 +101,8 @@ export default function ViewRoot() {
 
         {/** Main Content Area */}
         <main className={styles.mainContent}>
-          {/** Now Playing Bar */}
-          <NowPlayingBarWrapper track={trackPlaying} />
+          {/** Now Playing Bar - Hidden in tools view */}
+          {!isToolsView && <NowPlayingBarWrapper track={trackPlaying} />}
 
           {/** Content Outlet */}
           <div className={styles.contentArea}>

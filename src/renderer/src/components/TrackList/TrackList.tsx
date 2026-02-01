@@ -136,7 +136,8 @@ const TrackList = (props: Props) => {
       { field: 'bpm', maxWidth: 70 },
       {
         field: 'bitrate',
-        valueFormatter: (p: { value: number }) => p.value / 1000 + 'kbps',
+        // AIDEV-NOTE: Bitrate is stored in kbps, no conversion needed
+        valueFormatter: (p: { value: number }) => (p.value ? p.value + 'kbps' : ''),
         minWidth: 80,
         maxWidth: 90,
       },

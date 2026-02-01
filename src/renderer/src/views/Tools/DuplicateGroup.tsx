@@ -2,20 +2,22 @@ import { ParseDuration } from '../../../../preload/utils';
 import type { DuplicateGroup as DuplicateGroupType, DuplicateTrackInfo } from '../../../../preload/types/duplicates';
 import type { TrackId } from '../../../../preload/types/harmony';
 
-import MiniWaveform from './MiniWaveform';
+import DuplicateWavePlayer from './DuplicateWavePlayer';
 import styles from './DuplicateFinderTool.module.css';
 
 /**
  * DuplicateGroup - Displays a group of duplicate tracks
  * AIDEV-NOTE: Shows all tracks in a duplicate group with comparison columns.
  * First track (highest quality score) is highlighted as the recommended keeper.
+ * Uses interactive DuplicateWavePlayer components for audio preview.
  */
 
 type DuplicateGroupProps = {
   group: DuplicateGroupType;
   keeperIds: Set<TrackId>;
+  activePlayingId: TrackId | null;
   onKeepChange: (trackId: TrackId, keep: boolean) => void;
-  onPlayTrack: (trackId: TrackId) => void;
+  onSetActiveTrack: (trackId: TrackId) => void;
 };
 
 /**
@@ -75,28 +77,31 @@ function getParentFolder(path: string): string {
 
 /**
  * Format bitrate for display (e.g., 320, 256)
- * AIDEV-NOTE: Bitrate is stored in bps, convert to kbps for display
+ * AIDEV-NOTE: Bitrate is stored in kbps, no conversion needed
  */
 function formatBitrate(bitrate: number | undefined): string {
   if (!bitrate || bitrate === 0) return '—';
-  // Convert from bps to kbps
-  const kbps = Math.round(bitrate / 1000);
-  return kbps.toString();
+  return bitrate.toString();
 }
 
 /**
  * Get CSS class for bitrate based on quality
- * AIDEV-NOTE: Green for 320+, yellow for 256-319, red for <256
+ * AIDEV-NOTE: Green for 320+, yellow for 256-319, red for <256 (bitrate is already in kbps)
  */
 function getBitrateClass(bitrate: number | undefined): string {
   if (!bitrate || bitrate === 0) return '';
-  const kbps = Math.round(bitrate / 1000);
-  if (kbps >= 320) return styles.bitrateHigh;
-  if (kbps >= 256) return styles.bitrateMedium;
+  if (bitrate >= 320) return styles.bitrateHigh;
+  if (bitrate >= 256) return styles.bitrateMedium;
   return styles.bitrateLow;
 }
 
-export default function DuplicateGroup({ group, keeperIds, onKeepChange, onPlayTrack }: DuplicateGroupProps) {
+export default function DuplicateGroup({
+  group,
+  keeperIds,
+  activePlayingId,
+  onKeepChange,
+  onSetActiveTrack,
+}: DuplicateGroupProps) {
   return (
     <div className={styles.duplicateGroup}>
       {/* Group Header */}
@@ -128,8 +133,9 @@ export default function DuplicateGroup({ group, keeperIds, onKeepChange, onPlayT
           trackInfo={trackInfo}
           isFirst={index === 0}
           isKeeper={keeperIds.has(trackInfo.track.id)}
+          isActiveTrack={activePlayingId === trackInfo.track.id}
           onKeepChange={onKeepChange}
-          onPlayTrack={onPlayTrack}
+          onSetActiveTrack={onSetActiveTrack}
         />
       ))}
     </div>
@@ -143,11 +149,12 @@ type TrackRowProps = {
   trackInfo: DuplicateTrackInfo;
   isFirst: boolean;
   isKeeper: boolean;
+  isActiveTrack: boolean;
   onKeepChange: (trackId: TrackId, keep: boolean) => void;
-  onPlayTrack: (trackId: TrackId) => void;
+  onSetActiveTrack: (trackId: TrackId) => void;
 };
 
-function TrackRow({ trackInfo, isFirst, isKeeper, onKeepChange, onPlayTrack }: TrackRowProps) {
+function TrackRow({ trackInfo, isFirst, isKeeper, isActiveTrack, onKeepChange, onSetActiveTrack }: TrackRowProps) {
   const { track, fileSize, format, cueCount, playlistCount } = trackInfo;
 
   // Build row class names
@@ -163,16 +170,17 @@ function TrackRow({ trackInfo, isFirst, isKeeper, onKeepChange, onPlayTrack }: T
     onKeepChange(track.id, e.target.checked);
   };
 
-  const handlePlayClick = () => {
-    onPlayTrack(track.id);
+  const handleBecomeActive = () => {
+    onSetActiveTrack(track.id);
   };
 
   return (
     <div className={rowClassName}>
-      {/* Waveform */}
-      <MiniWaveform
+      {/* Interactive Waveform Player */}
+      <DuplicateWavePlayer
         track={track}
-        onClick={handlePlayClick}
+        isActiveTrack={isActiveTrack}
+        onBecomeActive={handleBecomeActive}
         color={isKeeper ? '#22c55e' : '#fa8905'}
       />
 

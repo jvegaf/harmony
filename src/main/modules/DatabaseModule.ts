@@ -38,6 +38,10 @@ class DatabaseModule extends ModuleWindow {
 
       await this.db.insertTracks(newTracks);
       log.info('Tracks added to the database');
+
+      // Invalidate duplicates cache since library changed
+      this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
+
       return tracks;
     });
 
@@ -45,8 +49,11 @@ class DatabaseModule extends ModuleWindow {
       return this.db.updateTrack(track);
     });
 
-    ipcMain.handle(channels.TRACKS_REMOVE, (_, trackIDs: TrackId[]): Promise<void> => {
-      return this.db.removeTracks(trackIDs);
+    ipcMain.handle(channels.TRACKS_REMOVE, async (_, trackIDs: TrackId[]): Promise<void> => {
+      await this.db.removeTracks(trackIDs);
+
+      // Invalidate duplicates cache since library changed
+      this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
     });
 
     ipcMain.handle(channels.TRACKS_BY_ID, (_, tracksIDs: string[]): Promise<Array<Track>> => {

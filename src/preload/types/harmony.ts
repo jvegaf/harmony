@@ -49,6 +49,7 @@ export interface Track {
    * that would otherwise be lost when only storing `year`.
    */
   releaseDate?: string;
+  /** Bitrate in kilobits per second (kbps). AIDEV-NOTE: Traktor stores bps, converted on import. */
   bitrate?: number;
   rating?: TrackRating;
   comment?: string;
