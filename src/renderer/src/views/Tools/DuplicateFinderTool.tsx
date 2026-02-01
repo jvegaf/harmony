@@ -166,6 +166,8 @@ export default function DuplicateFinderTool() {
 
   /**
    * Confirm and execute deletion
+   * AIDEV-NOTE: Must clear scan results BEFORE deleting files to ensure
+   * WaveSurfer instances are destroyed and release file handles
    */
   const handleConfirmDelete = useCallback(async () => {
     const tracksToDelete = getTracksToDelete();
@@ -178,18 +180,21 @@ export default function DuplicateFinderTool() {
     setIsDeleting(true);
 
     try {
-      // Stop any active playback
+      // Stop any active playback and clear scan results first
+      // This unmounts all DuplicateWavePlayer components, destroying WaveSurfer instances
+      // and releasing file handles before we try to delete the files
       setActivePlayingId(null);
+      setScanResult(null);
+      setKeeperIds(new Set());
+
+      // Wait for React to unmount components and release file handles
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Remove from database
       await db.tracks.remove(tracksToDelete.map(t => t.id));
 
-      // Delete from disk
+      // Delete from disk (files should be unlocked now)
       await library.deleteTracks(tracksToDelete);
-
-      // Clear scan results (user should rescan after deletion)
-      setScanResult(null);
-      setKeeperIds(new Set());
 
       logger.info(`Deleted ${tracksToDelete.length} duplicate tracks`);
     } catch (error) {

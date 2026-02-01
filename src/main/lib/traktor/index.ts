@@ -30,3 +30,5 @@ export { mergeTrack, mergeCuePoints, MergeStrategy } from './sync/conflict-resol
 export type { MergeResult, CueMergeResult, CueMergeStrategy } from './sync/conflict-resolver';
 export { SyncEngine } from './sync/sync-engine';
 export type { SyncOptions, SyncResult, SyncPlan, TrackSyncResult, TrackMatchResult } from './sync/sync-engine';
+export { AutoSyncService } from './sync/auto-sync-service';
+export type { SyncOperations } from './sync/auto-sync-service';

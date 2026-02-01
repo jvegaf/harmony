@@ -24,6 +24,28 @@ export default class ConfigModule extends Module {
       name: 'harmony-settings',
       defaults: this.getDefaultConfig(),
     });
+
+    // AIDEV-NOTE: Migrate existing configs to add new properties
+    this.migrateConfig();
+  }
+
+  /**
+   * Migrate existing configs to add new properties that may be missing
+   * AIDEV-NOTE: electron-store only applies defaults to top-level keys,
+   * so we need to manually ensure nested properties exist
+   */
+  private migrateConfig(): void {
+    const defaults = this.getDefaultConfig();
+
+    // Migrate traktorConfig.autoSync if missing
+    const traktorConfig = this.config.get('traktorConfig');
+    if (traktorConfig && !traktorConfig.autoSync) {
+      logger.info('[ConfigModule] Migrating traktorConfig to add autoSync');
+      this.config.set('traktorConfig', {
+        ...traktorConfig,
+        autoSync: defaults.traktorConfig.autoSync,
+      });
+    }
   }
 
   async load(): Promise<void> {
@@ -98,6 +120,13 @@ export default class ConfigModule extends Module {
         cueStrategy: 'SMART_MERGE',
         syncOnStartup: false,
         autoBackup: true,
+        autoSync: {
+          enabled: false,
+          direction: 'bidirectional',
+          onStartup: true,
+          onLibraryChange: true,
+          debounceMs: 5000, // 5 seconds debounce for library changes
+        },
       },
       // AIDEV-NOTE: Duplicate finder configuration, persisted to settings
       duplicateFinderConfig: {

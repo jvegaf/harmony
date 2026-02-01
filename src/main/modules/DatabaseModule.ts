@@ -5,6 +5,7 @@ import { Playlist, Track, TrackId } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
 import { Database } from '../lib/db/database';
+import { emitLibraryChanged } from '../lib/library-events';
 import log from 'electron-log';
 /**
  * Module in charge of returning the track with tags fixed
@@ -42,6 +43,9 @@ class DatabaseModule extends ModuleWindow {
       // Invalidate duplicates cache since library changed
       this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
 
+      // AIDEV-NOTE: Emit library change event for auto-sync
+      emitLibraryChanged('tracks-added', newTracks.length);
+
       return tracks;
     });
 
@@ -54,6 +58,9 @@ class DatabaseModule extends ModuleWindow {
 
       // Invalidate duplicates cache since library changed
       this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
+
+      // AIDEV-NOTE: Emit library change event for auto-sync
+      emitLibraryChanged('tracks-removed', trackIDs.length);
     });
 
     ipcMain.handle(channels.TRACKS_BY_ID, (_, tracksIDs: string[]): Promise<Array<Track>> => {

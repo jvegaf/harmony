@@ -25,6 +25,22 @@ export interface TraktorConfig {
   syncOnStartup: boolean;
   /** Create backup before writing to NML */
   autoBackup: boolean;
+  /**
+   * AIDEV-NOTE: Auto-sync configuration for background synchronization
+   * When enabled, Harmony will automatically sync with Traktor in the background
+   */
+  autoSync: {
+    /** Enable automatic background sync */
+    enabled: boolean;
+    /** Sync direction: import from Traktor, export to Traktor, or both */
+    direction: 'import' | 'export' | 'bidirectional';
+    /** Trigger sync on app startup (after initial load) */
+    onStartup: boolean;
+    /** Trigger sync when library changes (tracks added/removed/updated) */
+    onLibraryChange: boolean;
+    /** Debounce delay in ms before syncing after library change */
+    debounceMs: number;
+  };
 }
 
 /**
@@ -98,4 +114,25 @@ export interface TraktorSyncResultStats {
  */
 export interface TraktorSyncResult {
   stats: TraktorSyncResultStats;
+}
+
+/**
+ * Auto-sync status for tracking background sync state
+ * AIDEV-NOTE: Used by renderer to display sync status in notification
+ */
+export interface AutoSyncStatus {
+  /** Whether auto-sync is currently running */
+  isRunning: boolean;
+  /** Current phase of sync (if running) */
+  phase?: TraktorSyncProgress['phase'];
+  /** Progress percentage 0-100 */
+  progress: number;
+  /** Human-readable message */
+  message: string;
+  /** Direction of current sync */
+  direction?: 'import' | 'export';
+  /** Timestamp of last successful sync */
+  lastSyncTime?: number;
+  /** Error message if last sync failed */
+  lastError?: string;
 }

@@ -13,9 +13,13 @@
  * - TRAKTOR_GET_SYNC_PREVIEW: Preview what will change during sync
  * - TRAKTOR_EXECUTE_SYNC: Execute the sync and persist to database
  * - TRAKTOR_EXPORT_TO_NML: Write Harmony changes back to NML file
+ * - TRAKTOR_AUTO_SYNC_START: Start auto-sync manually
+ * - TRAKTOR_AUTO_SYNC_STOP: Stop auto-sync
+ * - TRAKTOR_AUTO_SYNC_GET_STATUS: Get current auto-sync status
  *
  * Events:
  * - TRAKTOR_SYNC_PROGRESS: Progress updates during sync operations
+ * - TRAKTOR_AUTO_SYNC_STATUS: Auto-sync status updates
  */
 
 import { dialog, ipcMain } from 'electron';
@@ -32,7 +36,9 @@ import {
   MergeStrategy,
   mapTraktorNodeToFolderTree,
   flattenPlaylistTree,
+  AutoSyncService,
   type SyncOptions,
+  type SyncResult,
 } from '../lib/traktor';
 import type {
   TraktorConfig,
@@ -40,12 +46,14 @@ import type {
   TraktorNMLInfo,
   TraktorSyncPlan,
   TraktorSyncResult,
+  AutoSyncStatus,
 } from '../../preload/types/traktor';
 import type { Track } from '../../preload/types/harmony';
 import type { CuePoint } from '../../preload/types/cue-point';
 
 import ModuleWindow from './BaseWindowModule';
 import ConfigModule from './ConfigModule';
+import { libraryEventBus } from '../lib/library-events';
 
 /**
  * Module providing IPC handlers for Traktor NML integration
@@ -53,6 +61,7 @@ import ConfigModule from './ConfigModule';
 export default class IPCTraktorModule extends ModuleWindow {
   protected db: Database;
   private configModule: ConfigModule;
+  private autoSyncService: AutoSyncService | null = null;
 
   constructor(window: Electron.BrowserWindow, configModule: ConfigModule) {
     super(window);
@@ -63,9 +72,26 @@ export default class IPCTraktorModule extends ModuleWindow {
 
   /**
    * Get the current Traktor config from persistent storage
+   * AIDEV-NOTE: Ensures autoSync defaults are applied for legacy configs
    */
   private getConfig(): TraktorConfig {
-    return this.configModule.getConfig().get('traktorConfig');
+    const config = this.configModule.getConfig().get('traktorConfig');
+
+    // Ensure autoSync exists with defaults for legacy configs
+    if (!config.autoSync) {
+      return {
+        ...config,
+        autoSync: {
+          enabled: false,
+          direction: 'bidirectional',
+          onStartup: true,
+          onLibraryChange: true,
+          debounceMs: 5000,
+        },
+      };
+    }
+
+    return config;
   }
 
   /**
@@ -611,7 +637,36 @@ export default class IPCTraktorModule extends ModuleWindow {
       }
     });
 
+    // Initialize auto-sync service
+    this.initAutoSyncService();
+
+    // Auto-sync IPC handlers
+    ipcMain.handle(channels.TRAKTOR_AUTO_SYNC_START, async (): Promise<void> => {
+      log.info('[IPCTraktor] Manual auto-sync triggered');
+      await this.autoSyncService?.start();
+    });
+
+    ipcMain.handle(channels.TRAKTOR_AUTO_SYNC_STOP, async (): Promise<void> => {
+      log.info('[IPCTraktor] Auto-sync stop requested');
+      this.autoSyncService?.stop();
+    });
+
+    ipcMain.handle(channels.TRAKTOR_AUTO_SYNC_GET_STATUS, async (): Promise<AutoSyncStatus> => {
+      return (
+        this.autoSyncService?.getStatus() ?? {
+          isRunning: false,
+          progress: 0,
+          message: '',
+        }
+      );
+    });
+
     log.info('[IPCTraktor] Module loaded');
+
+    // Trigger startup sync after a short delay to let the app fully initialize
+    setTimeout(() => {
+      this.triggerAutoSync('startup');
+    }, 2000);
   }
 
   // ---------------------------------------------------------------------------
@@ -659,5 +714,289 @@ export default class IPCTraktorModule extends ModuleWindow {
     // Replace /: with / and remove trailing /:
     const systemDir = dir.replace(/\/:/g, '/').replace(/:$/, '');
     return `${systemDir}${file}`;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Auto-Sync Integration
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Initialize the AutoSyncService with sync operations
+   */
+  private initAutoSyncService(): void {
+    this.autoSyncService = new AutoSyncService(this.window, {
+      executeSync: async () => this.executeSyncInternal(),
+      exportToNml: async () => this.exportToNmlInternal(),
+      getConfig: () => this.getConfig(),
+    });
+
+    // AIDEV-NOTE: Subscribe to library change events to trigger auto-sync
+    libraryEventBus.on('library-changed', () => {
+      this.triggerAutoSyncDebounced();
+    });
+
+    log.info('[IPCTraktor] AutoSyncService initialized');
+  }
+
+  /**
+   * Trigger auto-sync (called on startup or library changes)
+   */
+  async triggerAutoSync(reason: 'startup' | 'library_change' | 'manual'): Promise<void> {
+    await this.autoSyncService?.triggerSync(reason);
+  }
+
+  /**
+   * Trigger auto-sync with debounce (for library changes)
+   */
+  triggerAutoSyncDebounced(): void {
+    this.autoSyncService?.triggerSyncDebounced('library_change');
+  }
+
+  /**
+   * Internal sync execution used by AutoSyncService
+   * AIDEV-NOTE: Extracted from TRAKTOR_EXECUTE_SYNC handler for reuse
+   */
+  private async executeSyncInternal(): Promise<SyncResult> {
+    const config = this.getConfig();
+    const pathToUse = config.nmlPath;
+
+    if (!pathToUse) {
+      throw new Error('No NML path configured');
+    }
+
+    log.info('[IPCTraktor] Executing internal sync for:', pathToUse);
+
+    // Parse NML
+    const parser = new TraktorNMLParser();
+    const nml = await parser.parse(pathToUse);
+
+    const entries = nml.NML.COLLECTION.ENTRY || [];
+    const traktorTracks: Track[] = entries.map(entry => mapTraktorEntryToTrack(entry));
+
+    // Get cue points from NML
+    const traktorCuesByPath = new Map<string, CuePoint[]>();
+    for (const entry of entries) {
+      const track = mapTraktorEntryToTrack(entry);
+      if (entry.CUE_V2) {
+        const cues = Array.isArray(entry.CUE_V2) ? entry.CUE_V2 : [entry.CUE_V2];
+        const cuePoints = mapTraktorCuesToHarmony(cues, track.id);
+        traktorCuesByPath.set(track.path, cuePoints);
+      }
+    }
+
+    // Get Harmony tracks
+    const harmonyTracks = await this.db.getAllTracks();
+
+    // Get Harmony cue points
+    const allTrackIds = harmonyTracks.map(t => t.id);
+    const harmonyCues = await this.db.getCuePointsByTrackIds(allTrackIds);
+
+    // Group cues by track ID
+    const harmonyCuesByTrackId = new Map<string, CuePoint[]>();
+    for (const cue of harmonyCues) {
+      const existing = harmonyCuesByTrackId.get(cue.trackId) || [];
+      existing.push(cue);
+      harmonyCuesByTrackId.set(cue.trackId, existing);
+    }
+
+    // Execute sync
+    const syncOptions: SyncOptions = {
+      strategy: this.mapStrategyToEnum(config.syncStrategy),
+      cueStrategy: config.cueStrategy,
+      caseInsensitivePaths: process.platform !== 'linux',
+    };
+
+    const engine = new SyncEngine(syncOptions);
+    const result = engine.executeSync(harmonyTracks, traktorTracks, harmonyCuesByTrackId, traktorCuesByPath);
+
+    // Save updated tracks to database
+    if (result.tracksUpdated.length > 0) {
+      for (const track of result.tracksUpdated) {
+        await this.db.updateTrack(track);
+      }
+      log.info('[IPCTraktor] Updated', result.tracksUpdated.length, 'tracks');
+    }
+
+    // Save updated cue points to database
+    if (result.cuePointsUpdated.length > 0) {
+      const cuesByTrack = new Map<string, CuePoint[]>();
+      for (const cue of result.cuePointsUpdated) {
+        const existing = cuesByTrack.get(cue.trackId) || [];
+        existing.push(cue);
+        cuesByTrack.set(cue.trackId, existing);
+      }
+
+      for (const [trackId, cues] of cuesByTrack) {
+        await this.db.replaceCuePointsForTrack(trackId, cues);
+      }
+      log.info('[IPCTraktor] Updated cue points for', cuesByTrack.size, 'tracks');
+    }
+
+    // Import new tracks from Traktor that don't exist in Harmony
+    if (result.tracksImported.length > 0) {
+      const fs = await import('fs/promises');
+      const validTracks: Track[] = [];
+
+      for (const track of result.tracksImported) {
+        try {
+          await fs.access(track.path);
+          validTracks.push(track);
+        } catch {
+          // Skip tracks whose files don't exist
+        }
+      }
+
+      if (validTracks.length > 0) {
+        await this.db.insertTracks(validTracks);
+        log.info('[IPCTraktor] Imported', validTracks.length, 'new tracks');
+
+        // Save cue points for imported tracks
+        for (const track of validTracks) {
+          const cues = traktorCuesByPath.get(track.path);
+          if (cues && cues.length > 0) {
+            const cuesWithCorrectId = cues.map(cue => ({ ...cue, trackId: track.id }));
+            await this.db.saveCuePoints(cuesWithCorrectId);
+          }
+        }
+      }
+
+      result.stats.tracksImported = validTracks.length;
+    }
+
+    // Import playlists from Traktor
+    let playlistsImported = 0;
+    if (nml.NML.PLAYLISTS?.NODE) {
+      try {
+        const folderTree = mapTraktorNodeToFolderTree(nml.NML.PLAYLISTS.NODE);
+        const traktorPlaylists = flattenPlaylistTree(folderTree);
+
+        const existingPlaylists = await this.db.getAllPlaylists();
+        const existingPlaylistIds = new Set(existingPlaylists.map(p => p.id));
+        const existingPlaylistNames = new Set(existingPlaylists.map(p => p.name.toLowerCase()));
+
+        const allTracks = await this.db.getAllTracks();
+        const tracksByPath = new Map<string, Track>();
+        for (const track of allTracks) {
+          tracksByPath.set(this.normalizePath(track.path), track);
+        }
+
+        for (const traktorPlaylist of traktorPlaylists) {
+          if (existingPlaylistIds.has(traktorPlaylist.id)) continue;
+          if (existingPlaylistNames.has(traktorPlaylist.name.toLowerCase())) continue;
+
+          const playlistTracks: Track[] = [];
+          if (traktorPlaylist.trackPaths) {
+            for (const trackPath of traktorPlaylist.trackPaths) {
+              const normalizedPath = this.normalizePath(trackPath);
+              const track = tracksByPath.get(normalizedPath);
+              if (track) {
+                playlistTracks.push(track);
+              }
+            }
+          }
+
+          if (playlistTracks.length > 0) {
+            await this.db.insertPlaylist({
+              id: traktorPlaylist.id,
+              name: traktorPlaylist.name,
+              tracks: playlistTracks,
+            });
+            playlistsImported++;
+          }
+        }
+      } catch (playlistError) {
+        log.error('[IPCTraktor] Error importing playlists:', playlistError);
+      }
+    }
+
+    return {
+      ...result,
+      stats: {
+        ...result.stats,
+        playlistsImported,
+      },
+    };
+  }
+
+  /**
+   * Internal NML export used by AutoSyncService
+   * AIDEV-NOTE: Extracted from TRAKTOR_EXPORT_TO_NML handler for reuse
+   */
+  private async exportToNmlInternal(): Promise<void> {
+    const config = this.getConfig();
+    const pathToUse = config.nmlPath;
+
+    if (!pathToUse) {
+      throw new Error('No NML path configured');
+    }
+
+    log.info('[IPCTraktor] Exporting to NML (internal):', pathToUse);
+
+    // Clean up duplicate cue points
+    await this.db.cleanupDuplicateCuePoints();
+
+    // Parse existing NML
+    const parser = new TraktorNMLParser();
+    const nml = await parser.parse(pathToUse);
+
+    // Get all Harmony tracks
+    const harmonyTracks = await this.db.getAllTracks();
+
+    // Get all cue points
+    const allTrackIds = harmonyTracks.map(t => t.id);
+    const harmonyCues = await this.db.getCuePointsByTrackIds(allTrackIds);
+
+    // Group cues by track ID
+    const cuesByTrackId = new Map<string, CuePoint[]>();
+    for (const cue of harmonyCues) {
+      const existing = cuesByTrackId.get(cue.trackId) || [];
+      const duplicateKey = `${cue.positionMs}-${cue.type}-${cue.hotcueSlot ?? -1}`;
+      const isDuplicate = existing.some(c => `${c.positionMs}-${c.type}-${c.hotcueSlot ?? -1}` === duplicateKey);
+      if (!isDuplicate) {
+        existing.push(cue);
+      }
+      cuesByTrackId.set(cue.trackId, existing);
+    }
+
+    // Create path-indexed map
+    const harmonyTracksByPath = new Map<string, Track>();
+    for (const track of harmonyTracks) {
+      const normalizedPath = this.normalizePath(track.path);
+      harmonyTracksByPath.set(normalizedPath, track);
+    }
+
+    // Update NML with Harmony track data
+    const writer = new TraktorNMLWriter();
+    let updatedNml = nml;
+
+    for (const entry of nml.NML.COLLECTION.ENTRY) {
+      const entryPath = this.traktorPathToSystem(entry.LOCATION.DIR, entry.LOCATION.FILE);
+      const normalizedPath = this.normalizePath(entryPath);
+      const harmonyTrack = harmonyTracksByPath.get(normalizedPath);
+
+      if (harmonyTrack) {
+        const cues = cuesByTrackId.get(harmonyTrack.id);
+        updatedNml = writer.updateTrack(updatedNml, harmonyTrack, cues);
+      }
+    }
+
+    // Merge Harmony playlists into NML
+    const harmonyPlaylists = await this.db.getAllPlaylists();
+    if (harmonyPlaylists.length > 0) {
+      updatedNml = writer.mergePlaylistsFromHarmony(updatedNml, harmonyPlaylists);
+    }
+
+    // Create backup if enabled
+    if (config.autoBackup) {
+      const backupPath = `${pathToUse}.backup.${Date.now()}.nml`;
+      const fs = await import('fs/promises');
+      await fs.copyFile(pathToUse, backupPath);
+      log.info('[IPCTraktor] Created backup:', backupPath);
+    }
+
+    // Write updated NML
+    await writer.writeToFile(updatedNml, pathToUse);
+
+    log.info('[IPCTraktor] Export complete (internal)');
   }
 }

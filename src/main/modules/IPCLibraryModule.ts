@@ -14,6 +14,7 @@ import channels from '../../preload/lib/ipc-channels';
 import makeID from '../../preload/lib/id-provider';
 import { ParseDuration } from '../../preload/utils';
 import { loggerExtras } from '../lib/log/logger';
+import { emitLibraryChanged } from '../lib/library-events';
 import UpdateTrackRating from '../lib/track/rating-manager';
 import PersistTrack from '../lib/track/saver';
 import RemoveFile from '../lib/track/remover';
@@ -81,6 +82,9 @@ class IPCLibraryModule extends ModuleWindow {
 
       // Invalidate duplicates cache since library changed
       this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
+
+      // AIDEV-NOTE: Emit library change event for auto-sync
+      emitLibraryChanged('tracks-removed', trackFiles.length);
     });
   }
 

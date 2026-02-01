@@ -10,8 +10,28 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Select, Switch, Text, Badge, Group, Stack, Paper, Divider } from '@mantine/core';
-import { IconRefresh, IconUpload, IconDownload, IconFolder, IconCheck } from '@tabler/icons-react';
+import {
+  Button,
+  Select,
+  Switch,
+  Text,
+  Badge,
+  Group,
+  Stack,
+  Paper,
+  Divider,
+  NumberInput,
+  Collapse,
+} from '@mantine/core';
+import {
+  IconRefresh,
+  IconUpload,
+  IconDownload,
+  IconFolder,
+  IconCheck,
+  IconPlayerPlay,
+  IconPlayerStop,
+} from '@tabler/icons-react';
 
 import * as Setting from '../../components/Setting/Setting';
 import styles from './Settings.module.css';
@@ -20,6 +40,7 @@ import type {
   TraktorNMLInfo,
   TraktorSyncProgress,
   TraktorSyncPlan,
+  AutoSyncStatus,
 } from '../../../../preload/types/traktor';
 
 const { traktor, logger } = window.Main;
@@ -37,6 +58,9 @@ export default function SettingsTraktor() {
   const [progress, setProgress] = useState<TraktorSyncProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastSyncResult, setLastSyncResult] = useState<string | null>(null);
+
+  // Auto-sync state
+  const [autoSyncStatus, setAutoSyncStatus] = useState<AutoSyncStatus | null>(null);
 
   const loadNmlInfo = useCallback(async (path: string) => {
     try {
@@ -75,8 +99,17 @@ export default function SettingsTraktor() {
       setProgress(progressUpdate);
     });
 
+    // Subscribe to auto-sync status updates
+    const unsubscribeAutoSync = traktor.autoSync.onStatusChange(status => {
+      setAutoSyncStatus(status);
+    });
+
+    // Get initial auto-sync status
+    traktor.autoSync.getStatus().then(setAutoSyncStatus);
+
     return () => {
       unsubscribe();
+      unsubscribeAutoSync();
     };
   }, [loadConfig]);
 
@@ -188,6 +221,103 @@ export default function SettingsTraktor() {
     }
   }, []);
 
+  // -------------------------------------------------------------------------
+  // Auto-Sync Handlers
+  // -------------------------------------------------------------------------
+
+  const handleAutoSyncEnabledChange = useCallback(
+    async (checked: boolean) => {
+      if (!config) return;
+      try {
+        const updatedConfig = await traktor.setConfig({
+          autoSync: { ...config.autoSync, enabled: checked },
+        });
+        setConfig(updatedConfig);
+      } catch (err) {
+        logger.error('Failed to update auto sync enabled:', err);
+      }
+    },
+    [config],
+  );
+
+  const handleAutoSyncDirectionChange = useCallback(
+    async (value: string | null) => {
+      if (!value || !config) return;
+      try {
+        const updatedConfig = await traktor.setConfig({
+          autoSync: { ...config.autoSync, direction: value as 'import' | 'export' | 'bidirectional' },
+        });
+        setConfig(updatedConfig);
+      } catch (err) {
+        logger.error('Failed to update auto sync direction:', err);
+      }
+    },
+    [config],
+  );
+
+  const handleAutoSyncOnStartupChange = useCallback(
+    async (checked: boolean) => {
+      if (!config) return;
+      try {
+        const updatedConfig = await traktor.setConfig({
+          autoSync: { ...config.autoSync, onStartup: checked },
+        });
+        setConfig(updatedConfig);
+      } catch (err) {
+        logger.error('Failed to update auto sync on startup:', err);
+      }
+    },
+    [config],
+  );
+
+  const handleAutoSyncOnLibraryChangeChange = useCallback(
+    async (checked: boolean) => {
+      if (!config) return;
+      try {
+        const updatedConfig = await traktor.setConfig({
+          autoSync: { ...config.autoSync, onLibraryChange: checked },
+        });
+        setConfig(updatedConfig);
+      } catch (err) {
+        logger.error('Failed to update auto sync on library change:', err);
+      }
+    },
+    [config],
+  );
+
+  const handleAutoSyncDebounceChange = useCallback(
+    async (value: string | number) => {
+      if (!config) return;
+      const numValue = typeof value === 'string' ? parseInt(value, 10) : value;
+      if (isNaN(numValue)) return;
+      try {
+        const updatedConfig = await traktor.setConfig({
+          autoSync: { ...config.autoSync, debounceMs: numValue },
+        });
+        setConfig(updatedConfig);
+      } catch (err) {
+        logger.error('Failed to update auto sync debounce:', err);
+      }
+    },
+    [config],
+  );
+
+  const handleManualAutoSync = useCallback(async () => {
+    try {
+      await traktor.autoSync.start();
+    } catch (err) {
+      logger.error('Failed to trigger auto sync:', err);
+    }
+  }, []);
+
+  const handleStopAutoSync = useCallback(() => {
+    try {
+      traktor.autoSync.stop();
+    } catch (err) {
+      logger.error('Failed to stop auto sync:', err);
+    }
+  }, []);
+
   const isLoading =
     syncState === 'loading' || syncState === 'previewing' || syncState === 'syncing' || syncState === 'exporting';
 
@@ -291,6 +421,169 @@ export default function SettingsTraktor() {
             disabled={isLoading}
             label='Create backup before writing to NML'
           />
+        </Setting.Action>
+      </Setting.Section>
+
+      <Divider my='md' />
+
+      {/* Auto-Sync Settings */}
+      <Setting.Section>
+        <Setting.Description>Auto-Sync</Setting.Description>
+        <Setting.Action>
+          <Stack gap='sm'>
+            <Switch
+              checked={config?.autoSync?.enabled ?? false}
+              onChange={e => handleAutoSyncEnabledChange(e.currentTarget.checked)}
+              disabled={isLoading || !config?.nmlPath}
+              label='Enable automatic synchronization with Traktor'
+            />
+
+            <Collapse in={config?.autoSync?.enabled ?? false}>
+              <Stack
+                gap='sm'
+                mt='xs'
+              >
+                <Select
+                  label='Sync Direction'
+                  value={config?.autoSync?.direction || 'import'}
+                  onChange={handleAutoSyncDirectionChange}
+                  disabled={isLoading}
+                  data={[
+                    { value: 'import', label: 'Import from Traktor' },
+                    { value: 'export', label: 'Export to Traktor' },
+                    { value: 'bidirectional', label: 'Bidirectional (Import + Export)' },
+                  ]}
+                  style={{ width: 300 }}
+                />
+
+                <Switch
+                  checked={config?.autoSync?.onStartup ?? true}
+                  onChange={e => handleAutoSyncOnStartupChange(e.currentTarget.checked)}
+                  disabled={isLoading}
+                  label='Sync on app startup'
+                />
+
+                <Switch
+                  checked={config?.autoSync?.onLibraryChange ?? false}
+                  onChange={e => handleAutoSyncOnLibraryChangeChange(e.currentTarget.checked)}
+                  disabled={isLoading}
+                  label='Sync when library changes'
+                />
+
+                {config?.autoSync?.onLibraryChange && (
+                  <NumberInput
+                    label='Debounce delay (ms)'
+                    description='Wait time after library changes before syncing'
+                    value={config?.autoSync?.debounceMs ?? 5000}
+                    onChange={handleAutoSyncDebounceChange}
+                    disabled={isLoading}
+                    min={1000}
+                    max={60000}
+                    step={1000}
+                    style={{ width: 200 }}
+                  />
+                )}
+
+                {/* Auto-Sync Status & Manual Trigger */}
+                <Paper
+                  p='sm'
+                  withBorder
+                  style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+                >
+                  <Stack gap='xs'>
+                    <Group justify='space-between'>
+                      <Group gap='xs'>
+                        <Text
+                          size='sm'
+                          fw={500}
+                        >
+                          Status:
+                        </Text>
+                        <Badge
+                          color={autoSyncStatus?.isRunning ? 'blue' : autoSyncStatus?.lastError ? 'red' : 'gray'}
+                          variant='light'
+                        >
+                          {autoSyncStatus?.isRunning ? 'Syncing...' : autoSyncStatus?.lastError ? 'Error' : 'Idle'}
+                        </Badge>
+                        {autoSyncStatus?.lastSyncTime && !autoSyncStatus.isRunning && (
+                          <Text
+                            size='xs'
+                            c='dimmed'
+                          >
+                            Last sync: {new Date(autoSyncStatus.lastSyncTime).toLocaleTimeString()}
+                          </Text>
+                        )}
+                      </Group>
+
+                      <Group gap='xs'>
+                        {autoSyncStatus?.isRunning ? (
+                          <Button
+                            size='xs'
+                            variant='light'
+                            color='red'
+                            leftSection={<IconPlayerStop size={14} />}
+                            onClick={handleStopAutoSync}
+                          >
+                            Stop
+                          </Button>
+                        ) : (
+                          <Button
+                            size='xs'
+                            variant='light'
+                            leftSection={<IconPlayerPlay size={14} />}
+                            onClick={handleManualAutoSync}
+                            disabled={!config?.nmlPath}
+                          >
+                            Sync Now
+                          </Button>
+                        )}
+                      </Group>
+                    </Group>
+
+                    {/* Progress bar during sync */}
+                    {autoSyncStatus?.isRunning && (
+                      <>
+                        <Text
+                          size='xs'
+                          c='dimmed'
+                        >
+                          {autoSyncStatus.message}
+                        </Text>
+                        <div
+                          style={{
+                            width: '100%',
+                            height: 6,
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            borderRadius: 3,
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: `${autoSyncStatus.progress}%`,
+                              height: '100%',
+                              backgroundColor: 'var(--mantine-color-blue-6)',
+                              transition: 'width 0.3s ease',
+                            }}
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {/* Error message */}
+                    {autoSyncStatus?.lastError && !autoSyncStatus.isRunning && (
+                      <Text
+                        size='xs'
+                        c='red'
+                      >
+                        {autoSyncStatus.lastError}
+                      </Text>
+                    )}
+                  </Stack>
+                </Paper>
+              </Stack>
+            </Collapse>
+          </Stack>
         </Setting.Action>
       </Setting.Section>
 

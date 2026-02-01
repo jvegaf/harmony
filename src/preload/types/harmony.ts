@@ -199,6 +199,14 @@ export interface Config {
     cueStrategy: 'SMART_MERGE' | 'REPLACE';
     syncOnStartup: boolean;
     autoBackup: boolean;
+    /** Auto-sync configuration for background synchronization */
+    autoSync: {
+      enabled: boolean;
+      direction: 'import' | 'export' | 'bidirectional';
+      onStartup: boolean;
+      onLibraryChange: boolean;
+      debounceMs: number;
+    };
   };
   /**
    * Duplicate finder configuration.

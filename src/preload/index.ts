@@ -10,7 +10,13 @@ import {
   UpdateRatingPayload,
   Config,
 } from './types/harmony';
-import type { TraktorConfig, TraktorSyncProgress, TraktorNMLInfo, TraktorSyncResult } from './types/traktor';
+import type {
+  TraktorConfig,
+  TraktorSyncProgress,
+  TraktorNMLInfo,
+  TraktorSyncResult,
+  AutoSyncStatus,
+} from './types/traktor';
 import type { SyncPlan, SyncOptions } from '../main/lib/traktor';
 import type { DuplicateScanProgress, DuplicateScanResult, TrackFileInfo } from './types/duplicates';
 import parseUri from './lib/utils-uri';
@@ -166,6 +172,24 @@ const api = {
       const listener = (_: any, progress: TraktorSyncProgress) => callback(progress);
       ipcRenderer.on(channels.TRAKTOR_SYNC_PROGRESS, listener);
       return () => ipcRenderer.removeListener(channels.TRAKTOR_SYNC_PROGRESS, listener);
+    },
+    /**
+     * Auto-sync API
+     * AIDEV-NOTE: Background synchronization with Traktor
+     */
+    autoSync: {
+      /** Start auto-sync manually */
+      start: (): Promise<void> => ipcRenderer.invoke(channels.TRAKTOR_AUTO_SYNC_START),
+      /** Stop auto-sync (cancels pending debounced syncs) */
+      stop: (): Promise<void> => ipcRenderer.invoke(channels.TRAKTOR_AUTO_SYNC_STOP),
+      /** Get current auto-sync status */
+      getStatus: (): Promise<AutoSyncStatus> => ipcRenderer.invoke(channels.TRAKTOR_AUTO_SYNC_GET_STATUS),
+      /** Listen for auto-sync status updates */
+      onStatusChange: (callback: (status: AutoSyncStatus) => void) => {
+        const listener = (_: any, status: AutoSyncStatus) => callback(status);
+        ipcRenderer.on(channels.TRAKTOR_AUTO_SYNC_STATUS, listener);
+        return () => ipcRenderer.removeListener(channels.TRAKTOR_AUTO_SYNC_STATUS, listener);
+      },
     },
   },
   /**

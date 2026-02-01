@@ -14,6 +14,7 @@ import AppHeader from '../components/AppHeader/AppHeader';
 import Sidebar from '../components/Sidebar/Sidebar';
 import NowPlayingBar from '../components/NowPlayingBar/NowPlayingBar';
 import usePlayingTrack from '../hooks/usePlayingTrack';
+import { useAutoSyncNotification } from '../hooks/useAutoSyncNotification';
 import useLibraryStore, { useLibraryAPI } from '../stores/useLibraryStore';
 import styles from './Root.module.css';
 import { LoaderData } from './router';
@@ -30,6 +31,9 @@ export default function ViewRoot() {
   const location = useLocation();
   const { trackTagsCandidates, candidatesSearching, candidatesSearchProgress, tagsApplying, tagsApplyProgress, api } =
     useLibraryStore();
+
+  // AIDEV-NOTE: Show auto-sync notifications when syncing with Traktor
+  useAutoSyncNotification();
 
   // AIDEV-NOTE: Hide NowPlayingBar when in tools view to give more space to duplicate finder
   const isToolsView = location.pathname.startsWith('/tools');
