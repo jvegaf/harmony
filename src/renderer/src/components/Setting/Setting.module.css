@@ -2,6 +2,7 @@
   width: 100%;
   border-bottom: solid 1px var(--mantine-color-default-border);
   margin-top: 20px;
+  padding: 10px 0;
 }
 
 .settingTitle {
@@ -14,11 +15,13 @@
 .settingDescription {
   font-weight: bold;
   font-size: 1.2rem;
+  margin: 0.5rem 0;
 }
 
 .settingAction {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .settingLabel {

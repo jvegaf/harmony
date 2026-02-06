@@ -10,9 +10,10 @@ import router from '../views/router';
 import { TrackCandidatesResult } from '@preload/types/tagger';
 import { GetFilenameWithoutExtension } from '@renderer/lib/utils-library';
 
-const { db, config, covers, logger, library, dialog, playlists } = window.Main;
+const { db, config, covers, logger, library, dialog } = window.Main;
 
 type LibraryState = {
+  librarySourceRoot: string;
   search: string;
   searched: Track | null;
   refreshing: boolean;
@@ -49,7 +50,7 @@ type LibraryState = {
     openHandler: (opts: Electron.OpenDialogOptions) => Promise<void>;
     search: (value: string) => void;
     setSearched: (trackSearched: Track | null) => void;
-    add: (pathsToScan: string[]) => Promise<void>;
+    setLibrarySourceRoot: (pathsToScan: string[]) => Promise<void>;
     remove: (trackIDs: TrackId[]) => Promise<void>;
     reset: () => Promise<void>;
     refresh: () => Promise<void>;
@@ -80,6 +81,7 @@ const filenameToTag = (track: Track) => {
 const initialTracklistSort = config.__initialConfig.tracklistSort || { colId: 'path', mode: 'desc' };
 
 const useLibraryStore = createStore<LibraryState>((set, get) => ({
+  librarySourceRoot: '',
   search: '',
   searched: null,
   refreshing: false,
@@ -113,7 +115,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     openHandler: async (opts: Electron.OpenDialogOptions) => {
       const paths = await dialog.open(opts);
       if (paths.length) {
-        get().api.add(paths);
+        get().api.setLibrarySourceRoot(paths);
       }
     },
     /**
@@ -126,16 +128,16 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     /**
      * Add tracks to Library
      */
-    add: async (pathsToScan): Promise<void> => {
+    setLibrarySourceRoot: async (pathsToScan): Promise<void> => {
       set({ refreshing: true });
       logger.info(`Adding tracks to library: ${pathsToScan.length} paths`);
 
       try {
         // Get all valid track paths
         // TODO move this whole function to main process
-        const [supportedTrackFiles, supportedPlaylistsFiles] = await library.scanPaths(pathsToScan);
+        const supportedTrackFiles = await library.scanPaths(pathsToScan);
 
-        if (supportedTrackFiles.length === 0 && supportedPlaylistsFiles.length === 0) {
+        if (supportedTrackFiles.length === 0) {
           set({
             refreshing: false,
             refresh: { processed: 0, total: 0 },
@@ -149,6 +151,8 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         const batchSize = 100;
         const chunkedTracks = chunk(tracks, batchSize);
         let processed = 0;
+        set({ librarySourceRoot: pathsToScan[0] });
+        logger.info(`setting library source root to ${pathsToScan[0]}`);
 
         await Promise.allSettled(
           chunkedTracks.map(async chunk => {
@@ -171,42 +175,6 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
           }),
         );
 
-        // AIDEV-NOTE: Import playlists from M3U files found
-        if (supportedPlaylistsFiles.length > 0) {
-          logger.info(`Found ${supportedPlaylistsFiles.length} playlist files, importing...`);
-
-          for (const playlistPath of supportedPlaylistsFiles) {
-            try {
-              // Resolve M3U playlist to get track paths
-              const trackPaths = await playlists.resolveM3U(playlistPath);
-
-              if (trackPaths.length === 0) {
-                logger.warn(`Playlist ${playlistPath} has no valid tracks`);
-                continue;
-              }
-
-              // Find tracks in database by path
-              const playlistTracks = await db.tracks.findByPath(trackPaths);
-
-              if (playlistTracks.length === 0) {
-                logger.warn(`No tracks in database for playlist ${playlistPath}`);
-                continue;
-              }
-
-              // Create playlist with name from file
-              const playlistName = playlistPath.split(/[\\/]/).pop()?.replace('.m3u', '') || 'Imported Playlist';
-
-              logger.info(`Creating playlist "${playlistName}" with ${playlistTracks.length} tracks`);
-
-              // Use PlaylistsAPI to create the playlist
-              const PlaylistsAPI = (await import('./PlaylistsAPI')).default;
-              await PlaylistsAPI.create(playlistName, playlistTracks, false);
-            } catch (err) {
-              logger.error(`Error importing playlist ${playlistPath}:`, err as any);
-            }
-          }
-        }
-
         // TODO: do not re-import existing tracks
 
         return;
@@ -217,6 +185,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         set({
           refreshing: false,
           refresh: { processed: 0, total: 0 },
+          librarySourceRoot: '',
         });
       }
     },
@@ -264,7 +233,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         if (result.response === 1) {
           set({ refreshing: true });
           await db.reset();
-          set({ refreshing: false });
+          set({ refreshing: false, librarySourceRoot: '' });
           router.revalidate();
         }
       } catch (err) {

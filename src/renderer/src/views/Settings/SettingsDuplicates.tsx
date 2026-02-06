@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import * as Setting from '../../components/Setting/Setting';
-import { Checkbox, Slider, Stack, Text, Tooltip } from '@mantine/core';
-import { IconInfoCircle } from '@tabler/icons-react';
+import { Button, Checkbox, Slider, Stack, Text } from '@mantine/core';
 
 import styles from './Settings.module.css';
 
-const { config } = window.Main;
+const { config, duplicates } = window.Main;
 
 /**
  * Settings panel for configuring duplicate finder detection criteria.
@@ -19,7 +18,6 @@ export default function SettingsDuplicates() {
     title: true,
     artist: true,
     duration: true,
-    fingerprint: false,
   });
   const [durationTolerance, setDurationTolerance] = useState(2);
   const [similarityThreshold, setSimilarityThreshold] = useState(0.85);
@@ -83,7 +81,9 @@ export default function SettingsDuplicates() {
   );
 
   // Check if at least one criteria is enabled
-  const hasAnyCriteria = criteria.title || criteria.artist || criteria.duration || criteria.fingerprint;
+  const hasAnyCriteria = criteria.title || criteria.artist || criteria.duration;
+
+  const handleInvalidateCache = useCallback(() => duplicates.invalidateCache(), [duplicates]);
 
   return (
     <div className={styles.settingsContainer}>
@@ -93,7 +93,7 @@ export default function SettingsDuplicates() {
 
       <Stack
         gap='md'
-        mt='md'
+        mt='xs'
       >
         <Text
           size='xs'
@@ -127,28 +127,6 @@ export default function SettingsDuplicates() {
           onChange={e => handleCriteriaChange('duration', e.currentTarget.checked)}
         />
 
-        {/* Fingerprint Strategy */}
-        <Tooltip
-          label='Audio fingerprint detection is not yet implemented'
-          position='right'
-        >
-          <Checkbox
-            label={
-              <span>
-                Audio fingerprint{' '}
-                <IconInfoCircle
-                  size={14}
-                  style={{ verticalAlign: 'middle', opacity: 0.6 }}
-                />
-              </span>
-            }
-            description='Compare audio fingerprints for acoustic similarity (coming soon)'
-            checked={criteria.fingerprint}
-            onChange={e => handleCriteriaChange('fingerprint', e.currentTarget.checked)}
-            disabled
-          />
-        </Tooltip>
-
         {!hasAnyCriteria && (
           <Text
             size='xs'
@@ -165,7 +143,7 @@ export default function SettingsDuplicates() {
 
       <Stack
         gap='lg'
-        mt='md'
+        mt='xs'
       >
         {/* Duration Tolerance Slider */}
         <div>
@@ -229,6 +207,24 @@ export default function SettingsDuplicates() {
           </Text>
         </div>
       </Stack>
+
+      <Setting.Section>
+        <Setting.Action>
+          <Text
+            size='sm'
+            mb='xs'
+          >
+            Invalidate Cache
+          </Text>
+          <Button
+            onClick={handleInvalidateCache}
+            variant='filled'
+            color='red'
+          >
+            Reset Duplicate Finder Cache
+          </Button>
+        </Setting.Action>
+      </Setting.Section>
     </div>
   );
 }

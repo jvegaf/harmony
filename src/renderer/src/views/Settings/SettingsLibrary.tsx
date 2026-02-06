@@ -24,14 +24,14 @@ export default function SettingsLibrary() {
 
   const openFolderSelector = useCallback(async () => {
     const options: Electron.OpenDialogOptions = {
-      properties: ['multiSelections', 'openDirectory', 'openFile'],
+      properties: ['openDirectory'],
     };
 
     const result = await dialog.open(options);
 
     if (result.filePaths) {
       setImporting(true);
-      libraryAPI.add(result.filePaths).catch(err => {
+      libraryAPI.setLibrarySourceRoot(result.filePaths).catch(err => {
         logger.warn(err);
       });
     }
@@ -39,15 +39,14 @@ export default function SettingsLibrary() {
 
   return (
     <div className={styles.settingsContainer}>
-      {/* <Setting.Title>Library</Setting.Title> */}
       <Setting.Section>
-        <Setting.Description>Import Music</Setting.Description>
+        <Setting.Description>Music Collection Source</Setting.Description>
         <Setting.Action>
           <Button
             disabled={refreshing}
             onClick={openFolderSelector}
           >
-            Add files or folders
+            Select Music Collection Source
           </Button>
         </Setting.Action>
       </Setting.Section>

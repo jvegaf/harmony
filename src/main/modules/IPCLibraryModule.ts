@@ -49,8 +49,6 @@ const SUPPORTED_TRACKS_EXTENSIONS = [
   '.webm',
 ];
 
-const SUPPORTED_PLAYLISTS_EXTENSIONS = ['.m3u'];
-
 /**
  * Module in charge of renderer <> main processes communication regarding
  * library management, covers, playlists etc.
@@ -93,10 +91,10 @@ class IPCLibraryModule extends ModuleWindow {
   // ---------------------------------------------------------------------------
 
   /**
-   * Scan the file system and return all music files and playlists that may be
+   * Scan the file system and return all music files that may be
    * safely imported to Harmony.
    */
-  private async libraryLookup(_e: IpcMainInvokeEvent, pathsToScan: string[]): Promise<[string[], string[]]> {
+  private async libraryLookup(_e: IpcMainInvokeEvent, pathsToScan: string[]): Promise<string[]> {
     log.info('Starting tracks lookup', pathsToScan);
     // 1. Get the stats for all the files/paths
     const paths = await Promise.all(pathsToScan.map(this.getStats));
@@ -133,14 +131,9 @@ class IPCLibraryModule extends ModuleWindow {
       return SUPPORTED_TRACKS_EXTENSIONS.includes(extension);
     });
 
-    const supportedPlaylistsFiles = allFiles.filter(filePath => {
-      const extension = path.extname(filePath).toLowerCase();
-      return SUPPORTED_PLAYLISTS_EXTENSIONS.includes(extension);
-    });
-
     loggerExtras.timeEnd('Library lookup');
 
-    return [supportedTrackFiles, supportedPlaylistsFiles];
+    return supportedTrackFiles;
   }
 
   /**

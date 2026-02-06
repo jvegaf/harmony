@@ -222,8 +222,6 @@ export interface Config {
       artist: boolean;
       /** Compare duration within tolerance */
       duration: boolean;
-      /** Compare audio fingerprint (requires more resources, future feature) */
-      fingerprint: boolean;
     };
     /** Tolerance in seconds for duration comparison (default: 2) */
     durationToleranceSeconds: number;
