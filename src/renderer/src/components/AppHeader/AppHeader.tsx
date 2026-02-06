@@ -19,7 +19,7 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
   const location = useLocation();
 
   const tabs: Tab[] = [
-    { id: 'library', label: 'Library', path: '/' },
+    { id: 'library', label: 'Library', path: '/library' },
     { id: 'settings', label: 'Settings', path: '/settings' },
     { id: 'preparation', label: 'Preparation', path: '/preparation' },
     { id: 'prune', label: 'Prune', path: '/prune' },
@@ -29,7 +29,7 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
   const isActiveTab = (tab: Tab) => {
     if (tab.path === '/') {
       return (
-        location.pathname === '/' ||
+        location.pathname === '/library' ||
         location.pathname.startsWith('/details') ||
         location.pathname.startsWith('/playlists')
       );

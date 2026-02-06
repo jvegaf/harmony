@@ -6,8 +6,7 @@
 
 Symphony is a music manager designed specifically for old school DJs. It allows you to organize and manage your music collection efficiently.
 
-![harmony main](./img/harmony1.png)
-![harmony duplicate finder](./img/harmony2.png)
+![harmony main](./img/harmony1.png) ![harmony duplicate finder](./img/harmony2.png)
 
 ## Features
 

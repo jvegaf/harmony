@@ -192,7 +192,7 @@ export default function SettingsDuplicates() {
           <Text
             size='xs'
             c='dimmed'
-            mt='xs'
+            mt='xl'
           >
             Tracks with duration difference within this tolerance are considered matching.
           </Text>
@@ -223,7 +223,7 @@ export default function SettingsDuplicates() {
           <Text
             size='xs'
             c='dimmed'
-            mt='xs'
+            mt='xl'
           >
             Higher values require more exact matches for title/artist. Lower values find more potential duplicates.
           </Text>

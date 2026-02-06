@@ -29,7 +29,7 @@ export default function SettingsView() {
 
   const onCloseListener = () => {
     revalidator.revalidate();
-    navigate('/');
+    navigate('/library');
   };
 
   return (
@@ -43,17 +43,9 @@ export default function SettingsView() {
         preventInputConflict
       />
       <div className={styles.viewSettings}>
-        <div className={styles.header}>
-          <ActionIcon
-            variant='subtle'
-            onClick={onCloseListener}
-          >
-            <MdArrowBack size='3em' />
-          </ActionIcon>
-        </div>
         <Tabs
           defaultValue='general'
-          // orientation='vertical'
+          orientation='vertical'
           variant='pills'
           radius='xs'
         >
@@ -77,12 +69,6 @@ export default function SettingsView() {
               Audio
             </Tabs.Tab>
             <Tabs.Tab
-              value='logs'
-              leftSection={<IconPencilCog size={14} />}
-            >
-              Logs
-            </Tabs.Tab>
-            <Tabs.Tab
               value='traktor'
               leftSection={<IconDisc size={14} />}
             >
@@ -93,6 +79,12 @@ export default function SettingsView() {
               leftSection={<IconLayersIntersect size={14} />}
             >
               Duplicates
+            </Tabs.Tab>
+            <Tabs.Tab
+              value='logs'
+              leftSection={<IconPencilCog size={14} />}
+            >
+              Logs
             </Tabs.Tab>
           </Tabs.List>
 

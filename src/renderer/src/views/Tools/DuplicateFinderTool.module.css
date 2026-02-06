@@ -10,7 +10,7 @@
   height: 100%;
   width: 100%;
   padding: 20px 24px;
-  background-color: var(--second-bg-dark);
+  background-color: var(--main-bg-dark);
   overflow: hidden;
   border-radius: 8px;
 }

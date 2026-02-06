@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs, createHashRouter, isRouteErrorResponse, useRouteError } from 'react-router-dom';
+import { LoaderFunctionArgs, Navigate, createHashRouter, isRouteErrorResponse, useRouteError } from 'react-router-dom';
 
 import * as ViewMessage from '../elements/ViewMessage/ViewMessage';
 import ExternalLink from '../elements/ExternalLink/ExternalLink';
@@ -23,9 +23,17 @@ const router = createHashRouter([
     ErrorBoundary: GlobalErrorBoundary,
     children: [
       {
-        // path: 'library',
-        id: 'library',
         index: true,
+        element: (
+          <Navigate
+            to='/library'
+            replace
+          />
+        ),
+      },
+      {
+        path: 'library',
+        id: 'library',
         element: <LibraryView />,
         loader: LibraryView.loader,
       },

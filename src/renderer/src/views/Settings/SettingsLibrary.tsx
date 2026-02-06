@@ -18,7 +18,7 @@ export default function SettingsLibrary() {
   useEffect(() => {
     if (!refreshing && importing) {
       router.revalidate();
-      navigate('/');
+      navigate('/library');
     }
   }, [refreshing, importing]);
 

@@ -1,23 +1,19 @@
 .settingSection {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
   border-bottom: solid 1px var(--mantine-color-default-border);
+  margin-top: 20px;
 }
 
 .settingTitle {
-  display: inline-block;
   font-weight: bold;
-  font-size: 1.2rem;
-  background-color: var(--second-bg-dark);
-  padding: 5px 10px;
-  margin: 0 0 40px 0;
+  color: var(--normal-color-dark);
+  font-size: 1.4rem;
+  margin: 10px;
 }
 
 .settingDescription {
-  font-weight: normal;
+  font-weight: bold;
+  font-size: 1.2rem;
 }
 
 .settingAction {

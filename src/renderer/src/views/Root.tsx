@@ -35,8 +35,7 @@ export default function ViewRoot() {
   // AIDEV-NOTE: Show auto-sync notifications when syncing with Traktor
   useAutoSyncNotification();
 
-  // AIDEV-NOTE: Hide NowPlayingBar when in tools view to give more space to duplicate finder
-  const isToolsView = location.pathname.startsWith('/tools');
+  const showPlayingBar = location.pathname === '/library' || location.pathname.startsWith('/playlists');
 
   useEffect(() => {
     AppActions.init();
@@ -105,8 +104,8 @@ export default function ViewRoot() {
 
         {/** Main Content Area */}
         <main className={styles.mainContent}>
-          {/** Now Playing Bar - Hidden in tools view */}
-          {!isToolsView && <NowPlayingBarWrapper track={trackPlaying} />}
+          {/** Now Playing Bar */}
+          {showPlayingBar && <NowPlayingBarWrapper track={trackPlaying} />}
 
           {/** Content Outlet */}
           <div className={styles.contentArea}>
