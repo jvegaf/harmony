@@ -96,6 +96,7 @@ export interface SyncResult {
     tracksImported: number;
     cuePointsAdded: number;
     fieldsUpdated: Record<string, number>;
+    playlistsImported: number;
   };
 }
 
