@@ -300,6 +300,7 @@ export class SyncEngine {
         tracksImported: tracksImported.length,
         cuePointsAdded: cuePointsUpdated.length + cuePointsImported.length,
         fieldsUpdated,
+        playlistsImported: 0,
       },
     };
   }

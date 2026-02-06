@@ -191,7 +191,7 @@ export default function DuplicateWavePlayer({
               filteredPeaks.push(max);
             }
 
-            await db.tracks.update(track.id, { waveformPeaks: filteredPeaks });
+            await db.tracks.update({ ...track, waveformPeaks: filteredPeaks });
             console.log('[DuplicateWavePlayer] Saved peaks to database');
           }
         } catch (error) {
@@ -221,7 +221,6 @@ export default function DuplicateWavePlayer({
       ws.destroy();
       wavesurferRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wavesurferCreated]);
 
   // Control playback when active state changes (after WaveSurfer is created)

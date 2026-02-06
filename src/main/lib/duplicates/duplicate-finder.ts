@@ -18,7 +18,6 @@ import makeID from '../../../preload/lib/id-provider';
  * AIDEV-NOTE: Detects duplicate tracks in the library using configurable strategies:
  * - titleArtist: Fuzzy matching of normalized title + artist
  * - durationTitle: Similar duration (within tolerance) + similar title
- * - fingerprint: Audio fingerprint comparison (future)
  */
 
 // Format rankings for quality scoring (higher = better)
@@ -147,7 +146,6 @@ export interface DuplicateFinderOptions {
   criteria: {
     titleArtist: boolean;
     durationTitle: boolean;
-    fingerprint: boolean;
   };
   durationToleranceSeconds: number;
   similarityThreshold: number;
@@ -360,7 +358,7 @@ export async function findDuplicates(
 }
 
 interface MatchResult {
-  method: 'title' | 'artist' | 'duration' | 'titleArtist' | 'titleDuration' | 'multiple' | 'fingerprint';
+  method: 'title' | 'artist' | 'duration' | 'titleArtist' | 'titleDuration' | 'multiple';
   similarity: number;
 }
 
@@ -417,14 +415,6 @@ function checkDuplicateMatch(
       // Duration match contributes 1.0 to similarity if within tolerance
       totalSimilarity += 1.0;
     }
-  }
-
-  // Check fingerprint (future implementation)
-  if (criteria.fingerprint) {
-    enabledCriteria.push('fingerprint');
-    // AIDEV-TODO: Implement audio fingerprint comparison
-    // This would require running chromaprint/acoustid on tracks
-    // and storing fingerprints in the database
   }
 
   // If no criteria enabled, no match possible

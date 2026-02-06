@@ -134,7 +134,6 @@ export default class ConfigModule extends Module {
           title: true,
           artist: true,
           duration: true,
-          fingerprint: false, // Disabled by default - requires more resources
         },
         durationToleranceSeconds: 2,
         similarityThreshold: 0.85,

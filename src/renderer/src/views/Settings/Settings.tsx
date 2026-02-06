@@ -2,7 +2,7 @@ import { useNavigate, useRevalidator, useRouteLoaderData } from 'react-router-do
 
 import { LoaderData } from '../router';
 import styles from './Settings.module.css';
-import { ActionIcon, Tabs } from '@mantine/core';
+import { Tabs } from '@mantine/core';
 import Keybinding from 'react-keybinding-component';
 import SettingsLibrary from './SettingsLibrary';
 import SettingsAudio from './SettingsAudio';
@@ -16,7 +16,6 @@ import {
   IconSettings,
   IconLayersIntersect,
 } from '@tabler/icons-react';
-import { MdArrowBack } from 'react-icons/md';
 import SettingsLog from './SettingsLog';
 import SettingsDuplicates from './SettingsDuplicates';
 import { RootLoaderData } from '../Root';
