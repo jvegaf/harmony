@@ -80,9 +80,9 @@ app.whenReady().then(() => {
   mainWindow = new BrowserWindow({
     title: 'Harmony',
     minWidth: 1366,
-    minHeight: 768,
+    minHeight: 728,
     width: 1366,
-    height: 768,
+    height: 728,
     show: false,
     autoHideMenuBar: true,
     titleBarStyle: 'hidden',
