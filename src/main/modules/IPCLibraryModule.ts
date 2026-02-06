@@ -231,7 +231,7 @@ class IPCLibraryModule extends ModuleWindow {
       time: ParseDuration(format.duration || 0),
       genre: common.genre?.join(', '),
       comment: common.comment?.join(', '),
-      bitrate: format.bitrate!,
+      bitrate: Math.round(format.bitrate! / 1000),
       title: title,
       year: common.year,
       rating: rate,
