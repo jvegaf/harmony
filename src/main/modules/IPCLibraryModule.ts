@@ -218,7 +218,7 @@ class IPCLibraryModule extends ModuleWindow {
   private parseMusicMetadata(data: mmd.IAudioMetadata, trackPath: string): Partial<Track> {
     const { common, format } = data;
 
-    const title: string = common.title || path.parse(trackPath).base;
+    const title: string = common.title || path.parse(trackPath).base.split('.').slice(0, -1).join('.'); // Remove extension from filename if title tag is not present
     const rating = common.rating ? common.rating[0] : undefined;
     const rate = rating ? { ...rating, rating: Math.round(rating.rating * 5) } : undefined;
 

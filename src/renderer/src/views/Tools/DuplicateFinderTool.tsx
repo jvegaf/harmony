@@ -8,6 +8,7 @@ import type { TrackId, Track } from '../../../../preload/types/harmony';
 
 import DuplicateGroup from './DuplicateGroup';
 import styles from './DuplicateFinderTool.module.css';
+import { useLibraryAPI } from '@renderer/stores/useLibraryStore';
 
 const { config, duplicates, db, library, logger } = window.Main;
 
@@ -21,6 +22,7 @@ export default function DuplicateFinderTool() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState<DuplicateScanProgress | null>(null);
   const [scanResult, setScanResult] = useState<DuplicateScanResult | null>(null);
+  const libraryApi = useLibraryAPI();
 
   // Selection state: which tracks to keep
   const [keeperIds, setKeeperIds] = useState<Set<TrackId>>(new Set());
@@ -197,6 +199,7 @@ export default function DuplicateFinderTool() {
       await library.deleteTracks(tracksToDelete);
 
       logger.info(`Deleted ${tracksToDelete.length} duplicate tracks`);
+      await libraryApi.refresh();
     } catch (error) {
       logger.error('Failed to delete duplicate tracks:', error);
     } finally {

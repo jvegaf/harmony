@@ -52,6 +52,7 @@ type LibraryState = {
     add: (pathsToScan: string[]) => Promise<void>;
     remove: (trackIDs: TrackId[]) => Promise<void>;
     reset: () => Promise<void>;
+    refresh: () => Promise<void>;
     updateTrackMetadata: (trackID: string, newFields: TrackEditableFields) => Promise<void>;
     highlightPlayingTrack: (highlight: boolean) => void;
     getCover: (track: Track) => Promise<string | null>;
@@ -269,6 +270,10 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       } catch (err) {
         logger.error(err as any);
       }
+    },
+
+    refresh: async (): Promise<void> => {
+      router.revalidate();
     },
 
     updateTrackMetadata: async (trackID: string, newFields: TrackEditableFields): Promise<void> => {
