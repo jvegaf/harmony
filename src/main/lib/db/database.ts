@@ -109,6 +109,12 @@ export class Database {
 
       await AppDataSource.initialize();
 
+      // AIDEV-NOTE: Enable foreign keys constraint enforcement in SQLite.
+      // SQLite has foreign keys disabled by default. We need to enable them
+      // to ensure CASCADE DELETE works properly (e.g., removing tracks from
+      // playlists when the track is deleted).
+      await AppDataSource.query('PRAGMA foreign_keys = ON');
+
       // AIDEV-NOTE: Enable WAL mode after connection is established
       // WAL mode must be enabled with a PRAGMA statement
       await AppDataSource.query('PRAGMA journal_mode = WAL');
@@ -116,7 +122,7 @@ export class Database {
       await AppDataSource.query('PRAGMA cache_size = 10000');
       await AppDataSource.query('PRAGMA temp_store = MEMORY');
 
-      log.info('[db] Data Source has been initialized with WAL mode!');
+      log.info('[db] Data Source has been initialized with WAL mode and foreign keys enabled!');
       log.info('[db] Database path:', dbPath);
 
       this.connection = AppDataSource;
@@ -159,12 +165,18 @@ export class Database {
     await repository.save(track);
   }
 
+  /**
+   * Remove tracks from the database
+   * AIDEV-NOTE: Thanks to CASCADE DELETE foreign keys (enabled via PRAGMA foreign_keys = ON),
+   * removing tracks will automatically remove them from all playlists (playlistTrack table).
+   * This ensures playlist integrity without manual cleanup.
+   */
   public async removeTracks(trackIDs: TrackId[]): Promise<void> {
     await this.ensureInitialized();
     const repository = this.connection.getRepository<Track>(TrackEntity);
     log.info('[db] tracks to remove: ', trackIDs.length);
     await repository.delete(trackIDs);
-    log.info('[db] tracks removed');
+    log.info('[db] tracks removed (and automatically removed from all playlists via CASCADE)');
   }
 
   public async findTracksByID(tracksIDs: string[]): Promise<Track[]> {

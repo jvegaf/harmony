@@ -169,7 +169,15 @@ export default function DuplicateFinderTool() {
   /**
    * Confirm and execute deletion
    * AIDEV-NOTE: Must clear scan results BEFORE deleting files to ensure
-   * WaveSurfer instances are destroyed and release file handles
+   * WaveSurfer instances are destroyed and release file handles.
+   *
+   * Auto-sync flow when Traktor sync is enabled:
+   * 1. db.tracks.remove() → calls TRACKS_REMOVE IPC handler
+   * 2. DatabaseModule emits 'library-changed' event with type 'tracks-removed'
+   * 3. IPCTraktorModule listens to this event and triggers auto-sync (debounced)
+   * 4. Traktor collection.nml is automatically updated with the deletions
+   *
+   * This also removes tracks from playlists via CASCADE DELETE (foreign keys).
    */
   const handleConfirmDelete = useCallback(async () => {
     const tracksToDelete = getTracksToDelete();
