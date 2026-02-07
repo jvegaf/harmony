@@ -14,11 +14,13 @@ export default defineConfig({
     },
     build: {
       rollupOptions: {
-        // AIDEV-NOTE: Include the analysis worker as a separate entry point
-        // This ensures it gets compiled alongside the main process bundle
+        // AIDEV-NOTE: Include workers as separate entry points
+        // This ensures they get compiled alongside the main process bundle
         input: {
           index: resolve('src/main/index.ts'),
           'analysis-worker': resolve('src/main/lib/audio-analysis/analysis-worker.ts'),
+          'sync-worker': resolve('src/main/lib/traktor/sync/sync-worker.ts'),
+          'export-worker': resolve('src/main/lib/traktor/sync/export-worker.ts'),
         },
       },
     },

@@ -32,6 +32,7 @@ import {
   IconPlayerPlay,
   IconPlayerStop,
 } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 
 import * as Setting from '../../components/Setting/Setting';
 import styles from './Settings.module.css';
@@ -171,53 +172,153 @@ export default function SettingsTraktor() {
   }, []);
 
   const handleExecuteSync = useCallback(async () => {
+    const notificationId = `traktor-sync-${Date.now()}`;
+
     try {
       setSyncState('syncing');
       setError(null);
-      const result = await traktor.executeSync();
 
-      // Build result message
-      const parts: string[] = [];
-      if (result.stats.tracksImported > 0) {
-        parts.push(`Imported ${result.stats.tracksImported} tracks`);
-      }
-      if (result.stats.tracksUpdated > 0) {
-        parts.push(`Updated ${result.stats.tracksUpdated} tracks`);
-      }
-      if (result.stats.cuePointsAdded > 0) {
-        parts.push(`${result.stats.cuePointsAdded} cue points`);
-      }
-      if (result.stats.playlistsImported > 0) {
-        parts.push(`Imported ${result.stats.playlistsImported} playlists`);
-      }
-      const message = parts.length > 0 ? parts.join(', ') : 'No changes needed';
+      // Show initial notification
+      notifications.show({
+        id: notificationId,
+        title: 'Traktor: Import from Traktor',
+        message: 'Starting sync...',
+        loading: true,
+        autoClose: false,
+        withCloseButton: false,
+      });
 
-      setLastSyncResult(message);
-      setSyncPlan(null);
-      setSyncState('complete');
+      // Subscribe to progress updates during sync
+      const unsubscribe = traktor.onProgress(progressUpdate => {
+        const phaseLabel = progressUpdate.phase.charAt(0).toUpperCase() + progressUpdate.phase.slice(1);
+        const progressPercent = Math.round(progressUpdate.progress);
+        notifications.update({
+          id: notificationId,
+          message: `${phaseLabel}: ${progressUpdate.message} (${progressPercent}%)`,
+          loading: true,
+        });
+      });
 
-      // Refresh NML info
-      if (config?.nmlPath) {
-        await loadNmlInfo(config.nmlPath);
+      try {
+        const result = await traktor.executeSync();
+
+        // Build result message
+        const parts: string[] = [];
+        if (result.stats.tracksImported > 0) {
+          parts.push(`Imported ${result.stats.tracksImported} tracks`);
+        }
+        if (result.stats.tracksUpdated > 0) {
+          parts.push(`Updated ${result.stats.tracksUpdated} tracks`);
+        }
+        if (result.stats.cuePointsAdded > 0) {
+          parts.push(`${result.stats.cuePointsAdded} cue points`);
+        }
+        if (result.stats.playlistsImported > 0) {
+          parts.push(`Imported ${result.stats.playlistsImported} playlists`);
+        }
+        const message = parts.length > 0 ? parts.join(', ') : 'No changes needed';
+
+        setLastSyncResult(message);
+        setSyncPlan(null);
+        setSyncState('complete');
+
+        // Update notification to success
+        notifications.update({
+          id: notificationId,
+          title: 'Traktor Import Complete',
+          message,
+          loading: false,
+          autoClose: 3000,
+          color: 'green',
+          withCloseButton: true,
+        });
+
+        // Refresh NML info
+        if (config?.nmlPath) {
+          await loadNmlInfo(config.nmlPath);
+        }
+      } finally {
+        unsubscribe();
       }
     } catch (err) {
       logger.error('Sync failed:', err);
       setError('Sync failed');
       setSyncState('error');
+
+      // Update notification to error
+      notifications.update({
+        id: notificationId,
+        title: 'Traktor Import Failed',
+        message: String(err),
+        loading: false,
+        autoClose: 5000,
+        color: 'red',
+        withCloseButton: true,
+      });
     }
   }, [config, loadNmlInfo]);
 
   const handleExportToNml = useCallback(async () => {
+    const notificationId = `traktor-export-${Date.now()}`;
+
     try {
       setSyncState('exporting');
       setError(null);
-      await traktor.exportToNml();
-      setLastSyncResult('Exported changes to Traktor');
-      setSyncState('complete');
+
+      // Show initial notification
+      notifications.show({
+        id: notificationId,
+        title: 'Traktor: Export to Traktor',
+        message: 'Starting export...',
+        loading: true,
+        autoClose: false,
+        withCloseButton: false,
+      });
+
+      // Subscribe to progress updates during export
+      const unsubscribe = traktor.onProgress(progressUpdate => {
+        const phaseLabel = progressUpdate.phase.charAt(0).toUpperCase() + progressUpdate.phase.slice(1);
+        const progressPercent = Math.round(progressUpdate.progress);
+        notifications.update({
+          id: notificationId,
+          message: `${phaseLabel}: ${progressUpdate.message} (${progressPercent}%)`,
+          loading: true,
+        });
+      });
+
+      try {
+        await traktor.exportToNml();
+        setLastSyncResult('Exported changes to Traktor');
+        setSyncState('complete');
+
+        // Update notification to success
+        notifications.update({
+          id: notificationId,
+          title: 'Traktor Export Complete',
+          message: 'Successfully exported to Traktor',
+          loading: false,
+          autoClose: 3000,
+          color: 'green',
+          withCloseButton: true,
+        });
+      } finally {
+        unsubscribe();
+      }
     } catch (err) {
       logger.error('Export failed:', err);
       setError('Export failed');
       setSyncState('error');
+
+      // Update notification to error
+      notifications.update({
+        id: notificationId,
+        title: 'Traktor Export Failed',
+        message: String(err),
+        loading: false,
+        autoClose: 5000,
+        color: 'red',
+        withCloseButton: true,
+      });
     }
   }, []);
 

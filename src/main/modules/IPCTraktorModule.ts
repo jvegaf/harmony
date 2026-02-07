@@ -37,6 +37,7 @@ import {
   mapTraktorNodeToFolderTree,
   flattenPlaylistTree,
   AutoSyncService,
+  TraktorWorkerManager,
   type SyncOptions,
   type SyncResult,
 } from '../lib/traktor';
@@ -62,12 +63,15 @@ export default class IPCTraktorModule extends ModuleWindow {
   protected db: Database;
   private configModule: ConfigModule;
   private autoSyncService: AutoSyncService | null = null;
+  // AIDEV-NOTE: Singleton worker manager with pool for background operations
+  private workerManager: TraktorWorkerManager;
 
   constructor(window: Electron.BrowserWindow, configModule: ConfigModule) {
     super(window);
     // AIDEV-NOTE: Use singleton instance to prevent multiple database connections
     this.db = Database.getInstance();
     this.configModule = configModule;
+    this.workerManager = TraktorWorkerManager.getInstance();
   }
 
   /**
@@ -630,6 +634,11 @@ export default class IPCTraktorModule extends ModuleWindow {
         this.sendProgress({ phase: 'complete', message: 'Export complete!', progress: 100 });
 
         log.info('[IPCTraktor] Export complete');
+
+        // AIDEV-NOTE: Clear pending export changes flag after successful export
+        this.setConfig({ hasPendingExportChanges: false });
+        log.debug('[IPCTraktor] Cleared pending export changes flag');
+
         return { success: true };
       } catch (error) {
         log.error('[IPCTraktor] Export failed:', error);
@@ -732,6 +741,12 @@ export default class IPCTraktorModule extends ModuleWindow {
 
     // AIDEV-NOTE: Subscribe to library change events to trigger auto-sync
     libraryEventBus.on('library-changed', () => {
+      // Mark that there are pending changes to export
+      const config = this.getConfig();
+      if (!config.hasPendingExportChanges) {
+        log.debug('[IPCTraktor] Marking pending export changes');
+        this.setConfig({ hasPendingExportChanges: true });
+      }
       this.triggerAutoSyncDebounced();
     });
 
@@ -754,7 +769,8 @@ export default class IPCTraktorModule extends ModuleWindow {
 
   /**
    * Internal sync execution used by AutoSyncService
-   * AIDEV-NOTE: Extracted from TRAKTOR_EXECUTE_SYNC handler for reuse
+   * AIDEV-NOTE: Uses worker thread to avoid blocking the main thread.
+   * Worker handles parsing and sync logic; main thread handles database operations.
    */
   private async executeSyncInternal(): Promise<SyncResult> {
     const config = this.getConfig();
@@ -766,28 +782,8 @@ export default class IPCTraktorModule extends ModuleWindow {
 
     log.info('[IPCTraktor] Executing internal sync for:', pathToUse);
 
-    // Parse NML
-    const parser = new TraktorNMLParser();
-    const nml = await parser.parse(pathToUse);
-
-    const entries = nml.NML.COLLECTION.ENTRY || [];
-    const traktorTracks: Track[] = entries.map(entry => mapTraktorEntryToTrack(entry));
-
-    // Get cue points from NML
-    const traktorCuesByPath = new Map<string, CuePoint[]>();
-    for (const entry of entries) {
-      const track = mapTraktorEntryToTrack(entry);
-      if (entry.CUE_V2) {
-        const cues = Array.isArray(entry.CUE_V2) ? entry.CUE_V2 : [entry.CUE_V2];
-        const cuePoints = mapTraktorCuesToHarmony(cues, track.id);
-        traktorCuesByPath.set(track.path, cuePoints);
-      }
-    }
-
-    // Get Harmony tracks
+    // Get Harmony tracks and cue points from database
     const harmonyTracks = await this.db.getAllTracks();
-
-    // Get Harmony cue points
     const allTrackIds = harmonyTracks.map(t => t.id);
     const harmonyCues = await this.db.getCuePointsByTrackIds(allTrackIds);
 
@@ -799,15 +795,33 @@ export default class IPCTraktorModule extends ModuleWindow {
       harmonyCuesByTrackId.set(cue.trackId, existing);
     }
 
-    // Execute sync
+    // Prepare sync options
     const syncOptions: SyncOptions = {
       strategy: this.mapStrategyToEnum(config.syncStrategy),
       cueStrategy: config.cueStrategy,
       caseInsensitivePaths: process.platform !== 'linux',
     };
 
-    const engine = new SyncEngine(syncOptions);
-    const result = engine.executeSync(harmonyTracks, traktorTracks, harmonyCuesByTrackId, traktorCuesByPath);
+    // Execute sync in worker thread (non-blocking)
+    const workerResult = await this.workerManager.executeSync(
+      pathToUse,
+      harmonyTracks,
+      harmonyCuesByTrackId,
+      syncOptions,
+      progress => {
+        // Forward progress to renderer
+        this.sendProgress({
+          phase: progress.phase as 'parsing' | 'loading' | 'syncing' | 'saving' | 'complete',
+          progress: progress.progress,
+          message: progress.message,
+        });
+      },
+    );
+
+    const { result, traktorCuesByPath, parsedNml } = workerResult;
+
+    // Now persist changes to database (main thread only - TypeORM is not thread-safe)
+    log.info('[IPCTraktor] Persisting sync results to database...');
 
     // Save updated tracks to database
     if (result.tracksUpdated.length > 0) {
@@ -834,40 +848,24 @@ export default class IPCTraktorModule extends ModuleWindow {
 
     // Import new tracks from Traktor that don't exist in Harmony
     if (result.tracksImported.length > 0) {
-      const fs = await import('fs/promises');
-      const validTracks: Track[] = [];
+      await this.db.insertTracks(result.tracksImported);
+      log.info('[IPCTraktor] Imported', result.tracksImported.length, 'new tracks');
 
+      // Save cue points for imported tracks
       for (const track of result.tracksImported) {
-        try {
-          await fs.access(track.path);
-          validTracks.push(track);
-        } catch {
-          // Skip tracks whose files don't exist
+        const cues = traktorCuesByPath.get(this.normalizePath(track.path));
+        if (cues && cues.length > 0) {
+          const cuesWithCorrectId = cues.map(cue => ({ ...cue, trackId: track.id }));
+          await this.db.saveCuePoints(cuesWithCorrectId);
         }
       }
-
-      if (validTracks.length > 0) {
-        await this.db.insertTracks(validTracks);
-        log.info('[IPCTraktor] Imported', validTracks.length, 'new tracks');
-
-        // Save cue points for imported tracks
-        for (const track of validTracks) {
-          const cues = traktorCuesByPath.get(track.path);
-          if (cues && cues.length > 0) {
-            const cuesWithCorrectId = cues.map(cue => ({ ...cue, trackId: track.id }));
-            await this.db.saveCuePoints(cuesWithCorrectId);
-          }
-        }
-      }
-
-      result.stats.tracksImported = validTracks.length;
     }
 
     // Import playlists from Traktor
     let playlistsImported = 0;
-    if (nml.NML.PLAYLISTS?.NODE) {
+    if (parsedNml.NML.PLAYLISTS?.NODE) {
       try {
-        const folderTree = mapTraktorNodeToFolderTree(nml.NML.PLAYLISTS.NODE);
+        const folderTree = mapTraktorNodeToFolderTree(parsedNml.NML.PLAYLISTS.NODE);
         const traktorPlaylists = flattenPlaylistTree(folderTree);
 
         const existingPlaylists = await this.db.getAllPlaylists();
@@ -920,7 +918,8 @@ export default class IPCTraktorModule extends ModuleWindow {
 
   /**
    * Internal NML export used by AutoSyncService
-   * AIDEV-NOTE: Extracted from TRAKTOR_EXPORT_TO_NML handler for reuse
+   * AIDEV-NOTE: Uses worker thread to avoid blocking the main thread.
+   * Worker handles XML generation and file writing; main thread prepares data.
    */
   private async exportToNmlInternal(): Promise<void> {
     const config = this.getConfig();
@@ -932,12 +931,8 @@ export default class IPCTraktorModule extends ModuleWindow {
 
     log.info('[IPCTraktor] Exporting to NML (internal):', pathToUse);
 
-    // Clean up duplicate cue points
+    // Clean up duplicate cue points before export
     await this.db.cleanupDuplicateCuePoints();
-
-    // Parse existing NML
-    const parser = new TraktorNMLParser();
-    const nml = await parser.parse(pathToUse);
 
     // Get all Harmony tracks
     const harmonyTracks = await this.db.getAllTracks();
@@ -950,53 +945,37 @@ export default class IPCTraktorModule extends ModuleWindow {
     const cuesByTrackId = new Map<string, CuePoint[]>();
     for (const cue of harmonyCues) {
       const existing = cuesByTrackId.get(cue.trackId) || [];
-      const duplicateKey = `${cue.positionMs}-${cue.type}-${cue.hotcueSlot ?? -1}`;
-      const isDuplicate = existing.some(c => `${c.positionMs}-${c.type}-${c.hotcueSlot ?? -1}` === duplicateKey);
-      if (!isDuplicate) {
-        existing.push(cue);
-      }
-      cuesByTrackId.set(cue.trackId, existing);
+      cuesByTrackId.set(cue.trackId, existing.concat(cue));
     }
 
-    // Create path-indexed map
-    const harmonyTracksByPath = new Map<string, Track>();
-    for (const track of harmonyTracks) {
-      const normalizedPath = this.normalizePath(track.path);
-      harmonyTracksByPath.set(normalizedPath, track);
-    }
-
-    // Update NML with Harmony track data
-    const writer = new TraktorNMLWriter();
-    let updatedNml = nml;
-
-    for (const entry of nml.NML.COLLECTION.ENTRY) {
-      const entryPath = this.traktorPathToSystem(entry.LOCATION.DIR, entry.LOCATION.FILE);
-      const normalizedPath = this.normalizePath(entryPath);
-      const harmonyTrack = harmonyTracksByPath.get(normalizedPath);
-
-      if (harmonyTrack) {
-        const cues = cuesByTrackId.get(harmonyTrack.id);
-        updatedNml = writer.updateTrack(updatedNml, harmonyTrack, cues);
-      }
-    }
-
-    // Merge Harmony playlists into NML
+    // Get all playlists
     const harmonyPlaylists = await this.db.getAllPlaylists();
-    if (harmonyPlaylists.length > 0) {
-      updatedNml = writer.mergePlaylistsFromHarmony(updatedNml, harmonyPlaylists);
+
+    // Execute export in worker thread (non-blocking)
+    const result = await this.workerManager.executeExport(
+      pathToUse,
+      harmonyTracks,
+      cuesByTrackId,
+      harmonyPlaylists,
+      config.autoBackup ?? false,
+      progress => {
+        // Forward progress to renderer
+        this.sendProgress({
+          phase: progress.phase as 'parsing' | 'loading' | 'syncing' | 'saving' | 'complete',
+          progress: progress.progress,
+          message: progress.message,
+        });
+      },
+    );
+
+    if (result.backupPath) {
+      log.info('[IPCTraktor] Created backup:', result.backupPath);
     }
 
-    // Create backup if enabled
-    if (config.autoBackup) {
-      const backupPath = `${pathToUse}.backup.${Date.now()}.nml`;
-      const fs = await import('fs/promises');
-      await fs.copyFile(pathToUse, backupPath);
-      log.info('[IPCTraktor] Created backup:', backupPath);
-    }
+    log.info('[IPCTraktor] Export complete:', result.tracksExported, 'tracks,', result.playlistsExported, 'playlists');
 
-    // Write updated NML
-    await writer.writeToFile(updatedNml, pathToUse);
-
-    log.info('[IPCTraktor] Export complete (internal)');
+    // AIDEV-NOTE: Clear pending export changes flag after successful export
+    this.setConfig({ hasPendingExportChanges: false });
+    log.debug('[IPCTraktor] Cleared pending export changes flag');
   }
 }

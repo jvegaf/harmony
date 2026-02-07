@@ -2,7 +2,8 @@
  * useAutoSyncNotification Hook
  *
  * AIDEV-NOTE: Subscribes to auto-sync status events and shows/updates
- * a notification with progress during auto-sync operations.
+ * a notification with detailed progress during auto-sync operations.
+ * Shows percentage and current phase (parsing, syncing, writing, etc.)
  * Should be mounted once at the app root level.
  */
 
@@ -13,6 +14,42 @@ import type { AutoSyncStatus } from '../../../preload/types/traktor';
 const { traktor } = window.Main;
 
 const NOTIFICATION_ID = 'auto-sync-notification';
+
+/**
+ * Get user-friendly phase label
+ */
+function getPhaseLabel(phase: AutoSyncStatus['phase']): string {
+  switch (phase) {
+    case 'parsing':
+      return '📖 Parsing';
+    case 'loading':
+      return '📂 Loading';
+    case 'syncing':
+      return '🔄 Syncing';
+    case 'validating':
+      return '✓ Validating';
+    case 'writing':
+      return '💾 Writing';
+    case 'building':
+      return '🔨 Building';
+    case 'complete':
+      return '✓ Complete';
+    default:
+      return '';
+  }
+}
+
+/**
+ * Get operation label based on direction
+ */
+function getOperationLabel(direction: AutoSyncStatus['direction']): string {
+  if (direction === 'export') {
+    return 'Export to Traktor';
+  } else if (direction === 'import') {
+    return 'Import from Traktor';
+  }
+  return 'Sync with Traktor';
+}
 
 export function useAutoSyncNotification(): void {
   const wasRunningRef = useRef(false);
@@ -25,10 +62,12 @@ export function useAutoSyncNotification(): void {
         wasRunningRef.current = true;
         hasShownNotificationRef.current = true;
 
+        const operationLabel = getOperationLabel(status.direction);
+
         notifications.show({
           id: NOTIFICATION_ID,
-          title: 'Traktor Auto-Sync',
-          message: status.message || 'Starting sync...',
+          title: `Traktor: ${operationLabel}`,
+          message: status.message || 'Starting...',
           loading: true,
           autoClose: false,
           withCloseButton: false,
@@ -38,12 +77,25 @@ export function useAutoSyncNotification(): void {
 
       // Progress update
       if (status.isRunning && wasRunningRef.current) {
-        const directionLabel = status.direction === 'export' ? 'Exporting' : 'Importing';
-        const message = status.message || `${directionLabel}... ${status.progress}%`;
+        const operationLabel = getOperationLabel(status.direction);
+        const phaseLabel = status.phase ? getPhaseLabel(status.phase) : '';
+        const progress = status.progress ?? 0;
+
+        // Build detailed message with phase and percentage
+        let message = status.message || 'Processing...';
+
+        // Add phase and percentage if available
+        if (phaseLabel && progress > 0) {
+          message = `${phaseLabel} ${message} (${progress.toFixed(0)}%)`;
+        } else if (phaseLabel) {
+          message = `${phaseLabel} ${message}`;
+        } else if (progress > 0) {
+          message = `${message} (${progress.toFixed(0)}%)`;
+        }
 
         notifications.update({
           id: NOTIFICATION_ID,
-          title: 'Traktor Auto-Sync',
+          title: `Traktor: ${operationLabel}`,
           message,
           loading: true,
           autoClose: false,
@@ -59,7 +111,7 @@ export function useAutoSyncNotification(): void {
         if (status.lastError) {
           notifications.update({
             id: NOTIFICATION_ID,
-            title: 'Traktor Auto-Sync Failed',
+            title: 'Traktor Sync Failed',
             message: status.lastError,
             loading: false,
             autoClose: 5000,
@@ -67,10 +119,11 @@ export function useAutoSyncNotification(): void {
             withCloseButton: true,
           });
         } else if (status.phase === 'complete') {
+          const operationLabel = getOperationLabel(status.direction);
           notifications.update({
             id: NOTIFICATION_ID,
-            title: 'Traktor Auto-Sync Complete',
-            message: status.message || 'Sync completed successfully',
+            title: `Traktor ${operationLabel} Complete`,
+            message: status.message || 'Operation completed successfully',
             loading: false,
             autoClose: 3000,
             color: 'green',

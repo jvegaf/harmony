@@ -201,21 +201,33 @@ export class AutoSyncService {
 
       // Export to Traktor
       if (direction === 'export' || direction === 'bidirectional') {
-        this.updateStatus({
-          direction: 'export',
-          phase: 'writing',
-          progress: direction === 'bidirectional' ? 60 : 10,
-          message: 'Exporting to Traktor...',
-        });
+        // AIDEV-NOTE: Check if there are pending changes before exporting
+        const config = this.operations.getConfig();
+        const hasPendingChanges = config.hasPendingExportChanges ?? false;
 
-        log.info('[AutoSync] Starting export to Traktor');
-        await this.operations.exportToNml();
-        log.info('[AutoSync] Export complete');
+        if (!hasPendingChanges) {
+          log.info('[AutoSync] No pending export changes, skipping export');
+          this.updateStatus({
+            progress: 95,
+            message: 'No changes to export',
+          });
+        } else {
+          this.updateStatus({
+            direction: 'export',
+            phase: 'writing',
+            progress: direction === 'bidirectional' ? 60 : 10,
+            message: 'Exporting to Traktor...',
+          });
 
-        this.updateStatus({
-          progress: 90,
-          message: 'Export complete',
-        });
+          log.info('[AutoSync] Starting export to Traktor');
+          await this.operations.exportToNml();
+          log.info('[AutoSync] Export complete');
+
+          this.updateStatus({
+            progress: 90,
+            message: 'Export complete',
+          });
+        }
       }
 
       // Success

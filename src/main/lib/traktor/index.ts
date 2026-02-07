@@ -32,3 +32,12 @@ export { SyncEngine } from './sync/sync-engine';
 export type { SyncOptions, SyncResult, SyncPlan, TrackSyncResult, TrackMatchResult } from './sync/sync-engine';
 export { AutoSyncService } from './sync/auto-sync-service';
 export type { SyncOperations } from './sync/auto-sync-service';
+export { TraktorWorkerManager } from './sync/traktor-worker-manager';
+export type {
+  SyncWorkerExecutionResult,
+  ExportWorkerExecutionResult,
+  SyncProgressCallback,
+  ExportProgressCallback,
+} from './sync/traktor-worker-manager';
+export { WorkerPool } from './sync/worker-pool';
+export type { WorkerPoolOptions, WorkerTask } from './sync/worker-pool';

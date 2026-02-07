@@ -26,6 +26,12 @@ export interface TraktorConfig {
   /** Create backup before writing to NML */
   autoBackup: boolean;
   /**
+   * AIDEV-NOTE: Flag indicating there are pending changes in Harmony
+   * that need to be exported to Traktor. Set by library event handlers,
+   * cleared after successful export.
+   */
+  hasPendingExportChanges?: boolean;
+  /**
    * AIDEV-NOTE: Auto-sync configuration for background synchronization
    * When enabled, Harmony will automatically sync with Traktor in the background
    */
