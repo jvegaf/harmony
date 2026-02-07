@@ -49,8 +49,10 @@ class DatabaseModule extends ModuleWindow {
       return tracks;
     });
 
-    ipcMain.handle(channels.TRACK_UPDATE, (_, track: Track): Promise<void> => {
-      return this.db.updateTrack(track);
+    ipcMain.handle(channels.TRACK_UPDATE, async (_, track: Track): Promise<void> => {
+      await this.db.updateTrack(track);
+      // AIDEV-NOTE: Emit library change event for auto-sync
+      emitLibraryChanged('tracks-updated', 1);
     });
 
     ipcMain.handle(channels.TRACKS_REMOVE, async (_, trackIDs: TrackId[]): Promise<void> => {
@@ -83,16 +85,23 @@ class DatabaseModule extends ModuleWindow {
       return this.db.getAllPlaylists();
     });
 
-    ipcMain.handle(channels.PLAYLIST_ADD, (_, playlist: Playlist): Promise<Playlist> => {
-      return this.db.insertPlaylist(playlist);
+    ipcMain.handle(channels.PLAYLIST_ADD, async (_, playlist: Playlist): Promise<Playlist> => {
+      const result = await this.db.insertPlaylist(playlist);
+      // AIDEV-NOTE: Emit library change event for auto-sync
+      emitLibraryChanged('playlists-changed', 1);
+      return result;
     });
 
-    ipcMain.handle(channels.PLAYLIST_RENAME, (_, playlistID: string, name: string): Promise<void> => {
-      return this.db.renamePlaylist(playlistID, name);
+    ipcMain.handle(channels.PLAYLIST_RENAME, async (_, playlistID: string, name: string): Promise<void> => {
+      await this.db.renamePlaylist(playlistID, name);
+      // AIDEV-NOTE: Emit library change event for auto-sync
+      emitLibraryChanged('playlists-changed', 1);
     });
 
-    ipcMain.handle(channels.PLAYLIST_REMOVE, (_, playlistID: string): Promise<void> => {
-      return this.db.removePlaylist(playlistID);
+    ipcMain.handle(channels.PLAYLIST_REMOVE, async (_, playlistID: string): Promise<void> => {
+      await this.db.removePlaylist(playlistID);
+      // AIDEV-NOTE: Emit library change event for auto-sync
+      emitLibraryChanged('playlists-changed', 1);
     });
 
     ipcMain.handle(channels.PLAYLISTS_BY_ID, (_, playlistIDs: string[]): Promise<Array<Playlist>> => {
@@ -103,21 +112,25 @@ class DatabaseModule extends ModuleWindow {
       return this.db.findPlaylistOnlyByID(playlistID);
     });
 
-    ipcMain.handle(channels.PLAYLIST_SET_TRACKS, (_, playlistID: string, tracks: Track[]): Promise<void> => {
-      return this.db.setTracks(playlistID, tracks);
+    ipcMain.handle(channels.PLAYLIST_SET_TRACKS, async (_, playlistID: string, tracks: Track[]): Promise<void> => {
+      await this.db.setTracks(playlistID, tracks);
+      // AIDEV-NOTE: Emit library change event for auto-sync
+      emitLibraryChanged('playlists-changed', 1);
     });
 
     // AIDEV-NOTE: New optimized IPC handler for track reordering
     ipcMain.handle(
       channels.PLAYLIST_REORDER_TRACKS,
-      (
+      async (
         _,
         playlistID: string,
         tracksToMove: Track[],
         targetTrack: Track,
         position: 'above' | 'below',
       ): Promise<void> => {
-        return this.db.reorderTracks(playlistID, tracksToMove, targetTrack, position);
+        await this.db.reorderTracks(playlistID, tracksToMove, targetTrack, position);
+        // AIDEV-NOTE: Emit library change event for auto-sync
+        emitLibraryChanged('playlists-changed', 1);
       },
     );
 
