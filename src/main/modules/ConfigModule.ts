@@ -128,12 +128,14 @@ export default class ConfigModule extends Module {
           debounceMs: 5000, // 5 seconds debounce for library changes
         },
       },
-      // AIDEV-NOTE: Duplicate finder configuration, persisted to settings
+      // AIDEV-NOTE: Duplicate finder configuration with hierarchical logic.
+      // Title and artist are always required (mandatory matching).
+      // Duration is optional - when enabled, adds additional filtering.
       duplicateFinderConfig: {
         criteria: {
-          title: true,
-          artist: true,
-          duration: true,
+          title: true, // Always required (kept for backward compatibility)
+          artist: true, // Always required (kept for backward compatibility)
+          duration: true, // Optional filter
         },
         durationToleranceSeconds: 2,
         similarityThreshold: 0.85,

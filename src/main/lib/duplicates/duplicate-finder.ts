@@ -15,9 +15,10 @@ import makeID from '../../../preload/lib/id-provider';
 
 /**
  * Duplicate Finder Service
- * AIDEV-NOTE: Detects duplicate tracks in the library using configurable strategies:
- * - titleArtist: Fuzzy matching of normalized title + artist
- * - durationTitle: Similar duration (within tolerance) + similar title
+ * AIDEV-NOTE: Detects duplicate tracks in the library using HIERARCHICAL logic:
+ * - Title AND Artist are MANDATORY (fuzzy matching of normalized strings)
+ * - Duration is OPTIONAL (similar duration within tolerance)
+ * This ensures real duplicates are found while avoiding false positives.
  */
 
 // Format rankings for quality scoring (higher = better)
@@ -75,11 +76,57 @@ function stringSimilarity(a: string, b: string): number {
 }
 
 /**
+ * Remove common track suffixes that indicate versions/remixes
+ * AIDEV-NOTE: Removes common DJ/EDM track suffixes to improve duplicate detection.
+ * Examples: "Track (Original Mix)" → "Track", "Song [Radio Edit]" → "Song"
+ */
+function removeTrackSuffixes(str: string): string {
+  // Common suffixes to remove (case-insensitive)
+  const suffixPatterns = [
+    /\(original mix\)/gi,
+    /\[original mix\]/gi,
+    /\(radio edit\)/gi,
+    /\[radio edit\]/gi,
+    /\(extended mix\)/gi,
+    /\[extended mix\]/gi,
+    /\(club mix\)/gi,
+    /\[club mix\]/gi,
+    /\(vocal mix\)/gi,
+    /\[vocal mix\]/gi,
+    /\(instrumental\)/gi,
+    /\[instrumental\]/gi,
+    /\(dub mix\)/gi,
+    /\[dub mix\]/gi,
+    /\(original\)/gi,
+    /\[original\]/gi,
+    /\(extended\)/gi,
+    /\[extended\]/gi,
+    /\(clean\)/gi,
+    /\[clean\]/gi,
+    /\(explicit\)/gi,
+    /\[explicit\]/gi,
+  ];
+
+  let cleaned = str;
+  for (const pattern of suffixPatterns) {
+    cleaned = cleaned.replace(pattern, '');
+  }
+
+  return cleaned.trim();
+}
+
+/**
  * Normalize a string for comparison (lowercase, remove special chars)
+ * AIDEV-NOTE: First removes common track suffixes, then normalizes the string.
  */
 function normalizeString(str: string | undefined): string {
   if (!str) return '';
-  return str
+
+  // Step 1: Remove common track suffixes
+  const withoutSuffixes = removeTrackSuffixes(str);
+
+  // Step 2: Normalize
+  return withoutSuffixes
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
@@ -364,8 +411,10 @@ interface MatchResult {
 
 /**
  * Check if two tracks are duplicates based on configured criteria
- * AIDEV-NOTE: Uses individual criteria (title, artist, duration) that can be combined.
- * A match requires ALL enabled criteria to pass the similarity threshold.
+ * AIDEV-NOTE: Uses HIERARCHICAL logic for duplicate detection:
+ * - Title AND Artist are MANDATORY (always must match)
+ * - Duration is OPTIONAL (additional filter when enabled)
+ * This prevents false positives like grouping different songs with same duration.
  */
 function checkDuplicateMatch(
   trackA: Track,
@@ -374,83 +423,40 @@ function checkDuplicateMatch(
 ): MatchResult | null {
   const { criteria, similarityThreshold, durationToleranceSeconds } = config;
 
-  // Count enabled criteria and track matches
-  const enabledCriteria: string[] = [];
-  const matchedCriteria: string[] = [];
-  let totalSimilarity = 0;
+  // STEP 1: Check title similarity (MANDATORY)
+  const titleA = normalizeString(trackA.title);
+  const titleB = normalizeString(trackB.title);
+  const titleSim = stringSimilarity(titleA, titleB);
 
-  // Check title similarity
-  if (criteria.title) {
-    enabledCriteria.push('title');
-    const titleA = normalizeString(trackA.title);
-    const titleB = normalizeString(trackB.title);
-    const titleSim = stringSimilarity(titleA, titleB);
-
-    if (titleSim >= similarityThreshold) {
-      matchedCriteria.push('title');
-      totalSimilarity += titleSim;
-    }
+  if (titleSim < similarityThreshold) {
+    return null; // Title doesn't match = not a duplicate
   }
 
-  // Check artist similarity
-  if (criteria.artist) {
-    enabledCriteria.push('artist');
-    const artistA = normalizeString(trackA.artist);
-    const artistB = normalizeString(trackB.artist);
-    const artistSim = stringSimilarity(artistA, artistB);
+  // STEP 2: Check artist similarity (MANDATORY)
+  const artistA = normalizeString(trackA.artist);
+  const artistB = normalizeString(trackB.artist);
+  const artistSim = stringSimilarity(artistA, artistB);
 
-    if (artistSim >= similarityThreshold) {
-      matchedCriteria.push('artist');
-      totalSimilarity += artistSim;
-    }
+  if (artistSim < similarityThreshold) {
+    return null; // Artist doesn't match = not a duplicate
   }
 
-  // Check duration similarity
+  // STEP 3: Check duration similarity (OPTIONAL - only if enabled)
   if (criteria.duration) {
-    enabledCriteria.push('duration');
     const durationDiff = Math.abs(trackA.duration - trackB.duration);
 
-    if (durationDiff <= durationToleranceSeconds) {
-      matchedCriteria.push('duration');
-      // Duration match contributes 1.0 to similarity if within tolerance
-      totalSimilarity += 1.0;
+    if (durationDiff > durationToleranceSeconds) {
+      return null; // Duration check enabled but doesn't match = not a duplicate
     }
   }
 
-  // If no criteria enabled, no match possible
-  if (enabledCriteria.length === 0) {
-    return null;
-  }
+  // All required criteria passed - tracks are duplicates
+  const avgSimilarity = (titleSim + artistSim) / 2;
 
-  // All enabled criteria must match
-  if (matchedCriteria.length === enabledCriteria.length && matchedCriteria.length > 0) {
-    const avgSimilarity = totalSimilarity / matchedCriteria.length;
-
-    // Determine match method name
-    let method: MatchResult['method'] = 'multiple';
-    if (matchedCriteria.length === 1) {
-      method = matchedCriteria[0] as MatchResult['method'];
-    } else if (
-      matchedCriteria.includes('title') &&
-      matchedCriteria.includes('artist') &&
-      matchedCriteria.length === 2
-    ) {
-      method = 'titleArtist';
-    } else if (
-      matchedCriteria.includes('title') &&
-      matchedCriteria.includes('duration') &&
-      matchedCriteria.length === 2
-    ) {
-      method = 'titleDuration';
-    }
-
-    return {
-      method,
-      similarity: avgSimilarity,
-    };
-  }
-
-  return null;
+  return {
+    method: criteria.duration ? 'multiple' : 'titleArtist',
+    similarity: avgSimilarity,
+  };
 }
 
 /**

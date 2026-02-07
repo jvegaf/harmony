@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import * as Setting from '../../components/Setting/Setting';
 import { Button, Checkbox, Slider, Stack, Text } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 
 import styles from './Settings.module.css';
 
@@ -9,9 +10,9 @@ const { config, duplicates } = window.Main;
 
 /**
  * Settings panel for configuring duplicate finder detection criteria.
- * AIDEV-NOTE: Duplicate finder uses these settings when scanning the library.
- * Individual criteria (title, artist, duration) can be enabled/disabled.
- * ALL enabled criteria must match for tracks to be considered duplicates.
+ * AIDEV-NOTE: Duplicate finder uses HIERARCHICAL logic:
+ * - Title AND Artist are ALWAYS required (mandatory matching)
+ * - Duration is OPTIONAL (additional filter to refine results)
  */
 export default function SettingsDuplicates() {
   const [criteria, setCriteria] = useState({
@@ -80,10 +81,24 @@ export default function SettingsDuplicates() {
     [criteria, durationTolerance],
   );
 
-  // Check if at least one criteria is enabled
-  const hasAnyCriteria = criteria.title || criteria.artist || criteria.duration;
-
-  const handleInvalidateCache = useCallback(() => duplicates.invalidateCache(), [duplicates]);
+  const handleInvalidateCache = useCallback(async () => {
+    try {
+      await duplicates.invalidateCache();
+      notifications.show({
+        title: 'Cache Reset',
+        message: 'Duplicate finder cache has been successfully cleared',
+        color: 'green',
+        autoClose: 3000,
+      });
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: 'Failed to reset duplicate finder cache',
+        color: 'red',
+        autoClose: 5000,
+      });
+    }
+  }, []);
 
   return (
     <div className={styles.settingsContainer}>
@@ -99,42 +114,54 @@ export default function SettingsDuplicates() {
           size='xs'
           c='dimmed'
         >
-          Select which criteria to use when scanning for duplicate tracks. ALL enabled criteria must match for tracks to
-          be considered duplicates.
+          Harmony uses hierarchical duplicate detection. Title and artist must always match. Duration is an optional
+          additional filter.
         </Text>
 
-        {/* Title */}
-        <Checkbox
-          label='Title'
-          description='Compare normalized track titles using fuzzy matching'
-          checked={criteria.title}
-          onChange={e => handleCriteriaChange('title', e.currentTarget.checked)}
-        />
-
-        {/* Artist */}
-        <Checkbox
-          label='Artist'
-          description='Compare normalized artist names using fuzzy matching'
-          checked={criteria.artist}
-          onChange={e => handleCriteriaChange('artist', e.currentTarget.checked)}
-        />
-
-        {/* Duration */}
-        <Checkbox
-          label='Duration'
-          description='Compare track duration within the tolerance below'
-          checked={criteria.duration}
-          onChange={e => handleCriteriaChange('duration', e.currentTarget.checked)}
-        />
-
-        {!hasAnyCriteria && (
+        {/* Mandatory Criteria - Display Only */}
+        <div>
           <Text
-            size='xs'
-            c='red'
+            size='sm'
+            fw={500}
+            mb='xs'
           >
-            Warning: No criteria selected. Enable at least one criterion to find duplicates.
+            Mandatory Criteria (Always Active)
           </Text>
-        )}
+          <Stack
+            gap='xs'
+            pl='md'
+          >
+            <Text
+              size='sm'
+              c='dimmed'
+            >
+              ✓ Title - Fuzzy matching of normalized track titles
+            </Text>
+            <Text
+              size='sm'
+              c='dimmed'
+            >
+              ✓ Artist - Fuzzy matching of normalized artist names
+            </Text>
+          </Stack>
+        </div>
+
+        {/* Optional Criteria - Duration */}
+        <div>
+          <Text
+            size='sm'
+            fw={500}
+            mb='xs'
+          >
+            Optional Criteria
+          </Text>
+          <Checkbox
+            label='Duration'
+            description='Also require similar duration within the tolerance below'
+            checked={criteria.duration}
+            onChange={e => handleCriteriaChange('duration', e.currentTarget.checked)}
+          />
+        </div>
       </Stack>
 
       <Setting.Section>
