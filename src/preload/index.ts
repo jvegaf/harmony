@@ -97,6 +97,12 @@ const api = {
     applyTagSelections: async (selections: any[], tracks: Track[]) => {
       return ipcRenderer.invoke(channels.APPLY_TAG_SELECTIONS, selections, tracks);
     },
+    // AIDEV-NOTE: Listen for tag candidates search progress updates
+    onTagCandidatesProgress: (callback: (progress: any) => void) => {
+      const listener = (_: any, progress: any) => callback(progress);
+      ipcRenderer.on(channels.TAG_CANDIDATES_PROGRESS, listener);
+      return () => ipcRenderer.removeListener(channels.TAG_CANDIDATES_PROGRESS, listener);
+    },
     scanPaths: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_LOOKUP, paths),
     importTracks: async (tracks: Track[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, tracks),
     updateRating: (payload: UpdateRatingPayload) => ipcRenderer.send(channels.TRACK_UPDATE_RATING, payload),

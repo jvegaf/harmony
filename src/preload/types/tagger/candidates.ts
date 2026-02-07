@@ -118,3 +118,18 @@ export interface SearchCandidatesResult {
   /** Tracks sin candidatos encontrados */
   without_candidates: number;
 }
+
+/**
+ * AIDEV-NOTE: Progreso de búsqueda de candidatos
+ * Usado para actualizar el progress modal con información en tiempo real
+ */
+export interface TagCandidatesProgress {
+  /** Número de tracks procesados hasta ahora */
+  processed: number;
+
+  /** Total de tracks a procesar */
+  total: number;
+
+  /** Título del track que se está procesando actualmente */
+  currentTrackTitle: string;
+}

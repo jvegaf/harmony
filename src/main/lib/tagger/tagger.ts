@@ -8,7 +8,12 @@ import { ProviderOrchestrator } from './providers/orchestrator';
 import { createBeatportProvider } from './beatport/provider';
 import { createTraxsourceProvider } from './traxsource/provider';
 import { createBandcampProvider } from './bandcamp';
-import { TrackCandidatesResult, TrackCandidatesResultUtils, TrackSelection } from '@preload/types/tagger';
+import {
+  TrackCandidatesResult,
+  TrackCandidatesResultUtils,
+  TrackSelection,
+  TagCandidatesProgress,
+} from '@preload/types/tagger';
 import { TrackCandidateUtils } from '@preload/types/tagger/candidate';
 import { BeatportClient } from './beatport/client/client';
 import { BeatportTrackUtils } from '@preload/types/beatport';
@@ -99,6 +104,12 @@ export const FixTags = async (track: Track): Promise<Track> => {
 };
 
 /**
+ * AIDEV-NOTE: Callback de progreso para reportar el estado de la búsqueda
+ * Permite actualizar el progress modal en tiempo real
+ */
+export type ProgressCallback = (progress: TagCandidatesProgress) => void;
+
+/**
  * Busca candidatos para múltiples tracks usando todos los providers configurados
  *
  *   Esta función ahora usa el ProviderOrchestrator para buscar
@@ -106,9 +117,13 @@ export const FixTags = async (track: Track): Promise<Track> => {
  * y retornando los top 4 candidatos globales.
  *
  * @param tracks Lista de tracks locales para los que buscar candidatos
+ * @param onProgress Callback opcional para reportar progreso (processed, total, currentTrackTitle)
  * @returns Lista de TrackCandidatesResult con top 4 candidatos de todos los providers
  */
-export const FindCandidates = async (tracks: Track[]): Promise<TrackCandidatesResult[]> => {
+export const FindCandidates = async (
+  tracks: Track[],
+  onProgress?: ProgressCallback,
+): Promise<TrackCandidatesResult[]> => {
   //   Crear orchestrator con todos los providers (Beatport, Traxsource, Bandcamp)
   const orchestrator = new ProviderOrchestrator(
     [createBeatportProvider(), createTraxsourceProvider(), createBandcampProvider()],
@@ -121,8 +136,16 @@ export const FindCandidates = async (tracks: Track[]): Promise<TrackCandidatesRe
   const allTrackCandidates: TrackCandidatesResult[] = [];
 
   //   Procesamiento secuencial para evitar rate limiting
-  for (const track of tracks) {
+  for (let i = 0; i < tracks.length; i++) {
+    const track = tracks[i];
     log.info(`Processing candidates for: ${track.artist} - ${track.title}`);
+
+    // AIDEV-NOTE: Emitir progreso antes de procesar cada track
+    onProgress?.({
+      processed: i,
+      total: tracks.length,
+      currentTrackTitle: track.title,
+    });
 
     try {
       // Buscar en todos los providers en paralelo
@@ -162,6 +185,13 @@ export const FindCandidates = async (tracks: Track[]): Promise<TrackCandidatesRe
       allTrackCandidates.push(result);
     }
   }
+
+  // AIDEV-NOTE: Emitir progreso final cuando todos los tracks estén procesados
+  onProgress?.({
+    processed: tracks.length,
+    total: tracks.length,
+    currentTrackTitle: '',
+  });
 
   return allTrackCandidates;
 };

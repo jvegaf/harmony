@@ -23,7 +23,7 @@ import { TrackSelection } from '../../../preload/types/tagger';
 import ProgressModal from '../components/Modal/ProgressModal';
 import TagCandidatesSelectionModal from '../components/Modal/TagCandidateSelection/TagCandidatesSelection';
 
-const { db, config } = window.Main;
+const { db, config, library } = window.Main;
 
 export default function ViewRoot() {
   const trackPlaying = usePlayingTrack();
@@ -35,7 +35,26 @@ export default function ViewRoot() {
   // AIDEV-NOTE: Show auto-sync notifications when syncing with Traktor
   useAutoSyncNotification();
 
-  const showPlayingBar = location.pathname === '/library' || location.pathname.startsWith('/playlists');
+  // AIDEV-NOTE: Suscribirse a los eventos de progreso de búsqueda de candidatos
+  useEffect(() => {
+    const unsubscribe = library.onTagCandidatesProgress(progress => {
+      useLibraryStore.setState({
+        candidatesSearchProgress: {
+          processed: progress.processed,
+          total: progress.total,
+          currentTrackTitle: progress.currentTrackTitle,
+        },
+      });
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const showPlayingBar =
+    location.pathname === '/library' ||
+    location.pathname === '/prune' ||
+    location.pathname === '/preparation' ||
+    location.pathname.startsWith('/playlists');
 
   useEffect(() => {
     AppActions.init();
@@ -69,7 +88,11 @@ export default function ViewRoot() {
         <ProgressModal
           isOpen={candidatesSearching}
           title='Buscando Candidatos'
-          message='Buscando matches en Beatport y Traxsource...'
+          message={
+            candidatesSearchProgress.currentTrackTitle
+              ? `Buscando matches para "${candidatesSearchProgress.currentTrackTitle}"...`
+              : 'Buscando matches...'
+          }
           processed={candidatesSearchProgress.processed}
           total={candidatesSearchProgress.total}
         />

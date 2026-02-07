@@ -106,8 +106,15 @@ function CandidateCard({
   const scorePercent = Math.round(candidate.similarity_score * 100);
   const durationMatches = isDurationMatch(localDuration, candidate.duration_secs);
 
-  //  Determinar la fuente del candidato (beatport o traxsource)
-  const providerSource = (candidate as any).source || 'beatport';
+  // AIDEV-NOTE: Obtener el provider source (beatport, traxsource, bandcamp) del candidato
+  const providerSource = candidate.source;
+
+  // Mapeo de provider a nombre legible
+  const providerNames: Record<string, string> = {
+    beatport: 'Beatport',
+    traxsource: 'Traxsource',
+    bandcamp: 'Bandcamp',
+  };
 
   return (
     <button
@@ -159,10 +166,12 @@ function CandidateCard({
         </div>
       </div>
 
-      {/* Score badge */}
+      {/* Score badge con provider */}
       <div className={cn(styles.scoreBadge, getScoreColor(candidate.similarity_score))}>
-        {scorePercent}% match
-        {providerSource === 'traxsource' && ' (TX)'}
+        {scorePercent}% match ·{' '}
+        <span className={cn(styles.providerBadge, styles[`provider-${providerSource}`])}>
+          {providerNames[providerSource]}
+        </span>
       </div>
 
       {/* Info grid */}

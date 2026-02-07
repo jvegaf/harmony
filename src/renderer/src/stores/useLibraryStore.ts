@@ -35,6 +35,7 @@ type LibraryState = {
   candidatesSearchProgress: {
     processed: number;
     total: number;
+    currentTrackTitle: string; // AIDEV-NOTE: Título del track siendo procesado
   };
   tagsApplying: boolean;
   tagsApplyProgress: {
@@ -103,6 +104,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
   candidatesSearchProgress: {
     processed: 0,
     total: 0,
+    currentTrackTitle: '',
   },
   tagsApplying: false,
   tagsApplyProgress: {
@@ -276,7 +278,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       try {
         set({
           candidatesSearching: true,
-          candidatesSearchProgress: { processed: 0, total: tracks.length },
+          candidatesSearchProgress: { processed: 0, total: tracks.length, currentTrackTitle: '' },
         });
 
         logger.info(`Starting candidate search for ${tracks.length} tracks`);
@@ -287,7 +289,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         // Marcar como completado
         set({
           candidatesSearching: false,
-          candidatesSearchProgress: { processed: tracks.length, total: tracks.length },
+          candidatesSearchProgress: { processed: tracks.length, total: tracks.length, currentTrackTitle: '' },
           trackTagsCandidates: trkCandidates,
           tagsSelecting: true,
         });
@@ -297,7 +299,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         logger.error('Error finding candidates:', err as any);
         set({
           candidatesSearching: false,
-          candidatesSearchProgress: { processed: 0, total: 0 },
+          candidatesSearchProgress: { processed: 0, total: 0, currentTrackTitle: '' },
         });
       }
     },

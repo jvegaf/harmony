@@ -320,6 +320,23 @@
   border-color: rgba(239, 68, 68, 0.3);
 }
 
+/* AIDEV-NOTE: Provider badges - colores oficiales de cada provider */
+.providerBadge {
+  font-weight: 600;
+}
+
+.provider-beatport {
+  color: #02ff98; /* Verde oficial de Beatport */
+}
+
+.provider-traxsource {
+  color: #ff6600; /* Naranja oficial de Traxsource */
+}
+
+.provider-bandcamp {
+  color: #1da0c3; /* Azul de Bandcamp */
+}
+
 /* Info grid */
 .infoGrid {
   display: grid;
