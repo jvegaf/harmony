@@ -655,10 +655,77 @@ export class TraktorNMLWriter {
   }
 
   /**
+   * Remove a playlist from NML by UUID
+   *
+   * AIDEV-NOTE: Recursively removes a playlist node from the NML tree structure.
+   * Used to delete playlists that were removed in Harmony.
+   *
+   * @param nml - Original parsed NML
+   * @param playlistId - UUID of the playlist to remove
+   * @returns Updated NML structure (does not modify original)
+   */
+  removePlaylist(nml: TraktorNML, playlistId: string): TraktorNML {
+    // Deep clone
+    const updatedNml: TraktorNML = JSON.parse(JSON.stringify(nml));
+
+    if (!updatedNml.NML.PLAYLISTS) {
+      return updatedNml;
+    }
+
+    // Recursively find and remove the playlist
+    const removeFromNode = (parentNode: TraktorNode): boolean => {
+      if (!parentNode.SUBNODES?.NODE) {
+        return false;
+      }
+
+      const children = Array.isArray(parentNode.SUBNODES.NODE)
+        ? parentNode.SUBNODES.NODE
+        : [parentNode.SUBNODES.NODE];
+
+      // Find the index of the playlist to remove
+      const indexToRemove = children.findIndex(
+        child => child.TYPE === 'PLAYLIST' && child.PLAYLIST?.UUID === playlistId,
+      );
+
+      if (indexToRemove !== -1) {
+        // Found it - remove from array
+        if (Array.isArray(parentNode.SUBNODES.NODE)) {
+          parentNode.SUBNODES.NODE.splice(indexToRemove, 1);
+          // If array is now empty, set to undefined
+          if (parentNode.SUBNODES.NODE.length === 0) {
+            delete parentNode.SUBNODES.NODE;
+          }
+        } else {
+          // Single node, remove SUBNODES entirely
+          delete parentNode.SUBNODES.NODE;
+        }
+        return true;
+      }
+
+      // Not found at this level, recurse into children (folders)
+      for (const child of children) {
+        if (child.TYPE === 'FOLDER' && removeFromNode(child)) {
+          return true;
+        }
+      }
+
+      return false;
+    };
+
+    removeFromNode(updatedNml.NML.PLAYLISTS.NODE);
+
+    return updatedNml;
+  }
+
+  /**
    * Merge Harmony playlists into NML structure.
-   * - Adds playlists that exist in Harmony but not in NML
-   * - Updates playlists that exist in both
-   * - Preserves playlists that only exist in NML
+   * - Adds new playlists from Harmony
+   * - Updates existing playlists
+   * - REMOVES playlists that exist in NML but not in Harmony (Harmony is source of truth)
+   *
+   * AIDEV-NOTE: Changed behavior - now deletes playlists that are not in Harmony.
+   * This ensures that when a user deletes a playlist in Harmony, it also gets
+   * removed from Traktor on the next export.
    *
    * @param nml - Original parsed NML
    * @param harmonyPlaylists - Array of Harmony playlists with tracks
@@ -673,6 +740,10 @@ export class TraktorNMLWriter {
     // Get existing playlist UUIDs from NML
     const existingUUIDs = this.getPlaylistUUIDsFromNml(nml);
 
+    // Build set of Harmony playlist IDs for quick lookup
+    const harmonyPlaylistIds = new Set(harmonyPlaylists.map(p => p.id));
+
+    // Step 1: Add/Update playlists from Harmony
     for (const playlist of harmonyPlaylists) {
       const trackPaths = playlist.tracks?.map(t => t.path) || [];
 
@@ -683,6 +754,17 @@ export class TraktorNMLWriter {
         // Add new
         updatedNml = this.addPlaylist(updatedNml, { id: playlist.id, name: playlist.name, trackPaths });
       }
+    }
+
+    // Step 2: Remove playlists that exist in NML but not in Harmony
+    for (const nmlUUID of existingUUIDs) {
+      if (!harmonyPlaylistIds.has(nmlUUID)) {
+        updatedNml = this.removePlaylist(updatedNml, nmlUUID);
+      }
+    }
+
+    return updatedNml;
+  }
     }
 
     return updatedNml;
