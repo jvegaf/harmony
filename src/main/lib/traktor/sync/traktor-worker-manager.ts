@@ -123,7 +123,10 @@ export class TraktorWorkerManager {
       options,
     };
 
-    const result = await this.syncPool.runTask(input, onProgress);
+    // Wrap the typed callback for WorkerPool's unknown type
+    const progressWrapper = onProgress ? (progress: unknown) => onProgress(progress as SyncWorkerProgress) : undefined;
+
+    const result = await this.syncPool.runTask(input, progressWrapper);
 
     // Deserialize traktorCuesByPath from Record to Map
     const traktorCuesMap = new Map<string, CuePoint[]>();
@@ -172,7 +175,12 @@ export class TraktorWorkerManager {
       createBackup,
     };
 
-    const result = await this.exportPool.runTask(input, onProgress);
+    // Wrap the typed callback for WorkerPool's unknown type
+    const progressWrapper = onProgress
+      ? (progress: unknown) => onProgress(progress as ExportWorkerProgress)
+      : undefined;
+
+    const result = await this.exportPool.runTask(input, progressWrapper);
 
     return {
       success: result.success,

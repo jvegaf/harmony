@@ -47,7 +47,9 @@ export default function ViewRoot() {
       });
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const showPlayingBar =

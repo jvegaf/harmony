@@ -129,8 +129,17 @@ export interface TraktorSyncResult {
 export interface AutoSyncStatus {
   /** Whether auto-sync is currently running */
   isRunning: boolean;
-  /** Current phase of sync (if running) */
-  phase?: TraktorSyncProgress['phase'];
+  /** Current phase of sync (if running) - includes phases from both sync and export workers */
+  phase?:
+    | 'parsing'
+    | 'loading'
+    | 'analyzing'
+    | 'syncing'
+    | 'validating'
+    | 'saving'
+    | 'writing'
+    | 'building'
+    | 'complete';
   /** Progress percentage 0-100 */
   progress: number;
   /** Human-readable message */

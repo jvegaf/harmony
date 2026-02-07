@@ -678,9 +678,7 @@ export class TraktorNMLWriter {
         return false;
       }
 
-      const children = Array.isArray(parentNode.SUBNODES.NODE)
-        ? parentNode.SUBNODES.NODE
-        : [parentNode.SUBNODES.NODE];
+      const children = Array.isArray(parentNode.SUBNODES.NODE) ? parentNode.SUBNODES.NODE : [parentNode.SUBNODES.NODE];
 
       // Find the index of the playlist to remove
       const indexToRemove = children.findIndex(
@@ -761,10 +759,6 @@ export class TraktorNMLWriter {
       if (!harmonyPlaylistIds.has(nmlUUID)) {
         updatedNml = this.removePlaylist(updatedNml, nmlUUID);
       }
-    }
-
-    return updatedNml;
-  }
     }
 
     return updatedNml;
