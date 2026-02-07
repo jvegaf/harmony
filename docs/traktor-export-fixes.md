@@ -225,3 +225,7 @@ No se requiere migración. Los cambios son **backward compatible**:
 ---
 
 **Última actualización**: 2026-02-07
+
+## Ver También
+
+- `traktor-playlist-sync-fix.md` - Fix adicional para sincronización de cambios en playlists y track metadata
