@@ -1,0 +1,19 @@
+{
+  "traktor": {
+    "audioId": "AXsUQ1M0NFNDRDQ0VEM1NENFNDRTQ1jf/v/+///+///v///v/+///+///v/4V2NYh4VndXdYiZmZmZiZqpmZl2X////////////////////////8xlv/////vf/////////////////3dWn/////rf/////+eJaqmnu3l3l5l8mrepiXeGh3d3dmf////////////////////////LpX7/////////////////////////9Y////////////////////////////rLrMvJ3auLyrmu//7//v///v//7///7//v///v//7/tDNTRDVTQ1Q0NFNDRTQzREQ1RENVIAMw==",
+    "bpmQuality": 100,
+    "bpmTransientCoherence": null,
+    "covertArtId": "020/UMIEOPCUYIQ1NAV4CWZAAVJ0GJMD",
+    "playtimeFloat": 378.618774,
+    "volumeId": "44c628d3",
+    "volume": "C:",
+    "flags": "14",
+    "lock": 0,
+    "lockModificationTime": "2026-02-08T00:00:00",
+    "analyzedDb": -0.62735,
+    "peakDb": -0.973836,
+    "perceivedDb": -0.62735,
+    "albumOfTracks": null,
+    "stems": null
+  }
+}
