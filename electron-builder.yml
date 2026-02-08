@@ -10,9 +10,10 @@ files:
   - '!{.env,.env.*,.npmrc,yarn.lock}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
-  - node_modules/sqlite3
+  - node_modules/better-sqlite3
   - out/main/chunks/*.node
   - resources/**
+  - drizzle/**
 win:
   executableName: 'Harmony'
 nsis:

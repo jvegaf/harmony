@@ -77,7 +77,7 @@ export interface PlaylistTrack {
   playlistId: string;
   trackId: string;
   order: number;
-  // AIDEV-NOTE: Optional relations for TypeORM eager loading
+  // AIDEV-NOTE: Optional relations for Drizzle relational queries
   playlist?: Playlist;
   track?: Track;
 }
