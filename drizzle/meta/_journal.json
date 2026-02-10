@@ -8,6 +8,13 @@
       "when": 1770691337236,
       "tag": "0000_magical_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1770745343892,
+      "tag": "0001_white_monster_badoon",
+      "breakpoints": true
     }
   ]
 }

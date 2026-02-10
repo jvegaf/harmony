@@ -132,6 +132,7 @@ const TrackList = (props: Props) => {
         valueFormatter: (p: { value: TrackRating }) => String(p.value || 0),
       },
       { field: 'genre', minWidth: 180, maxWidth: 200 },
+      { field: 'label', minWidth: 180, maxWidth: 200 },
       { field: 'year', maxWidth: 70 },
       { field: 'bpm', maxWidth: 70 },
       {

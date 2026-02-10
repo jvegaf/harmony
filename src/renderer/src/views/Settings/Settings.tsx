@@ -43,23 +43,23 @@ export default function SettingsView() {
       />
       <div className={styles.viewSettings}>
         <Tabs
-          defaultValue='general'
+          defaultValue='library'
           orientation='vertical'
           variant='pills'
           radius='xs'
         >
           <Tabs.List classNames={styles}>
             <Tabs.Tab
-              value='general'
-              leftSection={<IconSettings size={14} />}
-            >
-              General
-            </Tabs.Tab>
-            <Tabs.Tab
               value='library'
               leftSection={<IconVinyl size={12} />}
             >
               Library
+            </Tabs.Tab>
+            <Tabs.Tab
+              value='general'
+              leftSection={<IconSettings size={14} />}
+            >
+              General
             </Tabs.Tab>
             <Tabs.Tab
               value='audio'
@@ -87,11 +87,11 @@ export default function SettingsView() {
             </Tabs.Tab>
           </Tabs.List>
 
-          <Tabs.Panel value='general'>
-            <SettingsGeneral />
-          </Tabs.Panel>
           <Tabs.Panel value='library'>
             <SettingsLibrary />
+          </Tabs.Panel>
+          <Tabs.Panel value='general'>
+            <SettingsGeneral />
           </Tabs.Panel>
           <Tabs.Panel value='audio'>
             <SettingsAudio config={appConfig} />

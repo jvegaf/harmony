@@ -246,6 +246,7 @@ class IPCLibraryModule extends ModuleWindow {
       comment: common.comment?.join(', '),
       bitrate: Math.round(format.bitrate! / 1000),
       title: title,
+      label: common.label?.join(', '),
       year: common.year,
       rating: rate,
     };

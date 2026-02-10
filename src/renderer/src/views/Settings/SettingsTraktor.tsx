@@ -43,6 +43,7 @@ import type {
   TraktorSyncPlan,
   AutoSyncStatus,
 } from '../../../../preload/types/traktor';
+import { useRevalidator } from 'react-router-dom';
 
 const { traktor, logger } = window.Main;
 
@@ -62,6 +63,7 @@ export default function SettingsTraktor() {
 
   // Auto-sync state
   const [autoSyncStatus, setAutoSyncStatus] = useState<AutoSyncStatus | null>(null);
+  const revalidator = useRevalidator();
 
   const loadNmlInfo = useCallback(async (path: string) => {
     try {
@@ -237,6 +239,8 @@ export default function SettingsTraktor() {
         if (config?.nmlPath) {
           await loadNmlInfo(config.nmlPath);
         }
+
+        revalidator.revalidate();
       } finally {
         unsubscribe();
       }

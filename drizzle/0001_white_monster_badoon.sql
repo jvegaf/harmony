@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `track_path_unique` ON `track` (`path`);
