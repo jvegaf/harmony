@@ -11,7 +11,7 @@ import { Track, UpdateRatingPayload } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
 import channels from '../../preload/lib/ipc-channels';
-import makeID from '../../preload/lib/id-provider';
+import { makeTrackID } from '../lib/track-id';
 import { ParseDuration } from '../../preload/utils';
 import { loggerExtras } from '../lib/log/logger';
 import { emitLibraryChanged } from '../lib/library-events';
@@ -137,16 +137,45 @@ class IPCLibraryModule extends ModuleWindow {
   }
 
   /**
-   * Now: returns the id3 tags of all the given tracks path
-   * Tomorrow: do DB insertion here
+   * Import tracks metadata from file paths.
+   *
+   * AIDEV-NOTE: Pre-filters paths that already exist in DB before scanning metadata.
+   * This optimization avoids expensive file I/O and metadata parsing for tracks
+   * that are already imported.
    */
   async importTracks(_e: IpcMainInvokeEvent, tracksPath: string[]): Promise<Array<Partial<Track>>> {
     log.info(`Starting import of ${tracksPath.length} tracks`);
     loggerExtras.time('Tracks scan');
 
-    return new Promise((resolve, reject) => {
-      if (tracksPath.length === 0) return;
+    // AIDEV-NOTE: Pre-filter optimization - check DB for existing paths
+    // This avoids scanning metadata for tracks that are already imported
+    const db = (await import('../lib/db/database')).Database.getInstance();
+    const resolvedPaths = tracksPath.map(p => path.resolve(p));
+    const existingTracks = await db.findTracksByPath(resolvedPaths);
 
+    // Build set of existing paths (normalized for case-insensitive comparison on Windows/macOS)
+    const existingPathsSet = new Set(
+      existingTracks.map(t => (process.platform !== 'linux' ? t.path.toLowerCase() : t.path)),
+    );
+
+    // Filter to only paths that don't exist yet
+    const pathsToImport = resolvedPaths.filter(p => {
+      const normalized = process.platform !== 'linux' ? p.toLowerCase() : p;
+      return !existingPathsSet.has(normalized);
+    });
+
+    const skippedCount = tracksPath.length - pathsToImport.length;
+    if (skippedCount > 0) {
+      log.info(`Pre-filter: Skipping ${skippedCount} already imported tracks`);
+    }
+
+    if (pathsToImport.length === 0) {
+      log.info('All tracks already imported, skipping metadata scan');
+      loggerExtras.timeEnd('Tracks scan');
+      return [];
+    }
+
+    return new Promise((resolve, reject) => {
       try {
         // Instantiate queue
         const scannedFiles: Array<Partial<Track>> = [];
@@ -164,25 +193,16 @@ class IPCLibraryModule extends ModuleWindow {
         });
         // End queue instantiation
 
-        this.import.total += tracksPath.length;
+        this.import.total += pathsToImport.length;
 
-        // Add all the items to the queue
-        tracksPath.forEach((filePath, index) => {
+        // Add all the items to the queue (only new paths)
+        pathsToImport.forEach((filePath, index) => {
           scanQueue.push(async callback => {
             try {
-              // Normalize (back)slashes on Windows
-              filePath = path.resolve(filePath);
-
-              // Check if there is an existing record in the DB
-              // const existingDoc = await db.tracks.findOnlyByPath(filePath);
-
-              // If there is existing document
-              // if (!existingDoc) {
+              // Path already resolved above
               // Get metadata
               const track = await this.getMetadata(filePath);
-              // const insertedDoc = await db.tracks.insert(track);
               scannedFiles.push(track);
-              // }
 
               this.import.processed++;
             } catch (err) {
@@ -235,6 +255,9 @@ class IPCLibraryModule extends ModuleWindow {
 
   /**
    * Get a file ID3 metadata
+   *
+   * AIDEV-NOTE: Uses makeTrackID() for deterministic ID generation based on file path.
+   * This ensures the same file always gets the same ID regardless of import source.
    */
   private async getMetadata(trackPath: string): Promise<Track> {
     const data = await mmd.parseFile(trackPath, {
@@ -245,7 +268,7 @@ class IPCLibraryModule extends ModuleWindow {
     // Let's try to define something with what we got so far...
     const parsedData = this.parseMusicMetadata(data, trackPath);
 
-    const trackId = makeID();
+    const trackId = makeTrackID(trackPath);
 
     const metadata: Partial<Track> = {
       ...parsedData,

@@ -6,6 +6,7 @@ import { Playlist, Track, TrackId } from '../../preload/types/harmony';
 import ModuleWindow from './BaseWindowModule';
 import { Database } from '../lib/db/database';
 import { emitLibraryChanged } from '../lib/library-events';
+import { deduplicateAndMergeTracks } from '../lib/track-merge';
 import log from 'electron-log';
 /**
  * Module in charge of returning the track with tags fixed
@@ -25,20 +26,33 @@ class DatabaseModule extends ModuleWindow {
     });
 
     ipcMain.handle(channels.TRACKS_ADD, async (_, tracks: Track[]): Promise<Track[]> => {
-      log.info('Adding tracks to the database');
-      // Check if the tracks are already in the database
+      log.info(`Adding ${tracks.length} tracks to the database`);
+
+      // AIDEV-NOTE: Deduplicate and smart merge tracks
+      // Get existing tracks by path to detect duplicates
       const existingTracks = await this.db.findTracksByPath(tracks.map(track => track.path));
 
-      const newTracks = tracks.filter(track => {
-        return !existingTracks.some(existingTrack => existingTrack.path === track.path);
-      });
-      if (newTracks.length === 0) {
-        log.info('No new tracks to add to the database');
-        return [];
+      // Use deduplicateAndMergeTracks to identify new tracks and tracks needing update
+      const { newTracks, tracksToUpdate } = deduplicateAndMergeTracks(existingTracks, tracks);
+
+      // Insert new tracks
+      if (newTracks.length > 0) {
+        await this.db.insertTracks(newTracks);
+        log.info(`Inserted ${newTracks.length} new tracks`);
       }
 
-      await this.db.insertTracks(newTracks);
-      log.info('Tracks added to the database');
+      // Update tracks with merged metadata
+      if (tracksToUpdate.length > 0) {
+        for (const track of tracksToUpdate) {
+          await this.db.updateTrack(track);
+        }
+        log.info(`Updated ${tracksToUpdate.length} existing tracks with new metadata`);
+      }
+
+      if (newTracks.length === 0 && tracksToUpdate.length === 0) {
+        log.info('No new tracks to add and no tracks to update');
+        return [];
+      }
 
       // Invalidate duplicates cache since library changed
       this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
@@ -46,7 +60,7 @@ class DatabaseModule extends ModuleWindow {
       // AIDEV-NOTE: Emit library change event for auto-sync
       emitLibraryChanged('tracks-added', newTracks.length);
 
-      return tracks;
+      return [...newTracks, ...tracksToUpdate];
     });
 
     ipcMain.handle(channels.TRACK_UPDATE, async (_, track: Track): Promise<void> => {

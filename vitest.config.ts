@@ -6,11 +6,15 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['./src/renderer/src/__tests__/setup.ts'],
-    include: ['src/renderer/src/**/*.{test,spec}.{ts,tsx}', 'src/main/lib/**/*.{test,spec}.{ts,tsx}'],
+    include: [
+      'src/renderer/src/**/*.{test,spec}.{ts,tsx}',
+      'src/main/lib/**/*.{test,spec}.{ts,tsx}',
+      'src/preload/lib/**/*.{test,spec}.{ts,tsx}',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/renderer/src/**/*.{ts,tsx}', 'src/main/lib/**/*.ts'],
+      include: ['src/renderer/src/**/*.{ts,tsx}', 'src/main/lib/**/*.ts', 'src/preload/lib/**/*.ts'],
       exclude: [
         'src/renderer/src/**/*.{test,spec}.{ts,tsx}',
         'src/renderer/src/**/*.d.ts',

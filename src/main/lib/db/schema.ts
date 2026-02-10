@@ -13,7 +13,7 @@ import type { TrackRating } from '../../../preload/types/harmony';
 
 export const tracks = sqliteTable('track', {
   id: text('id').primaryKey(),
-  path: text('path').notNull(),
+  path: text('path').notNull().unique(),
   title: text('title').notNull(),
   artist: text('artist'),
   album: text('album'),

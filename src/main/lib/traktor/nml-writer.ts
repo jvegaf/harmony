@@ -75,7 +75,8 @@ export function buildCueXml(cue: CuePoint): string {
  * Build XML for a complete ENTRY element from a Harmony Track
  */
 export function buildEntryXml(track: Track, cuePoints?: CuePoint[]): string {
-  const { dir, file } = mapSystemPathToTraktor(track.path);
+  const { dir, file, volume } = mapSystemPathToTraktor(track.path);
+
   const lines: string[] = [];
 
   // Entry opening with attributes
@@ -92,8 +93,8 @@ export function buildEntryXml(track: Track, cuePoints?: CuePoint[]): string {
 
   lines.push(`<ENTRY ${entryAttrs.join(' ')}>`);
 
-  // LOCATION element
-  lines.push(`  <LOCATION DIR="${escapeXml(dir)}" FILE="${escapeXml(file)}" VOLUME=""></LOCATION>`);
+  // LOCATION element - Use extracted volume from path
+  lines.push(`  <LOCATION DIR="${escapeXml(dir)}" FILE="${escapeXml(file)}" VOLUME="${escapeXml(volume)}"></LOCATION>`);
 
   // ALBUM element
   if (track.album) {
@@ -206,7 +207,7 @@ export class TraktorNMLWriter {
    * Build a new TraktorEntry from a Harmony Track
    */
   private buildEntryFromTrack(track: Track, cuePoints?: CuePoint[]): TraktorEntry {
-    const { dir, file } = mapSystemPathToTraktor(track.path);
+    const { dir, file, volume } = mapSystemPathToTraktor(track.path);
 
     const entry: TraktorEntry = {
       TITLE: track.title,
@@ -216,7 +217,7 @@ export class TraktorNMLWriter {
       LOCATION: {
         DIR: dir,
         FILE: file,
-        VOLUME: '',
+        VOLUME: volume,
       },
     };
 

@@ -13,7 +13,7 @@
  */
 
 import type { TraktorNode, TraktorPlaylistEntry } from '../types/nml-types';
-import { mapSystemPathToTraktor } from './track-mapper';
+import { mapSystemPathToTraktor, mapTraktorPathToSystem } from './track-mapper';
 
 /**
  * Harmony playlist with optional folder path and track paths.
@@ -43,23 +43,42 @@ export interface FolderTreeNode {
 /**
  * Convert Traktor PRIMARYKEY path to system path.
  *
- * Traktor format: "C:/:Users/:josev/:Music/:file.mp3"
- * System format:  "/Users/josev/Music/file.mp3"
+ * AIDEV-NOTE: Now delegates to mapTraktorPathToSystem() to ensure playlist track paths
+ * match the exact format stored in the database (OS-native separators, volume on Windows).
+ * This fixes the issue where playlist imports failed because paths didn't match.
+ *
+ * Traktor format: "C:/:Users/:josev/:Music/:BOX/:2402/:file.mp3"
+ * Windows output:  C:\Users\josev\Music\BOX\2402\file.mp3
+ * Linux output:    /Users/josev/Music/BOX/2402/file.mp3
  *
  * @param key - Traktor PRIMARYKEY.KEY value
- * @returns System path
+ * @returns OS-native system path
  */
 export function mapTraktorPlaylistKeyToPath(key: string): string {
-  // Remove Windows volume prefix (e.g., "C:" or "D:")
-  let path = key;
-  if (/^[A-Z]:/.test(path)) {
-    path = path.substring(2);
+  // Extract volume prefix if present (e.g., "C:" or "D:")
+  let volume: string | undefined;
+  let traktorPath = key;
+
+  if (/^[A-Z]:/.test(key)) {
+    volume = key.substring(0, 2); // e.g., "C:"
+    traktorPath = key.substring(2); // Remove volume from path
   }
 
-  // Convert /: to / and remove trailing colons
-  path = path.replace(/\/:/g, '/').replace(/:+$/g, '');
+  // Split traktor path into dir + file
+  // Traktor format: "/:Users/:josev/:Music/:BOX/:2402/:file.mp3"
+  // Need to extract: dir="/:Users/:josev/:Music/:BOX/:2402/:" file="file.mp3"
 
-  return path;
+  const lastSlashColonIndex = traktorPath.lastIndexOf('/:');
+  if (lastSlashColonIndex === -1) {
+    // No /: delimiter found - treat entire string as filename (edge case)
+    return mapTraktorPathToSystem('', traktorPath, volume);
+  }
+
+  const dir = traktorPath.substring(0, lastSlashColonIndex + 2); // Include the trailing /:
+  const file = traktorPath.substring(lastSlashColonIndex + 2); // After /:
+
+  // Delegate to mapTraktorPathToSystem which handles OS-native path resolution
+  return mapTraktorPathToSystem(dir, file, volume);
 }
 
 /**
@@ -173,9 +192,10 @@ export function mapHarmonyPlaylistToTraktor(playlist: { id: string; name: string
   const entries: TraktorPlaylistEntry[] = [];
 
   for (const path of playlist.trackPaths) {
-    const { dir, file } = mapSystemPathToTraktor(path);
-    // Construct the PRIMARYKEY path format: "C:" + dir + file (without trailing /:)
-    const traktorPath = 'C:' + dir.replace(/\/:$/, '') + '/:' + file;
+    const { dir, file, volume } = mapSystemPathToTraktor(path);
+    // Construct the PRIMARYKEY path format with volume
+    // AIDEV-NOTE: Traktor format is "C:" + dir (without trailing /:) + "/:" + file
+    const traktorPath = volume + dir.replace(/\/:$/, '') + '/:' + file;
 
     entries.push({
       PRIMARYKEY: {

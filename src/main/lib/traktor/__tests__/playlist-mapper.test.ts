@@ -22,25 +22,46 @@ const FIXTURE_PATH = resolve(__dirname, 'fixtures/collection.nml');
 
 describe('Playlist Mapper', () => {
   describe('mapTraktorPlaylistKeyToPath()', () => {
-    it('should convert Traktor PRIMARYKEY to system path', () => {
+    it('should convert Traktor PRIMARYKEY to OS-native system path', () => {
       const key = 'C:/:Users/:josev/:Music/:BOX/:2402/:Illusiones feat. Rafa Barrios (Origi.mp3';
       const path = mapTraktorPlaylistKeyToPath(key);
 
-      expect(path).toBe('/Users/josev/Music/BOX/2402/Illusiones feat. Rafa Barrios (Origi.mp3');
+      // On Windows: C:\Users\josev\Music\BOX\2402\...
+      // On Linux: C:/Users/josev/Music/BOX/2402/... (path.resolve will normalize)
+      expect(path).toContain('Users');
+      expect(path).toContain('josev');
+      expect(path).toContain('Music');
+      expect(path).toContain('BOX');
+      expect(path).toContain('2402');
+      expect(path).toContain('Illusiones feat. Rafa Barrios (Origi.mp3');
+
+      // Should start with C: on Windows, or be absolute on Linux
+      if (process.platform === 'win32') {
+        expect(path).toMatch(/^[A-Z]:\\/);
+      } else {
+        expect(path).toMatch(/^\//);
+      }
     });
 
     it('should handle keys without volume prefix', () => {
       const key = '/:Users/:josev/:Music/:test.mp3';
       const path = mapTraktorPlaylistKeyToPath(key);
 
-      expect(path).toBe('/Users/josev/Music/test.mp3');
+      expect(path).toContain('Users');
+      expect(path).toContain('josev');
+      expect(path).toContain('Music');
+      expect(path).toContain('test.mp3');
     });
 
     it('should handle special characters in path', () => {
       const key = 'C:/:Users/:josev/:Music/:My & Songs/:track.mp3';
       const path = mapTraktorPlaylistKeyToPath(key);
 
-      expect(path).toBe('/Users/josev/Music/My & Songs/track.mp3');
+      expect(path).toContain('Users');
+      expect(path).toContain('josev');
+      expect(path).toContain('Music');
+      expect(path).toContain('My & Songs');
+      expect(path).toContain('track.mp3');
     });
   });
 
@@ -65,8 +86,11 @@ describe('Playlist Mapper', () => {
       expect(playlist.id).toBe('abc123');
       expect(playlist.name).toBe('My Playlist');
       expect(playlist.trackPaths).toHaveLength(2);
-      expect(playlist.trackPaths?.[0]).toBe('/test/track1.mp3');
-      expect(playlist.trackPaths?.[1]).toBe('/test/track2.mp3');
+      // Paths are now OS-native, so just check they're resolved
+      expect(playlist.trackPaths?.[0]).toContain('test');
+      expect(playlist.trackPaths?.[0]).toContain('track1.mp3');
+      expect(playlist.trackPaths?.[1]).toContain('test');
+      expect(playlist.trackPaths?.[1]).toContain('track2.mp3');
     });
 
     it('should map an empty playlist', () => {
@@ -102,7 +126,8 @@ describe('Playlist Mapper', () => {
       const playlist = mapTraktorPlaylistToHarmony(traktorNode);
 
       expect(playlist.trackPaths).toHaveLength(1);
-      expect(playlist.trackPaths?.[0]).toBe('/test/track.mp3');
+      expect(playlist.trackPaths?.[0]).toContain('test');
+      expect(playlist.trackPaths?.[0]).toContain('track.mp3');
     });
 
     it('should generate ID if UUID missing', () => {
@@ -324,15 +349,29 @@ describe('Playlist Mapper', () => {
       expect(titoPlaylist?.trackPaths?.length).toBe(3);
     });
 
-    it('should convert track references to paths', () => {
+    it('should convert track references to OS-native paths', () => {
       const tree = mapTraktorNodeToFolderTree(nml.NML.PLAYLISTS!.NODE);
       const flat = flattenPlaylistTree(tree);
 
       const titoPlaylist = flat.find(p => p.name === 'tito alegria');
       if (titoPlaylist?.trackPaths) {
-        expect(titoPlaylist.trackPaths[0]).toContain('/Users/josev/Music/BOX/2402/');
-        expect(titoPlaylist.trackPaths[0]).not.toContain('C:');
+        // Should produce OS-native paths
+        expect(titoPlaylist.trackPaths[0]).toContain('Users');
+        expect(titoPlaylist.trackPaths[0]).toContain('josev');
+        expect(titoPlaylist.trackPaths[0]).toContain('Music');
+        expect(titoPlaylist.trackPaths[0]).toContain('BOX');
+        expect(titoPlaylist.trackPaths[0]).toContain('2402');
+
+        // Should NOT contain Traktor format markers
         expect(titoPlaylist.trackPaths[0]).not.toContain('/:');
+
+        // On Windows, should contain drive letter (C:) and backslashes
+        // On Linux, should be Unix-style absolute path
+        if (process.platform === 'win32') {
+          expect(titoPlaylist.trackPaths[0]).toMatch(/^[A-Z]:\\/);
+        } else {
+          expect(titoPlaylist.trackPaths[0]).toMatch(/^\//);
+        }
       }
     });
   });

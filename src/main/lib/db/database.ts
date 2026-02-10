@@ -151,31 +151,78 @@ export class Database {
   public async insertTracks(tracks: Track[]): Promise<void> {
     if (tracks.length === 0) return;
 
-    // AIDEV-NOTE: Drizzle doesn't have auto-upsert like TypeORM's save()
-    // We use onConflictDoUpdate to replicate the behavior
+    // AIDEV-NOTE: Handle both ID and path conflicts to prevent duplicates.
+    // Now that makeTrackID() normalizes slashes and mapTraktorPathToSystem() produces
+    // OS-native paths, both import sources (filesystem + Traktor) should generate
+    // identical IDs and paths for the same file. The onConflictDoUpdate on ID will
+    // handle the common case. The path check is a defensive fallback.
+    //
+    // Strategy: For each track, check if a track with that path already exists.
+    // If yes, update the existing track (preserving its ID and FK references).
+    // If no, insert with onConflictDoUpdate on ID as a safety net.
     for (const track of tracks) {
-      this.db
-        .insert(schema.tracks)
-        .values(track)
-        .onConflictDoUpdate({
-          target: schema.tracks.id,
-          set: {
-            path: sql`excluded.path`,
-            title: sql`excluded.title`,
-            artist: sql`excluded.artist`,
-            album: sql`excluded.album`,
-            genre: sql`excluded.genre`,
-            year: sql`excluded.year`,
-            duration: sql`excluded.duration`,
-            bitrate: sql`excluded.bitrate`,
-            comment: sql`excluded.comment`,
-            bpm: sql`excluded.bpm`,
-            initialKey: sql`excluded.initialKey`,
-            rating: sql`excluded.rating`,
-            waveformPeaks: sql`excluded.waveformPeaks`,
-          },
-        })
-        .run();
+      // Check if a track with this path already exists
+      // On Windows/macOS, do case-insensitive comparison to match filesystem behavior
+      const isLinux = process.platform === 'linux';
+      const existing = isLinux
+        ? // Linux: case-sensitive exact match
+          (this.db.select().from(schema.tracks).where(eq(schema.tracks.path, track.path)).get() as Track | undefined)
+        : // Windows/macOS: case-insensitive search
+          (this.db
+            .select()
+            .from(schema.tracks)
+            .all()
+            .find(t => t.path.toLowerCase() === track.path.toLowerCase()) as Track | undefined);
+
+      if (existing) {
+        // Path exists - update the existing track (preserve original ID to avoid breaking FKs)
+        this.db
+          .update(schema.tracks)
+          .set({
+            // Keep existing.id - never change ID
+            path: track.path,
+            title: track.title,
+            artist: track.artist,
+            album: track.album,
+            genre: track.genre,
+            year: track.year,
+            duration: track.duration,
+            bitrate: track.bitrate,
+            comment: track.comment,
+            bpm: track.bpm,
+            initialKey: track.initialKey,
+            rating: track.rating,
+            label: track.label,
+            waveformPeaks: track.waveformPeaks,
+          })
+          .where(eq(schema.tracks.id, existing.id))
+          .run();
+      } else {
+        // Path doesn't exist - insert with onConflictDoUpdate on ID as safety net
+        this.db
+          .insert(schema.tracks)
+          .values(track)
+          .onConflictDoUpdate({
+            target: schema.tracks.id,
+            set: {
+              path: sql`excluded.path`,
+              title: sql`excluded.title`,
+              artist: sql`excluded.artist`,
+              album: sql`excluded.album`,
+              genre: sql`excluded.genre`,
+              year: sql`excluded.year`,
+              duration: sql`excluded.duration`,
+              bitrate: sql`excluded.bitrate`,
+              comment: sql`excluded.comment`,
+              bpm: sql`excluded.bpm`,
+              initialKey: sql`excluded.initialKey`,
+              rating: sql`excluded.rating`,
+              label: sql`excluded.label`,
+              waveformPeaks: sql`excluded.waveformPeaks`,
+            },
+          })
+          .run();
+      }
     }
   }
 
@@ -220,7 +267,28 @@ export class Database {
 
   public async findTracksByPath(paths: string[]): Promise<Track[]> {
     if (paths.length === 0) return [];
-    return this.db.select().from(schema.tracks).where(inArray(schema.tracks.path, paths)).all() as Track[];
+
+    // AIDEV-NOTE: Case-sensitivity handling for path matching.
+    // On Windows/macOS (case-insensitive filesystems), we need to normalize paths
+    // to match how makeTrackID() generates IDs (lowercase on non-Linux).
+    // However, tracks are stored with their original case in the DB.
+    //
+    // Strategy: On Windows/macOS, do case-insensitive matching by normalizing both
+    // the input paths and the stored paths to lowercase before comparison.
+    // On Linux, do case-sensitive matching (exact match).
+    const isLinux = process.platform === 'linux';
+
+    if (isLinux) {
+      // Linux: case-sensitive, exact match
+      return this.db.select().from(schema.tracks).where(inArray(schema.tracks.path, paths)).all() as Track[];
+    } else {
+      // Windows/macOS: case-insensitive matching
+      // We need to find tracks where LOWER(path) matches any of the lowercase input paths
+      // Since inArray doesn't support LOWER(), we'll fetch all tracks and filter in-memory
+      const normalizedPaths = new Set(paths.map(p => p.toLowerCase()));
+      const allTracks = this.db.select().from(schema.tracks).all() as Track[];
+      return allTracks.filter(track => normalizedPaths.has(track.path.toLowerCase()));
+    }
   }
 
   public async findTrackByID(trackID: string): Promise<Track> {

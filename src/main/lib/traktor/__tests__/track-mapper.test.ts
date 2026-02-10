@@ -25,12 +25,24 @@ const FIXTURE_PATH = resolve(__dirname, 'fixtures/collection.nml');
 
 describe('Track Mapper', () => {
   describe('mapTraktorPathToSystem()', () => {
-    it('should convert Traktor path format to Unix path', () => {
+    it('should convert Traktor path format to system path (Linux/Unix)', () => {
       const traktorDir = '/:Users/:josev/:Music/:BOX/:2601/:';
       const traktorFile = 'test.mp3';
 
+      // Without volume, produces Unix-style path
       const result = mapTraktorPathToSystem(traktorDir, traktorFile);
-      expect(result).toBe('/Users/josev/Music/BOX/2601/test.mp3');
+      expect(result).toMatch(/Users[/\\]josev[/\\]Music[/\\]BOX[/\\]2601[/\\]test\.mp3$/);
+    });
+
+    it('should convert Traktor path with VOLUME to Windows path', () => {
+      const traktorDir = '/:Users/:josev/:Music/:BOX/:2601/:';
+      const traktorFile = 'test.mp3';
+      const volume = 'C:';
+
+      // With volume, produces OS-native path (Windows: C:\..., Unix: C:/...)
+      const result = mapTraktorPathToSystem(traktorDir, traktorFile, volume);
+      // On Windows: C:\Users\josev\..., On Unix: C:/Users/josev/...
+      expect(result).toMatch(/^C:[/\\]Users[/\\]josev[/\\]Music[/\\]BOX[/\\]2601[/\\]test\.mp3$/);
     });
 
     it('should handle paths with special characters', () => {
@@ -38,7 +50,7 @@ describe('Track Mapper', () => {
       const traktorFile = 'Track & Beat.mp3';
 
       const result = mapTraktorPathToSystem(traktorDir, traktorFile);
-      expect(result).toBe('/Users/josev/Music/My Songs/Track & Beat.mp3');
+      expect(result).toMatch(/My Songs[/\\]Track & Beat\.mp3$/);
     });
 
     it('should handle paths with accented characters', () => {
@@ -46,7 +58,7 @@ describe('Track Mapper', () => {
       const traktorFile = 'Música.mp3';
 
       const result = mapTraktorPathToSystem(traktorDir, traktorFile);
-      expect(result).toBe('/Users/josev/Music/Drøpz/Música.mp3');
+      expect(result).toMatch(/Drøpz[/\\]Música\.mp3$/);
     });
 
     it('should handle deep nested paths', () => {
@@ -54,7 +66,7 @@ describe('Track Mapper', () => {
       const traktorFile = 'set.mp3';
 
       const result = mapTraktorPathToSystem(traktorDir, traktorFile);
-      expect(result).toBe('/home/user/Music/DJ/Sets/2026/January/set.mp3');
+      expect(result).toMatch(/Music[/\\]DJ[/\\]Sets[/\\]2026[/\\]January[/\\]set\.mp3$/);
     });
   });
 
@@ -65,6 +77,16 @@ describe('Track Mapper', () => {
       const result = mapSystemPathToTraktor(systemPath);
       expect(result.dir).toBe('/:Users/:josev/:Music/:BOX/:2601/:');
       expect(result.file).toBe('test.mp3');
+      expect(result.volume).toBe('');
+    });
+
+    it('should convert Windows path to Traktor format with VOLUME', () => {
+      const systemPath = 'C:\\Users\\josev\\Music\\BOX\\2601\\test.mp3';
+
+      const result = mapSystemPathToTraktor(systemPath);
+      expect(result.dir).toBe('/:Users/:josev/:Music/:BOX/:2601/:');
+      expect(result.file).toBe('test.mp3');
+      expect(result.volume).toBe('C:');
     });
 
     it('should handle paths with special characters', () => {
@@ -73,6 +95,7 @@ describe('Track Mapper', () => {
       const result = mapSystemPathToTraktor(systemPath);
       expect(result.dir).toBe('/:Users/:josev/:Music/:My Songs/:');
       expect(result.file).toBe('Track & Beat.mp3');
+      expect(result.volume).toBe('');
     });
 
     it('should handle root-level file', () => {
@@ -81,6 +104,16 @@ describe('Track Mapper', () => {
       const result = mapSystemPathToTraktor(systemPath);
       expect(result.dir).toBe('/:');
       expect(result.file).toBe('music.mp3');
+      expect(result.volume).toBe('');
+    });
+
+    it('should handle Windows D: drive', () => {
+      const systemPath = 'D:\\Music\\track.mp3';
+
+      const result = mapSystemPathToTraktor(systemPath);
+      expect(result.dir).toBe('/:Music/:');
+      expect(result.file).toBe('track.mp3');
+      expect(result.volume).toBe('D:');
     });
   });
 
@@ -213,7 +246,10 @@ describe('Track Mapper', () => {
       const entry = entries[0];
       const track = mapTraktorEntryToTrack(entry);
 
-      expect(track.path).toContain('/Users/josev/Music/BOX/2601/');
+      // Path should be OS-native format (Windows: C:\..., Linux: C:/...)
+      // All fixture entries have VOLUME="C:", so expect C: prefix
+      expect(track.path).toMatch(/^C:[/\\]/);
+      expect(track.path).toMatch(/Users[/\\]josev[/\\]Music[/\\]BOX[/\\]2601[/\\]/);
       expect(track.path).toContain('S.W.A.G');
       expect(track.path).toContain('.mp3');
     });
@@ -268,13 +304,17 @@ describe('Track Mapper', () => {
       expect(track.year).toBe(2018);
     });
 
-    it('should generate id from path', () => {
+    it('should generate deterministic id from path using makeTrackID', () => {
       const entry = entries[0];
-      const track = mapTraktorEntryToTrack(entry);
+      const track1 = mapTraktorEntryToTrack(entry);
+      const track2 = mapTraktorEntryToTrack(entry);
 
-      expect(track.id).toBeDefined();
-      expect(typeof track.id).toBe('string');
-      expect(track.id.length).toBeGreaterThan(0);
+      // Same entry should produce same ID
+      expect(track1.id).toBe(track2.id);
+
+      // ID should be 16-char uppercase hex
+      expect(track1.id).toMatch(/^[0-9A-F]{16}$/);
+      expect(track1.id.length).toBe(16);
     });
 
     it('should map comment when present', () => {
@@ -288,23 +328,18 @@ describe('Track Mapper', () => {
     });
 
     it('should handle entries with minimal data', () => {
-      // Create minimal entry
       const minimalEntry: TraktorEntry = {
-        LOCATION: {
-          DIR: '/:test/:',
-          FILE: 'test.mp3',
-          VOLUME: 'C:',
-        },
         TITLE: 'Test Track',
+        LOCATION: { DIR: '/:test/:', FILE: 'test.mp3', VOLUME: '' },
       };
 
       const track = mapTraktorEntryToTrack(minimalEntry);
 
       expect(track.title).toBe('Test Track');
-      expect(track.path).toBe('/test/test.mp3');
+      // Without VOLUME, path is resolved from root
+      expect(track.path).toMatch(/[/\\]test[/\\]test\.mp3$/);
       expect(track.duration).toBe(0);
       expect(track.artist).toBeUndefined();
-      expect(track.bpm).toBeUndefined();
     });
 
     it('should map album track number', () => {

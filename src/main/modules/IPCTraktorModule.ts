@@ -55,6 +55,7 @@ import type { CuePoint } from '../../preload/types/cue-point';
 import ModuleWindow from './BaseWindowModule';
 import ConfigModule from './ConfigModule';
 import { libraryEventBus } from '../lib/library-events';
+import { deduplicateAndMergeTracks } from '../lib/track-merge';
 
 /**
  * Module providing IPC handlers for Traktor NML integration
@@ -387,10 +388,11 @@ export default class IPCTraktorModule extends ModuleWindow {
           }
 
           // AIDEV-NOTE: Import new tracks from Traktor that don't exist in Harmony
+          // Smart merge with existing tracks to avoid duplicates
           if (result.tracksImported.length > 0) {
             this.sendProgress({
               phase: 'saving',
-              message: `Importing ${result.tracksImported.length} new tracks...`,
+              message: `Processing ${result.tracksImported.length} potential new tracks...`,
               progress: 75,
             });
 
@@ -412,30 +414,48 @@ export default class IPCTraktorModule extends ModuleWindow {
               log.warn('[IPCTraktor] Skipped', skippedPaths.length, 'tracks (files not found)');
             }
 
-            // Insert valid tracks
+            // Deduplicate against existing tracks by path (with smart merge)
             if (validTracks.length > 0) {
-              await this.db.insertTracks(validTracks);
-              log.info('[IPCTraktor] Imported', validTracks.length, 'new tracks');
+              const existingByPath = await this.db.findTracksByPath(validTracks.map(t => t.path));
+              const { newTracks, tracksToUpdate } = deduplicateAndMergeTracks(
+                existingByPath,
+                validTracks,
+                process.platform !== 'linux', // case-insensitive on Windows/macOS
+              );
 
-              // Save cue points for imported tracks
-              this.sendProgress({
-                phase: 'saving',
-                message: 'Saving cue points for new tracks...',
-                progress: 85,
-              });
+              // Update existing tracks with merged metadata
+              if (tracksToUpdate.length > 0) {
+                for (const track of tracksToUpdate) {
+                  await this.db.updateTrack(track);
+                }
+                log.info('[IPCTraktor] Updated', tracksToUpdate.length, 'existing tracks with merged Traktor metadata');
+              }
 
-              for (const track of validTracks) {
-                const cues = traktorCuesByPath.get(track.path);
-                if (cues && cues.length > 0) {
-                  // Update track ID in cue points to match the imported track
-                  const cuesWithCorrectId = cues.map(cue => ({ ...cue, trackId: track.id }));
-                  await this.db.saveCuePoints(cuesWithCorrectId);
+              // Insert only truly new tracks
+              if (newTracks.length > 0) {
+                await this.db.insertTracks(newTracks);
+                log.info('[IPCTraktor] Imported', newTracks.length, 'new tracks');
+
+                // Save cue points for imported tracks
+                this.sendProgress({
+                  phase: 'saving',
+                  message: 'Saving cue points for new tracks...',
+                  progress: 85,
+                });
+
+                for (const track of newTracks) {
+                  const cues = traktorCuesByPath.get(track.path);
+                  if (cues && cues.length > 0) {
+                    // Update track ID in cue points to match the imported track
+                    const cuesWithCorrectId = cues.map(cue => ({ ...cue, trackId: track.id }));
+                    await this.db.saveCuePoints(cuesWithCorrectId);
+                  }
                 }
               }
-            }
 
-            // Update result stats to reflect actual imports
-            result.stats.tracksImported = validTracks.length;
+              // Update result stats to reflect actual imports
+              result.stats.tracksImported = newTracks.length;
+            }
           }
 
           // AIDEV-NOTE: Import playlists from Traktor
@@ -847,12 +867,35 @@ export default class IPCTraktorModule extends ModuleWindow {
     }
 
     // Import new tracks from Traktor that don't exist in Harmony
+    // AIDEV-NOTE: Apply same deduplication logic as manual sync to prevent duplicates
     if (result.tracksImported.length > 0) {
-      await this.db.insertTracks(result.tracksImported);
-      log.info('[IPCTraktor] Imported', result.tracksImported.length, 'new tracks');
+      // Get existing tracks by path to detect duplicates
+      const existingByPath = await this.db.findTracksByPath(result.tracksImported.map(t => t.path));
 
-      // Save cue points for imported tracks
-      for (const track of result.tracksImported) {
+      // Deduplicate and merge - only insert truly new tracks
+      const { newTracks, tracksToUpdate } = deduplicateAndMergeTracks(
+        existingByPath,
+        result.tracksImported,
+        process.platform !== 'linux',
+      );
+
+      // Update existing tracks with merged Traktor metadata
+      if (tracksToUpdate.length > 0) {
+        for (const track of tracksToUpdate) {
+          await this.db.updateTrack(track);
+        }
+        log.info('[IPCTraktor] Updated', tracksToUpdate.length, 'existing tracks with Traktor metadata');
+      }
+
+      // Insert only truly new tracks
+      if (newTracks.length > 0) {
+        await this.db.insertTracks(newTracks);
+        log.info('[IPCTraktor] Imported', newTracks.length, 'new tracks');
+      }
+
+      // Save cue points for all tracks (both new and updated)
+      const allTracksToSaveCues = [...newTracks, ...tracksToUpdate];
+      for (const track of allTracksToSaveCues) {
         const cues = traktorCuesByPath.get(this.normalizePath(track.path));
         if (cues && cues.length > 0) {
           const cuesWithCorrectId = cues.map(cue => ({ ...cue, trackId: track.id }));

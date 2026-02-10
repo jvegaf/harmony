@@ -11,23 +11,32 @@
  * - Key: Uses key-mapper for Open Key notation conversion
  */
 
+import path from 'path';
+
 import type { Track, TrackRating } from '../../../../preload/types/harmony';
 import type { TraktorEntry } from '../types/nml-types';
 import { mapTraktorKey } from './key-mapper';
+import { makeTrackID } from '../../track-id';
 
 /**
  * Convert Traktor path format to system path.
  *
- * Traktor format: DIR="/:Users/:josev/:Music/:" FILE="track.mp3"
- * System format:  /Users/josev/Music/track.mp3
+ * AIDEV-NOTE: Produces OS-native paths with proper drive letters and separators.
+ * This ensures Traktor imports generate the same paths as filesystem imports,
+ * enabling proper deduplication via makeTrackID().
+ *
+ * Traktor format: DIR="/:Users/:josev/:Music/:" FILE="track.mp3" VOLUME="C:"
+ * Windows output:  C:\Users\josev\Music\track.mp3
+ * Linux output:    /Users/josev/Music/track.mp3
  *
  * @param dir - Traktor DIR attribute (e.g., "/:Users/:josev/:Music/:")
  * @param file - Filename
- * @returns Unix-style path
+ * @param volume - Optional VOLUME attribute (e.g., "C:" on Windows)
+ * @returns OS-native absolute path
  */
-export function mapTraktorPathToSystem(dir: string, file: string): string {
+export function mapTraktorPathToSystem(dir: string, file: string, volume?: string): string {
   // Traktor format: "/:Users/:josev/:Music/:BOX/:2601/:"
-  // Need to convert to: "/Users/josev/Music/BOX/2601"
+  // Need to convert to: "/Users/josev/Music/BOX/2601" (or "C:/Users/..." with volume)
 
   // Remove leading /: and replace all /: with /
   let systemDir = dir.replace(/\/:/g, '/');
@@ -37,23 +46,43 @@ export function mapTraktorPathToSystem(dir: string, file: string): string {
     systemDir = systemDir.slice(0, -1);
   }
 
-  return `${systemDir}/${file}`;
+  // Combine with volume if present (e.g., "C:" + "/Users/..." → "C:/Users/...")
+  const fullPath = volume ? `${volume}${systemDir}/${file}` : `${systemDir}/${file}`;
+
+  // Normalize to OS-native separators using path.resolve()
+  // On Windows: C:/Users/... → C:\Users\...
+  // On Linux: stays as /Users/...
+  // This matches the path format from filesystem import (IPCLibraryModule.ts:153)
+  return path.resolve(fullPath);
 }
 
 /**
  * Convert system path to Traktor format.
  *
- * @param systemPath - Unix-style path
- * @returns Object with dir and file in Traktor format
+ * AIDEV-NOTE: Handles both Unix-style and Windows-style paths.
+ * Extracts Windows drive letter (e.g., "C:") to VOLUME attribute.
+ *
+ * @param systemPath - OS-native absolute path (Unix or Windows style)
+ * @returns Object with dir, file, and volume in Traktor format
  */
-export function mapSystemPathToTraktor(systemPath: string): { dir: string; file: string } {
-  const lastSlash = systemPath.lastIndexOf('/');
-  const dir = systemPath.substring(0, lastSlash) || '/';
-  const file = systemPath.substring(lastSlash + 1);
+export function mapSystemPathToTraktor(systemPath: string): { dir: string; file: string; volume: string } {
+  // Normalize to forward slashes for Traktor format
+  let normalized = systemPath.split(path.sep).join('/');
+
+  // Extract and remove Windows volume prefix (e.g., "C:")
+  let volume = '';
+  if (/^[A-Z]:/i.test(normalized)) {
+    volume = normalized.substring(0, 2).toUpperCase();
+    normalized = normalized.substring(2);
+  }
+
+  const lastSlash = normalized.lastIndexOf('/');
+  const dir = normalized.substring(0, lastSlash) || '/';
+  const file = normalized.substring(lastSlash + 1);
 
   // Handle root-level file (dir is just "/")
   if (dir === '/') {
-    return { dir: '/:', file };
+    return { dir: '/:', file, volume };
   }
 
   // Convert /Users/josev/Music -> /:Users/:josev/:Music/:
@@ -63,6 +92,7 @@ export function mapSystemPathToTraktor(systemPath: string): { dir: string; file:
   return {
     dir: traktorDir,
     file,
+    volume,
   };
 }
 
@@ -123,31 +153,20 @@ export function parseTraktorDate(dateStr: string | undefined): Date | undefined 
 }
 
 /**
- * Generate a stable ID from file path.
- * Uses a simple hash for now - can be replaced with proper UUID generation.
- *
- * @param path - File path
- * @returns Unique ID string
- */
-function generateTrackId(path: string): string {
-  // Simple hash function for stable IDs
-  let hash = 0;
-  for (let i = 0; i < path.length; i++) {
-    const char = path.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash).toString(36);
-}
-
-/**
  * Map a Traktor NML entry to a Harmony Track object.
+ *
+ * AIDEV-NOTE: Uses makeTrackID() for deterministic ID generation.
+ * This ensures the same file always gets the same ID regardless of
+ * import source (Traktor vs filesystem scanner).
+ *
+ * Path handling: Passes VOLUME to mapTraktorPathToSystem() to produce
+ * OS-native paths (e.g., "C:\Users\..." on Windows) that match filesystem import.
  *
  * @param entry - Traktor entry from collection.nml
  * @returns Harmony Track object
  */
 export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
-  const path = mapTraktorPathToSystem(entry.LOCATION.DIR, entry.LOCATION.FILE);
+  const path = mapTraktorPathToSystem(entry.LOCATION.DIR, entry.LOCATION.FILE, entry.LOCATION.VOLUME);
   const info = entry.INFO;
   const tempo = entry.TEMPO;
 
@@ -191,7 +210,7 @@ export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
   }
 
   return {
-    id: generateTrackId(path),
+    id: makeTrackID(path),
     path,
     title: entry.TITLE || entry.LOCATION.FILE,
     artist: entry.ARTIST,
@@ -222,7 +241,7 @@ export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
  * @returns Partial Traktor entry data
  */
 export function mapTrackToTraktorEntry(track: Track): Partial<TraktorEntry> {
-  const { dir, file } = mapSystemPathToTraktor(track.path);
+  const { dir, file, volume } = mapSystemPathToTraktor(track.path);
 
   // AIDEV-NOTE: Use releaseDate if available, otherwise fallback to year/1/1
   const releaseDate = track.releaseDate || (track.year ? `${track.year}/1/1` : undefined);
@@ -236,7 +255,7 @@ export function mapTrackToTraktorEntry(track: Track): Partial<TraktorEntry> {
     LOCATION: {
       DIR: dir,
       FILE: file,
-      VOLUME: 'C:', // Default volume, will be updated by writer
+      VOLUME: volume,
     },
     ALBUM: track.album ? { TITLE: track.album } : undefined,
     INFO: {
