@@ -22,11 +22,15 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
   };
 
   try {
-    PersistTrack(newTrack);
+    await PersistTrack(newTrack);
     log.info(`art: ${tag.art}`);
     if (!tag.art) return newTrack;
     const artwork = await FetchArtwork(tag.art);
-    PersistArtwork(newTrack.path, artwork!);
+    if (!artwork) {
+      log.warn(`Failed to fetch artwork from: ${tag.art}`);
+      return newTrack;
+    }
+    await PersistArtwork(newTrack.path, artwork);
   } catch (error) {
     log.error('update error: ', error);
   }
