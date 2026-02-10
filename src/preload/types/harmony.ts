@@ -53,6 +53,7 @@ export interface Track {
   bitrate?: number;
   rating?: TrackRating;
   comment?: string;
+  label?: string;
   /** Waveform peaks for visualization (~300 values, normalized 0-1) */
   waveformPeaks?: number[];
 }
@@ -69,6 +70,7 @@ export interface ResultTag {
   title: string;
   year?: string;
   art?: Maybe<string>;
+  label?: Maybe<string>;
   tokens?: Maybe<string[]>;
 }
 

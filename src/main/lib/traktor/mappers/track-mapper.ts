@@ -205,6 +205,7 @@ export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
     bpmPrecise: tempo?.BPM, // AIDEV-NOTE: Preserve precise BPM for round-trip
     initialKey,
     rating,
+    label: info?.LABEL,
     comment: info?.COMMENT,
   };
 }

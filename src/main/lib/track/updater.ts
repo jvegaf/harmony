@@ -7,6 +7,8 @@ import PersistArtwork from '../artwork/saver';
 const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
   if (!tag) return track;
 
+  // AIDEV-NOTE: Apply tag metadata to track, including label field from providers
+  // Label is extracted from Beatport, Traxsource, and Bandcamp when applying tag candidates
   const newTrack = {
     ...track,
     title: tag.title,
@@ -16,6 +18,7 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     bpm: tag.bpm || track.bpm,
     initialKey: tag.key ?? undefined,
     genre: tag.genre || track.genre,
+    label: tag.label ?? undefined,
   };
 
   try {

@@ -27,6 +27,7 @@ export const tracks = sqliteTable('track', {
   // AIDEV-NOTE: JSON columns use text with mode 'json' in SQLite
   // SQLite doesn't have native JSON type, stores as TEXT with JSON functions support
   rating: text('rating', { mode: 'json' }).$type<TrackRating | null>(),
+  label: text('label'),
   waveformPeaks: text('waveformPeaks', { mode: 'json' }).$type<number[] | null>(),
 });
 

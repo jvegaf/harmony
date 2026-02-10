@@ -267,6 +267,7 @@ export const ApplyTagSelections = async (
           genre: BeatportTrackUtils.getGenreName(beatportTrack),
           duration: BeatportTrackUtils.getDurationSecs(beatportTrack),
           art: artUrl,
+          label: BeatportTrackUtils.getLabelName(beatportTrack),
         };
       } else if (source === 'traxsource') {
         // Buscar el track completo de Traxsource
@@ -296,6 +297,7 @@ export const ApplyTagSelections = async (
           genre: extendedTrack.genres?.[0],
           duration: extendedTrack.duration,
           art: extendedTrack.art || extendedTrack.thumbnail,
+          label: extendedTrack.label,
         };
       } else if (source === 'bandcamp') {
         // AIDEV-NOTE: Bandcamp requires special handling:
@@ -320,6 +322,7 @@ export const ApplyTagSelections = async (
           genre: trackDetails.genre,
           duration: trackDetails.duration_secs,
           art: trackDetails.artwork_url,
+          label: trackDetails.label,
           // BPM and Key are undefined - will be filled by audio analysis
         };
 
