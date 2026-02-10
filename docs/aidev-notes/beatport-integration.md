@@ -186,6 +186,81 @@ interface Result {
 
 ---
 
+## Image/Artwork Field Handling
+
+### API v4 Image Object Structure
+
+**Location:** `src/main/lib/tagger/beatport/client/client.ts:577-613`
+
+**Context:** When parsing track details from Beatport API v4
+
+**Note:**
+
+```typescript
+// AIDEV-NOTE: API v4 returns image with 'uri' and 'dynamic_uri' fields, not 'url'
+```
+
+**Details:**
+
+- The Beatport API v4 returns image objects with the structure: `{ id: number, uri: string, dynamic_uri: string }`
+- **Field names are `uri` and `dynamic_uri`**, NOT `url`
+- This applies to both `data.image` (track-level image) and `data.release.image` (release-level image)
+- The `uri` field contains the full-resolution static image URL
+- The `dynamic_uri` field contains a URL with `{w}` and `{h}` placeholders for dynamic resizing
+
+**Image Object Interface:**
+
+```typescript
+interface BeatportImage {
+  id: number;
+  uri: string; // Full-resolution static image URL
+  dynamic_uri: string; // URL with {w} and {h} placeholders
+}
+```
+
+**Related Code:**
+
+```typescript
+// Release-level image from API v4
+image: data.release.image
+  ? {
+      id: data.release.image.id,
+      uri: data.release.image.uri,              // Correct field name
+      dynamic_uri: data.release.image.dynamic_uri, // Correct field name
+    }
+  : undefined,
+
+// Track-level image from API v4
+image: data.image
+  ? {
+      id: data.image.id,
+      uri: data.image.uri,              // Correct field name
+      dynamic_uri: data.image.dynamic_uri, // Correct field name
+    }
+  : undefined,
+```
+
+**Dynamic URI Usage:**
+
+```typescript
+// Example dynamic_uri format:
+// "https://geo-media.beatport.com/image_size/{w}x{h}/abc123.jpg"
+
+// To get a 500x500 image:
+const artworkUrl = dynamic_uri.replace('{w}', '500').replace('{h}', '500');
+// Result: "https://geo-media.beatport.com/image_size/500x500/abc123.jpg"
+```
+
+**Important:**
+
+- Max supported size appears to be **1400×1400** pixels
+- The `BeatportImageUtils.getUrl()` helper handles the `{w}` and `{h}` replacement automatically
+- Fallback string fields (`release_image_uri`, `image_uri`, etc.) should map from `data.release.image?.uri` and `data.release.image?.dynamic_uri`
+
+**Historical Bug:** Prior to 2026-02-10, the parser incorrectly read `data.release.image.url` and `data.image.url`, which don't exist in the API v4 response. This caused all Beatport artwork URLs to be `undefined`. The bug was fixed by using the correct field names `uri` and `dynamic_uri`.
+
+---
+
 ## Summary
 
 ### Key Takeaways
@@ -197,11 +272,18 @@ interface Result {
    - Singular format (API v4): `data.genre`
    - Plural format (API v4 fallback): `data.genres[0]`
 
-2. **Optional Fields**: Genre is optional throughout the codebase - all related code should use optional chaining
+2. **Image Field Handling**: The Beatport API v4 uses `uri` and `dynamic_uri` field names for image objects, NOT `url`:
 
-3. **API Configuration**: Always include `facets=genre,fieldType` in API requests to ensure genre data is returned
+   - Always read `data.release.image.uri` and `data.release.image.dynamic_uri`
+   - Always read `data.image.uri` and `data.image.dynamic_uri`
+   - Use `BeatportImageUtils.getUrl()` to handle `{w}` and `{h}` placeholder replacement
+   - Max image size: 1400×1400 pixels
 
-4. **Consistency**: Both scraping and API v4 parsing follow similar patterns for handling field variations
+3. **Optional Fields**: Genre is optional throughout the codebase - all related code should use optional chaining
+
+4. **API Configuration**: Always include `facets=genre,fieldType` in API requests to ensure genre data is returned
+
+5. **Consistency**: Both scraping and API v4 parsing follow similar patterns for handling field variations
 
 ---
 
@@ -214,4 +296,4 @@ interface Result {
 
 ---
 
-**Last Updated:** 2026-01-17
+**Last Updated:** 2026-02-10

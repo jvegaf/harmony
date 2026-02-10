@@ -574,11 +574,12 @@ export class BeatportClient {
               release_name: data.release.name,
               name: data.release.name,
               slug: data.release.slug,
+              // AIDEV-NOTE: API v4 returns image with 'uri' and 'dynamic_uri' fields, not 'url'
               image: data.release.image
                 ? {
                     id: data.release.image.id,
-                    uri: data.release.image.url,
-                    dynamic_uri: data.release.image.url,
+                    uri: data.release.image.uri,
+                    dynamic_uri: data.release.image.dynamic_uri,
                   }
                 : undefined,
               label: data.release.label
@@ -590,10 +591,10 @@ export class BeatportClient {
                     slug: data.release.label.slug,
                   }
                 : undefined,
-              release_image_uri: data.release.image?.url,
-              image_uri: data.release.image?.url,
-              release_image_dynamic_uri: data.release.image?.url,
-              image_dynamic_uri: data.release.image?.url,
+              release_image_uri: data.release.image?.uri,
+              image_uri: data.release.image?.uri,
+              release_image_dynamic_uri: data.release.image?.dynamic_uri,
+              image_dynamic_uri: data.release.image?.dynamic_uri,
             }
           : undefined,
         publish_date: data.publish_date,
@@ -601,15 +602,16 @@ export class BeatportClient {
         isrc: data.isrc,
         length_ms: data.length_ms,
         length: data.length,
+        // AIDEV-NOTE: Track-level image also uses 'uri' and 'dynamic_uri' fields
         image: data.image
           ? {
               id: data.image.id,
-              uri: data.image.url,
-              dynamic_uri: data.image.url,
+              uri: data.image.uri,
+              dynamic_uri: data.image.dynamic_uri,
             }
           : undefined,
-        track_image_uri: data.image?.url,
-        track_image_dynamic_uri: data.image?.url,
+        track_image_uri: data.image?.uri,
+        track_image_dynamic_uri: data.image?.dynamic_uri,
       };
     } catch (error) {
       throw BeatportError.parseError(`Error parsing API track response: ${error}`);
