@@ -51,5 +51,6 @@ CREATE TABLE `track` (
 	`bpm` integer,
 	`initialKey` text,
 	`rating` text,
+	`label` text,
 	`waveformPeaks` text
 );

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "26dad5a4-e837-4e36-b155-4140781f6448",
+  "id": "5f11c66e-0310-43c2-911f-87061bb30382",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "cuePoint": {
@@ -344,6 +344,13 @@
         },
         "rating": {
           "name": "rating",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "label": {
+          "name": "label",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
