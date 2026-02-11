@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import * as Setting from '../../components/Setting/Setting';
 import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
-import { Button } from '@mantine/core';
+import { Button, Stack } from '@mantine/core';
 import styles from './Settings.module.css';
 import { useNavigate } from 'react-router-dom';
 import router from '../router';
@@ -39,29 +39,34 @@ export default function SettingsLibrary() {
 
   return (
     <div className={styles.settingsContainer}>
-      <Setting.Section>
-        <Setting.Description>Music Collection Source</Setting.Description>
-        <Setting.Action>
-          <Button
-            disabled={refreshing}
-            onClick={openFolderSelector}
-          >
-            Select Music Collection Source
-          </Button>
-        </Setting.Action>
-      </Setting.Section>
-      <Setting.Section>
-        <Setting.Description>Danger zone</Setting.Description>
-        <Setting.Action>
-          <Button
-            color='red'
-            disabled={refreshing}
-            onClick={libraryAPI.reset}
-          >
-            Reset library
-          </Button>
-        </Setting.Action>
-      </Setting.Section>
+      <Stack
+        gap='lg'
+        mt='md'
+      >
+        <Setting.Element>
+          <Setting.Description>Music Collection Source</Setting.Description>
+          <Setting.Action>
+            <Button
+              disabled={refreshing}
+              onClick={openFolderSelector}
+            >
+              Select Music Collection Source
+            </Button>
+          </Setting.Action>
+        </Setting.Element>
+        <Setting.Element>
+          <Setting.Description>Danger zone</Setting.Description>
+          <Setting.Action>
+            <Button
+              color='red'
+              disabled={refreshing}
+              onClick={libraryAPI.reset}
+            >
+              Reset library
+            </Button>
+          </Setting.Action>
+        </Setting.Element>
+      </Stack>
     </div>
   );
 }

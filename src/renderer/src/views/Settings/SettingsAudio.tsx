@@ -4,7 +4,7 @@ import { usePlayerAPI } from '../../stores/usePlayerStore';
 import styles from './Settings.module.css';
 
 import { Config } from '@preload/types/harmony';
-import { NumberInput } from '@mantine/core';
+import { NumberInput, Stack } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 type Props = {
@@ -23,57 +23,62 @@ function SettingsAudio({ config }: Props) {
 
   return (
     <div className={styles.settingsContainer}>
-      <Setting.Section>
-        <Setting.Description>Audio output</Setting.Description>
-        <Setting.Action>
-          <AudioOutputSelect
-            defaultValue={config.audioOutputDevice}
-            onChange={playerAPI.setOutputDevice}
-          />
-        </Setting.Action>
-      </Setting.Section>
-      <Setting.Section>
-        <Setting.Description>PreCue position</Setting.Description>
-        <Setting.Action>
-          <NumberInput
-            allowNegative={false}
-            step={10}
-            value={positionValue}
-            onChange={value => {
-              if (value !== null) {
-                if (typeof value === 'string') {
-                  value = Number.parseInt(value);
+      <Stack
+        gap='lg'
+        mt='md'
+      >
+        <Setting.Element>
+          <Setting.Description>Audio output</Setting.Description>
+          <Setting.Action>
+            <AudioOutputSelect
+              defaultValue={config.audioOutputDevice}
+              onChange={playerAPI.setOutputDevice}
+            />
+          </Setting.Action>
+        </Setting.Element>
+        <Setting.Element>
+          <Setting.Description>PreCue position</Setting.Description>
+          <Setting.Action>
+            <NumberInput
+              allowNegative={false}
+              step={10}
+              value={positionValue}
+              onChange={value => {
+                if (value !== null) {
+                  if (typeof value === 'string') {
+                    value = Number.parseInt(value);
+                  }
+                  setPositionValue(value);
+                  playerAPI.setAudioPreCuePosition(value);
                 }
-                setPositionValue(value);
-                playerAPI.setAudioPreCuePosition(value);
-              }
-            }}
-          />
-        </Setting.Action>
-      </Setting.Section>
-      <Setting.Section>
-        <Setting.Description>Audio Analysis Workers (1-16)</Setting.Description>
-        <Setting.Action>
-          <NumberInput
-            allowNegative={false}
-            min={1}
-            max={16}
-            step={1}
-            value={workersValue}
-            onChange={value => {
-              if (value !== null) {
-                if (typeof value === 'string') {
-                  value = Number.parseInt(value);
+              }}
+            />
+          </Setting.Action>
+        </Setting.Element>
+        <Setting.Element>
+          <Setting.Description>Audio Analysis Workers (1-16)</Setting.Description>
+          <Setting.Action>
+            <NumberInput
+              allowNegative={false}
+              min={1}
+              max={16}
+              step={1}
+              value={workersValue}
+              onChange={value => {
+                if (value !== null) {
+                  if (typeof value === 'string') {
+                    value = Number.parseInt(value);
+                  }
+                  // Clamp between 1 and 16
+                  const clampedValue = Math.max(1, Math.min(16, value));
+                  setWorkersValue(clampedValue);
+                  window.Main.config.set('audioAnalysisWorkers', clampedValue);
                 }
-                // Clamp between 1 and 16
-                const clampedValue = Math.max(1, Math.min(16, value));
-                setWorkersValue(clampedValue);
-                window.Main.config.set('audioAnalysisWorkers', clampedValue);
-              }
-            }}
-          />
-        </Setting.Action>
-      </Setting.Section>
+              }}
+            />
+          </Setting.Action>
+        </Setting.Element>
+      </Stack>
     </div>
   );
 }

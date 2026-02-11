@@ -45,7 +45,7 @@ export default function Providers({ children }: any) {
     },
     components: {
       Button: {
-        defaultProps: { radius: 'md' },
+        defaultProps: { radius: 'sm' },
         styles: {
           root: {
             backgroundColor: 'var(--button-bg)',

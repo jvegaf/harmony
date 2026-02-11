@@ -429,426 +429,431 @@ export default function SettingsTraktor() {
   return (
     <div className={styles.settingsContainer}>
       {/* NML File Selection */}
-      <Setting.Section>
-        <Setting.Description>Traktor Collection File</Setting.Description>
-        <Setting.Action>
-          <Stack gap='xs'>
-            <Group>
-              <Button
-                leftSection={<IconFolder size={16} />}
-                onClick={handleSelectNmlPath}
-                disabled={isLoading}
-              >
-                Select collection.nml
-              </Button>
-              {config?.nmlPath && (
-                <Text
-                  size='sm'
-                  c='dimmed'
-                  style={{ maxWidth: 400, overflow: 'hidden', textOverflow: 'ellipsis' }}
+      <Stack
+        gap='lg'
+        mt='md'
+      >
+        <Setting.Element>
+          <Setting.Description>Traktor Collection File</Setting.Description>
+          <Setting.Action>
+            <Stack gap='xs'>
+              <Group>
+                <Button
+                  leftSection={<IconFolder size={16} />}
+                  onClick={handleSelectNmlPath}
+                  disabled={isLoading}
                 >
-                  {config.nmlPath}
-                </Text>
-              )}
-            </Group>
-
-            {/* NML Info */}
-            {nmlInfo && (
-              <Paper
-                p='sm'
-                withBorder
-                style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
-              >
-                <Group gap='lg'>
-                  <Badge
-                    color='blue'
-                    variant='light'
-                  >
-                    {nmlInfo.trackCount} tracks
-                  </Badge>
-                  <Badge
-                    color='green'
-                    variant='light'
-                  >
-                    {nmlInfo.playlistCount} playlists
-                  </Badge>
-                  <Badge
-                    color='violet'
-                    variant='light'
-                  >
-                    {nmlInfo.folderCount} folders
-                  </Badge>
-                  <Badge
-                    color='orange'
-                    variant='light'
-                  >
-                    {nmlInfo.totalCuePoints} cue points
-                  </Badge>
+                  Select collection.nml
+                </Button>
+                {config?.nmlPath && (
                   <Text
-                    size='xs'
+                    size='sm'
                     c='dimmed'
+                    style={{ maxWidth: 400, overflow: 'hidden', textOverflow: 'ellipsis' }}
                   >
-                    NML v{nmlInfo.version}
+                    {config.nmlPath}
                   </Text>
-                </Group>
-              </Paper>
-            )}
-          </Stack>
-        </Setting.Action>
-      </Setting.Section>
-
-      <Divider my='md' />
-
-      {/* Sync Settings */}
-      <Setting.Section>
-        <Setting.Description>Sync Strategy</Setting.Description>
-        <Setting.Action>
-          <Select
-            value={config?.syncStrategy || 'smart_merge'}
-            onChange={handleSyncStrategyChange}
-            disabled={isLoading}
-            data={[
-              { value: 'smart_merge', label: 'Smart Merge (fill empty fields only)' },
-              { value: 'traktor_wins', label: 'Traktor Wins (overwrite Harmony data)' },
-              { value: 'harmony_wins', label: 'Harmony Wins (keep Harmony data)' },
-            ]}
-            style={{ width: 300 }}
-          />
-        </Setting.Action>
-      </Setting.Section>
-
-      <Setting.Section>
-        <Setting.Description>Auto Backup</Setting.Description>
-        <Setting.Action>
-          <Switch
-            checked={config?.autoBackup ?? true}
-            onChange={e => handleAutoBackupChange(e.currentTarget.checked)}
-            disabled={isLoading}
-            label='Create backup before writing to NML'
-          />
-        </Setting.Action>
-      </Setting.Section>
-
-      <Divider my='md' />
-
-      {/* Auto-Sync Settings */}
-      <Setting.Section>
-        <Setting.Description>Auto-Sync</Setting.Description>
-        <Setting.Action>
-          <Stack gap='sm'>
-            <Switch
-              checked={config?.autoSync?.enabled ?? false}
-              onChange={e => handleAutoSyncEnabledChange(e.currentTarget.checked)}
-              disabled={isLoading || !config?.nmlPath}
-              label='Enable automatic synchronization with Traktor'
-            />
-
-            <Collapse in={config?.autoSync?.enabled ?? false}>
-              <Stack
-                gap='sm'
-                mt='xs'
-              >
-                <Select
-                  label='Sync Direction'
-                  value={config?.autoSync?.direction || 'import'}
-                  onChange={handleAutoSyncDirectionChange}
-                  disabled={isLoading}
-                  data={[
-                    { value: 'import', label: 'Import from Traktor' },
-                    { value: 'export', label: 'Export to Traktor' },
-                    { value: 'bidirectional', label: 'Bidirectional (Import + Export)' },
-                  ]}
-                  style={{ width: 300 }}
-                />
-
-                <Switch
-                  checked={config?.autoSync?.onStartup ?? true}
-                  onChange={e => handleAutoSyncOnStartupChange(e.currentTarget.checked)}
-                  disabled={isLoading}
-                  label='Sync on app startup'
-                />
-
-                <Switch
-                  checked={config?.autoSync?.onLibraryChange ?? false}
-                  onChange={e => handleAutoSyncOnLibraryChangeChange(e.currentTarget.checked)}
-                  disabled={isLoading}
-                  label='Sync when library changes'
-                />
-
-                {config?.autoSync?.onLibraryChange && (
-                  <NumberInput
-                    label='Debounce delay (ms)'
-                    description='Wait time after library changes before syncing'
-                    value={config?.autoSync?.debounceMs ?? 5000}
-                    onChange={handleAutoSyncDebounceChange}
-                    disabled={isLoading}
-                    min={1000}
-                    max={60000}
-                    step={1000}
-                    style={{ width: 200 }}
-                  />
                 )}
+              </Group>
 
-                {/* Auto-Sync Status & Manual Trigger */}
+              {/* NML Info */}
+              {nmlInfo && (
                 <Paper
                   p='sm'
                   withBorder
                   style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
                 >
-                  <Stack gap='xs'>
-                    <Group justify='space-between'>
-                      <Group gap='xs'>
-                        <Text
-                          size='sm'
-                          fw={500}
-                        >
-                          Status:
-                        </Text>
-                        <Badge
-                          color={autoSyncStatus?.isRunning ? 'blue' : autoSyncStatus?.lastError ? 'red' : 'gray'}
-                          variant='light'
-                        >
-                          {autoSyncStatus?.isRunning ? 'Syncing...' : autoSyncStatus?.lastError ? 'Error' : 'Idle'}
-                        </Badge>
-                        {autoSyncStatus?.lastSyncTime && !autoSyncStatus.isRunning && (
+                  <Group gap='lg'>
+                    <Badge
+                      color='blue'
+                      variant='light'
+                    >
+                      {nmlInfo.trackCount} tracks
+                    </Badge>
+                    <Badge
+                      color='green'
+                      variant='light'
+                    >
+                      {nmlInfo.playlistCount} playlists
+                    </Badge>
+                    <Badge
+                      color='violet'
+                      variant='light'
+                    >
+                      {nmlInfo.folderCount} folders
+                    </Badge>
+                    <Badge
+                      color='orange'
+                      variant='light'
+                    >
+                      {nmlInfo.totalCuePoints} cue points
+                    </Badge>
+                    <Text
+                      size='xs'
+                      c='dimmed'
+                    >
+                      NML v{nmlInfo.version}
+                    </Text>
+                  </Group>
+                </Paper>
+              )}
+            </Stack>
+          </Setting.Action>
+        </Setting.Element>
+
+        <Divider my='md' />
+
+        {/* Sync Settings */}
+        <Setting.Element>
+          <Setting.Description>Sync Strategy</Setting.Description>
+          <Setting.Action>
+            <Select
+              value={config?.syncStrategy || 'smart_merge'}
+              onChange={handleSyncStrategyChange}
+              disabled={isLoading}
+              data={[
+                { value: 'smart_merge', label: 'Smart Merge (fill empty fields only)' },
+                { value: 'traktor_wins', label: 'Traktor Wins (overwrite Harmony data)' },
+                { value: 'harmony_wins', label: 'Harmony Wins (keep Harmony data)' },
+              ]}
+              style={{ width: 300 }}
+            />
+          </Setting.Action>
+        </Setting.Element>
+
+        <Setting.Element>
+          <Setting.Description>Auto Backup</Setting.Description>
+          <Setting.Action>
+            <Switch
+              checked={config?.autoBackup ?? true}
+              onChange={e => handleAutoBackupChange(e.currentTarget.checked)}
+              disabled={isLoading}
+              label='Create backup before writing to NML'
+            />
+          </Setting.Action>
+        </Setting.Element>
+
+        <Divider my='md' />
+
+        {/* Auto-Sync Settings */}
+        <Setting.Element>
+          <Setting.Description>Auto-Sync</Setting.Description>
+          <Setting.Action>
+            <Stack gap='sm'>
+              <Switch
+                checked={config?.autoSync?.enabled ?? false}
+                onChange={e => handleAutoSyncEnabledChange(e.currentTarget.checked)}
+                disabled={isLoading || !config?.nmlPath}
+                label='Enable automatic synchronization with Traktor'
+              />
+
+              <Collapse in={config?.autoSync?.enabled ?? false}>
+                <Stack
+                  gap='sm'
+                  mt='xs'
+                >
+                  <Select
+                    label='Sync Direction'
+                    value={config?.autoSync?.direction || 'import'}
+                    onChange={handleAutoSyncDirectionChange}
+                    disabled={isLoading}
+                    data={[
+                      { value: 'import', label: 'Import from Traktor' },
+                      { value: 'export', label: 'Export to Traktor' },
+                      { value: 'bidirectional', label: 'Bidirectional (Import + Export)' },
+                    ]}
+                    style={{ width: 300 }}
+                  />
+
+                  <Switch
+                    checked={config?.autoSync?.onStartup ?? true}
+                    onChange={e => handleAutoSyncOnStartupChange(e.currentTarget.checked)}
+                    disabled={isLoading}
+                    label='Sync on app startup'
+                  />
+
+                  <Switch
+                    checked={config?.autoSync?.onLibraryChange ?? false}
+                    onChange={e => handleAutoSyncOnLibraryChangeChange(e.currentTarget.checked)}
+                    disabled={isLoading}
+                    label='Sync when library changes'
+                  />
+
+                  {config?.autoSync?.onLibraryChange && (
+                    <NumberInput
+                      label='Debounce delay (ms)'
+                      description='Wait time after library changes before syncing'
+                      value={config?.autoSync?.debounceMs ?? 5000}
+                      onChange={handleAutoSyncDebounceChange}
+                      disabled={isLoading}
+                      min={1000}
+                      max={60000}
+                      step={1000}
+                      style={{ width: 200 }}
+                    />
+                  )}
+
+                  {/* Auto-Sync Status & Manual Trigger */}
+                  <Paper
+                    p='sm'
+                    withBorder
+                    style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+                  >
+                    <Stack gap='xs'>
+                      <Group justify='space-between'>
+                        <Group gap='xs'>
+                          <Text
+                            size='sm'
+                            fw={500}
+                          >
+                            Status:
+                          </Text>
+                          <Badge
+                            color={autoSyncStatus?.isRunning ? 'blue' : autoSyncStatus?.lastError ? 'red' : 'gray'}
+                            variant='light'
+                          >
+                            {autoSyncStatus?.isRunning ? 'Syncing...' : autoSyncStatus?.lastError ? 'Error' : 'Idle'}
+                          </Badge>
+                          {autoSyncStatus?.lastSyncTime && !autoSyncStatus.isRunning && (
+                            <Text
+                              size='xs'
+                              c='dimmed'
+                            >
+                              Last sync: {new Date(autoSyncStatus.lastSyncTime).toLocaleTimeString()}
+                            </Text>
+                          )}
+                        </Group>
+
+                        <Group gap='xs'>
+                          {autoSyncStatus?.isRunning ? (
+                            <Button
+                              size='xs'
+                              variant='light'
+                              color='red'
+                              leftSection={<IconPlayerStop size={14} />}
+                              onClick={handleStopAutoSync}
+                            >
+                              Stop
+                            </Button>
+                          ) : (
+                            <Button
+                              size='xs'
+                              variant='light'
+                              leftSection={<IconPlayerPlay size={14} />}
+                              onClick={handleManualAutoSync}
+                              disabled={!config?.nmlPath}
+                            >
+                              Sync Now
+                            </Button>
+                          )}
+                        </Group>
+                      </Group>
+
+                      {/* Progress bar during sync */}
+                      {autoSyncStatus?.isRunning && (
+                        <>
                           <Text
                             size='xs'
                             c='dimmed'
                           >
-                            Last sync: {new Date(autoSyncStatus.lastSyncTime).toLocaleTimeString()}
+                            {autoSyncStatus.message}
                           </Text>
-                        )}
-                      </Group>
-
-                      <Group gap='xs'>
-                        {autoSyncStatus?.isRunning ? (
-                          <Button
-                            size='xs'
-                            variant='light'
-                            color='red'
-                            leftSection={<IconPlayerStop size={14} />}
-                            onClick={handleStopAutoSync}
-                          >
-                            Stop
-                          </Button>
-                        ) : (
-                          <Button
-                            size='xs'
-                            variant='light'
-                            leftSection={<IconPlayerPlay size={14} />}
-                            onClick={handleManualAutoSync}
-                            disabled={!config?.nmlPath}
-                          >
-                            Sync Now
-                          </Button>
-                        )}
-                      </Group>
-                    </Group>
-
-                    {/* Progress bar during sync */}
-                    {autoSyncStatus?.isRunning && (
-                      <>
-                        <Text
-                          size='xs'
-                          c='dimmed'
-                        >
-                          {autoSyncStatus.message}
-                        </Text>
-                        <div
-                          style={{
-                            width: '100%',
-                            height: 6,
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            borderRadius: 3,
-                            overflow: 'hidden',
-                          }}
-                        >
                           <div
                             style={{
-                              width: `${autoSyncStatus.progress}%`,
-                              height: '100%',
-                              backgroundColor: 'var(--mantine-color-blue-6)',
-                              transition: 'width 0.3s ease',
+                              width: '100%',
+                              height: 6,
+                              backgroundColor: 'rgba(255,255,255,0.1)',
+                              borderRadius: 3,
+                              overflow: 'hidden',
                             }}
-                          />
-                        </div>
-                      </>
-                    )}
+                          >
+                            <div
+                              style={{
+                                width: `${autoSyncStatus.progress}%`,
+                                height: '100%',
+                                backgroundColor: 'var(--mantine-color-blue-6)',
+                                transition: 'width 0.3s ease',
+                              }}
+                            />
+                          </div>
+                        </>
+                      )}
 
-                    {/* Error message */}
-                    {autoSyncStatus?.lastError && !autoSyncStatus.isRunning && (
-                      <Text
-                        size='xs'
-                        c='red'
-                      >
-                        {autoSyncStatus.lastError}
-                      </Text>
-                    )}
+                      {/* Error message */}
+                      {autoSyncStatus?.lastError && !autoSyncStatus.isRunning && (
+                        <Text
+                          size='xs'
+                          c='red'
+                        >
+                          {autoSyncStatus.lastError}
+                        </Text>
+                      )}
+                    </Stack>
+                  </Paper>
+                </Stack>
+              </Collapse>
+            </Stack>
+          </Setting.Action>
+        </Setting.Element>
+
+        <Divider my='md' />
+
+        {/* Sync Actions */}
+        <Setting.Element>
+          <Setting.Description>Import from Traktor</Setting.Description>
+          <Setting.Action>
+            <Stack gap='sm'>
+              <Group>
+                <Button
+                  leftSection={<IconRefresh size={16} />}
+                  onClick={handlePreviewSync}
+                  disabled={!config?.nmlPath || isLoading}
+                  variant='outline'
+                >
+                  Preview Sync
+                </Button>
+                <Button
+                  leftSection={<IconDownload size={16} />}
+                  onClick={handleExecuteSync}
+                  disabled={!config?.nmlPath || isLoading}
+                  color='blue'
+                >
+                  Sync from Traktor
+                </Button>
+              </Group>
+
+              {/* Sync Preview */}
+              {syncPlan && (
+                <Paper
+                  p='md'
+                  withBorder
+                  style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+                >
+                  <Stack gap='xs'>
+                    <Text
+                      size='sm'
+                      fw={500}
+                    >
+                      Sync Preview
+                    </Text>
+                    <Group gap='lg'>
+                      <Group gap='xs'>
+                        <IconCheck
+                          size={16}
+                          color='var(--mantine-color-green-6)'
+                        />
+                        <Text size='sm'>{syncPlan.summary.totalMatched} tracks matched</Text>
+                      </Group>
+                      <Group gap='xs'>
+                        <IconRefresh
+                          size={16}
+                          color='var(--mantine-color-blue-6)'
+                        />
+                        <Text size='sm'>{syncPlan.summary.tracksWithChanges} will be updated</Text>
+                      </Group>
+                      {syncPlan.summary.tracksToImport > 0 && (
+                        <Group gap='xs'>
+                          <IconDownload
+                            size={16}
+                            color='var(--mantine-color-teal-6)'
+                          />
+                          <Text size='sm'>{syncPlan.summary.tracksToImport} will be imported</Text>
+                        </Group>
+                      )}
+                    </Group>
                   </Stack>
                 </Paper>
-              </Stack>
-            </Collapse>
-          </Stack>
-        </Setting.Action>
-      </Setting.Section>
+              )}
 
-      <Divider my='md' />
-
-      {/* Sync Actions */}
-      <Setting.Section>
-        <Setting.Description>Import from Traktor</Setting.Description>
-        <Setting.Action>
-          <Stack gap='sm'>
-            <Group>
-              <Button
-                leftSection={<IconRefresh size={16} />}
-                onClick={handlePreviewSync}
-                disabled={!config?.nmlPath || isLoading}
-                variant='outline'
-              >
-                Preview Sync
-              </Button>
-              <Button
-                leftSection={<IconDownload size={16} />}
-                onClick={handleExecuteSync}
-                disabled={!config?.nmlPath || isLoading}
-                color='blue'
-              >
-                Sync from Traktor
-              </Button>
-            </Group>
-
-            {/* Sync Preview */}
-            {syncPlan && (
-              <Paper
-                p='md'
-                withBorder
-                style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
-              >
-                <Stack gap='xs'>
-                  <Text
-                    size='sm'
-                    fw={500}
-                  >
-                    Sync Preview
-                  </Text>
-                  <Group gap='lg'>
-                    <Group gap='xs'>
-                      <IconCheck
-                        size={16}
-                        color='var(--mantine-color-green-6)'
-                      />
-                      <Text size='sm'>{syncPlan.summary.totalMatched} tracks matched</Text>
-                    </Group>
-                    <Group gap='xs'>
-                      <IconRefresh
-                        size={16}
-                        color='var(--mantine-color-blue-6)'
-                      />
-                      <Text size='sm'>{syncPlan.summary.tracksWithChanges} will be updated</Text>
-                    </Group>
-                    {syncPlan.summary.tracksToImport > 0 && (
-                      <Group gap='xs'>
-                        <IconDownload
-                          size={16}
-                          color='var(--mantine-color-teal-6)'
-                        />
-                        <Text size='sm'>{syncPlan.summary.tracksToImport} will be imported</Text>
-                      </Group>
-                    )}
-                  </Group>
-                </Stack>
-              </Paper>
-            )}
-
-            {/* Progress */}
-            {isLoading && progress && (
-              <Paper
-                p='md'
-                withBorder
-                style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
-              >
-                <Stack gap='xs'>
-                  <Text size='sm'>{progress.message}</Text>
-                  <div
-                    style={{
-                      width: '100%',
-                      height: 8,
-                      backgroundColor: 'rgba(255,255,255,0.1)',
-                      borderRadius: 4,
-                      overflow: 'hidden',
-                    }}
-                  >
+              {/* Progress */}
+              {isLoading && progress && (
+                <Paper
+                  p='md'
+                  withBorder
+                  style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+                >
+                  <Stack gap='xs'>
+                    <Text size='sm'>{progress.message}</Text>
                     <div
                       style={{
-                        width: `${progress.progress}%`,
-                        height: '100%',
-                        backgroundColor: 'var(--mantine-color-blue-6)',
-                        transition: 'width 0.3s ease',
+                        width: '100%',
+                        height: 8,
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        borderRadius: 4,
+                        overflow: 'hidden',
                       }}
-                    />
-                  </div>
-                </Stack>
-              </Paper>
-            )}
-          </Stack>
-        </Setting.Action>
-      </Setting.Section>
+                    >
+                      <div
+                        style={{
+                          width: `${progress.progress}%`,
+                          height: '100%',
+                          backgroundColor: 'var(--mantine-color-blue-6)',
+                          transition: 'width 0.3s ease',
+                        }}
+                      />
+                    </div>
+                  </Stack>
+                </Paper>
+              )}
+            </Stack>
+          </Setting.Action>
+        </Setting.Element>
 
-      <Setting.Section>
-        <Setting.Description>Export to Traktor</Setting.Description>
-        <Setting.Action>
-          <Button
-            leftSection={<IconUpload size={16} />}
-            onClick={handleExportToNml}
-            disabled={!config?.nmlPath || isLoading}
-            color='green'
-          >
-            Export to Traktor
-          </Button>
-        </Setting.Action>
-      </Setting.Section>
-
-      {/* Status Messages */}
-      {error && (
-        <Setting.Section>
-          <Paper
-            p='sm'
-            withBorder
-            style={{ backgroundColor: 'rgba(255,0,0,0.1)', borderColor: 'rgba(255,0,0,0.3)' }}
-          >
-            <Text
-              size='sm'
-              c='red'
+        <Setting.Element>
+          <Setting.Description>Export to Traktor</Setting.Description>
+          <Setting.Action>
+            <Button
+              leftSection={<IconUpload size={16} />}
+              onClick={handleExportToNml}
+              disabled={!config?.nmlPath || isLoading}
+              color='green'
             >
-              {error}
-            </Text>
-          </Paper>
-        </Setting.Section>
-      )}
+              Export to Traktor
+            </Button>
+          </Setting.Action>
+        </Setting.Element>
 
-      {lastSyncResult && syncState === 'complete' && (
-        <Setting.Section>
-          <Paper
-            p='sm'
-            withBorder
-            style={{ backgroundColor: 'rgba(0,255,0,0.1)', borderColor: 'rgba(0,255,0,0.3)' }}
-          >
-            <Group gap='xs'>
-              <IconCheck
-                size={16}
-                color='green'
-              />
+        {/* Status Messages */}
+        {error && (
+          <Setting.Element>
+            <Paper
+              p='sm'
+              withBorder
+              style={{ backgroundColor: 'rgba(255,0,0,0.1)', borderColor: 'rgba(255,0,0,0.3)' }}
+            >
               <Text
                 size='sm'
-                c='green'
+                c='red'
               >
-                {lastSyncResult}
+                {error}
               </Text>
-            </Group>
-          </Paper>
-        </Setting.Section>
-      )}
+            </Paper>
+          </Setting.Element>
+        )}
+
+        {lastSyncResult && syncState === 'complete' && (
+          <Setting.Element>
+            <Paper
+              p='sm'
+              withBorder
+              style={{ backgroundColor: 'rgba(0,255,0,0.1)', borderColor: 'rgba(0,255,0,0.3)' }}
+            >
+              <Group gap='xs'>
+                <IconCheck
+                  size={16}
+                  color='green'
+                />
+                <Text
+                  size='sm'
+                  c='green'
+                >
+                  {lastSyncResult}
+                </Text>
+              </Group>
+            </Paper>
+          </Setting.Element>
+        )}
+      </Stack>
     </div>
   );
 }

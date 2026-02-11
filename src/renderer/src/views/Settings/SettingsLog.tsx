@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 
 import styles from './Settings.module.css';
 import { Box, ScrollAreaAutosize, Text } from '@mantine/core';
+import { useViewportSize } from '@renderer/hooks/useViewPortSize';
 
 export default function SettingsLog() {
+  const { height, width } = useViewportSize();
   const viewPortRef = useRef<HTMLDivElement>(null);
   const { app } = window.Main;
   const [logs, setLogs] = useState<string[]>([]);
@@ -19,9 +21,9 @@ export default function SettingsLog() {
       <ScrollAreaAutosize
         viewportRef={viewPortRef}
         type='always'
-        mah={700}
+        mah={height}
       >
-        <Box w={900}>
+        <Box w={width}>
           {logs.map((log, index) => (
             <Text
               component='div'
