@@ -242,6 +242,7 @@ export class Database {
         bpm: track.bpm,
         initialKey: track.initialKey,
         rating: track.rating,
+        label: track.label,
         waveformPeaks: track.waveformPeaks,
       })
       .where(eq(schema.tracks.id, track.id))

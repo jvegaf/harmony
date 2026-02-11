@@ -140,7 +140,11 @@ export default function Providers({ children }: any) {
         theme={theme}
         withCssVariables
       >
-        <ModalsProvider>
+        <ModalsProvider
+          modalProps={{
+            centered: true,
+          }}
+        >
           <Notifications />
           {children}
         </ModalsProvider>

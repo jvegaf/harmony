@@ -21,8 +21,10 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 import { TrklistCtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '../../../../preload/types/harmony';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
+import { useDetailsNavigationAPI } from '../../stores/useDetailsNavigationStore';
 import { ParseDuration } from '../../../../preload/utils';
 import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
 import { GetParentFolderName, ratingComparator } from '../../lib/utils-library';
@@ -70,8 +72,10 @@ const { menu, logger } = window.Main;
 
 const TrackList = (props: Props) => {
   const { tracks, trackPlayingID, playlists, currentPlaylist, type } = props;
+  const location = useLocation();
   const playerAPI = usePlayerAPI();
   const libraryAPI = useLibraryAPI();
+  const detailsNavAPI = useDetailsNavigationAPI();
   const { search, updated, deleting, tracklistSort } = useLibraryStore();
   const gridRef = useRef<AgGridReact>(null);
   const [lastUpdated, setLastUpdated] = useState<Track | null>(null);
@@ -272,6 +276,19 @@ const TrackList = (props: Props) => {
 
       const selected = event.api.getSelectedRows() as Track[];
 
+      // AIDEV-NOTE: Save navigation context for Details view
+      // When user opens Details from context menu, they can navigate prev/next within the current track list
+      if (selected.length === 1 && gridApi) {
+        const allDisplayedTracks: Track[] = [];
+        gridApi.forEachNodeAfterFilterAndSort(node => {
+          if (node.data) {
+            allDisplayedTracks.push(node.data);
+          }
+        });
+        const trackIds = allDisplayedTracks.map(t => t.id);
+        detailsNavAPI.setContext(trackIds, selected[0].id, location.pathname);
+      }
+
       const payload: TrklistCtxMenuPayload = {
         selected,
         playlists,
@@ -280,7 +297,7 @@ const TrackList = (props: Props) => {
 
       menu.tracklist(payload);
     },
-    [playlists, currentPlaylist],
+    [playlists, currentPlaylist, gridApi, detailsNavAPI, location.pathname],
   );
 
   const onKeyPress = useCallback((event: { ctrlKey: boolean; key: string; preventDefault: () => void }) => {

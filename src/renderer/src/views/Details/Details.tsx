@@ -1,13 +1,23 @@
 import React, { useCallback, useEffect } from 'react';
-import { LoaderFunctionArgs, useLoaderData, useNavigate } from 'react-router-dom';
-import { Button, Grid, GridCol, Group, Textarea, TextInput } from '@mantine/core';
+import { LoaderFunctionArgs, useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
+import { Button, Grid, GridCol, Group, Stack, Textarea, TextInput } from '@mantine/core';
 import { hasLength, useForm } from '@mantine/form';
+import { modals } from '@mantine/modals';
+import {
+  IconSearch,
+  IconBrandGoogle,
+  IconTag,
+  IconEraser,
+  IconChevronLeft,
+  IconChevronRight,
+} from '@tabler/icons-react';
 import { LoaderData } from '../router';
 import appStyles from '../Root.module.css';
 import styles from './Details.module.css';
 import Cover from '../../components/Cover/Cover';
 import TrackRatingComponent from '../../components/TrackRatingComponent/TrackRatingComponent';
 import { useLibraryAPI } from '../../stores/useLibraryStore';
+import { useDetailsNavigationAPI, useDetailsNavigationStore } from '../../stores/useDetailsNavigationStore';
 import { GetFilenameWithoutExtension } from '../../lib/utils-library';
 import { SearchEngine } from '../../../../preload/types/harmony';
 import { SanitizedTitle } from '../../../../preload/utils';
@@ -16,8 +26,11 @@ const { menu, shell } = window.Main;
 
 export default function DetailsView() {
   const navigate = useNavigate();
+  const revalidator = useRevalidator();
   const { track } = useLoaderData() as DetailsLoaderData;
   const libraryAPI = useLibraryAPI();
+  const detailsNavAPI = useDetailsNavigationAPI();
+  const { getPreviousTrackId, getNextTrackId } = useDetailsNavigationStore();
 
   const form = useForm({
     mode: 'uncontrolled',
@@ -30,6 +43,7 @@ export default function DetailsView() {
       bpm: '',
       initialKey: '',
       comment: '',
+      label: '',
       rating: {
         source: '',
         rating: '',
@@ -47,11 +61,57 @@ export default function DetailsView() {
 
   const handleSubmit = useCallback(
     async values => {
+      // AIDEV-NOTE: Changed behavior - Save no longer navigates away
+      // User can continue editing or navigate manually with Cancel or Prev/Next buttons
       await libraryAPI.updateTrackMetadata(track.id, values);
-      navigate('/');
+      form.resetDirty(values);
+      revalidator.revalidate();
     },
-    [track, navigate, libraryAPI],
+    [track, libraryAPI, form, revalidator],
   );
+
+  // AIDEV-NOTE: Navigation handlers with unsaved changes confirmation
+  const confirmNavigation = useCallback(
+    (action: () => void) => {
+      if (form.isDirty()) {
+        modals.openConfirmModal({
+          title: 'Unsaved changes',
+          children: 'You have unsaved changes. Are you sure you want to leave without saving?',
+          labels: { confirm: 'Leave', cancel: 'Stay' },
+          confirmProps: { color: 'red' },
+          onConfirm: action,
+        });
+      } else {
+        action();
+      }
+    },
+    [form],
+  );
+
+  const handlePrevious = useCallback(() => {
+    confirmNavigation(() => {
+      const prevTrackId = detailsNavAPI.navigateToPrevious();
+      if (prevTrackId) {
+        navigate(`/details/${prevTrackId}`);
+      }
+    });
+  }, [confirmNavigation, detailsNavAPI, navigate]);
+
+  const handleNext = useCallback(() => {
+    confirmNavigation(() => {
+      const nextTrackId = detailsNavAPI.navigateToNext();
+      if (nextTrackId) {
+        navigate(`/details/${nextTrackId}`);
+      }
+    });
+  }, [confirmNavigation, detailsNavAPI, navigate]);
+
+  const handleClose = useCallback(() => {
+    confirmNavigation(() => {
+      const originPath = detailsNavAPI.getOriginPath();
+      navigate(originPath);
+    });
+  }, [confirmNavigation, detailsNavAPI, navigate]);
 
   const filenameToTag = useCallback(() => {
     const filename = GetFilenameWithoutExtension(track.path);
@@ -107,18 +167,59 @@ export default function DetailsView() {
             size='xl'
           />
         </div>
-        <div>
+        <Stack
+          gap='sm'
+          mt='md'
+        >
           <Group
-            mt='md'
             justify='center'
+            gap='sm'
           >
-            <Button onClick={filenameToTag}>Filename to Tag</Button>
-            <Button onClick={clearComments}>Clear Comments</Button>
-            <Button onClick={() => searchOn(SearchEngine.BEATPORT)}>Search on Beatport</Button>
-            <Button onClick={() => searchOn(SearchEngine.GOOGLE)}>Search on Google</Button>
-            <Button onClick={() => searchOn(SearchEngine.TRAXSOURCE)}>Search on TraxxSource</Button>
+            <Button
+              variant='light'
+              leftSection={<IconTag size={18} />}
+              onClick={filenameToTag}
+            >
+              Filename to Tag
+            </Button>
+            <Button
+              variant='light'
+              leftSection={<IconEraser size={18} />}
+              onClick={clearComments}
+            >
+              Clear Comments
+            </Button>
           </Group>
-        </div>
+          <Group
+            justify='center'
+            gap='xs'
+          >
+            <Button
+              variant='outline'
+              size='sm'
+              leftSection={<IconSearch size={16} />}
+              onClick={() => searchOn(SearchEngine.BEATPORT)}
+            >
+              Beatport
+            </Button>
+            <Button
+              variant='outline'
+              size='sm'
+              leftSection={<IconBrandGoogle size={16} />}
+              onClick={() => searchOn(SearchEngine.GOOGLE)}
+            >
+              Google
+            </Button>
+            <Button
+              variant='outline'
+              size='sm'
+              leftSection={<IconSearch size={16} />}
+              onClick={() => searchOn(SearchEngine.TRAXSOURCE)}
+            >
+              TraxxSource
+            </Button>
+          </Group>
+        </Stack>
       </div>
       <div className={styles.detailsRight}>
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -144,7 +245,7 @@ export default function DetailsView() {
             justify='center'
             grow
           >
-            <GridCol span={8}>
+            <GridCol span={5}>
               <TextInput
                 label='Album'
                 {...form.getInputProps('album')}
@@ -152,11 +253,19 @@ export default function DetailsView() {
                 onContextMenu={handleContextMenu}
               />
             </GridCol>
-            <GridCol span={4}>
+            <GridCol span={3}>
               <TextInput
                 label='Genre'
                 {...form.getInputProps('genre')}
                 key={form.key('genre')}
+                onContextMenu={handleContextMenu}
+              />
+            </GridCol>
+            <GridCol span={4}>
+              <TextInput
+                label='Label'
+                {...form.getInputProps('label')}
+                key={form.key('label')}
                 onContextMenu={handleContextMenu}
               />
             </GridCol>
@@ -194,16 +303,42 @@ export default function DetailsView() {
           />
           <Group
             mt='md'
-            justify='end'
-            gap='xl'
+            justify='space-between'
+            gap='md'
           >
-            <Button
-              className={styles.cancelBtn}
-              onClick={() => navigate(-1)}
-            >
-              Cancel
-            </Button>
-            <Button type='submit'>Save</Button>
+            <Group gap='xs'>
+              <Button
+                variant='subtle'
+                leftSection={<IconChevronLeft size={18} />}
+                onClick={handlePrevious}
+                disabled={!getPreviousTrackId()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant='subtle'
+                rightSection={<IconChevronRight size={18} />}
+                onClick={handleNext}
+                disabled={!getNextTrackId()}
+              >
+                Next
+              </Button>
+            </Group>
+            <Group gap='xl'>
+              <Button
+                variant='subtle'
+                className={styles.cancelBtn}
+                onClick={handleClose}
+              >
+                Close
+              </Button>
+              <Button
+                type='submit'
+                variant='filled'
+              >
+                Save
+              </Button>
+            </Group>
           </Group>
         </form>
       </div>

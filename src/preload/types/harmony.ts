@@ -139,7 +139,7 @@ export const enum LogLevel {
 
 export type TrackEditableFields = Pick<
   Track,
-  'title' | 'artist' | 'album' | 'genre' | 'year' | 'comment' | 'bpm' | 'initialKey'
+  'title' | 'artist' | 'album' | 'genre' | 'year' | 'comment' | 'bpm' | 'initialKey' | 'label'
 >;
 
 export type LogProps = {
