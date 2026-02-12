@@ -93,13 +93,10 @@ export default function NowPlayingBar({ track, config }: NowPlayingBarProps) {
             </button>
             <button
               type='button'
-              className={styles.actionButton}
+              className={`${styles.actionButton} ${isPreCueing ? styles.active : ''}`}
               onClick={() => playerAPI.togglePreCue()}
             >
-              <IconHeadphones
-                size={20}
-                style={{ color: isPreCueing ? '#fa8905' : '' }}
-              />
+              <IconHeadphones size={20} />
             </button>
             <button
               type='button'

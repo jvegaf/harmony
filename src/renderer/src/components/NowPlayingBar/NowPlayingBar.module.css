@@ -1,7 +1,7 @@
 .nowPlayingBar {
   padding: 1rem 1rem 0rem 1rem;
-  border-bottom: 1px solid var(--border-color);
-  background-color: rgba(17, 24, 39, 0.7);
+  border-bottom: 1px solid var(--hm-border);
+  background-color: var(--hm-bg-main);
 }
 
 .emptyState {
@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: center;
   height: 150px;
-  color: var(--text-muted);
+  color: var(--hm-text-muted);
 }
 
 /* Track Info Section */
@@ -35,7 +35,7 @@
 .trackTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--hm-text);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -44,7 +44,7 @@
 
 .trackArtist {
   font-size: 0.875rem;
-  color: var(--text-muted);
+  color: var(--hm-text-muted);
   margin: 0;
 }
 
@@ -59,7 +59,7 @@
   background: none;
   border: none;
   padding: 0.5rem;
-  color: var(--text-muted);
+  color: var(--hm-text-muted);
   cursor: pointer;
   border-radius: 9999px;
   display: flex;
@@ -71,8 +71,13 @@
 }
 
 .actionButton:hover {
-  background-color: rgba(55, 65, 81, 0.5);
-  color: var(--text-secondary);
+  background-color: var(--hm-bg-hover);
+  color: var(--hm-text-secondary);
+}
+
+/* AIDEV-NOTE: Theme-aware active state for pre-cue headphones icon */
+.actionButton.active {
+  color: var(--hm-primary);
 }
 
 /* Tags Section */
@@ -86,14 +91,14 @@
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   font-size: 0.75rem;
-  background-color: rgba(31, 41, 55, 0.8);
-  color: var(--text-secondary);
+  background-color: var(--hm-bg-elevated);
+  color: var(--hm-text-secondary);
 }
 
 .tagPrimary {
-  background-color: var(--primary-color-light);
-  color: var(--primary-color);
-  border: 1px solid rgba(250, 137, 5, 0.5);
+  background-color: var(--hm-primary-light);
+  color: var(--hm-primary);
+  border: 1px solid light-dark(rgba(250, 137, 5, 0.6), rgba(250, 137, 5, 0.5));
 }
 
 /* Waveform Section */
@@ -115,7 +120,7 @@
 }
 
 .playIcon {
-  color: var(--primary-color);
+  color: var(--hm-primary);
 }
 
 .waveformContainer {

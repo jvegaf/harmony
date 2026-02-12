@@ -1,0 +1,23 @@
+/* AIDEV-NOTE: Styles for SettingsTraktor component - theme-aware Paper backgrounds and status indicators */
+
+/* Paper with elevated/subtle background for info boxes */
+.infoPaper {
+  background-color: var(--hm-bg-elevated);
+}
+
+/* Progress bar semi-transparent background */
+.progressBar {
+  background-color: var(--hm-progress-bg);
+}
+
+/* Error state Paper - red tint */
+.errorPaper {
+  background-color: var(--hm-danger-light);
+  border-color: var(--hm-danger);
+}
+
+/* Success state Paper - green tint */
+.successPaper {
+  background-color: var(--hm-success-light);
+  border-color: var(--hm-success);
+}

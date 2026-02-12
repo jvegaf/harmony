@@ -8,6 +8,7 @@ import SettingsLibrary from './SettingsLibrary';
 import SettingsAudio from './SettingsAudio';
 import SettingsTraktor from './SettingsTraktor';
 import SettingsGeneral from './SettingsGeneral';
+import SettingsUI from './SettingsUI';
 import {
   IconDeviceSpeaker,
   IconPencilCog,
@@ -15,6 +16,7 @@ import {
   IconDisc,
   IconSettings,
   IconLayersIntersect,
+  IconPalette,
 } from '@tabler/icons-react';
 import SettingsLog from './SettingsLog';
 import SettingsDuplicates from './SettingsDuplicates';
@@ -56,6 +58,12 @@ export default function SettingsView() {
               Library
             </Tabs.Tab>
             <Tabs.Tab
+              value='appearance'
+              leftSection={<IconPalette size={14} />}
+            >
+              Appearance
+            </Tabs.Tab>
+            <Tabs.Tab
               value='general'
               leftSection={<IconSettings size={14} />}
             >
@@ -89,6 +97,9 @@ export default function SettingsView() {
 
           <Tabs.Panel value='library'>
             <SettingsLibrary />
+          </Tabs.Panel>
+          <Tabs.Panel value='appearance'>
+            <SettingsUI />
           </Tabs.Panel>
           <Tabs.Panel value='general'>
             <SettingsGeneral />

@@ -16,52 +16,115 @@
   box-sizing: border-box;
   overflow: hidden;
 
-  color-scheme: light dark;
-  color: #d1d5db;
-  background-color: #231a0f;
-
   font-synthesis: none;
   text-rendering: optimizelegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* New color scheme */
-  --primary-color: #fa8905;
-  --primary-color-hover: #fb9f2d;
-  --primary-color-light: rgba(250, 137, 5, 0.2);
+  /* ==========================================
+     Harmony Design System - Color Tokens
+     ========================================== */
 
-  --secondary-color: #da933b;
-  --secondary-bg: #ae5f04;
+  /* === Base palette (theme-independent) === */
+  --hm-primary: #fa8905;
+  --hm-primary-hover: #fb9f2d;
+  --hm-primary-light: rgba(250, 137, 5, 0.2);
+  --hm-primary-muted: rgba(250, 137, 5, 0.15);
+  --hm-primary-subtle: rgba(250, 137, 5, 0.1);
+  --hm-primary-ghost: rgba(250, 137, 5, 0.05);
 
-  --background-light: #f8f7f5;
-  --background-dark: #231a0f;
+  /* Semantic colors */
+  --hm-success: #22c55e;
+  --hm-success-light: rgba(34, 197, 94, 0.2);
+  --hm-warning: #eab308;
+  --hm-warning-light: rgba(234, 179, 8, 0.2);
+  --hm-danger: #ef4444;
+  --hm-danger-light: rgba(239, 68, 68, 0.2);
+  --hm-info: #3b82f6;
+  --hm-info-light: rgba(59, 130, 246, 0.2);
 
-  --normal-color-dark: #d1d5db;
-  --progress-bg: #374151;
-  --main-color: #fa8905;
-  --red-color: #d30e21;
-  --main-bg-dark: #1f2937;
-  --second-bg-dark: #374151;
-  --second-hover-dark: #4b5563;
-
-  --hm-primary-bg: rgba(17, 24, 39, 0.4);
-  --header-bg: rgba(31, 41, 55, 0.5);
-  --card-bg: rgba(31, 41, 55, 0.7);
-  --border-color: rgba(75, 85, 99, 0.5);
-
+  /* Layout constants */
+  --hm-button-radius: 0.5rem;
   --table-vertical-spacing: 0.5rem;
   --table-bg: transparent;
 
-  --appbar-bg-light: #e5e5e5;
-  --appbar-color-light: #555555;
+  /* === Dark theme (default) === */
+  @mixin dark-root {
+    /* Backgrounds */
+    --hm-bg-app: #231a0f;
+    --hm-bg-main: rgba(17, 24, 39, 0.7);
+    --hm-bg-sidebar: rgba(17, 24, 39, 0.4);
+    --hm-bg-header: rgba(31, 41, 55, 0.5);
+    --hm-bg-card: rgba(31, 41, 55, 0.7);
+    --hm-bg-elevated: rgba(31, 41, 55, 0.8);
+    --hm-bg-input: rgba(31, 41, 55, 0.6);
+    --hm-bg-button: #374151;
+    --hm-bg-hover: rgba(55, 65, 81, 0.5);
+    --hm-bg-overlay: rgba(0, 0, 0, 0.7);
+    --hm-bg-modal: rgb(17, 24, 39);
 
-  --button-bg: #374151;
-  --button-radius: 0.5rem;
+    /* Borders */
+    --hm-border: rgba(75, 85, 99, 0.5);
+    --hm-border-subtle: rgba(55, 65, 81, 0.3);
 
-  /* Text colors */
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
+    /* Text colors */
+    --hm-text: #f3f4f6;
+    --hm-text-secondary: #9ca3af;
+    --hm-text-muted: #6b7280;
+    --hm-text-on-primary: white;
+
+    /* Scrollbar */
+    --hm-scrollbar-track: #1f2937;
+    --hm-scrollbar-thumb: #4b5563;
+    --hm-scrollbar-thumb-hover: #6b7280;
+
+    /* Progress */
+    --hm-progress-bg: #374151;
+
+    /* Color scheme meta */
+    color-scheme: dark;
+    color: var(--hm-text);
+    background-color: var(--hm-bg-app);
+  }
+
+  /* === Light theme === */
+  @mixin light-root {
+    /* Backgrounds */
+    --hm-bg-app: #f8f7f5;
+    --hm-bg-main: #ffffff;
+    --hm-bg-sidebar: #f1f0ee;
+    --hm-bg-header: rgba(255, 255, 255, 0.9);
+    --hm-bg-card: #ffffff;
+    --hm-bg-elevated: #f9fafb;
+    --hm-bg-input: #ffffff;
+    --hm-bg-button: #e5e7eb;
+    --hm-bg-hover: rgba(0, 0, 0, 0.05);
+    --hm-bg-overlay: rgba(0, 0, 0, 0.4);
+    --hm-bg-modal: #ffffff;
+
+    /* Borders */
+    --hm-border: rgba(0, 0, 0, 0.12);
+    --hm-border-subtle: rgba(0, 0, 0, 0.06);
+
+    /* Text colors */
+    --hm-text: #1a1b1e;
+    --hm-text-secondary: #495057;
+    --hm-text-muted: #868e96;
+    --hm-text-on-primary: white;
+
+    /* Scrollbar */
+    --hm-scrollbar-track: #e9ecef;
+    --hm-scrollbar-thumb: #ced4da;
+    --hm-scrollbar-thumb-hover: #adb5bd;
+
+    /* Progress */
+    --hm-progress-bg: #e9ecef;
+
+    /* Color scheme meta */
+    color-scheme: light;
+    color: var(--hm-text);
+    background-color: var(--hm-bg-app);
+  }
 }
 
 /* Custom scrollbar */
@@ -71,14 +134,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #1f2937;
+  background: var(--hm-scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4b5563;
+  background: var(--hm-scrollbar-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: var(--hm-scrollbar-thumb-hover);
 }

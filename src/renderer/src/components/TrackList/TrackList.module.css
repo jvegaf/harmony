@@ -1,5 +1,6 @@
 /* AIDEV-NOTE: CSS Module styles for TrackList component */
 /* Additional AG Grid custom styles not covered by theme API (lines 31-45 in TrackList.tsx) */
+/* Now uses Harmony theme system with light/dark support */
 
 .trackListContainer {
   width: 100%;
@@ -24,18 +25,18 @@
 
 /* Header styling refinements */
 :global(.ag-header) {
-  background-color: rgba(31, 41, 55, 0.8) !important;
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--hm-bg-elevated) !important;
+  border-bottom: 1px solid var(--hm-border);
   min-height: 32px !important;
 }
 
 :global(.ag-header-container) {
-  background-color: rgba(31, 41, 55, 0.8) !important;
+  background-color: var(--hm-bg-elevated) !important;
 }
 
 :global(.ag-header-cell) {
-  background-color: rgba(31, 41, 55, 0.8) !important;
-  color: var(--text-muted);
+  background-color: var(--hm-bg-elevated) !important;
+  color: var(--hm-text-muted);
   font-size: 0.75rem;
   font-weight: 500;
   height: 32px !important;
@@ -53,13 +54,13 @@
 
 :global(.ag-row) {
   background-color: transparent !important;
-  color: var(--text-secondary);
+  color: var(--hm-text-secondary);
   font-size: 0.9rem;
-  border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+  border-bottom: 1px solid var(--hm-border-subtle);
 }
 
 :global(.ag-row:hover) {
-  background-color: rgba(55, 65, 81, 0.5) !important;
+  background-color: var(--hm-bg-hover) !important;
 }
 
 :global(.ag-row-odd) {
@@ -79,18 +80,18 @@
 
 /* Playing track highlight */
 :global(.playing-style .ag-cell) {
-  color: var(--primary-color) !important;
+  color: var(--hm-primary) !important;
   font-weight: 500;
 }
 
 /* Selected row styling */
 :global(.ag-row-selected) {
-  background-color: rgba(250, 137, 5, 0.15) !important;
+  background-color: var(--hm-primary-muted) !important;
 }
 
 /* Rating cell styling */
 :global(.rating-cell) {
-  color: var(--text-muted);
+  color: var(--hm-text-muted);
 }
 
 /* Checkbox styling */
@@ -100,7 +101,7 @@
 }
 
 :global(.ag-checkbox-input-wrapper.ag-checked) {
-  background-color: var(--primary-color);
+  background-color: var(--hm-primary);
 }
 
 /* Custom track artwork components */
@@ -115,9 +116,9 @@
   width: 32px;
   height: 32px;
   border-radius: 0.25rem;
-  background-color: rgba(55, 65, 81, 0.5);
+  background-color: var(--hm-bg-elevated);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
+  color: var(--hm-text-muted);
 }

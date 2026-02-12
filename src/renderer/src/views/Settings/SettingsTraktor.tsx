@@ -36,6 +36,7 @@ import { notifications } from '@mantine/notifications';
 
 import * as Setting from '../../components/Setting/Setting';
 import styles from './Settings.module.css';
+import traktorStyles from './SettingsTraktor.module.css';
 import type {
   TraktorConfig,
   TraktorNMLInfo,
@@ -461,7 +462,7 @@ export default function SettingsTraktor() {
                 <Paper
                   p='sm'
                   withBorder
-                  style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+                  className={traktorStyles.infoPaper}
                 >
                   <Group gap='lg'>
                     <Badge
@@ -597,7 +598,7 @@ export default function SettingsTraktor() {
                   <Paper
                     p='sm'
                     withBorder
-                    style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+                    className={traktorStyles.infoPaper}
                   >
                     <Stack gap='xs'>
                       <Group justify='space-between'>
@@ -659,10 +660,10 @@ export default function SettingsTraktor() {
                             {autoSyncStatus.message}
                           </Text>
                           <div
+                            className={traktorStyles.progressBar}
                             style={{
                               width: '100%',
                               height: 6,
-                              backgroundColor: 'rgba(255,255,255,0.1)',
                               borderRadius: 3,
                               overflow: 'hidden',
                             }}
@@ -727,7 +728,7 @@ export default function SettingsTraktor() {
                 <Paper
                   p='md'
                   withBorder
-                  style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+                  className={traktorStyles.infoPaper}
                 >
                   <Stack gap='xs'>
                     <Text
@@ -770,15 +771,15 @@ export default function SettingsTraktor() {
                 <Paper
                   p='md'
                   withBorder
-                  style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+                  className={traktorStyles.infoPaper}
                 >
                   <Stack gap='xs'>
                     <Text size='sm'>{progress.message}</Text>
                     <div
+                      className={traktorStyles.progressBar}
                       style={{
                         width: '100%',
                         height: 8,
-                        backgroundColor: 'rgba(255,255,255,0.1)',
                         borderRadius: 4,
                         overflow: 'hidden',
                       }}
@@ -819,7 +820,7 @@ export default function SettingsTraktor() {
             <Paper
               p='sm'
               withBorder
-              style={{ backgroundColor: 'rgba(255,0,0,0.1)', borderColor: 'rgba(255,0,0,0.3)' }}
+              className={traktorStyles.errorPaper}
             >
               <Text
                 size='sm'
@@ -836,7 +837,7 @@ export default function SettingsTraktor() {
             <Paper
               p='sm'
               withBorder
-              style={{ backgroundColor: 'rgba(0,255,0,0.1)', borderColor: 'rgba(0,255,0,0.3)' }}
+              className={traktorStyles.successPaper}
             >
               <Group gap='xs'>
                 <IconCheck

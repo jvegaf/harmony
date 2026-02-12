@@ -19,14 +19,14 @@
   border: none;
   border-radius: 0.25rem;
   background-color: transparent;
-  color: var(--text-secondary);
+  color: var(--hm-text-secondary);
   cursor: pointer;
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
 
   &:hover {
-    background-color: rgba(55, 65, 81, 0.5);
-    color: var(--text-primary);
+    background-color: var(--hm-bg-hover);
+    color: var(--hm-text);
   }
 }

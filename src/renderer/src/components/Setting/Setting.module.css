@@ -9,7 +9,7 @@
 
 .settingTitle {
   font-weight: bold;
-  color: var(--normal-color-dark);
+  color: var(--hm-text);
   font-size: 1.4rem;
   margin: 10px;
 }
@@ -35,8 +35,8 @@
 .settingSelect,
 .settingInput {
   display: block;
-  color: var(--input-color);
-  background-color: var(--second-bg-dark);
+  color: var(--hm-text);
+  background-color: var(--hm-bg-button);
   border: solid 1px var(--mantine-color-default-border);
   border-radius: var(--mantine-radius-default);
   padding: 8px 12px;
@@ -50,5 +50,5 @@
 }
 
 .settingError {
-  color: red;
+  color: var(--hm-danger);
 }

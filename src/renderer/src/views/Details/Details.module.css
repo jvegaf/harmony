@@ -15,9 +15,9 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  background-color: var(--card-bg);
+  background-color: var(--hm-bg-card);
   border-radius: 0.75rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--hm-border);
 }
 
 .detailsLeft {
@@ -38,9 +38,9 @@
   justify-content: center;
   border-radius: 0.5rem;
   overflow: hidden;
-  border: 2px solid var(--border-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  background-color: var(--main-bg-dark);
+  border: 2px solid var(--hm-border);
+  box-shadow: 0 4px 12px light-dark(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+  background-color: var(--hm-bg-modal);
 }
 
 .rating {
@@ -72,5 +72,5 @@
 }
 
 .cancelBtn:hover {
-  background-color: var(--red-color) !important;
+  background-color: var(--hm-danger) !important;
 }

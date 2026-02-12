@@ -9,7 +9,7 @@
 .nav__link {
   display: inline-block;
   padding: 15px;
-  color: var(--text);
+  color: var(--hm-text);
   font-weight: bold;
   text-decoration: none;
 
@@ -21,6 +21,6 @@
   }
 
   &.nav__linkActive {
-    color: var(--main-color);
+    color: var(--hm-primary);
   }
 }

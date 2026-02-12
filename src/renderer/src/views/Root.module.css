@@ -3,7 +3,7 @@
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  background-color: var(--background-dark);
+  background-color: var(--hm-bg-app);
 }
 
 .mainLayout {
@@ -16,7 +16,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: rgba(17, 24, 39, 0.7);
+  background-color: var(--hm-bg-main);
   overflow: hidden;
 }
 
@@ -34,7 +34,7 @@
   flex: none;
   width: 100%;
   height: 64px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--hm-border);
 }
 
 .content {

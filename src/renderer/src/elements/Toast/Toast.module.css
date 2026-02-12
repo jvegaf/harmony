@@ -1,12 +1,12 @@
 .toast {
   border: solid 1px;
   border-left-width: 5px;
-  background-color: var(--toasts-bg);
-  border-top-color: var(--border-color);
-  border-right-color: var(--border-color);
-  border-bottom-color: var(--border-color);
-  color: var(--text);
-  box-shadow: 0 5px 3px -5px rgba(0 0 0 0.5);
+  background-color: var(--hm-bg-card);
+  border-top-color: var(--hm-border);
+  border-right-color: var(--hm-border);
+  border-bottom-color: var(--hm-border);
+  color: var(--hm-text);
+  box-shadow: 0 5px 3px -5px light-dark(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
   padding: 15px;
 
   & + .toast {
@@ -15,17 +15,17 @@
 }
 
 .toastSuccess {
-  border-left-color: var(--success-color);
+  border-left-color: var(--hm-success);
 }
 
 .toastInfo {
-  border-left-color: var(--info-color);
+  border-left-color: var(--hm-info);
 }
 
 .toastWarning {
-  border-left-color: var(--warning-color);
+  border-left-color: var(--hm-warning);
 }
 
 .toastDanger {
-  border-left-color: var(--danger-color);
+  border-left-color: var(--hm-danger);
 }

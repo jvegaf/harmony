@@ -6,20 +6,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--hm-bg-overlay);
 }
 
 /* Modal container */
 .modalContainer {
-  background-color: rgb(17, 24, 39); /* gray-900 */
+  background-color: var(--hm-bg-modal);
   border-radius: 0.75rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 50px -12px light-dark(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.25));
   width: 100%;
   max-width: 90rem; /* max-w-7xl */
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgb(55, 65, 81); /* gray-700 */
+  border: 1px solid var(--hm-border);
 }
 
 /* Modal header */
@@ -28,19 +28,19 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid rgb(55, 65, 81);
+  border-bottom: 1px solid var(--hm-border);
 }
 
 .modalTitle {
   font-size: 1.25rem;
   font-weight: 600;
-  color: white;
+  color: var(--hm-text);
   margin: 0;
 }
 
 .modalSubtitle {
   font-size: 0.875rem;
-  color: rgb(156, 163, 175); /* gray-400 */
+  color: var(--hm-text-secondary);
   margin: 0;
 }
 
@@ -52,7 +52,7 @@
 }
 
 .closeButton:hover:not(:disabled) {
-  background-color: rgb(31, 41, 55); /* gray-800 */
+  background-color: var(--hm-bg-hover);
 }
 
 .closeButton:disabled {
@@ -69,7 +69,7 @@
 
 /* Track row */
 .trackRow {
-  border-bottom: 1px solid rgb(55, 65, 81);
+  border-bottom: 1px solid var(--hm-border);
   padding: 1rem 0;
 }
 
@@ -87,7 +87,7 @@
 .trackIcon {
   width: 1.25rem;
   height: 1.25rem;
-  color: rgb(156, 163, 175);
+  color: var(--hm-text-secondary);
   flex-shrink: 0;
 }
 
@@ -98,7 +98,7 @@
 
 .trackTitle {
   font-weight: 500;
-  color: white;
+  color: var(--hm-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -107,7 +107,7 @@
 
 .trackArtist {
   font-size: 0.875rem;
-  color: rgb(156, 163, 175);
+  color: var(--hm-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -116,12 +116,12 @@
 
 .trackDuration {
   margin-left: 0.5rem;
-  color: rgb(107, 114, 128); /* gray-500 */
+  color: var(--hm-text-muted);
 }
 
 .trackFilename {
   font-size: 0.75rem;
-  color: rgb(107, 114, 128);
+  color: var(--hm-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -147,7 +147,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: rgb(248, 113, 113); /* red-400 */
+  color: light-dark(#dc2626, #f87171); /* red-600 / red-400 */
   font-size: 0.75rem;
 }
 
@@ -155,7 +155,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: rgb(251, 191, 36); /* yellow-400 */
+  color: light-dark(#ca8a04, #facc15); /* yellow-600 / yellow-400 */
   font-size: 0.75rem;
 }
 
@@ -166,8 +166,8 @@
 
 .errorMessage {
   font-size: 0.875rem;
-  color: rgb(248, 113, 113);
-  background-color: rgba(239, 68, 68, 0.1); /* red-500/10 */
+  color: light-dark(#dc2626, #f87171);
+  background-color: var(--hm-danger-light);
   border-radius: 0.5rem;
   padding: 0.75rem;
 }
@@ -187,8 +187,8 @@
   flex-direction: column;
   padding: 0.75rem;
   border-radius: 0.5rem;
-  border: 2px solid rgb(55, 65, 81); /* gray-700 */
-  background-color: rgba(31, 41, 55, 0.5); /* gray-800/50 */
+  border: 2px solid var(--hm-border);
+  background-color: var(--hm-bg-card);
   transition: all 0.2s;
   text-align: left;
   cursor: pointer;
@@ -197,19 +197,19 @@
 }
 
 .candidateCard:hover {
-  border-color: rgba(250, 137, 5, 0.5);
+  border-color: light-dark(rgba(250, 137, 5, 0.7), rgba(250, 137, 5, 0.5));
 }
 
 .candidateCardSelected {
-  border-color: var(--primary-color);
-  background-color: var(--primary-color-light);
+  border-color: var(--hm-primary);
+  background-color: var(--hm-primary-light);
 }
 
 .candidateCheckmark {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background-color: var(--primary-color);
+  background-color: var(--hm-primary);
   border-radius: 9999px;
   padding: 0.125rem;
 }
@@ -217,7 +217,7 @@
 .checkmarkIcon {
   width: 0.75rem;
   height: 0.75rem;
-  color: white;
+  color: var(--hm-text-on-primary);
 }
 
 .candidateContent {
@@ -231,7 +231,7 @@
   width: 4rem;
   height: 4rem;
   border-radius: 0.25rem;
-  background-color: rgb(55, 65, 81);
+  background-color: var(--hm-bg-elevated);
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -253,7 +253,7 @@
 .artworkIcon {
   width: 1.5rem;
   height: 1.5rem;
-  color: rgb(107, 114, 128);
+  color: var(--hm-text-muted);
 }
 
 /* Candidate text */
@@ -265,7 +265,7 @@
 .candidateTitle {
   font-size: 0.875rem;
   font-weight: 500;
-  color: white;
+  color: var(--hm-text);
   overflow: hidden;
   width: 80%;
   text-overflow: ellipsis;
@@ -275,7 +275,7 @@
 
 .candidateArtist {
   font-size: 0.75rem;
-  color: rgb(156, 163, 175);
+  color: var(--hm-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   margin: 0;
@@ -286,8 +286,8 @@
   margin-top: 0.25rem;
   padding: 0.125rem 0.375rem;
   font-size: 0.625rem;
-  background-color: rgba(168, 85, 247, 0.2); /* purple-500/20 */
-  color: rgb(216, 180, 254); /* purple-300 */
+  background-color: light-dark(rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.2)); /* purple-500/15-20 */
+  color: light-dark(#a855f7, #d8b4fe); /* purple-500 / purple-300 */
   border-radius: 0.25rem;
 }
 
@@ -303,21 +303,21 @@
 }
 
 .scoreHigh {
-  background-color: rgba(34, 197, 94, 0.2); /* green-500/20 */
-  color: rgb(74, 222, 128); /* green-400 */
-  border-color: rgba(34, 197, 94, 0.3);
+  background-color: var(--hm-success-light);
+  color: var(--hm-success);
+  border-color: light-dark(rgba(34, 197, 94, 0.4), rgba(34, 197, 94, 0.3));
 }
 
 .scoreMedium {
-  background-color: rgba(234, 179, 8, 0.2); /* yellow-500/20 */
-  color: rgb(250, 204, 21); /* yellow-400 */
-  border-color: rgba(234, 179, 8, 0.3);
+  background-color: var(--hm-warning-light);
+  color: var(--hm-warning);
+  border-color: light-dark(rgba(234, 179, 8, 0.4), rgba(234, 179, 8, 0.3));
 }
 
 .scoreLow {
-  background-color: rgba(239, 68, 68, 0.2); /* red-500/20 */
-  color: rgb(248, 113, 113); /* red-400 */
-  border-color: rgba(239, 68, 68, 0.3);
+  background-color: var(--hm-danger-light);
+  color: var(--hm-danger);
+  border-color: light-dark(rgba(239, 68, 68, 0.4), rgba(239, 68, 68, 0.3));
 }
 
 /* AIDEV-NOTE: Provider badges - colores oficiales de cada provider */
@@ -326,15 +326,15 @@
 }
 
 .provider-beatport {
-  color: #02ff98; /* Verde oficial de Beatport */
+  color: light-dark(#00cc7a, #02ff98); /* Verde oficial de Beatport - darker in light mode */
 }
 
 .provider-traxsource {
-  color: #ff6600; /* Naranja oficial de Traxsource */
+  color: light-dark(#cc5200, #ff6600); /* Naranja oficial de Traxsource - darker in light mode */
 }
 
 .provider-bandcamp {
-  color: #1da0c3; /* Azul de Bandcamp */
+  color: light-dark(#157f9d, #1da0c3); /* Azul de Bandcamp - darker in light mode */
 }
 
 /* Info grid */
@@ -350,18 +350,18 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: rgb(156, 163, 175);
+  color: var(--hm-text-secondary);
 }
 
 .infoDuration {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: rgb(156, 163, 175);
+  color: var(--hm-text-secondary);
 }
 
 .infoDurationMatch {
-  color: rgb(74, 222, 128); /* green-400 */
+  color: var(--hm-success);
   font-weight: 500;
 }
 
@@ -372,7 +372,7 @@
 }
 
 .infoDurationIconMatch {
-  color: rgb(74, 222, 128);
+  color: var(--hm-success);
 }
 
 .infoIcon {
@@ -410,8 +410,8 @@
   justify-content: center;
   padding: 0.75rem;
   border-radius: 0.5rem;
-  border: 2px solid rgb(55, 65, 81);
-  background-color: rgba(31, 41, 55, 0.5);
+  border: 2px solid var(--hm-border);
+  background-color: var(--hm-bg-card);
   transition: all 0.2s;
   cursor: pointer;
   min-width: 200px;
@@ -420,19 +420,19 @@
 }
 
 .notFoundButton:hover {
-  border-color: rgba(239, 68, 68, 0.5); /* red-500/50 */
+  border-color: light-dark(rgba(239, 68, 68, 0.7), rgba(239, 68, 68, 0.5)); /* red-500/70-50 */
 }
 
 .notFoundButtonSelected {
-  border-color: rgb(239, 68, 68); /* red-500 */
-  background-color: rgba(239, 68, 68, 0.1);
+  border-color: var(--hm-danger);
+  background-color: var(--hm-danger-light);
 }
 
 .notFoundCheckmark {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background-color: rgb(239, 68, 68);
+  background-color: var(--hm-danger);
   border-radius: 9999px;
   padding: 0.125rem;
 }
@@ -440,13 +440,13 @@
 .notFoundIcon {
   width: 2.5rem;
   height: 2.5rem;
-  color: rgb(248, 113, 113);
+  color: var(--hm-danger);
   margin-bottom: 0.75rem;
 }
 
 .notFoundText {
   font-size: 0.875rem;
-  color: rgb(248, 113, 113);
+  color: var(--hm-danger);
   text-align: center;
   font-weight: 500;
 }
@@ -457,21 +457,21 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-top: 1px solid rgb(55, 65, 81);
-  background-color: rgba(31, 41, 55, 0.5); /* gray-800/50 */
+  border-top: 1px solid var(--hm-border);
+  background-color: var(--hm-bg-elevated);
 }
 
 .footerStats {
   font-size: 0.875rem;
-  color: rgb(156, 163, 175);
+  color: var(--hm-text-secondary);
 }
 
 .statsMatched {
-  color: rgb(74, 222, 128); /* green-400 */
+  color: var(--hm-success);
 }
 
 .statsSkipped {
-  color: rgb(107, 114, 128); /* gray-500 */
+  color: var(--hm-text-muted);
 }
 
 .footerButtons {
@@ -482,7 +482,7 @@
 .cancelButton {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  color: rgb(209, 213, 219); /* gray-300 */
+  color: var(--hm-text-secondary);
   border-radius: 0.5rem;
   transition: all 0.2s;
   border: none;
@@ -490,8 +490,8 @@
 }
 
 .cancelButton:hover:not(:disabled) {
-  color: white;
-  background-color: rgb(55, 65, 81); /* gray-700 */
+  color: var(--hm-text);
+  background-color: var(--hm-bg-hover);
 }
 
 .cancelButton:disabled {
@@ -509,17 +509,17 @@
 }
 
 .confirmButtonEnabled {
-  background-color: var(--primary-color);
-  color: white;
+  background-color: var(--hm-primary);
+  color: var(--hm-text-on-primary);
 }
 
 .confirmButtonEnabled:hover:not(:disabled) {
-  background-color: var(--primary-color-hover);
+  background-color: var(--hm-primary-hover);
 }
 
 .confirmButtonDisabled {
-  background-color: rgb(55, 65, 81); /* gray-700 */
-  color: rgb(107, 114, 128); /* gray-500 */
+  background-color: var(--hm-bg-button);
+  color: var(--hm-text-muted);
   cursor: not-allowed;
 }
 
@@ -532,8 +532,8 @@
 .spinner {
   width: 1rem;
   height: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border: 2px solid light-dark(rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.3));
+  border-top-color: light-dark(rgba(0, 0, 0, 0.8), white);
   border-radius: 9999px;
   animation: spin 1s linear infinite;
 }

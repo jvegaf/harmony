@@ -1,11 +1,23 @@
-import { ColorSchemeScript, MantineProvider, createTheme } from '@mantine/core';
+import { ColorSchemeScript, MantineProvider, MantineColorScheme, createTheme } from '@mantine/core';
 import '@mantine/core/styles.css';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
+import { useEffect, useState } from 'react';
+
+const { config } = window.Main;
 
 export default function Providers({ children }: any) {
-  // long tasks should use useState(true)
+  const [colorScheme, setColorScheme] = useState<MantineColorScheme>('auto');
+
+  // Load theme preference from config
+  useEffect(() => {
+    const loadTheme = async () => {
+      const theme = await config.get('theme');
+      setColorScheme(theme);
+    };
+    loadTheme();
+  }, []);
 
   // override theme for Mantine (default props and styles)
   // https://mantine.dev/theming/mantine-provider/
@@ -48,9 +60,9 @@ export default function Providers({ children }: any) {
         defaultProps: { radius: 'sm' },
         styles: {
           root: {
-            backgroundColor: 'var(--button-bg)',
+            backgroundColor: 'var(--hm-bg-button)',
             '&:hover': {
-              backgroundColor: 'var(--second-hover-dark)',
+              backgroundColor: 'var(--hm-bg-hover)',
             },
           },
         },
@@ -60,31 +72,31 @@ export default function Providers({ children }: any) {
           input: {
             cursor: 'pointer',
             backgroundColor: 'transparent',
-            borderColor: 'var(--border-color)',
+            borderColor: 'var(--hm-border)',
           },
           label: { cursor: 'pointer' },
         },
       },
       TextInput: {
         styles: {
-          label: { fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.5rem' },
+          label: { fontSize: '0.7rem', color: 'var(--hm-text-muted)', marginTop: '0.5rem' },
           input: {
-            backgroundColor: 'rgba(31, 41, 55, 0.6)',
-            borderColor: 'var(--border-color)',
-            color: 'var(--text-primary)',
+            backgroundColor: 'var(--hm-bg-input)',
+            borderColor: 'var(--hm-border)',
+            color: 'var(--hm-text)',
             '&:focus': {
-              borderColor: 'var(--primary-color)',
+              borderColor: 'var(--hm-primary)',
             },
           },
         },
       },
       Textarea: {
         styles: {
-          label: { fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' },
+          label: { fontSize: '0.8rem', color: 'var(--hm-text-muted)', marginTop: '0.5rem' },
           input: {
-            backgroundColor: 'rgba(31, 41, 55, 0.6)',
-            borderColor: 'var(--border-color)',
-            color: 'var(--text-primary)',
+            backgroundColor: 'var(--hm-bg-input)',
+            borderColor: 'var(--hm-border)',
+            color: 'var(--hm-text)',
           },
         },
       },
@@ -93,27 +105,27 @@ export default function Providers({ children }: any) {
         styles: {
           label: { marginTop: '0.5rem' },
           input: {
-            backgroundColor: 'rgba(31, 41, 55, 0.6)',
-            borderColor: 'var(--border-color)',
-            color: 'var(--text-primary)',
+            backgroundColor: 'var(--hm-bg-input)',
+            borderColor: 'var(--hm-border)',
+            color: 'var(--hm-text)',
           },
         },
       },
       Loader: { defaultProps: { size: 'xl', color: 'orange' } },
       Space: { defaultProps: { h: 'sm' } },
       Anchor: { defaultProps: { target: '_blank' } },
-      Burger: { styles: { burger: { color: 'var(--text-secondary)' } } },
+      Burger: { styles: { burger: { color: 'var(--hm-text-secondary)' } } },
       Table: {
         styles: {
           td: { padding: '0.6rem' },
-          th: { padding: '0.5rem', backgroundColor: 'rgba(31, 41, 55, 0.8)' },
+          th: { padding: '0.5rem', backgroundColor: 'var(--hm-bg-elevated)' },
         },
       },
       Tabs: {
         styles: {
           tab: {
             '&[dataActive]': {
-              backgroundColor: 'var(--primary-color)',
+              backgroundColor: 'var(--hm-primary)',
               color: 'white',
             },
           },
@@ -122,9 +134,9 @@ export default function Providers({ children }: any) {
       ActionIcon: {
         styles: {
           root: {
-            color: 'var(--text-secondary)',
+            color: 'var(--hm-text-secondary)',
             '&:hover': {
-              backgroundColor: 'rgba(55, 65, 81, 0.5)',
+              backgroundColor: 'var(--hm-bg-hover)',
             },
           },
         },
@@ -134,9 +146,9 @@ export default function Providers({ children }: any) {
 
   return (
     <>
-      <ColorSchemeScript defaultColorScheme='dark' />
+      <ColorSchemeScript defaultColorScheme={colorScheme} />
       <MantineProvider
-        defaultColorScheme='dark'
+        defaultColorScheme={colorScheme}
         theme={theme}
         withCssVariables
       >

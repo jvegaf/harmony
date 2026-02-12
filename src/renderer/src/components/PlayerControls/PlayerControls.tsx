@@ -32,7 +32,7 @@ function PlayerControls() {
         </ControlButton>
         <ControlButton onClick={() => playerAPI.togglePlayPause()}>
           <IconPlayerPlayFilled
-            style={{ color: playerStatus === PlayerStatus.PLAY ? '#d30e21' : '#e6e6e6' }}
+            className={playerStatus === PlayerStatus.PLAY ? styles.iconActive : styles.iconInactive}
             size={ICON_SIZE}
           />
         </ControlButton>
@@ -46,7 +46,7 @@ function PlayerControls() {
         <ControlButton onClick={() => playerAPI.togglePreCue()}>
           <IconHeadphones
             size={ICON_SIZE}
-            style={{ color: isPreCueing ? '#d30e21' : '#e6e6e6' }}
+            className={isPreCueing ? styles.iconActive : styles.iconInactive}
           />
         </ControlButton>
       </div>

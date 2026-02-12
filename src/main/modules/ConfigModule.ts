@@ -46,6 +46,13 @@ export default class ConfigModule extends Module {
         autoSync: defaults.traktorConfig.autoSync,
       });
     }
+
+    // Migrate theme if missing (added for light/dark/auto support)
+    const theme = this.config.get('theme');
+    if (!theme) {
+      logger.info('[ConfigModule] Migrating config to add theme property');
+      this.config.set('theme', defaults.theme);
+    }
   }
 
   async load(): Promise<void> {
@@ -113,6 +120,8 @@ export default class ConfigModule extends Module {
           isDefault: true,
         },
       ],
+      // AIDEV-NOTE: UI theme configuration - 'auto' follows system preference
+      theme: 'auto',
       // AIDEV-NOTE: Traktor NML integration configuration, persisted to settings
       traktorConfig: {
         nmlPath: '',

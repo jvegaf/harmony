@@ -7,20 +7,20 @@
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  background-color: rgba(55, 65, 81, 0.5);
+  background-color: var(--hm-bg-button);
   cursor: pointer;
   outline: none;
-  color: var(--text-secondary);
+  color: var(--hm-text-secondary);
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
 
   &:hover {
-    background-color: rgba(75, 85, 99, 0.6);
-    color: var(--text-primary);
+    background-color: var(--hm-bg-hover);
+    color: var(--hm-text);
   }
 
   &:only-child {
-    color: var(--text-secondary);
+    color: var(--hm-text-secondary);
   }
 }

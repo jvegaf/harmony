@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { useMantineColorScheme } from '@mantine/core';
 import WaveSurfer from 'wavesurfer.js';
 import type { Track } from '../../../../preload/types/harmony';
 import styles from './DuplicateWavePlayer.module.css';
@@ -28,6 +29,7 @@ export default function DuplicateWavePlayer({
   color = '#fa8905',
   onBecomeActive,
 }: DuplicateWavePlayerProps) {
+  const { colorScheme } = useMantineColorScheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
@@ -87,7 +89,14 @@ export default function DuplicateWavePlayer({
     const barsCount = Math.floor(width / barTotalWidth);
     const step = peaks.length / barsCount;
 
-    const waveColor = hasPreComputedPeaks ? '#4b5563' : 'rgba(107, 114, 128, 0.4)';
+    // AIDEV-NOTE: Theme-aware waveform colors - lighter grays for light mode, darker for dark mode
+    const waveColor = hasPreComputedPeaks
+      ? colorScheme === 'dark'
+        ? '#4b5563' // dark mode: gray-600
+        : '#9ca3af' // light mode: gray-400
+      : colorScheme === 'dark'
+        ? 'rgba(107, 114, 128, 0.4)' // dark mode: gray-500 with opacity
+        : 'rgba(156, 163, 175, 0.4)'; // light mode: gray-400 with opacity
     ctx.fillStyle = waveColor;
 
     for (let i = 0; i < barsCount; i++) {
@@ -99,7 +108,7 @@ export default function DuplicateWavePlayer({
 
       ctx.fillRect(x, y, barWidth, barHeight);
     }
-  }, [width, height, hasPreComputedPeaks, track.waveformPeaks, placeholderPeaks, wavesurferCreated]);
+  }, [width, height, hasPreComputedPeaks, track.waveformPeaks, placeholderPeaks, wavesurferCreated, colorScheme]);
 
   // Trigger WaveSurfer creation when track becomes active for the first time
   useEffect(() => {
@@ -119,7 +128,14 @@ export default function DuplicateWavePlayer({
     peaksSavedRef.current = false;
 
     const peaks = hasPreComputedPeaks ? track.waveformPeaks! : placeholderPeaks;
-    const waveColor = hasPreComputedPeaks ? '#4b5563' : 'rgba(107, 114, 128, 0.4)';
+    // AIDEV-NOTE: Theme-aware waveform colors for WaveSurfer instance
+    const waveColor = hasPreComputedPeaks
+      ? colorScheme === 'dark'
+        ? '#4b5563' // dark mode: gray-600
+        : '#9ca3af' // light mode: gray-400
+      : colorScheme === 'dark'
+        ? 'rgba(107, 114, 128, 0.4)' // dark mode: gray-500 with opacity
+        : 'rgba(156, 163, 175, 0.4)'; // light mode: gray-400 with opacity
     const progressColor = hasPreComputedPeaks ? color : 'rgba(250, 137, 5, 0.4)';
 
     const ws = WaveSurfer.create({
@@ -131,7 +147,7 @@ export default function DuplicateWavePlayer({
       barGap: 1,
       barRadius: 1,
       cursorWidth: 1,
-      cursorColor: 'rgba(255, 255, 255, 0.5)',
+      cursorColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)', // Theme-aware cursor
       interact: true,
       normalize: true,
     });

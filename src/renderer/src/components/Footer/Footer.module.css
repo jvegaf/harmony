@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: flex-start;
   padding-left: 10px;
-  background-color: rgba(31, 41, 55, 0.8);
-  color: var(--primary-color);
+  background-color: var(--hm-bg-elevated);
+  color: var(--hm-primary);
   font-size: 0.75rem;
 }

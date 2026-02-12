@@ -24,3 +24,12 @@
   align-items: center;
   gap: 1rem;
 }
+
+/* AIDEV-NOTE: Icon color states - adapt to light/dark theme */
+.iconActive {
+  color: var(--hm-danger);
+}
+
+.iconInactive {
+  color: var(--hm-text-secondary);
+}

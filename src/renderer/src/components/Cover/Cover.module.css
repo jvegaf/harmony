@@ -10,7 +10,7 @@
 }
 
 .empty {
-  border: solid 1px var(--border-color);
+  border: solid 1px var(--hm-border);
   border-width: 0 1px;
   box-sizing: border-box;
 }

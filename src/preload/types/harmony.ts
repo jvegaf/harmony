@@ -194,6 +194,8 @@ export interface Config {
   };
   /** Custom search engines for track context menu */
   searchEngines: SearchEngineConfig[];
+  /** UI appearance theme: 'light', 'dark', or 'auto' (follows system preference) */
+  theme: 'light' | 'dark' | 'auto';
   /** Traktor NML integration configuration */
   traktorConfig: {
     nmlPath: string;

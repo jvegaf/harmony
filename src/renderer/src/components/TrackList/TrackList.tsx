@@ -22,6 +22,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 import { TrklistCtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '../../../../preload/types/harmony';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useMantineColorScheme } from '@mantine/core';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
 import { useDetailsNavigationAPI } from '../../stores/useDetailsNavigationStore';
@@ -33,18 +34,37 @@ import { perfLogger } from '../../lib/performance-logger';
 import { themeQuartz, iconSetMaterial } from 'ag-grid-community';
 import styles from './TrackList.module.css';
 
-const harmonyTheme = themeQuartz.withPart(iconSetMaterial).withParams({
+// AIDEV-NOTE: AG Grid theme configurations for light and dark modes
+// These themes use hardcoded color values because AG Grid's theming API doesn't support CSS variables
+// Color values are matched to the design tokens in App.css
+const harmonyDarkTheme = themeQuartz.withPart(iconSetMaterial).withParams({
   fontFamily: { googleFont: 'Inter' },
   backgroundColor: 'transparent',
-  foregroundColor: 'var(--text-secondary)',
-  headerTextColor: 'var(--text-muted)',
-  headerBackgroundColor: 'rgba(31, 41, 55, 0.8)',
+  foregroundColor: '#9ca3af', // --hm-text-secondary (dark)
+  headerTextColor: '#6b7280', // --hm-text-muted (dark)
+  headerBackgroundColor: 'rgba(31, 41, 55, 0.8)', // --hm-bg-elevated (dark)
   rowHeight: 40,
   oddRowBackgroundColor: 'transparent',
-  rowHoverColor: 'rgba(55, 65, 81, 0.5)',
-  selectedRowBackgroundColor: 'rgba(250, 137, 5, 0.15)',
-  rangeSelectionBorderColor: 'var(--primary-color)',
-  borderColor: 'var(--border-color)',
+  rowHoverColor: 'rgba(55, 65, 81, 0.5)', // --hm-bg-hover (dark)
+  selectedRowBackgroundColor: 'rgba(250, 137, 5, 0.15)', // --hm-primary-muted
+  rangeSelectionBorderColor: '#fa8905', // --hm-primary
+  borderColor: 'rgba(75, 85, 99, 0.5)', // --hm-border (dark)
+  cellHorizontalPadding: 8,
+  fontSize: 16,
+});
+
+const harmonyLightTheme = themeQuartz.withPart(iconSetMaterial).withParams({
+  fontFamily: { googleFont: 'Inter' },
+  backgroundColor: 'transparent',
+  foregroundColor: '#495057', // --hm-text-secondary (light)
+  headerTextColor: '#868e96', // --hm-text-muted (light)
+  headerBackgroundColor: '#f9fafb', // --hm-bg-elevated (light)
+  rowHeight: 40,
+  oddRowBackgroundColor: 'transparent',
+  rowHoverColor: 'rgba(0, 0, 0, 0.05)', // --hm-bg-hover (light)
+  selectedRowBackgroundColor: 'rgba(250, 137, 5, 0.15)', // --hm-primary-muted
+  rangeSelectionBorderColor: '#fa8905', // --hm-primary
+  borderColor: 'rgba(0, 0, 0, 0.12)', // --hm-border (light)
   cellHorizontalPadding: 8,
   fontSize: 16,
 });
@@ -77,6 +97,7 @@ const TrackList = (props: Props) => {
   const libraryAPI = useLibraryAPI();
   const detailsNavAPI = useDetailsNavigationAPI();
   const { search, updated, deleting, tracklistSort } = useLibraryStore();
+  const { colorScheme } = useMantineColorScheme();
   const gridRef = useRef<AgGridReact>(null);
   const [lastUpdated, setLastUpdated] = useState<Track | null>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
@@ -84,6 +105,11 @@ const TrackList = (props: Props) => {
   const [isDragEnabled, setIsDragEnabled] = useState<boolean>(false);
 
   const gridStyle = useMemo(() => ({ height: '100%', width: '100%' }), []);
+
+  // AIDEV-NOTE: Select appropriate AG Grid theme based on current color scheme
+  const harmonyTheme = useMemo(() => {
+    return colorScheme === 'dark' ? harmonyDarkTheme : harmonyLightTheme;
+  }, [colorScheme]);
   // AIDEV-NOTE: Helper to check if drag should be enabled
   // Drag is only enabled in playlist view when sorted by playlistOrder or no sorting
   const checkDragEnabled = useCallback(() => {

@@ -1,5 +1,6 @@
 import { useWavesurfer } from '../../hooks/useWavesurfer';
 import { useRef, useEffect, useState, useMemo } from 'react';
+import { useMantineColorScheme } from '@mantine/core';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
 import { Config, PlayerStatus } from '../../../../preload/types/harmony';
 import { WaveSurferOptions } from 'wavesurfer.js';
@@ -22,26 +23,33 @@ function WavePlayer({ config }: WavePlayerProps) {
   const hoverRef = useRef<HTMLInputElement>(null);
   const { position, playingTrack, playerStatus, isPreCueing, isPruneMode, volume, isMuted } = usePlayerStore();
   const playerAPI = usePlayerAPI();
+  const { colorScheme } = useMantineColorScheme();
   const [audioUrl, setAudioUrl] = useState('');
   const [time, setTime] = useState<string>('0:00');
   const [totalDuration, setTotalDuration] = useState<string>('0:00');
 
+  // AIDEV-NOTE: Create theme-aware waveform gradients
   const optionsMemo = useMemo((): Omit<WaveSurferOptions, 'container'> => {
     let gradient, progressGradient;
     if (typeof window !== 'undefined') {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!;
 
-      // Updated waveform colors to match the new orange theme
-      gradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 1.35);
-      gradient.addColorStop(0, '#4b5563');
-      gradient.addColorStop((canvas.height * 0.7) / canvas.height, '#4b5563');
-      gradient.addColorStop((canvas.height * 0.7 + 1) / canvas.height, '#6b7280');
-      gradient.addColorStop((canvas.height * 0.7 + 2) / canvas.height, '#6b7280');
-      gradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, '#374151');
-      gradient.addColorStop(1, '#374151');
+      // Waveform gradient colors - adapt to theme
+      const isDark = colorScheme === 'dark';
+      const waveColors = isDark
+        ? { top: '#4b5563', mid: '#6b7280', bottom: '#374151' }
+        : { top: '#9ca3af', mid: '#d1d5db', bottom: '#e5e7eb' };
 
-      // Orange progress gradient matching the primary color
+      gradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 1.35);
+      gradient.addColorStop(0, waveColors.top);
+      gradient.addColorStop((canvas.height * 0.7) / canvas.height, waveColors.top);
+      gradient.addColorStop((canvas.height * 0.7 + 1) / canvas.height, waveColors.mid);
+      gradient.addColorStop((canvas.height * 0.7 + 2) / canvas.height, waveColors.mid);
+      gradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, waveColors.bottom);
+      gradient.addColorStop(1, waveColors.bottom);
+
+      // Orange progress gradient - same for both themes (primary color)
       progressGradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 1.35);
       progressGradient.addColorStop(0, '#fa8905');
       progressGradient.addColorStop((canvas.height * 0.7) / canvas.height, '#f76707');
@@ -58,7 +66,7 @@ function WavePlayer({ config }: WavePlayerProps) {
       barWidth: 2,
       url: audioUrl,
     };
-  }, [audioUrl]);
+  }, [audioUrl, colorScheme]);
   // AIDEV-NOTE: Pass playingTrack to useWavesurfer so it can use cached waveform peaks from DB
   const wavesurfer = useWavesurfer(containerRef, optionsMemo, playingTrack);
   // Initialize wavesurfer when the container mounts
