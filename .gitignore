@@ -14,3 +14,4 @@ out
 .opencode/plugin
 opencode.json
 tsconfig.web.tsbuildinfo
+/drizzle/meta/*.json
