@@ -25,6 +25,10 @@ class DatabaseModule extends ModuleWindow {
       return this.db.getAllTracks();
     });
 
+    ipcMain.handle(channels.TRACKS_RECENT, (_, days?: number): Promise<Array<Track>> => {
+      return this.db.getRecentTracks(days);
+    });
+
     ipcMain.handle(channels.TRACKS_ADD, async (_, tracks: Track[]): Promise<Track[]> => {
       log.info(`Adding ${tracks.length} tracks to the database`);
 

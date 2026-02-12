@@ -5,6 +5,7 @@ import ExternalLink from '../elements/ExternalLink/ExternalLink';
 
 import RootView from './Root';
 import LibraryView from './Library/Library';
+import RecentlyAddedView from './RecentlyAdded/RecentlyAdded';
 import DetailsView from './Details/Details';
 import SettingsView from './Settings/Settings';
 import PlaylistView from './PLaylist/PlaylistView';
@@ -36,6 +37,12 @@ const router = createHashRouter([
         id: 'library',
         element: <LibraryView />,
         loader: LibraryView.loader,
+      },
+      {
+        path: 'recent_added',
+        id: 'recent_added',
+        element: <RecentlyAddedView />,
+        loader: RecentlyAddedView.loader,
       },
       {
         path: 'playlists/:playlistID',

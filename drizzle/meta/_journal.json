@@ -15,6 +15,13 @@
       "when": 1770745343892,
       "tag": "0001_white_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1770916057548,
+      "tag": "0002_slippery_shatterstar",
+      "breakpoints": true
     }
   ]
 }

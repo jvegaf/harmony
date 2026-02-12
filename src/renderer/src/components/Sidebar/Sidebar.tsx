@@ -29,6 +29,7 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
 
   // AIDEV-NOTE: Determine active nav item based on current route
   const isLibraryRoute = location.pathname === '/library' || location.pathname === '/';
+  const isRecentRoute = location.pathname === '/recent_added';
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -185,10 +186,10 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
         </a>
         <a
           href='#'
-          className={styles.navItem}
+          className={`${styles.navItem} ${isRecentRoute ? styles.navItemActive : ''}`}
           onClick={e => {
             e.preventDefault();
-            navigate('/library');
+            navigate('/recent_added');
           }}
         >
           <span className={styles.navLabel}>

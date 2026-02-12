@@ -29,6 +29,8 @@ export const tracks = sqliteTable('track', {
   rating: text('rating', { mode: 'json' }).$type<TrackRating | null>(),
   label: text('label'),
   waveformPeaks: text('waveformPeaks', { mode: 'json' }).$type<number[] | null>(),
+  // AIDEV-NOTE: Timestamp when the track was added to Harmony (Unix timestamp in milliseconds)
+  addedAt: integer('addedAt'),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

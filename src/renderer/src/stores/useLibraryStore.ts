@@ -1,5 +1,5 @@
 import type { MessageBoxReturnValue } from 'electron';
-import { TrackEditableFields, Track, TrackId, TrackSrc } from '../../../preload/types/harmony';
+import { TrackEditableFields, Track, TrackId, TrackSrc, LibraryChanges } from '../../../preload/types/harmony';
 import { TrackSelection } from '../../../preload/types/tagger';
 import { stripAccents } from '../../../preload/lib/utils-id3';
 import { chunk } from '../../../preload/lib/utils';
@@ -47,6 +47,13 @@ type LibraryState = {
     mode: string;
   };
   renamingPlaylist: string | null;
+  checking: boolean; // AIDEV-NOTE: true while checking library changes
+  libraryChanges: LibraryChanges | null; // AIDEV-NOTE: result of library changes scan
+  applyingChanges: boolean; // AIDEV-NOTE: true while applying changes
+  applyChangesProgress: {
+    processed: number;
+    total: number;
+  };
   api: {
     openHandler: (opts: Electron.OpenDialogOptions) => Promise<void>;
     search: (value: string) => void;
@@ -68,6 +75,9 @@ type LibraryState = {
     setTracklistSort: (colId: string, mode: string) => Promise<void>;
     filenameToTags: (tracks: Track[]) => Promise<void>;
     setRenamingPlaylist: (playlistID: string | null) => void;
+    checkLibraryChanges: () => Promise<void>;
+    applyLibraryChanges: (changes: LibraryChanges) => Promise<void>;
+    dismissLibraryChanges: () => void;
   };
 };
 
@@ -113,6 +123,13 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
   },
   tracklistSort: initialTracklistSort,
   renamingPlaylist: null,
+  checking: false,
+  libraryChanges: null,
+  applyingChanges: false,
+  applyChangesProgress: {
+    processed: 0,
+    total: 0,
+  },
   api: {
     openHandler: async (opts: Electron.OpenDialogOptions) => {
       const paths = await dialog.open(opts);
@@ -178,6 +195,10 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         );
 
         // TODO: do not re-import existing tracks
+
+        // Save the library path to config for future change detection
+        await config.set('libraryPath', pathsToScan[0]);
+        logger.info(`Saved library path to config: ${pathsToScan[0]}`);
 
         return;
       } catch (err: any) {
@@ -388,8 +409,10 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
           tagsApplyProgress: { processed: 0, total: 0 },
         });
 
-        // Revalidar el router para refrescar toda la lista
+        // AIDEV-NOTE: Revalidate router and navigate to recently added to show updated tracks
         router.revalidate();
+        // Use window.location.hash for navigation with HashRouter
+        window.location.hash = '#/recent_added';
 
         logger.info(
           `Tag application complete: ${totalUpdated} updated, ${totalErrors} errors, ${selections.length - validSelections.length} skipped`,
@@ -495,6 +518,203 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     },
     setRenamingPlaylist: (playlistID: string | null): void => {
       set({ renamingPlaylist: playlistID });
+    },
+    /**
+     * Check for library changes comparing filesystem with database
+     */
+    checkLibraryChanges: async (): Promise<void> => {
+      try {
+        // Get library path from config
+        const libraryPath = await config.get('libraryPath');
+
+        if (!libraryPath) {
+          logger.warn('No library path configured, cannot check for changes');
+          const options: Electron.MessageBoxOptions = {
+            buttons: ['OK'],
+            title: 'No Library Path',
+            message: 'Please import a music collection first before checking for changes.',
+            type: 'info',
+          };
+          await dialog.msgbox(options);
+          return;
+        }
+
+        set({ checking: true });
+        logger.info(`Checking library changes for path: ${libraryPath}`);
+
+        // Call IPC to check changes
+        const changes = await library.checkChanges(libraryPath);
+        logger.info(`Changes detected: ${changes.added.length} new, ${changes.removed.length} removed`);
+
+        set({ libraryChanges: changes });
+      } catch (err) {
+        logger.error('Error checking library changes:', err as any);
+      } finally {
+        set({ checking: false });
+      }
+    },
+    /**
+     * Apply library changes (import new tracks and remove deleted ones)
+     * AIDEV-NOTE: If autoFixMetadata is enabled, this will:
+     * 1. Import new tracks
+     * 2. Check if they have complete metadata
+     * 3. Extract title/artist from filename if missing
+     * 4. Search for tag candidates for tracks with incomplete metadata
+     * 5. Navigate to /recent_added to show results
+     */
+    applyLibraryChanges: async (changes: LibraryChanges): Promise<void> => {
+      try {
+        set({
+          applyingChanges: true,
+          libraryChanges: null,
+          applyChangesProgress: { processed: 0, total: changes.added.length + changes.removed.length },
+        });
+
+        logger.info(`Applying library changes: ${changes.added.length} to add, ${changes.removed.length} to remove`);
+
+        const importedTracks: Track[] = [];
+
+        // 1. Import new tracks (reuse existing pipeline)
+        if (changes.added.length > 0) {
+          logger.info(`Importing ${changes.added.length} new tracks`);
+          const tracks: Track[] = await library.importTracks(changes.added);
+
+          const batchSize = 100;
+          const chunkedTracks = chunk(tracks, batchSize);
+          let processed = 0;
+
+          const results = await Promise.allSettled(
+            chunkedTracks.map(async chunk => {
+              const insertedChunk = await db.tracks.insertMultiple(chunk);
+              processed += chunk.length;
+
+              set({
+                applyChangesProgress: {
+                  processed,
+                  total: changes.added.length + changes.removed.length,
+                },
+              });
+
+              return insertedChunk;
+            }),
+          );
+
+          // Collect all successfully imported tracks
+          results.forEach(result => {
+            if (result.status === 'fulfilled') {
+              importedTracks.push(...result.value);
+            }
+          });
+
+          logger.info(`Successfully imported ${importedTracks.length} tracks`);
+        }
+
+        // 2. Remove tracks whose files no longer exist
+        if (changes.removed.length > 0) {
+          logger.info(`Removing ${changes.removed.length} tracks`);
+          await db.tracks.remove(changes.removed.map(t => t.id));
+
+          set({
+            applyChangesProgress: {
+              processed: changes.added.length + changes.removed.length,
+              total: changes.added.length + changes.removed.length,
+            },
+          });
+        }
+
+        // 3. Auto-fix metadata if enabled
+        const autoFixEnabled = await config.get('autoFixMetadata');
+        if (autoFixEnabled && importedTracks.length > 0) {
+          logger.info('Auto-fix metadata is enabled, checking imported tracks...');
+
+          // Helper: Check if track has complete metadata
+          const hasCompleteMetadata = (track: Track): boolean => {
+            return !!(track.title && track.artist && track.album && track.genre && track.bpm && track.initialKey);
+          };
+
+          // Helper: Check if track has at least title and artist
+          const hasTitleAndArtist = (track: Track): boolean => {
+            return !!(track.title && track.artist);
+          };
+
+          // Filter tracks that need metadata fixing
+          let tracksNeedingFix = importedTracks.filter(t => !hasCompleteMetadata(t));
+
+          if (tracksNeedingFix.length > 0) {
+            logger.info(`Found ${tracksNeedingFix.length} tracks with incomplete metadata`);
+
+            // Extract title/artist from filename if missing
+            tracksNeedingFix = tracksNeedingFix.map(track => {
+              if (!hasTitleAndArtist(track)) {
+                logger.info(`Extracting title/artist from filename for: ${track.path}`);
+                return filenameToTag(track);
+              }
+              return track;
+            });
+
+            // Update tracks in DB with extracted title/artist
+            await Promise.all(tracksNeedingFix.map(track => db.tracks.update(track)));
+
+            // Search for tag candidates
+            logger.info(`Searching tag candidates for ${tracksNeedingFix.length} tracks...`);
+
+            // Set state to show we're searching for candidates
+            set({
+              candidatesSearching: true,
+              candidatesSearchProgress: { processed: 0, total: tracksNeedingFix.length, currentTrackTitle: '' },
+            });
+
+            try {
+              const candidates = await library.findTagCandidates(tracksNeedingFix);
+
+              // Show tag candidates modal for user selection
+              set({
+                candidatesSearching: false,
+                candidatesSearchProgress: {
+                  processed: tracksNeedingFix.length,
+                  total: tracksNeedingFix.length,
+                  currentTrackTitle: '',
+                },
+                trackTagsCandidates: candidates,
+                tagsSelecting: true,
+                applyingChanges: false,
+                applyChangesProgress: { processed: 0, total: 0 },
+              });
+
+              logger.info('Tag candidates ready for user selection');
+              return; // Exit early - user will select candidates and then we navigate
+            } catch (err) {
+              logger.error('Error searching tag candidates:', err as any);
+              set({
+                candidatesSearching: false,
+                candidatesSearchProgress: { processed: 0, total: 0, currentTrackTitle: '' },
+              });
+            }
+          } else {
+            logger.info('All imported tracks have complete metadata');
+          }
+        }
+
+        // 4. Refresh UI and navigate to recently added
+        router.revalidate();
+        // Use window.location.hash for navigation with HashRouter
+        window.location.hash = '#/recent_added';
+
+        logger.info('Library changes applied successfully');
+      } catch (err) {
+        logger.error('Error applying library changes:', err as any);
+      } finally {
+        set({
+          applyingChanges: false,
+          applyChangesProgress: { processed: 0, total: 0 },
+        });
+      }
+    },
+    /**
+     * Dismiss library changes modal without applying
+     */
+    dismissLibraryChanges: (): void => {
+      set({ libraryChanges: null });
     },
   },
 }));

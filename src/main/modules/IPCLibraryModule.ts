@@ -7,7 +7,7 @@ import { globby } from 'globby';
 import * as mmd from 'music-metadata';
 import queue from 'queue';
 
-import { Track, UpdateRatingPayload } from '../../preload/types/harmony';
+import { Track, UpdateRatingPayload, LibraryChanges } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
 import channels from '../../preload/lib/ipc-channels';
@@ -71,6 +71,7 @@ class IPCLibraryModule extends ModuleWindow {
   async load(): Promise<void> {
     ipcMain.handle(channels.LIBRARY_IMPORT_TRACKS, this.importTracks.bind(this));
     ipcMain.handle(channels.LIBRARY_LOOKUP, this.libraryLookup.bind(this));
+    ipcMain.handle(channels.LIBRARY_CHECK_CHANGES, this.checkLibraryChanges.bind(this));
     ipcMain.on(channels.TRACK_UPDATE_RATING, (_: IpcMainEvent, payload: UpdateRatingPayload) =>
       UpdateTrackRating(payload),
     );
@@ -275,6 +276,7 @@ class IPCLibraryModule extends ModuleWindow {
       ...parsedData,
       id: trackId,
       path: trackPath,
+      addedAt: Date.now(), // AIDEV-NOTE: Timestamp when track was imported
     };
 
     // Let's try another wat to retrieve a track duration
@@ -297,6 +299,64 @@ class IPCLibraryModule extends ModuleWindow {
       path: folderPath,
       stat: await fs.promises.stat(folderPath),
     };
+  }
+
+  /**
+   * Check for changes in the library path compared to the database.
+   * Detects new files added by user and tracks whose files no longer exist.
+   *
+   * AIDEV-NOTE: Reuses libraryLookup logic for filesystem scanning and
+   * compares with database state to identify additions and removals.
+   */
+  private async checkLibraryChanges(_e: IpcMainInvokeEvent, libraryPath: string): Promise<LibraryChanges> {
+    log.info('Starting library changes check', libraryPath);
+
+    // 1. Scan filesystem for all supported audio files
+    const filesInFilesystem = await this.libraryLookup(_e, [libraryPath]);
+    log.info(`Found ${filesInFilesystem.length} audio files in filesystem`);
+
+    // 2. Get all tracks from database
+    const db = (await import('../lib/db/database')).Database.getInstance();
+    const tracksInDb = await db.getAllTracks();
+    log.info(`Found ${tracksInDb.length} tracks in database`);
+
+    // 3. Build sets for comparison (case-insensitive on Windows/macOS)
+    const isLinux = process.platform === 'linux';
+    const filesystemSet = new Set(
+      filesInFilesystem.map(p => (isLinux ? path.resolve(p) : path.resolve(p).toLowerCase())),
+    );
+    const dbPathsMap = new Map(tracksInDb.map(t => [isLinux ? t.path : t.path.toLowerCase(), t]));
+
+    // 4. Find new files (in filesystem but not in DB)
+    const added: string[] = [];
+    for (const filePath of filesInFilesystem) {
+      const normalizedPath = isLinux ? path.resolve(filePath) : path.resolve(filePath).toLowerCase();
+      if (!dbPathsMap.has(normalizedPath)) {
+        added.push(path.resolve(filePath)); // Use original case for the result
+      }
+    }
+
+    // 5. Find removed files (in DB but not in filesystem)
+    const removed: LibraryChanges['removed'] = [];
+    for (const [normalizedPath, track] of dbPathsMap.entries()) {
+      // Check if file still exists in the scanned filesystem
+      if (!filesystemSet.has(normalizedPath)) {
+        // Double-check with fs.existsSync to avoid false positives
+        // (file might be outside the library path)
+        if (!fs.existsSync(track.path)) {
+          removed.push({
+            id: track.id,
+            path: track.path,
+            title: track.title,
+            artist: track.artist,
+          });
+        }
+      }
+    }
+
+    log.info(`Library changes: ${added.length} new files, ${removed.length} missing files`);
+
+    return { added, removed };
   }
 }
 

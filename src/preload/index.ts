@@ -47,6 +47,7 @@ const api = {
   db: {
     tracks: {
       getAll: () => ipcRenderer.invoke(channels.TRACK_ALL),
+      getRecent: (days?: number) => ipcRenderer.invoke(channels.TRACKS_RECENT, days),
       insertMultiple: (tracks: Track[]) => ipcRenderer.invoke(channels.TRACKS_ADD, tracks),
       update: (track: Track) => ipcRenderer.invoke(channels.TRACK_UPDATE, track),
       remove: (trackIDs: TrackId[]) => ipcRenderer.invoke(channels.TRACKS_REMOVE, trackIDs),
@@ -104,7 +105,8 @@ const api = {
       return () => ipcRenderer.removeListener(channels.TAG_CANDIDATES_PROGRESS, listener);
     },
     scanPaths: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_LOOKUP, paths),
-    importTracks: async (tracks: Track[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, tracks),
+    importTracks: async (trackPaths: string[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, trackPaths),
+    checkChanges: async (libraryPath: string) => ipcRenderer.invoke(channels.LIBRARY_CHECK_CHANGES, libraryPath),
     updateRating: (payload: UpdateRatingPayload) => ipcRenderer.send(channels.TRACK_UPDATE_RATING, payload),
     updateMetadata: async (track: Track) => ipcRenderer.send(channels.TRACK_UPDATE_METADATA, track),
     deleteTracks: async (tracks: Track[]) => ipcRenderer.send(channels.TRACKS_DELETE, tracks),

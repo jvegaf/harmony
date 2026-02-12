@@ -148,6 +148,25 @@ export class Database {
     return tracks as Track[];
   }
 
+  /**
+   * Get tracks added in the last N days
+   * AIDEV-NOTE: Used for "Recently Added" view. Filters tracks by addedAt timestamp
+   * and sorts by most recent first. Tracks without addedAt are excluded.
+   * @param days Number of days to look back (default: 30)
+   */
+  public async getRecentTracks(days: number = 30): Promise<Track[]> {
+    const cutoffDate = Date.now() - days * 24 * 60 * 60 * 1000; // milliseconds
+
+    const tracks = this.db
+      .select()
+      .from(schema.tracks)
+      .where(sql`${schema.tracks.addedAt} IS NOT NULL AND ${schema.tracks.addedAt} >= ${cutoffDate}`)
+      .orderBy(sql`${schema.tracks.addedAt} DESC`)
+      .all();
+
+    return tracks as Track[];
+  }
+
   public async insertTracks(tracks: Track[]): Promise<void> {
     if (tracks.length === 0) return;
 
@@ -219,6 +238,7 @@ export class Database {
               rating: sql`excluded.rating`,
               label: sql`excluded.label`,
               waveformPeaks: sql`excluded.waveformPeaks`,
+              addedAt: sql`excluded.addedAt`,
             },
           })
           .run();
@@ -244,6 +264,7 @@ export class Database {
         rating: track.rating,
         label: track.label,
         waveformPeaks: track.waveformPeaks,
+        addedAt: track.addedAt,
       })
       .where(eq(schema.tracks.id, track.id))
       .run();
