@@ -1,46 +1,34 @@
-import { ReactNode, useCallback, useState } from 'react';
+import { type ReactNode, useCallback, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { IconSearch, IconPlus, IconPlayerPlay } from '@tabler/icons-react';
+import { IconSearch, IconPlus, IconMusic, IconVinyl, IconClock } from '@tabler/icons-react';
+
 import { Playlist } from '../../../../preload/types/harmony';
-import styles from './Sidebar.module.css';
 import PlaylistsAPI from '@renderer/stores/PlaylistsAPI';
 import useLibraryStore from '@renderer/stores/useLibraryStore';
-import { JSX } from 'react/jsx-runtime';
+
+import styles from './Sidebar.module.css';
 
 type SidebarProps = {
-  trackCount: number;
   playlists: Playlist[];
   onSearch: (query: string) => void;
 };
 
-type NavItem = {
-  id: string;
-  isPlaylist: boolean;
-  label: string;
-  count?: number;
-  isActive?: boolean;
-  isPlaying?: boolean;
-  badge?: string;
-};
-
 const { menu, logger } = window.Main;
 
-export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProps) {
+// AIDEV-NOTE: Sidebar navigation with Collection, Recently Added, and Playlists.
+// Active state is determined by the current route:
+// - /library → Collection is active
+// - /playlists/:id → that playlist is active
+// - Neither Collection nor any playlist → no active state (e.g. /settings, /tools)
+export default function Sidebar({ playlists, onSearch }: SidebarProps) {
   const { playlistID } = useParams();
   const location = useLocation();
   const { renamingPlaylist, api } = useLibraryStore();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
-  // AIDEV-NOTE: Determine which nav item is active based on current route
-  // If we're at root (/), 'all-tracks' is active
-  // If we're at /playlists/:id, that playlist is active
-  const isRootRoute = location.pathname === '/' || location.pathname === '';
-
-  const navItems: NavItem[] = [
-    { id: 'all-tracks', isPlaylist: false, label: `All Tracks`, count: trackCount, isActive: isRootRoute },
-    { id: 'recently-added', isPlaylist: false, label: 'Recently Added', count: trackCount, isActive: false },
-  ];
+  // AIDEV-NOTE: Determine active nav item based on current route
+  const isLibraryRoute = location.pathname === '/library' || location.pathname === '/';
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -54,12 +42,6 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
       setSearchQuery('');
       onSearch('');
       e.currentTarget.blur();
-    }
-  };
-
-  const handleNavClick = (itemId: string) => {
-    if (itemId === 'all-tracks' || itemId === 'queue' || itemId === 'recently-added') {
-      navigate('/');
     }
   };
 
@@ -77,7 +59,6 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
 
       switch (e.nativeEvent.code) {
         case 'Enter': {
-          // Enter
           if (renamingPlaylist && e.currentTarget) {
             await rename(renamingPlaylist, e.currentTarget.value);
             api.setRenamingPlaylist(null);
@@ -85,7 +66,6 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
           break;
         }
         case 'Escape': {
-          // Escape
           api.setRenamingPlaylist(null);
           break;
         }
@@ -124,15 +104,15 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
     [navigate],
   );
 
-  const nav = playlists.map(elem => {
-    let navItemContent: string | number | boolean | JSX.Element | Iterable<ReactNode> | null | undefined;
-    // AIDEV-NOTE: Check if this playlist is currently active based on URL params
+  // AIDEV-NOTE: Render playlist items with active state based on URL params
+  const playlistItems = playlists.map(elem => {
     const isPlaylistActive = playlistID === elem.id;
+    let content: ReactNode;
 
     if (elem.id === renamingPlaylist) {
-      navItemContent = (
+      content = (
         <input
-          className={styles.item__input}
+          className={styles.renameInput}
           type='text'
           defaultValue={elem.name}
           onKeyDown={keyDown}
@@ -142,9 +122,8 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
         />
       );
     } else {
-      navItemContent = (
+      content = (
         <a
-          key={elem.id}
           href='#'
           className={`${styles.navItem} ${isPlaylistActive ? styles.navItemActive : ''}`}
           onClick={e => {
@@ -153,12 +132,18 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
           }}
           onContextMenu={() => onShowCtxtMenu(elem.id)}
         >
-          {elem.name}
+          <span className={styles.navLabel}>
+            <IconMusic
+              size={16}
+              className={styles.navIcon}
+            />
+            {elem.name}
+          </span>
         </a>
       );
     }
 
-    return <div key={`playlist-${elem.id}`}>{navItemContent}</div>;
+    return <div key={`playlist-${elem.id}`}>{content}</div>;
   });
 
   return (
@@ -182,32 +167,38 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
 
       {/* Navigation */}
       <nav className={styles.nav}>
-        {navItems.map(
-          item =>
-            !item.isPlaylist && (
-              <a
-                key={item.id}
-                href='#'
-                className={`${styles.navItem} ${item.isActive ? styles.navItemActive : ''}`}
-                onClick={e => {
-                  e.preventDefault();
-                  handleNavClick(item.id);
-                }}
-              >
-                <span className={styles.navLabel}>
-                  {item.label}
-                  {item.count !== undefined && ` [${item.count}]`}
-                  {item.badge && <span className={styles.navBadge}>[{item.badge}]</span>}
-                </span>
-                {item.isPlaying && (
-                  <IconPlayerPlay
-                    className={styles.playingIcon}
-                    size={18}
-                  />
-                )}
-              </a>
-            ),
-        )}
+        <a
+          href='#'
+          className={`${styles.navItem} ${isLibraryRoute ? styles.navItemActive : ''}`}
+          onClick={e => {
+            e.preventDefault();
+            navigate('/library');
+          }}
+        >
+          <span className={styles.navLabel}>
+            <IconVinyl
+              size={16}
+              className={styles.navIcon}
+            />
+            Collection
+          </span>
+        </a>
+        <a
+          href='#'
+          className={styles.navItem}
+          onClick={e => {
+            e.preventDefault();
+            navigate('/library');
+          }}
+        >
+          <span className={styles.navLabel}>
+            <IconClock
+              size={16}
+              className={styles.navIcon}
+            />
+            Recently Added
+          </span>
+        </a>
       </nav>
 
       {/* Divider */}
@@ -225,13 +216,11 @@ export default function Sidebar({ trackCount, playlists, onSearch }: SidebarProp
         </button>
       </div>
       <div className={styles.playlistsSection}>
-        <div className={styles.playlistsContainerWrapper}>
-          {playlists.length > 0 ? (
-            <div className={styles.playlistsList}>{nav}</div>
-          ) : (
-            <p className={styles.noPlaylists}></p>
-          )}
-        </div>
+        {playlists.length > 0 ? (
+          <div className={styles.playlistsList}>{playlistItems}</div>
+        ) : (
+          <p className={styles.noPlaylists}></p>
+        )}
       </div>
     </aside>
   );

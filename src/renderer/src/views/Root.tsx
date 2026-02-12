@@ -144,13 +144,10 @@ export default function ViewRoot() {
 
 // Wrapper component to get data from route loader
 function SidebarWrapper({ onSearch }: { onSearch: (query: string) => void }) {
-  const { playlists, tracks } = useRouteLoaderData('root') as RootLoaderData;
-
-  const trackCount = tracks?.length ?? 0;
+  const { playlists } = useRouteLoaderData('root') as RootLoaderData;
 
   return (
     <Sidebar
-      trackCount={trackCount}
       playlists={playlists}
       onSearch={onSearch}
     />
