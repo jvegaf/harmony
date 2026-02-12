@@ -250,13 +250,110 @@ import icon from '../../resources/icon.png?asset';
 
 ---
 
+## Available Skills
+
+Harmony includes specialized AI skills in `.agents/skills/` that provide deep expertise for specific technologies and patterns. These skills are automatically activated when working with relevant code.
+
+### Core Framework Skills
+
+#### Electron (`electron/`)
+
+- **Activation**: When working with Electron APIs, main/renderer processes, IPC, or desktop features
+- **Coverage**: Main process, renderer process, preload scripts, BrowserWindow, IPC communication, menus, tray, packaging, security
+- **Key Resources**: API documentation for `app`, `BrowserWindow`, `ipcMain`, `ipcRenderer`, templates for common patterns
+- **Best Practices**: Security (no nodeIntegration), process separation, IPC for cross-process communication
+
+#### React Development (`react-dev/`)
+
+- **Activation**: When building React components, typing hooks, handling events, or using React 19 features
+- **Coverage**: TypeScript patterns, generic components, event handlers, hooks typing, React 19 (Actions, Server Components, `use()`), routing (TanStack Router, React Router v7)
+- **Key Patterns**: Props typing with `ComponentPropsWithoutRef`, discriminated unions, `useActionState`, ref as prop (no forwardRef in React 19)
+- **References**: `hooks.md`, `event-handlers.md`, `react-19-patterns.md`, `generic-components.md`, `server-components.md`
+
+#### Mantine UI (`mantine-dev/`)
+
+- **Activation**: When working with Mantine components, theming, forms, or styling
+- **Coverage**: 100+ components, hooks library, forms with validation, dark mode, CSS modules, TypeScript setup
+- **Version**: 8.3.14 (updated Feb 2026)
+- **Critical**: Always use `MantineProvider`, import `@mantine/core/styles.css`, configure PostCSS with `postcss-preset-mantine`
+- **References**: `getting-started.md`, `components.md`, `hooks.md`, `forms.md`, `styling.md`, `testing.md`
+
+#### Zustand State Management (`zustand-state-management/`)
+
+- **Activation**: When setting up global state, managing React state, or troubleshooting hydration/TypeScript issues
+- **Coverage**: Type-safe stores, persist middleware, devtools, slices pattern, Next.js SSR/hydration
+- **Version**: 5.0.10+ (includes persist race condition fix)
+- **Critical**: Use `create<T>()()` (double parentheses) in TypeScript, handle Next.js hydration with `_hasHydrated` flag
+- **Prevents**: 6 documented issues including hydration mismatch, infinite render loops, TypeScript inference failures
+- **Resources**: 8 templates (`basic-store.ts`, `typescript-store.ts`, `persist-store.ts`, etc.), migration guides
+
+### Architecture & Quality Skills
+
+#### Code Review Expert (`code-review-expert/`)
+
+- **Activation**: When reviewing code changes, checking for SOLID violations, security risks, or quality issues
+- **Coverage**: SOLID principles, architecture smells, security vulnerabilities, code quality, removal candidates
+- **Severity Levels**: P0 (Critical/blocking), P1 (High/should fix), P2 (Medium/follow-up), P3 (Low/optional)
+- **Workflow**: Review-only by default, waits for explicit user confirmation before implementing fixes
+- **Checklists**: `solid-checklist.md`, `security-checklist.md`, `code-quality-checklist.md`, `removal-plan.md`
+
+#### Architecture Designer (`architecture-designer/`)
+
+- **Activation**: When designing system architecture, selecting patterns, or making architectural decisions
+- **References**: ADR templates, architecture patterns, database selection guides, NFR checklists, system design patterns
+
+#### Clean Code (`clean-code/`)
+
+- **Activation**: When refactoring for readability, maintainability, or applying Clean Code principles
+- **Focus**: Code clarity, naming, function design, single responsibility, meaningful abstractions
+
+#### Electron Architect (`electron-architect/`)
+
+- **Activation**: When architecting Electron applications, designing process communication, or planning desktop app structure
+- **Tools**: Project scaffolding scripts, architecture templates
+
+#### Solutions Architect (`solutions-architect/`)
+
+- **Activation**: When designing complete solutions, evaluating technology stacks, or planning system integration
+
+#### TDD Workflow (`tdd-workflow/`)
+
+- **Activation**: When implementing test-driven development, writing tests first, or establishing testing patterns
+- **Focus**: Red-Green-Refactor cycle, test structure, coverage strategies
+
+### Other Available Skills
+
+- **Architect Review** (`architect-review/`) - Architecture assessment and validation
+- **Drizzle ORM** (`drizzle-orm/`) - TypeScript-first SQL ORM patterns
+- **Engineer Expertise Extractor** (`engineer-expertise-extractor/`) - Extract patterns from existing code
+
+### Using Skills
+
+Skills are **automatically activated** based on context:
+
+- Working with Electron APIs → `electron` skill loads relevant documentation
+- Typing React components → `react-dev` skill provides TypeScript patterns
+- Using Mantine components → `mantine-dev` skill enforces best practices
+- Code review requested → `code-review-expert` performs structured analysis
+
+**Manual Activation**: If needed, you can explicitly request a skill:
+
+```
+"Use the code-review-expert skill to review this PR"
+"Apply zustand-state-management patterns for this store"
+"Show me the electron skill's IPC examples"
+```
+
+---
+
 ## When Unsure, Ask!
 
 - **Architecture decisions**: Consult before adding new modules or dependencies
 - **Breaking changes**: Confirm before modifying shared types (`preload/types/`)
 - **Database schema**: Migrations are auto-sync'd but check with team for production
 - **Large refactors**: >300 LOC or >3 files requires human review
+- **Skill selection**: If uncertain which skill applies, ask for guidance
 
 ---
 
-**Last Updated**: 2026-01-17
+**Last Updated**: 2026-02-12
