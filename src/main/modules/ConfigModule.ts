@@ -122,6 +122,10 @@ export default class ConfigModule extends Module {
       ],
       // AIDEV-NOTE: UI theme configuration - 'auto' follows system preference
       theme: 'auto',
+      // AIDEV-NOTE: Root path of music collection for change detection and re-scanning
+      libraryPath: '',
+      // AIDEV-NOTE: Auto-fix metadata for newly imported tracks with missing tags
+      autoFixMetadata: false,
       // AIDEV-NOTE: Traktor NML integration configuration, persisted to settings
       traktorConfig: {
         nmlPath: '',

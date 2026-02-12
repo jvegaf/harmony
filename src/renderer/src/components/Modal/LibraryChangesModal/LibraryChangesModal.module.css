@@ -1,0 +1,168 @@
+/**
+ * Styles for LibraryChangesModal component
+ * AIDEV-NOTE: Uses Harmony theme system with light/dark support
+ */
+
+/* Overlay oscuro de fondo */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--hm-bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+/* Contenedor del modal */
+.modal {
+  background-color: var(--hm-bg-modal);
+  border-radius: 16px;
+  padding: 32px;
+  min-width: 500px;
+  max-width: 700px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: light-dark(0 20px 60px rgba(0, 0, 0, 0.2), 0 20px 60px rgba(0, 0, 0, 0.5));
+  border: 1px solid var(--hm-border);
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.iconContainer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--hm-primary) 0%, light-dark(#5856d6, #7c3aed) 100%);
+  margin-bottom: 16px;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  color: var(--hm-text-on-primary);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--hm-text);
+  margin: 0 0 8px 0;
+}
+
+.message {
+  font-size: 0.95rem;
+  color: var(--hm-text-secondary);
+  margin: 0;
+}
+
+/* Changes container */
+.changesContainer {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Section */
+.section {
+  border: 1px solid var(--hm-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sectionHeader {
+  width: 100%;
+  padding: 16px;
+  background-color: var(--hm-bg);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sectionHeader:hover {
+  background-color: var(--hm-bg-hover);
+}
+
+.sectionIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--hm-primary);
+  flex-shrink: 0;
+}
+
+.sectionTitle {
+  font-weight: 600;
+  color: var(--hm-text);
+  flex-grow: 1;
+  text-align: left;
+}
+
+.badge {
+  background-color: var(--hm-primary);
+  color: var(--hm-text-on-primary);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.expandIcon {
+  color: var(--hm-text-secondary);
+  font-size: 0.75rem;
+  width: 16px;
+  text-align: center;
+}
+
+/* List */
+.list {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: var(--hm-bg);
+}
+
+.listItem {
+  padding: 12px 16px;
+  border-top: 1px solid var(--hm-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fileName,
+.trackTitle {
+  font-weight: 500;
+  color: var(--hm-text);
+  font-size: 0.95rem;
+}
+
+.filePath {
+  font-size: 0.85rem;
+  color: var(--hm-text-secondary);
+  font-family: monospace;
+  word-break: break-all;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}

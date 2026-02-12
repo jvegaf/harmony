@@ -56,6 +56,8 @@ export interface Track {
   label?: string;
   /** Waveform peaks for visualization (~300 values, normalized 0-1) */
   waveformPeaks?: number[];
+  /** Timestamp when the track was added to Harmony. AIDEV-NOTE: Used for "Recently Added" view */
+  addedAt?: number;
 }
 
 export interface ResultTag {
@@ -196,6 +198,10 @@ export interface Config {
   searchEngines: SearchEngineConfig[];
   /** UI appearance theme: 'light', 'dark', or 'auto' (follows system preference) */
   theme: 'light' | 'dark' | 'auto';
+  /** Root path of the music collection for re-scanning and change detection */
+  libraryPath: string;
+  /** Auto-fix metadata for newly imported tracks with missing tags */
+  autoFixMetadata: boolean;
   /** Traktor NML integration configuration */
   traktorConfig: {
     nmlPath: string;
@@ -232,6 +238,17 @@ export interface Config {
     /** Similarity threshold for fuzzy matching 0-1 (default: 0.85) */
     similarityThreshold: number;
   };
+}
+
+/**
+ * Result of checking library changes between filesystem and database.
+ * Used to detect new files added by user and missing files deleted by user.
+ */
+export interface LibraryChanges {
+  /** New audio files found in the filesystem that are not in the database */
+  added: string[];
+  /** Tracks in the database whose files no longer exist in the filesystem */
+  removed: { id: TrackId; path: string; title: string; artist?: string }[];
 }
 
 export const enum SearchEngine {
