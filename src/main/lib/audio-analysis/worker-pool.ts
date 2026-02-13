@@ -32,10 +32,14 @@ interface WorkerMessage {
 }
 
 interface WorkerResult {
-  type: 'result' | 'error' | 'ready';
+  type: 'result' | 'error' | 'ready' | 'log';
   id?: string;
   result?: AudioAnalysisResult;
   error?: string;
+  // For log messages
+  level?: 'info' | 'error' | 'warn';
+  message?: string;
+  args?: any[];
 }
 
 /**
@@ -141,6 +145,24 @@ export class AudioAnalysisWorkerPool {
    */
   private async spawnWorker(index: number): Promise<void> {
     return new Promise((resolve, reject) => {
+      // AIDEV-NOTE: Prevent double-settle (timeout vs error/exit vs ready race)
+      let settled = false;
+      let timeoutHandle: NodeJS.Timeout | null = null;
+
+      const safeResolve = () => {
+        if (settled) return;
+        settled = true;
+        if (timeoutHandle) clearTimeout(timeoutHandle);
+        resolve();
+      };
+
+      const safeReject = (error: Error) => {
+        if (settled) return;
+        settled = true;
+        if (timeoutHandle) clearTimeout(timeoutHandle);
+        reject(error);
+      };
+
       const workerScriptPath = getWorkerScriptPath();
 
       const worker = new Worker(workerScriptPath, {
@@ -163,13 +185,18 @@ export class AudioAnalysisWorkerPool {
         if (message.type === 'ready' && !workerInstance.ready) {
           workerInstance.ready = true;
           log.info(`[AudioWorkerPool] Worker ${index} ready`);
-          resolve();
+          safeResolve();
         }
       });
 
       // Handle worker errors
       worker.on('error', error => {
         log.error(`[AudioWorkerPool] Worker ${index} error:`, error);
+
+        // AIDEV-NOTE: Reject spawn promise if worker crashes during initialization
+        if (!workerInstance.ready) {
+          safeReject(error instanceof Error ? error : new Error(String(error)));
+        }
 
         // If there's a pending task, reject it
         if (workerInstance.currentTaskId) {
@@ -191,6 +218,11 @@ export class AudioAnalysisWorkerPool {
       worker.on('exit', code => {
         log.warn(`[AudioWorkerPool] Worker ${index} exited with code ${code}`);
 
+        // AIDEV-NOTE: Reject spawn promise if worker exits during initialization
+        if (!workerInstance.ready) {
+          safeReject(new Error(`Worker ${index} exited with code ${code} during initialization`));
+        }
+
         // Remove from workers array
         const idx = this.workers.indexOf(workerInstance);
         if (idx !== -1) {
@@ -210,10 +242,10 @@ export class AudioAnalysisWorkerPool {
       this.workers.push(workerInstance);
 
       // Set a timeout for worker initialization
-      setTimeout(() => {
+      timeoutHandle = setTimeout(() => {
         if (!workerInstance.ready) {
           log.error(`[AudioWorkerPool] Worker ${index} initialization timeout`);
-          reject(new Error('Worker initialization timeout'));
+          safeReject(new Error('Worker initialization timeout'));
         }
       }, 30000); // 30 second timeout
     });
@@ -223,6 +255,15 @@ export class AudioAnalysisWorkerPool {
    * Handle messages from worker threads
    */
   private handleWorkerMessage(workerInstance: WorkerInstance, message: WorkerResult): void {
+    // AIDEV-NOTE: Handle log messages from worker thread
+    // Workers send log messages via parentPort to avoid electron-log import issues
+    if (message.type === 'log') {
+      const { level, message: logMessage, args } = message;
+      const logFn = log[level as 'info' | 'error' | 'warn'] || log.info;
+      logFn(logMessage || '', ...(args || []));
+      return;
+    }
+
     if (message.type === 'ready') {
       // Worker is ready, already handled in spawnWorker
       return;

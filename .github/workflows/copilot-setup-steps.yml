@@ -90,7 +90,7 @@ jobs:
           - **Frontend**: React 18 with Mantine UI components and React Router
           - **Backend**: Electron with TypeScript, TypeORM (SQLite), and IPC-based architecture
           - **Build**: electron-vite, Vite, electron-builder
-          - **Package Manager**: Yarn (required - do not use npm/pnpm)
+          - **Package Manager**: npm
           - **Database**: SQLite with TypeORM
           - **Styling**: CSS Modules + Mantine UI components
 
@@ -129,8 +129,8 @@ jobs:
           - **IPC Handlers**: Return error info to renderer rather than throwing
 
           ## Package Manager
-          - **Yarn Only**: This project uses Yarn exclusively. Do not use npm or pnpm commands
-          - **Scripts**: Use `yarn dev`, `yarn build`, `yarn lint`, `yarn typecheck`
+          - **npm**: This project uses npm as its package manager
+          - **Scripts**: Use `npm run dev`, `npm run build`, `npm run lint`, `npm run typecheck`
 
           ## Development Workflow
 

@@ -1,6 +1,6 @@
 {
   "name": "harmony",
-  "version": "0.25.0",
+  "version": "0.25.1",
   "description": "Music manager for old-school DJs",
   "main": "./out/main/index.js",
   "author": "Jose Vega",
@@ -12,16 +12,16 @@
     "lint": "eslint . --fix",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
-    "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
-    "build": "pnpm run typecheck && electron-vite build",
+    "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
-    "build:win": "pnpm run build && electron-builder --win --config",
+    "build:win": "npm run build && electron-builder --win --config",
     "build:linux": "electron-vite build && electron-builder --linux --config",
     "release": "electron-builder",
     "db:push": "drizzle-kit push",
@@ -123,15 +123,7 @@
     "vite": "^5.0.11",
     "vitest": "^1.2.0"
   },
-  "pnpm": {
-    "overrides": {
-      "@esbuild-kit/core-utils>esbuild": "^0.25.4"
-    },
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "electron",
-      "electron-winstaller",
-      "esbuild"
-    ]
+  "overrides": {
+    "esbuild": "^0.25.4"
   }
 }

@@ -24,7 +24,22 @@ import { unlink } from 'fs/promises';
 
 import wav from 'node-wav';
 import * as essentiaJs from 'essentia.js';
-import { logger } from '../log/logger';
+
+// AIDEV-NOTE: Worker-safe logging via parentPort messages
+// electron-log (and wrappers like logger) cannot be used in worker threads
+// because they import 'electron' module which is unavailable in worker_threads
+// context in packaged Electron apps. We send log messages to parent thread instead.
+const workerLog = {
+  info: (message: string, ...args: any[]) => {
+    parentPort?.postMessage({ type: 'log', level: 'info', message, args });
+  },
+  error: (message: string, ...args: any[]) => {
+    parentPort?.postMessage({ type: 'log', level: 'error', message, args });
+  },
+  warn: (message: string, ...args: any[]) => {
+    parentPort?.postMessage({ type: 'log', level: 'warn', message, args });
+  },
+};
 
 // Types (duplicated here since worker threads can't easily share imports)
 interface AudioAnalysisResult {
@@ -94,8 +109,7 @@ async function initializeEssentia(): Promise<void> {
  * Log function for worker (prepends worker info)
  */
 function log(message: string): void {
-  // Can't use electron-log in worker threads, so we'll use console
-  logger.info(`[AudioWorker] ${message}`);
+  workerLog.info(`[AudioWorker] ${message}`);
 }
 
 /**

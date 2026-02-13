@@ -7,7 +7,7 @@
 - **Frontend**: React 18 with Mantine UI components and React Router
 - **Backend**: Electron with TypeScript, TypeORM (SQLite), and IPC-based architecture
 - **Build**: electron-vite, Vite, electron-builder
-- **Package Manager**: pnpm (preferred over npm/yarn)
+- **Package Manager**: npm
 
 ---
 
@@ -16,36 +16,36 @@
 ### Development
 
 ```bash
-pnpm dev                # Start development mode with hot reload
-pnpm start              # Preview built app
+npm run dev             # Start development mode with hot reload
+npm start               # Preview built app
 ```
 
 ### Build
 
 ```bash
-pnpm build              # TypeCheck + build for current platform
-pnpm build:win          # Build Windows installer
-pnpm build:linux        # Build Linux AppImage/deb
-pnpm release            # Create production release
+npm run build           # TypeCheck + build for current platform
+npm run build:win       # Build Windows installer
+npm run build:linux     # Build Linux AppImage/deb
+npm run release         # Create production release
 ```
 
 ### Code Quality
 
 ```bash
-pnpm lint               # ESLint with auto-fix
-pnpm format             # Prettier auto-format all files
-pnpm typecheck          # Run both node + web type checks
-pnpm typecheck:node     # TypeCheck main/preload (tsconfig.node.json)
-pnpm typecheck:web      # TypeCheck renderer (tsconfig.web.json)
+npm run lint            # ESLint with auto-fix
+npm run format          # Prettier auto-format all files
+npm run typecheck       # Run both node + web type checks
+npm run typecheck:node  # TypeCheck main/preload (tsconfig.node.json)
+npm run typecheck:web   # TypeCheck renderer (tsconfig.web.json)
 ```
 
 ### Testing
 
 ```bash
-pnpm test               # Run tests in watch mode (development)
-pnpm test:run           # Run all tests once (CI mode)
-pnpm test:ui            # Open Vitest UI (visual test runner)
-pnpm test:coverage      # Run tests with coverage report
+npm test                # Run tests in watch mode (development)
+npm run test:run        # Run all tests once (CI mode)
+npm run test:ui         # Open Vitest UI (visual test runner)
+npm run test:coverage   # Run tests with coverage report
 ```
 
 **Test Framework**: Vitest (preferred over Jest for performance)  
@@ -55,9 +55,9 @@ pnpm test:coverage      # Run tests with coverage report
 ### Makefile shortcuts
 
 ```bash
-make dev                # Same as pnpm dev
-make lint               # Same as pnpm lint
-make check              # Same as pnpm typecheck
+make dev                # Same as npm run dev
+make lint               # Same as npm run lint
+make check              # Same as npm run typecheck
 make clean              # Remove out/ and dist/ folders
 make build/linux        # Clean + build Linux
 ```
@@ -234,13 +234,13 @@ import icon from '../../resources/icon.png?asset';
 
 ## Common Pitfalls to Avoid
 
-1. **Don't modify `package.json` scripts without checking dependencies**—pnpm scripts are orchestrated
-2. **Don't use `npm` or `yarn`**—this is a pnpm project (see `pnpm-lock.yaml`)
-3. **Don't skip type checking**—always run `pnpm typecheck` before committing
+1. **Don't modify `package.json` scripts without checking dependencies**—npm scripts are orchestrated
+2. **Don't use `pnpm` or `yarn`**—this is an npm project (see `package-lock.json`)
+3. **Don't skip type checking**—always run `npm run typecheck` before committing
 4. **Don't mix console.log and electron-log** in main process—use `log.*` only
 5. **Don't use `any` as a crutch**—ESLint allows it but prefer proper typing
 6. **Don't hardcode paths**—use Electron's `app.getPath()` for user data
-7. **Don't commit without running `pnpm lint`**—auto-fix is enabled
+7. **Don't commit without running `npm run lint`**—auto-fix is enabled
 
 ---
 

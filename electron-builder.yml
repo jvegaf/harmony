@@ -7,7 +7,7 @@ files:
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,yarn.lock}'
+  - '!{.env,.env.*,.npmrc,package-lock.json}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - node_modules/better-sqlite3
@@ -32,7 +32,7 @@ nsis:
 linux:
   target:
     - AppImage
-    - rpm
+    # - rpm
     - deb
   mimeTypes: [audio/mpeg]
   maintainer: josevega234@gmail.com

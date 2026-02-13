@@ -92,6 +92,24 @@ export class TaggerWorkerManager {
    */
   private async spawnWorker(provider: ProviderSource, workerId: number): Promise<void> {
     return new Promise((resolve, reject) => {
+      // AIDEV-NOTE: Prevent double-settle (timeout vs error/exit vs ready race)
+      let settled = false;
+      let timeoutHandle: NodeJS.Timeout | null = null;
+
+      const safeResolve = () => {
+        if (settled) return;
+        settled = true;
+        if (timeoutHandle) clearTimeout(timeoutHandle);
+        resolve();
+      };
+
+      const safeReject = (error: Error) => {
+        if (settled) return;
+        settled = true;
+        if (timeoutHandle) clearTimeout(timeoutHandle);
+        reject(error);
+      };
+
       const workerScriptPath = getWorkerScriptPath();
 
       const workerData: TaggerWorkerData = {
@@ -117,7 +135,7 @@ export class TaggerWorkerManager {
         if (message.type === 'ready' && !workerInstance.ready) {
           workerInstance.ready = true;
           log.info(`[TaggerWorkerManager] Worker ${provider} ready`);
-          resolve();
+          safeResolve();
         }
       });
 
@@ -125,14 +143,15 @@ export class TaggerWorkerManager {
       worker.on('error', error => {
         log.error(`[TaggerWorkerManager] Worker ${provider} error:`, error);
 
-        // If there's a pending task, reject it
-        if (workerInstance.currentTaskId) {
-          const task = this.pendingTasks.get(workerInstance.currentTaskId);
-          if (task) {
-            task.reject(error);
-            this.pendingTasks.delete(workerInstance.currentTaskId);
-          }
+        // AIDEV-NOTE: Reject spawn promise if worker crashes during initialization
+        if (!workerInstance.ready) {
+          safeReject(error instanceof Error ? error : new Error(String(error)));
         }
+
+        // AIDEV-NOTE: Reject ALL pending tasks for this provider to prevent orphaned promises
+        // This fixes the issue where only currentTaskId was rejected, leaving earlier tasks hanging
+        const errorObj = error instanceof Error ? error : new Error(String(error));
+        this.rejectAllPendingTasksForProvider(provider, errorObj);
 
         workerInstance.busy = false;
         workerInstance.currentTaskId = null;
@@ -142,14 +161,14 @@ export class TaggerWorkerManager {
       worker.on('exit', code => {
         log.warn(`[TaggerWorkerManager] Worker ${provider} exited with code ${code}`);
 
-        // If there's a pending task, reject it
-        if (workerInstance.currentTaskId) {
-          const task = this.pendingTasks.get(workerInstance.currentTaskId);
-          if (task) {
-            task.reject(new Error(`Worker ${provider} exited with code ${code}`));
-            this.pendingTasks.delete(workerInstance.currentTaskId);
-          }
+        // AIDEV-NOTE: Reject spawn promise if worker exits during initialization
+        if (!workerInstance.ready) {
+          safeReject(new Error(`Worker ${provider} exited with code ${code} during initialization`));
         }
+
+        // AIDEV-NOTE: Reject ALL pending tasks for this provider to prevent orphaned promises
+        const exitError = new Error(`Worker ${provider} exited with code ${code}`);
+        this.rejectAllPendingTasksForProvider(provider, exitError);
 
         // Remove from workers map
         this.workers.delete(provider);
@@ -158,10 +177,10 @@ export class TaggerWorkerManager {
       this.workers.set(provider, workerInstance);
 
       // Set initialization timeout
-      setTimeout(() => {
+      timeoutHandle = setTimeout(() => {
         if (!workerInstance.ready) {
           log.error(`[TaggerWorkerManager] Worker ${provider} initialization timeout`);
-          reject(new Error(`Worker ${provider} initialization timeout`));
+          safeReject(new Error(`Worker ${provider} initialization timeout`));
         }
       }, 30000); // 30 seconds
     });
@@ -171,6 +190,15 @@ export class TaggerWorkerManager {
    * Handle messages from worker threads
    */
   private handleWorkerMessage(workerInstance: WorkerInstance, message: TaggerWorkerResult): void {
+    // AIDEV-NOTE: Handle log messages from worker thread
+    // Workers send log messages via parentPort to avoid electron-log import issues
+    if (message.type === 'log') {
+      const { level, message: logMessage, args } = message as any;
+      const logFn = log[level as 'info' | 'error' | 'warn'] || log.info;
+      logFn(logMessage, ...(args || []));
+      return;
+    }
+
     if (message.type === 'ready') {
       // Already handled in spawnWorker
       return;
@@ -206,6 +234,31 @@ export class TaggerWorkerManager {
   }
 
   /**
+   * Reject all pending tasks for a specific provider
+   * AIDEV-NOTE: Called when a worker crashes to clean up orphaned tasks.
+   * This prevents tasks from hanging forever if a worker dies mid-batch.
+   */
+  private rejectAllPendingTasksForProvider(provider: ProviderSource, error: Error): void {
+    const tasksToReject: PendingTask[] = [];
+
+    // Collect all tasks for this provider
+    for (const [taskId, task] of this.pendingTasks.entries()) {
+      if (task.provider === provider) {
+        tasksToReject.push(task);
+        this.pendingTasks.delete(taskId);
+      }
+    }
+
+    // Reject all collected tasks
+    if (tasksToReject.length > 0) {
+      log.warn(`[TaggerWorkerManager] Rejecting ${tasksToReject.length} pending tasks for provider ${provider}`);
+      for (const task of tasksToReject) {
+        task.reject(error);
+      }
+    }
+  }
+
+  /**
    * Generate unique task ID
    */
   private generateTaskId(): string {
@@ -232,6 +285,7 @@ export class TaggerWorkerManager {
     return new Promise((resolve, reject) => {
       const task: PendingTask = {
         id: message.id,
+        provider,
         resolve,
         reject,
       };

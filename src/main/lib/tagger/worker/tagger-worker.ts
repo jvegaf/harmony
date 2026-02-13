@@ -17,7 +17,22 @@
  */
 
 import { parentPort, workerData } from 'worker_threads';
-import log from 'electron-log';
+
+// AIDEV-NOTE: Worker-safe logging via parentPort messages
+// electron-log cannot be used in worker threads because it imports 'electron' module
+// which is unavailable in worker_threads context in packaged Electron apps.
+// Instead, we send log messages to the parent thread for forwarding to electron-log.
+const workerLog = {
+  info: (message: string, ...args: any[]) => {
+    parentPort?.postMessage({ type: 'log', level: 'info', message, args });
+  },
+  error: (message: string, ...args: any[]) => {
+    parentPort?.postMessage({ type: 'log', level: 'error', message, args });
+  },
+  warn: (message: string, ...args: any[]) => {
+    parentPort?.postMessage({ type: 'log', level: 'warn', message, args });
+  },
+};
 
 import { BeatportClient } from '../beatport/client/client';
 import { Traxsource } from '../traxsource/traxsource';
@@ -38,7 +53,7 @@ if (!parentPort) {
 const config = workerData as TaggerWorkerData;
 const { providerType, workerId } = config;
 
-log.info(`[TaggerWorker-${providerType}] Initializing worker ${workerId}...`);
+workerLog.info(`[TaggerWorker-${providerType}] Initializing worker ${workerId}...`);
 
 /**
  * Initialize the provider client for this worker
@@ -69,13 +84,13 @@ try {
       throw new Error(`Unknown provider type: ${providerType}`);
   }
 
-  log.info(`[TaggerWorker-${providerType}] Provider initialized successfully`);
+  workerLog.info(`[TaggerWorker-${providerType}] Provider initialized successfully`);
 
   // Signal ready
   const readyMessage: TaggerWorkerResult = { type: 'ready' };
   parentPort.postMessage(readyMessage);
 } catch (error) {
-  log.error(`[TaggerWorker-${providerType}] Initialization failed:`, error);
+  workerLog.error(`[TaggerWorker-${providerType}] Initialization failed:`, error);
   process.exit(1);
 }
 
@@ -84,11 +99,11 @@ try {
  */
 async function handleSearch(id: string, payload: SearchPayload): Promise<void> {
   try {
-    log.info(`[TaggerWorker-${providerType}] Search: "${payload.artist} - ${payload.title}"`);
+    workerLog.info(`[TaggerWorker-${providerType}] Search: "${payload.artist} - ${payload.title}"`);
 
     const results: RawTrackData[] = await provider.search(payload.title, payload.artist);
 
-    log.info(`[TaggerWorker-${providerType}] Search returned ${results.length} results`);
+    workerLog.info(`[TaggerWorker-${providerType}] Search returned ${results.length} results`);
 
     const message: TaggerWorkerResult = {
       type: 'result',
@@ -97,7 +112,7 @@ async function handleSearch(id: string, payload: SearchPayload): Promise<void> {
     };
     parentPort!.postMessage(message);
   } catch (error) {
-    log.error(`[TaggerWorker-${providerType}] Search failed:`, error);
+    workerLog.error(`[TaggerWorker-${providerType}] Search failed:`, error);
 
     const message: TaggerWorkerResult = {
       type: 'error',
@@ -114,7 +129,7 @@ async function handleSearch(id: string, payload: SearchPayload): Promise<void> {
  */
 async function handleGetDetails(id: string, payload: GetDetailsPayload): Promise<void> {
   try {
-    log.info(`[TaggerWorker-${providerType}] GetDetails: ${payload.trackId}`);
+    workerLog.info(`[TaggerWorker-${providerType}] GetDetails: ${payload.trackId}`);
 
     let result: any;
 
@@ -152,7 +167,7 @@ async function handleGetDetails(id: string, payload: GetDetailsPayload): Promise
       throw new Error(`Provider ${providerType} not properly initialized`);
     }
 
-    log.info(`[TaggerWorker-${providerType}] GetDetails succeeded`);
+    workerLog.info(`[TaggerWorker-${providerType}] GetDetails succeeded`);
 
     const message: TaggerWorkerResult = {
       type: 'result',
@@ -161,7 +176,7 @@ async function handleGetDetails(id: string, payload: GetDetailsPayload): Promise
     };
     parentPort!.postMessage(message);
   } catch (error) {
-    log.error(`[TaggerWorker-${providerType}] GetDetails failed:`, error);
+    workerLog.error(`[TaggerWorker-${providerType}] GetDetails failed:`, error);
 
     const message: TaggerWorkerResult = {
       type: 'error',
@@ -189,7 +204,7 @@ parentPort.on('message', async (message: TaggerWorkerMessage) => {
       break;
 
     default: {
-      log.error(`[TaggerWorker-${providerType}] Unknown message type: ${type}`);
+      workerLog.error(`[TaggerWorker-${providerType}] Unknown message type: ${type}`);
       const errorMsg: TaggerWorkerResult = {
         type: 'error',
         id,
@@ -200,4 +215,4 @@ parentPort.on('message', async (message: TaggerWorkerMessage) => {
   }
 });
 
-log.info(`[TaggerWorker-${providerType}] Listening for messages...`);
+workerLog.info(`[TaggerWorker-${providerType}] Listening for messages...`);

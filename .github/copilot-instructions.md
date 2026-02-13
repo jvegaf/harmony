@@ -12,7 +12,7 @@
 - **Frontend**: React 18 with Mantine UI components and React Router
 - **Backend**: Electron with TypeScript, TypeORM (SQLite), and IPC-based architecture
 - **Build**: electron-vite, Vite, electron-builder
-- **Package Manager**: Yarn (required - do not use npm/pnpm)
+- **Package Manager**: npm
 - **Database**: SQLite with TypeORM
 - **Styling**: CSS Modules + Mantine UI components
 
@@ -61,14 +61,14 @@ src/
 - **IPC Handlers**: Return error info to renderer rather than throwing
 
 ### Package Manager
-- **Yarn Only**: This project uses Yarn exclusively. Do not use npm or pnpm commands
-- **Scripts**: Use `yarn dev`, `yarn build`, `yarn lint`, `yarn typecheck`
+- **npm**: This project uses npm as its package manager
+- **Scripts**: Use `npm run dev`, `npm run build`, `npm run lint`, `npm run typecheck`
 
 ## Development Workflow
 
 ### Before Code Changes
-1. Run `yarn typecheck` to verify type safety
-2. Run `yarn lint` to check code style
+1. Run `npm run typecheck` to verify type safety
+2. Run `npm run lint` to check code style
 3. Understand the three-process architecture and IPC flow
 
 ### Implementation Standards
@@ -79,7 +79,7 @@ src/
 - **State Management**: Zustand stores in `src/renderer/src/stores/`
 
 ### Testing & Validation
-- Run `yarn build` to verify build process
+- Run `npm run build` to verify build process
 - Test all three processes (main, preload, renderer) integration
 - Validate IPC communication between processes
 - Test database operations and migrations

@@ -51,7 +51,7 @@ export interface TaggerWorkerMessage {
 /**
  * Result types from worker to main thread
  */
-export type TaggerWorkerResultType = 'result' | 'error' | 'ready';
+export type TaggerWorkerResultType = 'result' | 'error' | 'ready' | 'log';
 
 /**
  * Success result containing data
@@ -80,9 +80,25 @@ export interface TaggerWorkerReadyResult {
 }
 
 /**
+ * Log message from worker (sent to forward to electron-log in main thread)
+ * AIDEV-NOTE: Workers cannot use electron-log directly due to 'electron' module
+ * being unavailable in worker_threads in packaged apps
+ */
+export interface TaggerWorkerLogResult {
+  type: 'log';
+  level: 'info' | 'error' | 'warn';
+  message: string;
+  args?: any[];
+}
+
+/**
  * Union type for all worker results
  */
-export type TaggerWorkerResult = TaggerWorkerSuccessResult | TaggerWorkerErrorResult | TaggerWorkerReadyResult;
+export type TaggerWorkerResult =
+  | TaggerWorkerSuccessResult
+  | TaggerWorkerErrorResult
+  | TaggerWorkerReadyResult
+  | TaggerWorkerLogResult;
 
 /**
  * Worker data passed when spawning the worker
@@ -99,6 +115,7 @@ export interface TaggerWorkerData {
  */
 export interface PendingTask {
   id: string;
+  provider: ProviderSource;
   resolve: (result: any) => void;
   reject: (error: Error) => void;
 }
