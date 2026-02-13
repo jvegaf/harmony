@@ -18,13 +18,21 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
-      - name: Install Node.js, NPM and Yarn
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1.6.0
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          package_root: '.'
+          build_script_name: build
+          args: --config electron-builder.yml
