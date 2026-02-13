@@ -24,69 +24,6 @@ import { getWorkerPool } from '../audio-analysis/worker-pool';
 import type { RawTrackData } from './providers/types';
 import { Database } from '../db/database';
 
-// import { SearchTags } from './beatport/beatport';
-// import { BandcampSearchResult, search } from './bandcamp/bandcamp';
-// import { soundcloudSearch } from './soundcloud/soundcloudProvider';
-
-// const searchOnBandCamp = async (track: Track): Promise<BandcampSearchResult[]> => {
-//   const { title, artist } = track;
-//   const reqAggregate: string[] = [title];
-//   if (artist) {
-//     reqAggregate.push(artist);
-//   }
-
-//   const result = await search(reqAggregate.join(' '));
-//   return result;
-// };
-
-// const searchOnSoundCloud = async (track: Track): Promise<MatchResult | null> => {
-//   const { title, artist } = track;
-//   const reqAggregate: string[] = [title];
-//   if (artist) {
-//     reqAggregate.push(artist);
-//   }
-
-//   const trackTokens = GetStringTokens(reqAggregate);
-//   const result = await soundcloudSearch(reqAggregate.join(' '));
-
-//   log.info('Soundcloud results count: ', result.length);
-//   log.info('tokens: ', trackTokens);
-//   log.info('Soundcloud result: ', result[0]);
-//   const match = Match(trackTokens, result);
-
-//   return match;
-// };
-// const SearchOnDab = async (track: Track): Promise<MatchResult | null> => {
-//   const { title, artist, duration } = track;
-//   const reqAggregate: string[] = [title];
-//   if (artist) {
-//     reqAggregate.push(...artist);
-//   }
-//   const trackTokens = GetStringTokens(reqAggregate);
-//   const bpResults = await SearchTags(title, artist);
-//   if (!bpResults.length) {
-//     return null;
-//   }
-//   if (!duration) {
-//     const match = Match(trackTokens, bpResults);
-//     return match;
-//   }
-//   const durRounded = Math.round(duration);
-//   const resultsFiltered = bpResults.filter(
-//     result => result.duration >= durRounded - 10 && result.duration <= durRounded + 10,
-//   );
-//   if (resultsFiltered.length < 2) {
-//     return {
-//       tag: resultsFiltered[0],
-//       trackTokens,
-//       matches: 1,
-//       of: 1,
-//     };
-//   }
-//   const match = Match(trackTokens, resultsFiltered);
-//   return match;
-// };
-
 export const FixTags = async (track: Track): Promise<Track> => {
   const tsClient = new Traxsource();
   try {
@@ -113,6 +50,95 @@ export const FixTags = async (track: Track): Promise<Track> => {
  * Permite actualizar el progress modal en tiempo real
  */
 export type ProgressCallback = (progress: TagCandidatesProgress) => void;
+
+/**
+ * AIDEV-NOTE: Callback para notificar cuando se completa el auto-apply en background
+ * Emite evento al renderer con estadísticas de tracks actualizados/errores
+ */
+export type AutoApplyCompleteCallback = (result: { updated: number; failed: number; trackIds: string[] }) => void;
+
+/**
+ * AIDEV-NOTE: Aplica tags de perfect matches (100% score) en background sin bloquear
+ * Esta función se ejecuta de forma asíncrona después de retornar los candidatos al UI
+ *
+ * @param perfectMatches Lista de perfect matches detectados durante FindCandidates
+ * @param onComplete Callback opcional para notificar cuando termine
+ */
+async function applyPerfectMatchesInBackground(
+  perfectMatches: Array<{ track: Track; candidate: TrackCandidate }>,
+  onComplete?: AutoApplyCompleteCallback,
+): Promise<void> {
+  if (perfectMatches.length === 0) return;
+
+  log.info(`[AUTO-APPLY] Starting background application of ${perfectMatches.length} perfect matches...`);
+
+  try {
+    // Convert perfect matches to TrackSelection format
+    const autoSelections: TrackSelection[] = perfectMatches.map(({ track, candidate }) => ({
+      local_track_id: track.id,
+      selected_candidate_id: `${candidate.source}:${candidate.id}`,
+    }));
+
+    // Apply tags using the same flow as manual selections (runs in workers)
+    const { updated, errors } = await ApplyTagSelections(
+      autoSelections,
+      perfectMatches.map(m => m.track),
+    );
+
+    // Persist to database in parallel (much faster than sequential)
+    if (updated.length > 0) {
+      const db = Database.getInstance();
+      const persistPromises = updated.map(async track => {
+        try {
+          await db.updateTrack(track);
+          log.info(`[AUTO-APPLY] Persisted to DB: ${track.title}`);
+          return { success: true, trackId: track.id };
+        } catch (dbError) {
+          log.error(`[AUTO-APPLY] Failed to persist ${track.title}:`, dbError);
+          return { success: false, trackId: track.id };
+        }
+      });
+
+      const persistResults = await Promise.all(persistPromises);
+      const persistErrors = persistResults.filter(r => !r.success);
+
+      log.info(
+        `[AUTO-APPLY] Successfully applied and persisted ${updated.length - persistErrors.length}/${updated.length} tracks`,
+      );
+
+      // Notify completion with statistics
+      if (onComplete) {
+        onComplete({
+          updated: updated.length - persistErrors.length,
+          failed: errors.length + persistErrors.length,
+          trackIds: updated.map(t => t.id),
+        });
+      }
+    } else {
+      log.warn(`[AUTO-APPLY] No tracks were successfully updated`);
+      if (onComplete) {
+        onComplete({
+          updated: 0,
+          failed: errors.length,
+          trackIds: [],
+        });
+      }
+    }
+
+    if (errors.length > 0) {
+      log.warn(`[AUTO-APPLY] Failed to apply ${errors.length} perfect matches:`, errors);
+    }
+  } catch (error) {
+    log.error(`[AUTO-APPLY] Background auto-apply failed:`, error);
+    if (onComplete) {
+      onComplete({
+        updated: 0,
+        failed: perfectMatches.length,
+        trackIds: [],
+      });
+    }
+  }
+}
 
 /**
  * Busca candidatos para múltiples tracks usando todos los providers configurados
@@ -167,34 +193,43 @@ export const FindCandidates = async (
     // Process each track's results
     for (let i = 0; i < tracks.length; i++) {
       const track = tracks[i];
-      const trackResults = batchResults[i];
+      // AIDEV-NOTE: searchBatch() returns Map<trackId, BatchSearchResult>, not array
+      const trackResults = batchResults.get(track.id);
+
+      // Guard: handle missing results (shouldn't happen but defensive)
+      if (!trackResults) {
+        log.error(`[Tagger] No results found for track ${track.title} (id: ${track.id})`);
+        const result = TrackCandidatesResultUtils.withError(
+          track.id,
+          track.title,
+          track.artist ?? '',
+          track.path,
+          track.duration,
+          'No search results returned for this track',
+        );
+        allTrackCandidates.push(result);
+        continue;
+      }
 
       try {
-        // Combine all provider results (successful ones)
+        // Combine all provider results (workers already handle errors -> empty arrays)
         const allRaw: Array<RawTrackData & { source: ProviderSource }> = [];
+        const providers: ProviderSource[] = ['beatport', 'traxsource', 'bandcamp'];
 
-        if (trackResults.beatport.status === 'fulfilled') {
-          trackResults.beatport.value.forEach(raw => {
-            allRaw.push({ ...raw, source: 'beatport' });
-          });
-        } else {
-          log.error(`[Beatport] Search failed for ${track.title}:`, trackResults.beatport.reason);
-        }
+        for (const provider of providers) {
+          const providerData = trackResults.providerResults.get(provider);
 
-        if (trackResults.traxsource.status === 'fulfilled') {
-          trackResults.traxsource.value.forEach(raw => {
-            allRaw.push({ ...raw, source: 'traxsource' });
-          });
-        } else {
-          log.error(`[Traxsource] Search failed for ${track.title}:`, trackResults.traxsource.reason);
-        }
+          if (providerData && providerData.length > 0) {
+            providerData.forEach(raw => {
+              allRaw.push({ ...raw, source: provider });
+            });
+          }
 
-        if (trackResults.bandcamp.status === 'fulfilled') {
-          trackResults.bandcamp.value.forEach(raw => {
-            allRaw.push({ ...raw, source: 'bandcamp' });
-          });
-        } else {
-          log.error(`[Bandcamp] Search failed for ${track.title}:`, trackResults.bandcamp.reason);
+          // Log errors if any (workers set empty [] on error and store error message)
+          const error = trackResults.errors.get(provider);
+          if (error) {
+            log.error(`[${provider}] Search failed for ${track.title}:`, error);
+          }
         }
 
         // Score and rank using orchestrator (main thread)
@@ -207,8 +242,8 @@ export const FindCandidates = async (
           );
         });
 
-        // AIDEV-NOTE: Check if best candidate has 100% match - auto-apply and skip preselection
-        if (candidates.length > 0 && candidates[0].similarity_score === 1.0) {
+        // AIDEV-NOTE: Check if best candidate has 90% match - auto-apply and skip preselection
+        if (candidates.length > 0 && candidates[0].similarity_score === 0.9) {
           log.info(`[AUTO-APPLY] Perfect match for ${track.title} - ${candidates[0].source}:${candidates[0].id}`);
           perfectMatches.push({ track, candidate: candidates[0] });
           // Don't add to allTrackCandidates - user won't see it in preselection
@@ -243,39 +278,23 @@ export const FindCandidates = async (
       }
     }
 
-    // AIDEV-NOTE: Auto-apply tags for perfect matches
+    // AIDEV-NOTE: Auto-apply tags for perfect matches in background (non-blocking)
+    // This allows the UI to show manual-selection candidates immediately
     if (perfectMatches.length > 0) {
-      log.info(`[AUTO-APPLY] Applying tags for ${perfectMatches.length} perfect matches...`);
+      log.info(`[AUTO-APPLY] Detected ${perfectMatches.length} perfect matches - applying in background...`);
 
-      // Convert perfect matches to TrackSelection format
-      const autoSelections: TrackSelection[] = perfectMatches.map(({ track, candidate }) => ({
-        local_track_id: track.id,
-        selected_candidate_id: `${candidate.source}:${candidate.id}`,
-      }));
-
-      // Apply tags using the same flow as manual selections
-      const { updated, errors } = await ApplyTagSelections(
-        autoSelections,
-        perfectMatches.map(m => m.track),
-      );
-
-      // Persist to database
-      if (updated.length > 0) {
-        const db = Database.getInstance();
-        for (const track of updated) {
-          try {
-            await db.updateTrack(track);
-            log.info(`[AUTO-APPLY] Persisted to DB: ${track.title}`);
-          } catch (dbError) {
-            log.error(`[AUTO-APPLY] Failed to persist ${track.title}:`, dbError);
-          }
-        }
-      }
-
-      log.info(`[AUTO-APPLY] Successfully applied ${updated.length} perfect matches`);
-      if (errors.length > 0) {
-        log.warn(`[AUTO-APPLY] Failed to apply ${errors.length} perfect matches:`, errors);
-      }
+      // Fire-and-forget: apply in background without blocking return
+      applyPerfectMatchesInBackground(perfectMatches, result => {
+        log.info(`[AUTO-APPLY] Background completion: ${result.updated} updated, ${result.failed} failed`);
+        // Callback will be used by IPCTaggerModule to emit completion event
+        onProgress?.({
+          processed: tracks.length,
+          total: tracks.length,
+          currentTrackTitle: `Auto-applied ${result.updated} perfect matches`,
+        });
+      }).catch(error => {
+        log.error(`[AUTO-APPLY] Background process error:`, error);
+      });
     }
 
     // AIDEV-NOTE: Emitir progreso final cuando todos los tracks estén procesados
