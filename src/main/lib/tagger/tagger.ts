@@ -13,11 +13,16 @@ import {
   TrackCandidatesResultUtils,
   TrackSelection,
   TagCandidatesProgress,
+  ProviderSource,
+  TrackCandidate,
 } from '@preload/types/tagger';
 import { TrackCandidateUtils } from '@preload/types/tagger/candidate';
-import { BeatportClient } from './beatport/client/client';
-import { BeatportTrackUtils } from '@preload/types/beatport';
-import { analyzeAudio } from '../audio-analysis';
+import { BeatportTrackUtils, BeatportTrack } from '@preload/types/beatport';
+import { TXTrack } from '@preload/types/traxsource';
+import { getTaggerWorkerManager } from './worker/tagger-worker-manager';
+import { getWorkerPool } from '../audio-analysis/worker-pool';
+import type { RawTrackData } from './providers/types';
+import { Database } from '../db/database';
 
 // import { SearchTags } from './beatport/beatport';
 // import { BandcampSearchResult, search } from './bandcamp/bandcamp';
@@ -112,19 +117,22 @@ export type ProgressCallback = (progress: TagCandidatesProgress) => void;
 /**
  * Busca candidatos para múltiples tracks usando todos los providers configurados
  *
- *   Esta función ahora usa el ProviderOrchestrator para buscar
- * en Beatport y Traxsource en paralelo, aplicando scoring unificado
- * y retornando los top 4 candidatos globales.
+ * AIDEV-NOTE: Refactored to use TaggerWorkerManager for parallel provider searches.
+ * Workers handle all HTTP/scraping operations across 3 providers simultaneously.
+ * Main thread only does scoring/ranking using ProviderOrchestrator.scoreAndRank().
+ *
+ * AIDEV-NOTE: Tracks with 100% match are auto-applied immediately and excluded from
+ * the candidate list. Only tracks needing manual decision are returned.
  *
  * @param tracks Lista de tracks locales para los que buscar candidatos
  * @param onProgress Callback opcional para reportar progreso (processed, total, currentTrackTitle)
- * @returns Lista de TrackCandidatesResult con top 4 candidatos de todos los providers
+ * @returns Lista de TrackCandidatesResult con top 4 candidatos (excluye matches perfectos ya aplicados)
  */
 export const FindCandidates = async (
   tracks: Track[],
   onProgress?: ProgressCallback,
 ): Promise<TrackCandidatesResult[]> => {
-  //   Crear orchestrator con todos los providers (Beatport, Traxsource, Bandcamp)
+  // Create orchestrator for scoring/ranking (not for searching - workers do that)
   const orchestrator = new ProviderOrchestrator(
     [createBeatportProvider(), createTraxsourceProvider(), createBandcampProvider()],
     {
@@ -134,77 +142,161 @@ export const FindCandidates = async (
   );
 
   const allTrackCandidates: TrackCandidatesResult[] = [];
+  const perfectMatches: Array<{ track: Track; candidate: TrackCandidate }> = [];
+  const taggerManager = getTaggerWorkerManager();
 
-  //   Procesamiento secuencial para evitar rate limiting
-  for (let i = 0; i < tracks.length; i++) {
-    const track = tracks[i];
-    log.info(`Processing candidates for: ${track.artist} - ${track.title}`);
+  try {
+    // AIDEV-NOTE: Initialize workers once before batch search
+    await taggerManager.initialize();
 
-    // AIDEV-NOTE: Emitir progreso antes de procesar cada track
-    onProgress?.({
-      processed: i,
-      total: tracks.length,
-      currentTrackTitle: track.title,
+    // Convert Track[] to BatchSearchRequest[]
+    const searchRequests = tracks.map(track => ({
+      trackId: track.id,
+      title: track.title,
+      artist: track.artist || '',
+      durationSecs: track.duration,
+    }));
+
+    // AIDEV-NOTE: Batch search across all tracks and all providers in parallel
+    // Workers process their provider-specific queues internally while running concurrently
+    const batchResults = await taggerManager.searchBatch(searchRequests, progress => {
+      // Forward worker progress to caller
+      onProgress?.(progress);
     });
 
-    try {
-      // Buscar en todos los providers en paralelo
-      const candidates = await orchestrator.findCandidates(track.title, track.artist!, track.duration);
+    // Process each track's results
+    for (let i = 0; i < tracks.length; i++) {
+      const track = tracks[i];
+      const trackResults = batchResults[i];
 
-      // Log de resultados por provider
-      candidates.forEach(c => {
-        log.info(
-          `[${c.source.toUpperCase()}] ${c.artists} - ${c.title} - Score: ${(c.similarity_score * 100).toFixed(1)}%`,
+      try {
+        // Combine all provider results (successful ones)
+        const allRaw: Array<RawTrackData & { source: ProviderSource }> = [];
+
+        if (trackResults.beatport.status === 'fulfilled') {
+          trackResults.beatport.value.forEach(raw => {
+            allRaw.push({ ...raw, source: 'beatport' });
+          });
+        } else {
+          log.error(`[Beatport] Search failed for ${track.title}:`, trackResults.beatport.reason);
+        }
+
+        if (trackResults.traxsource.status === 'fulfilled') {
+          trackResults.traxsource.value.forEach(raw => {
+            allRaw.push({ ...raw, source: 'traxsource' });
+          });
+        } else {
+          log.error(`[Traxsource] Search failed for ${track.title}:`, trackResults.traxsource.reason);
+        }
+
+        if (trackResults.bandcamp.status === 'fulfilled') {
+          trackResults.bandcamp.value.forEach(raw => {
+            allRaw.push({ ...raw, source: 'bandcamp' });
+          });
+        } else {
+          log.error(`[Bandcamp] Search failed for ${track.title}:`, trackResults.bandcamp.reason);
+        }
+
+        // Score and rank using orchestrator (main thread)
+        const candidates = orchestrator.scoreAndRank(allRaw, track.title, track.artist!, track.duration);
+
+        // Log de resultados por provider
+        candidates.forEach(c => {
+          log.info(
+            `[${c.source.toUpperCase()}] ${c.artists} - ${c.title} - Score: ${(c.similarity_score * 100).toFixed(1)}%`,
+          );
+        });
+
+        // AIDEV-NOTE: Check if best candidate has 100% match - auto-apply and skip preselection
+        if (candidates.length > 0 && candidates[0].similarity_score === 1.0) {
+          log.info(`[AUTO-APPLY] Perfect match for ${track.title} - ${candidates[0].source}:${candidates[0].id}`);
+          perfectMatches.push({ track, candidate: candidates[0] });
+          // Don't add to allTrackCandidates - user won't see it in preselection
+          continue;
+        }
+
+        // Crear TrackCandidatesResult (only for tracks needing manual selection)
+        const result = TrackCandidatesResultUtils.withCandidates(
+          track.id,
+          track.title,
+          track.artist ?? '',
+          track.path,
+          track.duration,
+          candidates,
         );
-      });
 
-      // Crear TrackCandidatesResult
-      const result = TrackCandidatesResultUtils.withCandidates(
-        track.id,
-        track.title,
-        track.artist ?? '',
-        track.path,
-        track.duration,
-        candidates,
-      );
+        allTrackCandidates.push(result);
+      } catch (error) {
+        log.error(`Error processing candidates for ${track.title}:`, error);
 
-      allTrackCandidates.push(result);
-    } catch (error) {
-      log.error(`Error finding candidates for ${track.title}:`, error);
+        // Agregar resultado con error
+        const result = TrackCandidatesResultUtils.withError(
+          track.id,
+          track.title,
+          track.artist ?? '',
+          track.path,
+          track.duration,
+          error instanceof Error ? error.message : String(error),
+        );
 
-      // Agregar resultado con error
-      const result = TrackCandidatesResultUtils.withError(
-        track.id,
-        track.title,
-        track.artist ?? '',
-        track.path,
-        track.duration,
-        error instanceof Error ? error.message : String(error),
-      );
-
-      allTrackCandidates.push(result);
+        allTrackCandidates.push(result);
+      }
     }
+
+    // AIDEV-NOTE: Auto-apply tags for perfect matches
+    if (perfectMatches.length > 0) {
+      log.info(`[AUTO-APPLY] Applying tags for ${perfectMatches.length} perfect matches...`);
+
+      // Convert perfect matches to TrackSelection format
+      const autoSelections: TrackSelection[] = perfectMatches.map(({ track, candidate }) => ({
+        local_track_id: track.id,
+        selected_candidate_id: `${candidate.source}:${candidate.id}`,
+      }));
+
+      // Apply tags using the same flow as manual selections
+      const { updated, errors } = await ApplyTagSelections(
+        autoSelections,
+        perfectMatches.map(m => m.track),
+      );
+
+      // Persist to database
+      if (updated.length > 0) {
+        const db = Database.getInstance();
+        for (const track of updated) {
+          try {
+            await db.updateTrack(track);
+            log.info(`[AUTO-APPLY] Persisted to DB: ${track.title}`);
+          } catch (dbError) {
+            log.error(`[AUTO-APPLY] Failed to persist ${track.title}:`, dbError);
+          }
+        }
+      }
+
+      log.info(`[AUTO-APPLY] Successfully applied ${updated.length} perfect matches`);
+      if (errors.length > 0) {
+        log.warn(`[AUTO-APPLY] Failed to apply ${errors.length} perfect matches:`, errors);
+      }
+    }
+
+    // AIDEV-NOTE: Emitir progreso final cuando todos los tracks estén procesados
+    onProgress?.({
+      processed: tracks.length,
+      total: tracks.length,
+      currentTrackTitle: '',
+    });
+
+    return allTrackCandidates;
+  } finally {
+    // AIDEV-NOTE: Don't shutdown workers here - let IPCTaggerModule manage lifecycle
   }
-
-  // AIDEV-NOTE: Emitir progreso final cuando todos los tracks estén procesados
-  onProgress?.({
-    processed: tracks.length,
-    total: tracks.length,
-    currentTrackTitle: '',
-  });
-
-  return allTrackCandidates;
 };
 
 /**
  * Aplica las selecciones de tags del usuario a los tracks locales
  *
- *   Esta función toma las selecciones del usuario (qué candidato usar para cada track)
- * y aplica los tags completos desde el provider correspondiente (Beatport, Traxsource, o Bandcamp).
- * Ignora tracks con selected_candidate_id null ("No está disponible").
- *
- * AIDEV-NOTE: Para Bandcamp, automáticamente ejecuta audio analysis para detectar BPM/Key
- * ya que Bandcamp no proporciona esta metadata.
+ * AIDEV-NOTE: Refactored to use TaggerWorkerManager for detail fetching (all providers)
+ * and AudioAnalysisWorkerPool for Bandcamp audio analysis (batch processing).
+ * This moves ALL blocking HTTP/analysis operations off the main thread.
  *
  * @param selections Lista de selecciones del usuario
  * @param tracks Lista de tracks locales a actualizar
@@ -214,166 +306,197 @@ export const ApplyTagSelections = async (
   selections: TrackSelection[],
   tracks: Track[],
 ): Promise<{ updated: Track[]; errors: Array<{ trackId: string; error: string }> }> => {
-  const beatportClient = BeatportClient.new();
-  const traxsourceClient = new Traxsource();
-  const bandcampProvider = createBandcampProvider();
+  const taggerManager = getTaggerWorkerManager();
+  const audioPool = getWorkerPool();
 
   const updated: Track[] = [];
   const errors: Array<{ trackId: string; error: string }> = [];
+  const bandcampTracksToAnalyze: Array<{ track: Track; index: number }> = [];
 
-  //   Procesar cada selección secuencialmente para evitar rate limiting
-  for (const selection of selections) {
-    // Ignorar tracks sin candidato seleccionado (usuario eligió "No está disponible")
-    if (!selection.selected_candidate_id) {
-      log.info(`Skipping track ${selection.local_track_id} - no candidate selected`);
-      continue;
-    }
+  try {
+    // AIDEV-NOTE: Ensure workers are initialized
+    await taggerManager.initialize();
 
-    try {
-      // Buscar el track local
-      const localTrack = tracks.find(t => t.id === selection.local_track_id);
-      if (!localTrack) {
-        log.error(`Local track ${selection.local_track_id} not found`);
-        errors.push({ trackId: selection.local_track_id, error: 'Track not found' });
+    // Process each selection sequentially (to maintain order)
+    for (const selection of selections) {
+      // Ignorar tracks sin candidato seleccionado (usuario eligió "No está disponible")
+      if (!selection.selected_candidate_id) {
+        log.info(`Skipping track ${selection.local_track_id} - no candidate selected`);
         continue;
       }
 
-      // Parsear el ID del candidato (formato: "provider:id")
-      const { source, id } = TrackCandidateUtils.parseId(selection.selected_candidate_id);
-
-      log.info(`Applying tags for ${localTrack.title} from ${source}:${id}`);
-
-      // Obtener tags completos desde el provider correspondiente
-      let resultTag: ResultTag;
-      let needsAudioAnalysis = false;
-
-      if (source === 'beatport') {
-        // Obtener track completo de Beatport
-        const beatportTrack = await beatportClient.getTrack(parseInt(id, 10));
-
-        const artUrl = BeatportTrackUtils.getArtworkUrl(beatportTrack, 500);
-        log.info(`Beatport artwork URL: ${artUrl}`);
-
-        // Convertir BeatportTrack a ResultTag
-        resultTag = {
-          id: beatportTrack.id,
-          title: beatportTrack.name,
-          artist: beatportTrack.artists?.[0]?.name,
-          artists: beatportTrack.artists?.map(a => a.name) || [],
-          album: beatportTrack.release?.name,
-          year: beatportTrack.publish_date?.substring(0, 4), // "2023-01-15" -> "2023"
-          bpm: beatportTrack.bpm,
-          key: BeatportTrackUtils.getKeyName(beatportTrack),
-          genre: BeatportTrackUtils.getGenreName(beatportTrack),
-          duration: BeatportTrackUtils.getDurationSecs(beatportTrack),
-          art: artUrl,
-          label: BeatportTrackUtils.getLabelName(beatportTrack),
-        };
-      } else if (source === 'traxsource') {
-        // Buscar el track completo de Traxsource
-        //   Necesitamos el objeto TXTrack completo con URL para usar extendTrack
-        const searchResults = await traxsourceClient.searchTracks(localTrack.title, localTrack.artist || '');
-        const txTrack = searchResults.find(t => t.track_id === id);
-
-        if (!txTrack) {
-          throw new Error(`Traxsource track ${id} not found in search results`);
+      try {
+        // Buscar el track local
+        const localTrack = tracks.find(t => t.id === selection.local_track_id);
+        if (!localTrack) {
+          log.error(`Local track ${selection.local_track_id} not found`);
+          errors.push({ trackId: selection.local_track_id, error: 'Track not found' });
+          continue;
         }
 
-        // Extender con datos completos (artwork, album, etc.)
-        const extendedTrack = await traxsourceClient.extendTrack(txTrack);
+        // Parsear el ID del candidato (formato: "provider:id")
+        const { source, id } = TrackCandidateUtils.parseId(selection.selected_candidate_id);
 
-        log.info(`Traxsource artwork URL: ${extendedTrack.art || extendedTrack.thumbnail}`);
+        log.info(`Applying tags for ${localTrack.title} from ${source}:${id}`);
 
-        // Convertir TXTrack a ResultTag
-        resultTag = {
-          id: extendedTrack.track_id || undefined,
-          title: extendedTrack.title,
-          artist: extendedTrack.artists[0],
-          artists: extendedTrack.artists,
-          album: extendedTrack.album,
-          year: extendedTrack.release_date?.substring(0, 4), // "2023-01-15" -> "2023"
-          bpm: extendedTrack.bpm,
-          key: extendedTrack.key,
-          genre: extendedTrack.genres?.[0],
-          duration: extendedTrack.duration,
-          art: extendedTrack.art || extendedTrack.thumbnail,
-          label: extendedTrack.label,
-        };
-      } else if (source === 'bandcamp') {
-        // AIDEV-NOTE: Bandcamp requires special handling:
-        // 1. The 'id' is actually the full track URL
-        // 2. Bandcamp doesn't provide BPM/Key, so we need audio analysis
-        const trackUrl = id; // The ID is the full URL for Bandcamp
-        const trackDetails = await bandcampProvider.getTrackDetails(trackUrl);
+        // AIDEV-NOTE: Fetch details via worker (off main thread)
+        let resultTag: ResultTag;
+        let needsAudioAnalysis = false;
 
-        log.info(`Bandcamp artwork URL: ${trackDetails?.artwork_url}`);
+        if (source === 'beatport') {
+          // Fetch via worker
+          const beatportTrack = await taggerManager.getDetails('beatport', { trackId: id });
 
-        if (!trackDetails) {
-          throw new Error(`Failed to fetch Bandcamp track: ${trackUrl}`);
-        }
+          const artUrl = BeatportTrackUtils.getArtworkUrl(beatportTrack as BeatportTrack, 500);
+          log.info(`Beatport artwork URL: ${artUrl}`);
 
-        // Convert to ResultTag (BPM and Key will be undefined)
-        resultTag = {
-          title: trackDetails.title,
-          artist: trackDetails.artists[0],
-          artists: trackDetails.artists,
-          album: trackDetails.label, // Use label as album fallback
-          year: trackDetails.release_date?.substring(0, 4),
-          genre: trackDetails.genre,
-          duration: trackDetails.duration_secs,
-          art: trackDetails.artwork_url,
-          label: trackDetails.label,
-          // BPM and Key are undefined - will be filled by audio analysis
-        };
-
-        // Flag for audio analysis since Bandcamp doesn't provide BPM/Key
-        needsAudioAnalysis = true;
-      } else {
-        throw new Error(`Unknown provider: ${source}`);
-      }
-
-      // Aplicar los tags al track local usando el updater existente
-      let updatedTrack = await Update(localTrack, resultTag);
-
-      // AIDEV-NOTE: Auto-analyze audio for Bandcamp tracks to get BPM/Key/Waveform
-      if (needsAudioAnalysis) {
-        log.info(`[Bandcamp] Running audio analysis for ${updatedTrack.title}...`);
-        try {
-          const analysisResult = await analyzeAudio(localTrack.path, {
-            detectBpm: true,
-            detectKey: true,
-            generateWaveform: true,
-            waveformBins: 300,
+          // Convertir BeatportTrack a ResultTag
+          const bt = beatportTrack as BeatportTrack;
+          resultTag = {
+            id: bt.id,
+            title: bt.name,
+            artist: bt.artists?.[0]?.name,
+            artists: bt.artists?.map(a => a.name) || [],
+            album: bt.release?.name,
+            year: bt.publish_date?.substring(0, 4),
+            bpm: bt.bpm,
+            key: BeatportTrackUtils.getKeyName(bt),
+            genre: BeatportTrackUtils.getGenreName(bt),
+            duration: BeatportTrackUtils.getDurationSecs(bt),
+            art: artUrl,
+            label: BeatportTrackUtils.getLabelName(bt),
+          };
+        } else if (source === 'traxsource') {
+          // Fetch via worker (worker re-searches and extends internally)
+          const extendedTrack = await taggerManager.getDetails('traxsource', {
+            trackId: id,
+            localTitle: localTrack.title,
+            localArtist: localTrack.artist || '',
           });
 
-          // Apply analysis results to track
-          if (analysisResult.bpm) {
-            updatedTrack = { ...updatedTrack, bpm: analysisResult.bpm };
-            log.info(`[Bandcamp] Detected BPM: ${analysisResult.bpm}`);
+          const txTrack = extendedTrack as TXTrack;
+          log.info(`Traxsource artwork URL: ${txTrack.art || txTrack.thumbnail}`);
+
+          // Convertir TXTrack a ResultTag
+          resultTag = {
+            id: txTrack.track_id || undefined,
+            title: txTrack.title,
+            artist: txTrack.artists[0],
+            artists: txTrack.artists,
+            album: txTrack.album,
+            year: txTrack.release_date?.substring(0, 4),
+            bpm: txTrack.bpm,
+            key: txTrack.key,
+            genre: txTrack.genres?.[0],
+            duration: txTrack.duration,
+            art: txTrack.art || txTrack.thumbnail,
+            label: txTrack.label,
+          };
+        } else if (source === 'bandcamp') {
+          // AIDEV-NOTE: Bandcamp - fetch details via worker, defer audio analysis to batch
+          const trackUrl = id; // The ID is the full URL for Bandcamp
+          const trackDetails = await taggerManager.getDetails('bandcamp', { trackId: trackUrl });
+
+          if (!trackDetails) {
+            throw new Error(`Failed to fetch Bandcamp track: ${trackUrl}`);
           }
-          if (analysisResult.key) {
-            updatedTrack = { ...updatedTrack, initialKey: analysisResult.key };
-            log.info(`[Bandcamp] Detected Key: ${analysisResult.key}`);
-          }
-          if (analysisResult.waveformPeaks) {
-            updatedTrack = { ...updatedTrack, waveformPeaks: analysisResult.waveformPeaks };
-            log.info(`[Bandcamp] Generated waveform: ${analysisResult.waveformPeaks.length} peaks`);
-          }
-        } catch (analysisError) {
-          // Log but don't fail - partial tags are better than none
-          log.warn(`[Bandcamp] Audio analysis failed: ${analysisError}`);
+
+          log.info(`Bandcamp artwork URL: ${trackDetails.artwork_url}`);
+
+          // Convert to ResultTag (BPM and Key will be undefined initially)
+          resultTag = {
+            title: trackDetails.title,
+            artist: trackDetails.artists[0],
+            artists: trackDetails.artists,
+            album: trackDetails.label,
+            year: trackDetails.release_date?.substring(0, 4),
+            genre: trackDetails.genre,
+            duration: trackDetails.duration_secs,
+            art: trackDetails.artwork_url,
+            label: trackDetails.label,
+          };
+
+          // Flag for batch audio analysis
+          needsAudioAnalysis = true;
+        } else {
+          throw new Error(`Unknown provider: ${source}`);
         }
+
+        // Aplicar los tags al track local
+        let updatedTrack = await Update(localTrack, resultTag);
+
+        // AIDEV-NOTE: Accumulate Bandcamp tracks for batch audio analysis
+        if (needsAudioAnalysis) {
+          bandcampTracksToAnalyze.push({
+            track: updatedTrack,
+            index: updated.length,
+          });
+        }
+
+        updated.push(updatedTrack);
+        log.info(`Tags applied successfully for ${updatedTrack.title}`);
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        log.error(`Error applying tags for track ${selection.local_track_id}: ${errorMsg}`);
+        errors.push({ trackId: selection.local_track_id, error: errorMsg });
       }
-
-      updated.push(updatedTrack);
-
-      log.info(`Tags applied successfully for ${updatedTrack.title}`);
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      log.error(`Error applying tags for track ${selection.local_track_id}: ${errorMsg}`);
-      errors.push({ trackId: selection.local_track_id, error: errorMsg });
     }
-  }
 
-  return { updated, errors };
+    // AIDEV-NOTE: Batch audio analysis for all Bandcamp tracks using worker pool
+    if (bandcampTracksToAnalyze.length > 0) {
+      log.info(`[Bandcamp] Running batch audio analysis for ${bandcampTracksToAnalyze.length} tracks...`);
+
+      try {
+        const filePaths = bandcampTracksToAnalyze.map(({ track }) => track.path);
+        const analysisResultsMap = await audioPool.analyzeFiles(filePaths, {
+          detectBpm: true,
+          detectKey: true,
+          generateWaveform: true,
+          waveformBins: 300,
+        });
+
+        // Apply results back to tracks
+        bandcampTracksToAnalyze.forEach(({ track, index }) => {
+          const result = analysisResultsMap.get(track.path);
+
+          if (!result) {
+            log.warn(`[Bandcamp] ${track.title} - No analysis result`);
+            return;
+          }
+
+          if (result instanceof Error) {
+            log.warn(`[Bandcamp] ${track.title} - Analysis failed: ${result.message}`);
+            return;
+          }
+
+          // Result is AudioAnalysisResult
+          let updatedTrack = updated[index];
+
+          if (result.bpm) {
+            updatedTrack = { ...updatedTrack, bpm: result.bpm };
+            log.info(`[Bandcamp] ${track.title} - Detected BPM: ${result.bpm}`);
+          }
+          if (result.key) {
+            updatedTrack = { ...updatedTrack, initialKey: result.key };
+            log.info(`[Bandcamp] ${track.title} - Detected Key: ${result.key}`);
+          }
+          if (result.waveformPeaks) {
+            updatedTrack = { ...updatedTrack, waveformPeaks: result.waveformPeaks };
+            log.info(`[Bandcamp] ${track.title} - Generated waveform: ${result.waveformPeaks.length} peaks`);
+          }
+
+          updated[index] = updatedTrack;
+        });
+
+        log.info(`[Bandcamp] Batch audio analysis completed successfully`);
+      } catch (analysisError) {
+        // Log but don't fail - partial tags are better than none
+        log.warn(`[Bandcamp] Batch audio analysis failed: ${analysisError}`);
+      }
+    }
+
+    return { updated, errors };
+  } finally {
+    // AIDEV-NOTE: Don't shutdown workers here - let IPCTaggerModule manage lifecycle
+  }
 };

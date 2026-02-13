@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron';
+import log from 'electron-log';
 
 import channels from '../../preload/lib/ipc-channels';
 import { Track } from '../../preload/types/harmony';
@@ -6,13 +7,23 @@ import { FindCandidates, FixTags, ApplyTagSelections } from '../lib/tagger/tagge
 
 import ModuleWindow from './BaseWindowModule';
 import { TrackCandidatesResult, TrackSelection, TagCandidatesProgress } from '@preload/types/tagger';
+import { getTaggerWorkerManager } from '../lib/tagger/worker/tagger-worker-manager';
 
 /**
  * Module in charge of returning the track with tags fixed
- * AIDEV-NOTE: Emite eventos de progreso durante la búsqueda de candidatos
+ * AIDEV-NOTE: Manages tagger worker lifecycle and emits progress events during candidate searches
  */
 class IPCTaggerModule extends ModuleWindow {
   async load(): Promise<void> {
+    // AIDEV-NOTE: Initialize tagger workers on module load
+    try {
+      const taggerManager = getTaggerWorkerManager();
+      await taggerManager.initialize();
+      log.info('[IPCTaggerModule] Tagger workers initialized successfully');
+    } catch (error) {
+      log.error('[IPCTaggerModule] Failed to initialize tagger workers:', error);
+    }
+
     ipcMain.handle(channels.FIX_TAGS, (_e, track: Track): Promise<Track> => {
       return FixTags(track);
     });
@@ -37,6 +48,17 @@ class IPCTaggerModule extends ModuleWindow {
         return ApplyTagSelections(selections, tracks);
       },
     );
+  }
+
+  // AIDEV-NOTE: Shutdown tagger workers when module unloads
+  async unload(): Promise<void> {
+    try {
+      const taggerManager = getTaggerWorkerManager();
+      await taggerManager.shutdown();
+      log.info('[IPCTaggerModule] Tagger workers shut down successfully');
+    } catch (error) {
+      log.error('[IPCTaggerModule] Error shutting down tagger workers:', error);
+    }
   }
 }
 

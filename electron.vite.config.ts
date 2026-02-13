@@ -21,6 +21,7 @@ export default defineConfig({
           'analysis-worker': resolve('src/main/lib/audio-analysis/analysis-worker.ts'),
           'sync-worker': resolve('src/main/lib/traktor/sync/sync-worker.ts'),
           'export-worker': resolve('src/main/lib/traktor/sync/export-worker.ts'),
+          'tagger-worker': resolve('src/main/lib/tagger/worker/tagger-worker.ts'),
         },
       },
     },

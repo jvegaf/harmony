@@ -70,8 +70,30 @@ export class ProviderOrchestrator {
       }
     });
 
-    // 3. Calcular scores unificados para cada candidato
-    const scored = allRaw.map(raw => {
+    // 3. Score and rank using extracted method
+    return this.scoreAndRank(allRaw, title, artist, durationSecs);
+  }
+
+  /**
+   * AIDEV-NOTE: Extracted scoring/ranking logic so it can be used independently
+   * by the worker-based flow. This allows workers to fetch raw data and then
+   * main thread to score/rank without re-implementing logic.
+   *
+   * Scores, filters, sorts, and limits candidates based on configuration
+   * @param rawResults - Raw track data with source attached
+   * @param title - Local track title for scoring
+   * @param artist - Local track artist for scoring
+   * @param durationSecs - Optional local track duration for scoring
+   * @returns Top N candidates ordered by score
+   */
+  public scoreAndRank(
+    rawResults: Array<RawTrackData & { source: ProviderSource }>,
+    title: string,
+    artist: string,
+    durationSecs?: number,
+  ): TrackCandidate[] {
+    // 1. Calcular scores unificados para cada candidato
+    const scored = rawResults.map(raw => {
       const score = this.scorer.calculateFromParams(
         title,
         artist,
@@ -84,7 +106,7 @@ export class ProviderOrchestrator {
       return this.rawToCandidate(raw, score);
     });
 
-    // 4. Filtrar por score mínimo, ordenar y tomar top N
+    // 2. Filtrar por score mínimo, ordenar y tomar top N
     return scored
       .filter(candidate => candidate.similarity_score >= this.minScore)
       .sort((a, b) => b.similarity_score - a.similarity_score)
