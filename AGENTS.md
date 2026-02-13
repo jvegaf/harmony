@@ -7,7 +7,7 @@
 - **Frontend**: React 18 with Mantine UI components and React Router
 - **Backend**: Electron with TypeScript, TypeORM (SQLite), and IPC-based architecture
 - **Build**: electron-vite, Vite, electron-builder
-- **Package Manager**: Yarn (preferred over npm/pnpm)
+- **Package Manager**: pnpm (preferred over npm/yarn)
 
 ---
 
@@ -16,36 +16,36 @@
 ### Development
 
 ```bash
-yarn dev                # Start development mode with hot reload
-yarn start              # Preview built app
+pnpm dev                # Start development mode with hot reload
+pnpm start              # Preview built app
 ```
 
 ### Build
 
 ```bash
-yarn build              # TypeCheck + build for current platform
-yarn build:win          # Build Windows installer
-yarn build:linux        # Build Linux AppImage/deb
-yarn release            # Create production release
+pnpm build              # TypeCheck + build for current platform
+pnpm build:win          # Build Windows installer
+pnpm build:linux        # Build Linux AppImage/deb
+pnpm release            # Create production release
 ```
 
 ### Code Quality
 
 ```bash
-yarn lint               # ESLint with auto-fix
-yarn format             # Prettier auto-format all files
-yarn typecheck          # Run both node + web type checks
-yarn typecheck:node     # TypeCheck main/preload (tsconfig.node.json)
-yarn typecheck:web      # TypeCheck renderer (tsconfig.web.json)
+pnpm lint               # ESLint with auto-fix
+pnpm format             # Prettier auto-format all files
+pnpm typecheck          # Run both node + web type checks
+pnpm typecheck:node     # TypeCheck main/preload (tsconfig.node.json)
+pnpm typecheck:web      # TypeCheck renderer (tsconfig.web.json)
 ```
 
 ### Testing
 
 ```bash
-yarn test               # Run tests in watch mode (development)
-yarn test:run           # Run all tests once (CI mode)
-yarn test:ui            # Open Vitest UI (visual test runner)
-yarn test:coverage      # Run tests with coverage report
+pnpm test               # Run tests in watch mode (development)
+pnpm test:run           # Run all tests once (CI mode)
+pnpm test:ui            # Open Vitest UI (visual test runner)
+pnpm test:coverage      # Run tests with coverage report
 ```
 
 **Test Framework**: Vitest (preferred over Jest for performance)  
@@ -55,9 +55,9 @@ yarn test:coverage      # Run tests with coverage report
 ### Makefile shortcuts
 
 ```bash
-make dev                # Same as yarn dev
-make lint               # Same as yarn lint
-make check              # Same as yarn typecheck
+make dev                # Same as pnpm dev
+make lint               # Same as pnpm lint
+make check              # Same as pnpm typecheck
 make clean              # Remove out/ and dist/ folders
 make build/linux        # Clean + build Linux
 ```
@@ -104,7 +104,7 @@ import icon from '../../resources/icon.png?asset';
 - **Bracket same line**: No (closing `>` on new line in JSX)
 - **Single attribute per line**: Yes for JSX
 
-**Never manually format**—run `yarn format` or let your IDE auto-format on save.
+**Never manually format**—run `pnpm format` or let your IDE auto-format on save.
 
 ### TypeScript Conventions
 
@@ -234,13 +234,13 @@ import icon from '../../resources/icon.png?asset';
 
 ## Common Pitfalls to Avoid
 
-1. **Don't modify `package.json` scripts without checking dependencies**—yarn scripts are orchestrated
-2. **Don't use `npm` or `pnpm`**—this is a Yarn project (see `yarn.lock`)
-3. **Don't skip type checking**—always run `yarn typecheck` before committing
+1. **Don't modify `package.json` scripts without checking dependencies**—pnpm scripts are orchestrated
+2. **Don't use `npm` or `yarn`**—this is a pnpm project (see `pnpm-lock.yaml`)
+3. **Don't skip type checking**—always run `pnpm typecheck` before committing
 4. **Don't mix console.log and electron-log** in main process—use `log.*` only
 5. **Don't use `any` as a crutch**—ESLint allows it but prefer proper typing
 6. **Don't hardcode paths**—use Electron's `app.getPath()` for user data
-7. **Don't commit without running `yarn lint`**—auto-fix is enabled
+7. **Don't commit without running `pnpm lint`**—auto-fix is enabled
 
 ---
 
@@ -356,4 +356,4 @@ Skills are **automatically activated** based on context:
 
 ---
 
-**Last Updated**: 2026-02-12
+**Last Updated**: 2026-02-13

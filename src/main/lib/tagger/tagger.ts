@@ -423,7 +423,7 @@ export const ApplyTagSelections = async (
         }
 
         // Aplicar los tags al track local
-        let updatedTrack = await Update(localTrack, resultTag);
+        const updatedTrack = await Update(localTrack, resultTag);
 
         // AIDEV-NOTE: Accumulate Bandcamp tracks for batch audio analysis
         if (needsAudioAnalysis) {

@@ -188,7 +188,7 @@ parentPort.on('message', async (message: TaggerWorkerMessage) => {
       await handleGetDetails(id, payload as GetDetailsPayload);
       break;
 
-    default:
+    default: {
       log.error(`[TaggerWorker-${providerType}] Unknown message type: ${type}`);
       const errorMsg: TaggerWorkerResult = {
         type: 'error',
@@ -196,6 +196,7 @@ parentPort.on('message', async (message: TaggerWorkerMessage) => {
         error: `Unknown message type: ${type}`,
       };
       parentPort!.postMessage(errorMsg);
+    }
   }
 });
 

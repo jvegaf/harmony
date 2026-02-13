@@ -4,7 +4,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()],
+    // AIDEV-NOTE: ESM-only packages must NOT be externalized — Vite bundles them into CJS output.
+    // Without this, Electron's require() fails with ERR_REQUIRE_ESM at runtime.
+    plugins: [externalizeDepsPlugin({ exclude: ['p-limit', 'uuid', 'globby', 'html-minifier-terser'] })],
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer/src'),
