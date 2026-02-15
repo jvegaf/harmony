@@ -104,6 +104,12 @@ const api = {
       ipcRenderer.on(channels.TAG_CANDIDATES_PROGRESS, listener);
       return () => ipcRenderer.removeListener(channels.TAG_CANDIDATES_PROGRESS, listener);
     },
+    // AIDEV-NOTE: Listen for auto-apply progress and completion events
+    onTagAutoApplyComplete: (callback: (event: any) => void) => {
+      const listener = (_: any, event: any) => callback(event);
+      ipcRenderer.on(channels.TAG_AUTO_APPLY_COMPLETE, listener);
+      return () => ipcRenderer.removeListener(channels.TAG_AUTO_APPLY_COMPLETE, listener);
+    },
     scanPaths: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_LOOKUP, paths),
     importTracks: async (trackPaths: string[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, trackPaths),
     checkChanges: async (libraryPath: string) => ipcRenderer.invoke(channels.LIBRARY_CHECK_CHANGES, libraryPath),

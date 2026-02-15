@@ -52,20 +52,35 @@ export const FixTags = async (track: Track): Promise<Track> => {
 export type ProgressCallback = (progress: TagCandidatesProgress) => void;
 
 /**
+ * AIDEV-NOTE: Callback para notificar progreso durante el auto-apply en background
+ * Emite evento al renderer con progreso track por track
+ */
+export type AutoApplyProgressCallback = (progress: {
+  processed: number;
+  total: number;
+  currentTrackTitle: string;
+  updated: number;
+  failed: number;
+}) => void;
+
+/**
  * AIDEV-NOTE: Callback para notificar cuando se completa el auto-apply en background
  * Emite evento al renderer con estadísticas de tracks actualizados/errores
  */
 export type AutoApplyCompleteCallback = (result: { updated: number; failed: number; trackIds: string[] }) => void;
 
 /**
- * AIDEV-NOTE: Aplica tags de perfect matches (100% score) en background sin bloquear
+ * AIDEV-NOTE: Aplica tags de perfect matches (>= 90% score) en background sin bloquear
  * Esta función se ejecuta de forma asíncrona después de retornar los candidatos al UI
+ * Emite progreso track por track para mostrar en el renderer
  *
  * @param perfectMatches Lista de perfect matches detectados durante FindCandidates
+ * @param onProgress Callback opcional para notificar progreso track por track
  * @param onComplete Callback opcional para notificar cuando termine
  */
 async function applyPerfectMatchesInBackground(
   perfectMatches: Array<{ track: Track; candidate: TrackCandidate }>,
+  onProgress?: AutoApplyProgressCallback,
   onComplete?: AutoApplyCompleteCallback,
 ): Promise<void> {
   if (perfectMatches.length === 0) return;
@@ -79,6 +94,15 @@ async function applyPerfectMatchesInBackground(
       selected_candidate_id: `${candidate.source}:${candidate.id}`,
     }));
 
+    // Emit initial progress
+    onProgress?.({
+      processed: 0,
+      total: perfectMatches.length,
+      currentTrackTitle: perfectMatches[0]?.track.title || '',
+      updated: 0,
+      failed: 0,
+    });
+
     // Apply tags using the same flow as manual selections (runs in workers)
     const { updated, errors } = await ApplyTagSelections(
       autoSelections,
@@ -88,13 +112,38 @@ async function applyPerfectMatchesInBackground(
     // Persist to database in parallel (much faster than sequential)
     if (updated.length > 0) {
       const db = Database.getInstance();
+      let persistedCount = 0;
+      let persistFailedCount = 0;
+
       const persistPromises = updated.map(async track => {
         try {
           await db.updateTrack(track);
+          persistedCount++;
           log.info(`[AUTO-APPLY] Persisted to DB: ${track.title}`);
+
+          // Emit progress after each track
+          onProgress?.({
+            processed: persistedCount + persistFailedCount,
+            total: perfectMatches.length,
+            currentTrackTitle: track.title,
+            updated: persistedCount,
+            failed: persistFailedCount + errors.length,
+          });
+
           return { success: true, trackId: track.id };
         } catch (dbError) {
+          persistFailedCount++;
           log.error(`[AUTO-APPLY] Failed to persist ${track.title}:`, dbError);
+
+          // Emit progress for failed track
+          onProgress?.({
+            processed: persistedCount + persistFailedCount,
+            total: perfectMatches.length,
+            currentTrackTitle: track.title,
+            updated: persistedCount,
+            failed: persistFailedCount + errors.length,
+          });
+
           return { success: false, trackId: track.id };
         }
       });
@@ -147,16 +196,20 @@ async function applyPerfectMatchesInBackground(
  * Workers handle all HTTP/scraping operations across 3 providers simultaneously.
  * Main thread only does scoring/ranking using ProviderOrchestrator.scoreAndRank().
  *
- * AIDEV-NOTE: Tracks with 100% match are auto-applied immediately and excluded from
+ * AIDEV-NOTE: Tracks with >= 90% match are auto-applied immediately and excluded from
  * the candidate list. Only tracks needing manual decision are returned.
  *
  * @param tracks Lista de tracks locales para los que buscar candidatos
  * @param onProgress Callback opcional para reportar progreso (processed, total, currentTrackTitle)
+ * @param onAutoApplyProgress Callback opcional para reportar progreso del auto-apply en background
+ * @param onAutoApplyComplete Callback opcional para notificar cuando el auto-apply termine
  * @returns Lista de TrackCandidatesResult con top 4 candidatos (excluye matches perfectos ya aplicados)
  */
 export const FindCandidates = async (
   tracks: Track[],
   onProgress?: ProgressCallback,
+  onAutoApplyProgress?: AutoApplyProgressCallback,
+  onAutoApplyComplete?: AutoApplyCompleteCallback,
 ): Promise<TrackCandidatesResult[]> => {
   // Create orchestrator for scoring/ranking (not for searching - workers do that)
   const orchestrator = new ProviderOrchestrator(
@@ -242,9 +295,12 @@ export const FindCandidates = async (
           );
         });
 
-        // AIDEV-NOTE: Check if best candidate has 90% match - auto-apply and skip preselection
-        if (candidates.length > 0 && candidates[0].similarity_score === 0.9) {
-          log.info(`[AUTO-APPLY] Perfect match for ${track.title} - ${candidates[0].source}:${candidates[0].id}`);
+        // AIDEV-NOTE: Check if best candidate has >= 90% match - auto-apply and skip preselection
+        // Changed from === 0.9 to >= 0.9 to handle float precision issues
+        if (candidates.length > 0 && candidates[0].similarity_score >= 0.9) {
+          log.info(
+            `[AUTO-APPLY] Perfect match for ${track.title} - ${candidates[0].source}:${candidates[0].id} (score: ${(candidates[0].similarity_score * 100).toFixed(1)}%)`,
+          );
           perfectMatches.push({ track, candidate: candidates[0] });
           // Don't add to allTrackCandidates - user won't see it in preselection
           continue;
@@ -284,15 +340,11 @@ export const FindCandidates = async (
       log.info(`[AUTO-APPLY] Detected ${perfectMatches.length} perfect matches - applying in background...`);
 
       // Fire-and-forget: apply in background without blocking return
-      applyPerfectMatchesInBackground(perfectMatches, result => {
-        log.info(`[AUTO-APPLY] Background completion: ${result.updated} updated, ${result.failed} failed`);
-        // Callback will be used by IPCTaggerModule to emit completion event
-        onProgress?.({
-          processed: tracks.length,
-          total: tracks.length,
-          currentTrackTitle: `Auto-applied ${result.updated} perfect matches`,
-        });
-      }).catch(error => {
+      applyPerfectMatchesInBackground(
+        perfectMatches,
+        onAutoApplyProgress, // Pass through progress callback
+        onAutoApplyComplete, // Pass through completion callback
+      ).catch(error => {
         log.error(`[AUTO-APPLY] Background process error:`, error);
       });
     }

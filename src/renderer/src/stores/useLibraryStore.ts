@@ -307,7 +307,21 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         // Llamar a la API (que procesa internamente todos los tracks)
         const trkCandidates = await library.findTagCandidates(tracks);
 
-        // Marcar como completado
+        // AIDEV-NOTE: Si no hay candidatos manuales (todos fueron perfect matches >= 0.9),
+        // no mostrar modal de selección. El renderer escuchará TAG_AUTO_APPLY_COMPLETE
+        // para mostrar progreso y actualizar la UI cuando los perfect matches terminen.
+        if (trkCandidates.length === 0) {
+          logger.info('All tracks were perfect matches (>= 90%) - auto-applied in background');
+          set({
+            candidatesSearching: false,
+            candidatesSearchProgress: { processed: tracks.length, total: tracks.length, currentTrackTitle: '' },
+            trackTagsCandidates: null,
+            tagsSelecting: false, // No mostrar modal
+          });
+          return;
+        }
+
+        // Marcar como completado con candidatos para selección manual
         set({
           candidatesSearching: false,
           candidatesSearchProgress: { processed: tracks.length, total: tracks.length, currentTrackTitle: '' },
@@ -666,6 +680,31 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
 
             try {
               const candidates = await library.findTagCandidates(tracksNeedingFix);
+
+              // AIDEV-NOTE: Si no hay candidatos manuales (todos fueron perfect matches >= 0.9),
+              // no mostrar modal de selección y navegar directamente a recent_added
+              if (candidates.length === 0) {
+                logger.info(
+                  'Auto-fix: All tracks were perfect matches (>= 90%) - auto-applied in background. Navigating to recent_added.',
+                );
+                set({
+                  candidatesSearching: false,
+                  candidatesSearchProgress: {
+                    processed: tracksNeedingFix.length,
+                    total: tracksNeedingFix.length,
+                    currentTrackTitle: '',
+                  },
+                  trackTagsCandidates: null,
+                  tagsSelecting: false,
+                  applyingChanges: false,
+                  applyChangesProgress: { processed: 0, total: 0 },
+                });
+
+                // Navigate to recently added (perfect matches will update in background)
+                router.revalidate();
+                window.location.hash = '#/recent_added';
+                return;
+              }
 
               // Show tag candidates modal for user selection
               set({

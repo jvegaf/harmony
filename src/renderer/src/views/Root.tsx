@@ -15,6 +15,7 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import NowPlayingBar from '../components/NowPlayingBar/NowPlayingBar';
 import usePlayingTrack from '../hooks/usePlayingTrack';
 import { useAutoSyncNotification } from '../hooks/useAutoSyncNotification';
+import { useAutoApplyNotification } from '../hooks/useAutoApplyNotification';
 import useLibraryStore, { useLibraryAPI } from '../stores/useLibraryStore';
 import styles from './Root.module.css';
 import { LoaderData } from './router';
@@ -34,6 +35,9 @@ export default function ViewRoot() {
 
   // AIDEV-NOTE: Show auto-sync notifications when syncing with Traktor
   useAutoSyncNotification();
+
+  // AIDEV-NOTE: Show auto-apply notifications when perfect matches (>= 90%) are applied in background
+  useAutoApplyNotification();
 
   // AIDEV-NOTE: Suscribirse a los eventos de progreso de búsqueda de candidatos
   useEffect(() => {
