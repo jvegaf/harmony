@@ -21,6 +21,7 @@ export default function PruneView() {
   const [pressedK, setPressedK] = useState(false);
   const [pressedD, setPressedD] = useState(false);
   const [isAtEnd, setIsAtEnd] = useState(false);
+  const [isStarted, setIsStarted] = useState(false);
 
   // AIDEV-NOTE: Load To Delete playlist on mount
   useEffect(() => {
@@ -38,7 +39,8 @@ export default function PruneView() {
 
   useEffect(() => {
     const startPruneMode = async () => {
-      if (tracks.length === 0) {
+      // AIDEV-NOTE: Only start if user has confirmed via "Start Prune Mode" button
+      if (!isStarted || tracks.length === 0) {
         return;
       }
 
@@ -56,8 +58,8 @@ export default function PruneView() {
     return () => {
       playerAPI.setPruneMode(false);
     };
-    // Intentionally run only once on mount
-  }, []);
+    // AIDEV-NOTE: Run when isStarted changes or on mount
+  }, [isStarted, tracks, playerAPI]);
 
   // AIDEV-NOTE: Check if we're at the end of the queue
   useEffect(() => {
@@ -165,6 +167,39 @@ export default function PruneView() {
               type='button'
               onClick={() => navigate('/')}
               className={styles.quitButton}
+            >
+              Back to Library
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // AIDEV-NOTE: Show confirmation screen before starting
+  if (!isStarted) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.pruneOverlay}>
+          <h2>Prune Mode</h2>
+          <p className={styles.subtitle}>Listen to tracks and quickly mark them for deletion</p>
+
+          <div className={styles.trackCount}>
+            <p>{tracks.length} tracks in your library</p>
+          </div>
+
+          <div className={styles.confirmationButtons}>
+            <button
+              type='button'
+              onClick={() => setIsStarted(true)}
+              className={styles.startButton}
+            >
+              Start Prune Mode
+            </button>
+            <button
+              type='button'
+              onClick={() => navigate('/')}
+              className={styles.backButton}
             >
               Back to Library
             </button>
