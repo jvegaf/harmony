@@ -213,6 +213,7 @@ export class Database {
             rating: track.rating,
             label: track.label,
             waveformPeaks: track.waveformPeaks,
+            url: track.url,
           })
           .where(eq(schema.tracks.id, existing.id))
           .run();
@@ -239,6 +240,7 @@ export class Database {
               label: sql`excluded.label`,
               waveformPeaks: sql`excluded.waveformPeaks`,
               addedAt: sql`excluded.addedAt`,
+              url: sql`excluded.url`,
             },
           })
           .run();
@@ -265,6 +267,7 @@ export class Database {
         label: track.label,
         waveformPeaks: track.waveformPeaks,
         addedAt: track.addedAt,
+        url: track.url,
       })
       .where(eq(schema.tracks.id, track.id))
       .run();

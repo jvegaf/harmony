@@ -250,6 +250,7 @@ class IPCLibraryModule extends ModuleWindow {
       label: common.label?.join(', '),
       year: common.year,
       rating: rate,
+      url: common.website,
     };
 
     return metadata;

@@ -58,6 +58,8 @@ export interface Track {
   waveformPeaks?: number[];
   /** Timestamp when the track was added to Harmony. AIDEV-NOTE: Used for "Recently Added" view */
   addedAt?: number;
+  /** URL of the track page from the tag provider (Beatport, Traxsource, Bandcamp). AIDEV-NOTE: Persisted as WOAR frame (artistUrl in node-id3) */
+  url?: string;
 }
 
 export interface ResultTag {
@@ -74,6 +76,8 @@ export interface ResultTag {
   art?: Maybe<string>;
   label?: Maybe<string>;
   tokens?: Maybe<string[]>;
+  /** URL of the track page from the provider */
+  url?: Maybe<string>;
 }
 
 export interface PlaylistTrack {

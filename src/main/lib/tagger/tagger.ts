@@ -384,6 +384,7 @@ export const ApplyTagSelections = async (
             duration: BeatportTrackUtils.getDurationSecs(bt),
             art: artUrl,
             label: BeatportTrackUtils.getLabelName(bt),
+            url: bt.slug ? `https://www.beatport.com/track/${bt.slug}/${bt.id}` : undefined,
           };
         } else if (source === 'traxsource') {
           // Fetch via worker (worker re-searches and extends internally)
@@ -410,6 +411,7 @@ export const ApplyTagSelections = async (
             duration: txTrack.duration,
             art: txTrack.art || txTrack.thumbnail,
             label: txTrack.label,
+            url: txTrack.url,
           };
         } else if (source === 'bandcamp') {
           // AIDEV-NOTE: Bandcamp - fetch details via worker, defer audio analysis to batch
@@ -433,6 +435,7 @@ export const ApplyTagSelections = async (
             duration: trackDetails.duration_secs,
             art: trackDetails.artwork_url,
             label: trackDetails.label,
+            url: trackDetails.url,
           };
 
           // Flag for batch audio analysis

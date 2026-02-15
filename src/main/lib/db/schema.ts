@@ -31,6 +31,9 @@ export const tracks = sqliteTable('track', {
   waveformPeaks: text('waveformPeaks', { mode: 'json' }).$type<number[] | null>(),
   // AIDEV-NOTE: Timestamp when the track was added to Harmony (Unix timestamp in milliseconds)
   addedAt: integer('addedAt'),
+  // AIDEV-NOTE: URL of the track page from the tag provider (Beatport, Traxsource, Bandcamp)
+  // Persisted as WOAR frame (artistUrl in node-id3) / common.website in music-metadata
+  url: text('url'),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

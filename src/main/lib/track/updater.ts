@@ -19,6 +19,7 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     initialKey: tag.key ?? undefined,
     genre: tag.genre || track.genre,
     label: tag.label ?? undefined,
+    url: tag.url ?? track.url,
   };
 
   try {

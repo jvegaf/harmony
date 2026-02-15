@@ -15,6 +15,7 @@ Harmony is a music manager designed specifically for old-school DJs. It allows y
 - ⚡ **High-performance drag & drop** - Instant track reordering (< 10ms)
 - 🎨 Custom drag ghost showing track information
 - 🔄 Automatic background synchronization
+- 🔗 **Track URLs** - Store and access track pages from Beatport, Traxsource, and Bandcamp
 - 🎧 Intuitive interface designed for DJs
 
 ## Tech Stack

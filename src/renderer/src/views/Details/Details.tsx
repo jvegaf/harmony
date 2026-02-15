@@ -10,6 +10,7 @@ import {
   IconEraser,
   IconChevronLeft,
   IconChevronRight,
+  IconExternalLink,
 } from '@tabler/icons-react';
 import { LoaderData } from '../router';
 import appStyles from '../Root.module.css';
@@ -44,6 +45,7 @@ export default function DetailsView() {
       initialKey: '',
       comment: '',
       label: '',
+      url: '',
       rating: {
         source: '',
         rating: '',
@@ -219,6 +221,21 @@ export default function DetailsView() {
               TraxxSource
             </Button>
           </Group>
+          {track.url && (
+            <Group
+              justify='center'
+              mt='xs'
+            >
+              <Button
+                variant='light'
+                size='sm'
+                leftSection={<IconExternalLink size={16} />}
+                onClick={() => shell.openExternal(track.url!)}
+              >
+                Open Track Page
+              </Button>
+            </Group>
+          )}
         </Stack>
       </div>
       <div className={styles.detailsRight}>
@@ -299,6 +316,13 @@ export default function DetailsView() {
             label='Comments'
             {...form.getInputProps('comment')}
             key={form.key('comment')}
+            onContextMenu={handleContextMenu}
+          />
+          <TextInput
+            label='Website / Track URL'
+            placeholder='https://...'
+            {...form.getInputProps('url')}
+            key={form.key('url')}
             onContextMenu={handleContextMenu}
           />
           <Group
