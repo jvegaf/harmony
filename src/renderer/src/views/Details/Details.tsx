@@ -3,6 +3,7 @@ import { LoaderFunctionArgs, useLoaderData, useNavigate, useRevalidator } from '
 import { Button, Grid, GridCol, Group, Stack, Textarea, TextInput } from '@mantine/core';
 import { hasLength, useForm } from '@mantine/form';
 import { modals } from '@mantine/modals';
+import { notifications } from '@mantine/notifications';
 import {
   IconSearch,
   IconBrandGoogle,
@@ -11,6 +12,10 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconExternalLink,
+  IconReplace,
+  IconStarOff,
+  IconWand,
+  IconFileImport,
 } from '@tabler/icons-react';
 import { LoaderData } from '../router';
 import appStyles from '../Root.module.css';
@@ -20,6 +25,7 @@ import TrackRatingComponent from '../../components/TrackRatingComponent/TrackRat
 import { useLibraryAPI } from '../../stores/useLibraryStore';
 import { useDetailsNavigationAPI, useDetailsNavigationStore } from '../../stores/useDetailsNavigationStore';
 import { GetFilenameWithoutExtension } from '../../lib/utils-library';
+import { parseDuration } from '../../lib/utils';
 import { SearchEngine } from '../../../../preload/types/harmony';
 import { SanitizedTitle } from '../../../../preload/utils';
 
@@ -68,6 +74,14 @@ export default function DetailsView() {
       await libraryAPI.updateTrackMetadata(track.id, values);
       form.resetDirty(values);
       revalidator.revalidate();
+
+      // Show success notification
+      notifications.show({
+        title: 'Saved',
+        message: 'Track metadata updated successfully',
+        color: 'green',
+        autoClose: 2000,
+      });
     },
     [track, libraryAPI, form, revalidator],
   );
@@ -129,6 +143,79 @@ export default function DetailsView() {
     form.setValues({ comment: '' });
   }, []);
 
+  // AIDEV-NOTE: Handler to replace underscores with spaces in all text fields
+  const replaceUnderscoresWithSpaces = useCallback(() => {
+    const currentValues = form.getValues();
+    const updatedValues: Record<string, string> = {};
+    const textFields = ['title', 'artist', 'album', 'genre', 'label', 'comment', 'url'] as const;
+
+    for (const field of textFields) {
+      const value = currentValues[field];
+      if (typeof value === 'string' && value.includes('_')) {
+        updatedValues[field] = value.replace(/_/g, ' ');
+      }
+    }
+
+    if (Object.keys(updatedValues).length > 0) {
+      form.setValues(updatedValues);
+    }
+  }, [form]);
+
+  const resetRating = useCallback(() => {
+    form.setValues({ rating: { source: '', rating: '0' } });
+  }, [form]);
+
+  const findCandidates = useCallback(async () => {
+    // AIDEV-NOTE: Disable auto-apply when finding candidates from Detail View
+    // User should always see the selection modal, even for perfect matches
+    await libraryAPI.findCandidates([track], { autoApply: false });
+  }, [track, libraryAPI]);
+
+  const replaceFile = useCallback(async () => {
+    try {
+      // AIDEV-NOTE: Get the current file extension to restrict picker to same format
+      const currentExt = track.path.split('.').pop()?.toLowerCase() || 'mp3';
+
+      // Open file picker restricted to the same extension
+      const result = await window.Main.dialog.open({
+        title: 'Select replacement audio file',
+        filters: [
+          { name: `Audio Files (.${currentExt})`, extensions: [currentExt] },
+          { name: 'All Files', extensions: ['*'] },
+        ],
+        properties: ['openFile'],
+      });
+
+      // User cancelled
+      if (!result || result.canceled || result.filePaths.length === 0) {
+        return;
+      }
+
+      const newFilePath = result.filePaths[0];
+
+      // Call the IPC method to replace the file
+      await window.Main.library.replaceFile(track.id, track.path, newFilePath);
+
+      // Show success notification
+      notifications.show({
+        title: 'File Replaced',
+        message: 'Track file replaced and metadata updated successfully',
+        color: 'green',
+        autoClose: 3000,
+      });
+
+      // Refresh the view to show updated metadata
+      revalidator.revalidate();
+    } catch (error) {
+      notifications.show({
+        title: 'Replacement Failed',
+        message: error instanceof Error ? error.message : 'Failed to replace file',
+        color: 'red',
+        autoClose: 5000,
+      });
+    }
+  }, [track, revalidator]);
+
   const searchOn = useCallback(
     (engine: SearchEngine) => {
       const sanitizedQuery = encodeURIComponent(`${track.artist} ${SanitizedTitle(track.title)}`);
@@ -159,84 +246,105 @@ export default function DetailsView() {
   return (
     <div className={`${appStyles.view} ${styles.viewDetails}`}>
       <div className={styles.detailsLeft}>
-        <div className={styles.detailsCover}>
-          <Cover track={track} />
-        </div>
-        <div className={styles.rating}>
-          <TrackRatingComponent
-            trackSrc={track.path}
-            rating={track.rating}
-            size='xl'
-          />
-        </div>
         <Stack
-          gap='sm'
-          mt='md'
+          gap='xs'
+          className={styles.detailsButtons}
         >
-          <Group
-            justify='center'
-            gap='sm'
+          <Button
+            variant='light'
+            leftSection={<IconTag size={18} />}
+            onClick={filenameToTag}
+            fullWidth
           >
-            <Button
-              variant='light'
-              leftSection={<IconTag size={18} />}
-              onClick={filenameToTag}
-            >
-              Filename to Tag
-            </Button>
-            <Button
-              variant='light'
-              leftSection={<IconEraser size={18} />}
-              onClick={clearComments}
-            >
-              Clear Comments
-            </Button>
-          </Group>
-          <Group
-            justify='center'
-            gap='xs'
+            Filename to Tag
+          </Button>
+          <Button
+            variant='light'
+            leftSection={<IconReplace size={18} />}
+            onClick={replaceUnderscoresWithSpaces}
+            fullWidth
           >
-            <Button
-              variant='outline'
-              size='sm'
-              leftSection={<IconSearch size={16} />}
-              onClick={() => searchOn(SearchEngine.BEATPORT)}
-            >
-              Beatport
-            </Button>
-            <Button
-              variant='outline'
-              size='sm'
-              leftSection={<IconBrandGoogle size={16} />}
-              onClick={() => searchOn(SearchEngine.GOOGLE)}
-            >
-              Google
-            </Button>
-            <Button
-              variant='outline'
-              size='sm'
-              leftSection={<IconSearch size={16} />}
-              onClick={() => searchOn(SearchEngine.TRAXSOURCE)}
-            >
-              TraxxSource
-            </Button>
-          </Group>
+            Replace with space
+          </Button>
+          <Button
+            variant='light'
+            leftSection={<IconEraser size={18} />}
+            onClick={clearComments}
+            fullWidth
+          >
+            Clear Comments
+          </Button>
+          <Button
+            variant='light'
+            leftSection={<IconStarOff size={18} />}
+            onClick={resetRating}
+            fullWidth
+          >
+            Reset rating
+          </Button>
+          <Button
+            variant='light'
+            leftSection={<IconWand size={18} />}
+            onClick={findCandidates}
+            fullWidth
+          >
+            Find Tag Candidates
+          </Button>
+          <Button
+            variant='light'
+            leftSection={<IconFileImport size={18} />}
+            onClick={replaceFile}
+            fullWidth
+          >
+            File Replacement
+          </Button>
+          <Button
+            variant='outline'
+            leftSection={<IconSearch size={18} />}
+            onClick={() => searchOn(SearchEngine.BEATPORT)}
+            fullWidth
+          >
+            Beatport
+          </Button>
+          <Button
+            variant='outline'
+            leftSection={<IconBrandGoogle size={18} />}
+            onClick={() => searchOn(SearchEngine.GOOGLE)}
+            fullWidth
+          >
+            Google
+          </Button>
+          <Button
+            variant='outline'
+            leftSection={<IconSearch size={18} />}
+            onClick={() => searchOn(SearchEngine.TRAXSOURCE)}
+            fullWidth
+          >
+            TraxxSource
+          </Button>
           {track.url && (
-            <Group
-              justify='center'
-              mt='xs'
+            <Button
+              variant='light'
+              leftSection={<IconExternalLink size={18} />}
+              onClick={() => shell.openExternal(track.url!)}
+              fullWidth
             >
-              <Button
-                variant='light'
-                size='sm'
-                leftSection={<IconExternalLink size={16} />}
-                onClick={() => shell.openExternal(track.url!)}
-              >
-                Open Track Page
-              </Button>
-            </Group>
+              Open Track Page
+            </Button>
           )}
         </Stack>
+        <div className={styles.detailsCoverRating}>
+          <div className={styles.detailsCover}>
+            <Cover track={track} />
+          </div>
+          <div className={styles.rating}>
+            <TrackRatingComponent
+              trackSrc={track.path}
+              rating={track.rating}
+              size='xl'
+            />
+          </div>
+        </div>
       </div>
       <div className={styles.detailsRight}>
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -262,7 +370,7 @@ export default function DetailsView() {
             justify='center'
             grow
           >
-            <GridCol span={5}>
+            <GridCol span={4}>
               <TextInput
                 label='Album'
                 {...form.getInputProps('album')}
@@ -278,12 +386,19 @@ export default function DetailsView() {
                 onContextMenu={handleContextMenu}
               />
             </GridCol>
-            <GridCol span={4}>
+            <GridCol span={3}>
               <TextInput
                 label='Label'
                 {...form.getInputProps('label')}
                 key={form.key('label')}
                 onContextMenu={handleContextMenu}
+              />
+            </GridCol>
+            <GridCol span={2}>
+              <TextInput
+                readOnly
+                label='Bitrate'
+                value={track.bitrate ? `${track.bitrate} kbps` : ''}
               />
             </GridCol>
           </Grid>
@@ -308,6 +423,11 @@ export default function DetailsView() {
               {...form.getInputProps('initialKey')}
               key={form.key('initialKey')}
               onContextMenu={handleContextMenu}
+            />
+            <TextInput
+              readOnly
+              label='Time'
+              value={parseDuration(track.duration)}
             />
           </Group>
           <Textarea

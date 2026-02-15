@@ -389,7 +389,6 @@ detailsNavAPI.clear();
 Para verificar la funcionalidad:
 
 1. **Test básico de navegación:**
-
    - Abrir Library
    - Click derecho en un track del medio de la lista
    - Verificar que ambos botones Previous/Next están habilitados
@@ -397,14 +396,12 @@ Para verificar la funcionalidad:
    - Click en "Previous" → debe volver al track anterior
 
 2. **Test de límites:**
-
    - Click derecho en el **primer** track de la lista
    - Verificar que "Previous" está **deshabilitado**
    - Navegar con "Next" hasta el **último** track
    - Verificar que "Next" está **deshabilitado**
 
 3. **Test de Save sin navegación:**
-
    - Abrir Details de cualquier track
    - Editar el campo "Title"
    - Click en "Save"
@@ -412,21 +409,18 @@ Para verificar la funcionalidad:
    - Verificar que el título se actualizó (revalidation funcionó)
 
 4. **Test con filtros:**
-
    - En Library, escribir algo en el buscador (ej: "house")
    - Click derecho en uno de los tracks filtrados
    - Navegar con Previous/Next
    - Verificar que **solo navega entre los tracks filtrados**
 
 5. **Test en Playlist:**
-
    - Abrir una playlist
    - Click derecho en un track
    - Navegar con Previous/Next
    - Verificar que **solo navega dentro de la playlist**
 
 6. **🆕 Test de confirmación con cambios sin guardar:**
-
    - Abrir Details de cualquier track
    - Editar el campo "Label" (o cualquier campo)
    - **NO hacer click en Save**
@@ -437,7 +431,6 @@ Para verificar la funcionalidad:
    - Click en "Leave" → Cambios se descartan, navega al siguiente track
 
 7. **🆕 Test de navegación sin diálogo después de guardar:**
-
    - Abrir Details de cualquier track
    - Editar el campo "BPM"
    - Click en "Save"

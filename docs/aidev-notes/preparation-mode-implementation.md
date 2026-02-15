@@ -89,13 +89,11 @@ Main component with:
   - `pressedK`, `pressedD` - Visual feedback for key presses
   - `isAtEnd` - Detect when reached end of library
 - **Keyboard Shortcuts**:
-
   - `K` → `handleKeep()` - Adds current track to preparation playlist and advances
   - `D` → `handleSkip()` - Skips current track (moves to next without adding)
   - `Q` → `handleQuit()` - Exits preparation mode
 
 - **Player Integration**:
-
   - Enables `isPruneMode` to start tracks at 50% position (reuses Prune Mode feature)
   - Auto-starts playback on mount
   - Disables mode on unmount

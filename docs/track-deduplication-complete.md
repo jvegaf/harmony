@@ -243,20 +243,17 @@ Comprehensive database constraint tests created but **skipped** due to Node modu
 Before releasing, verify:
 
 1. **Filesystem Import**
-
    - [ ] Import tracks from folder → Re-import same folder → No duplicates created
    - [ ] Verify log shows "Pre-filter: X already imported, Y to scan"
    - [ ] Confirm re-import is much faster (skips metadata scan)
    - [ ] Check that missing metadata is filled on re-import
 
 2. **Traktor Sync**
-
    - [ ] Sync with Traktor collection → Re-sync → No duplicates
    - [ ] Verify Traktor metadata fills empty fields in existing tracks
    - [ ] Confirm BPM, key, cue points are merged correctly
 
 3. **Cross-Source Import**
-
    - [ ] Import tracks from filesystem first
    - [ ] Then sync with Traktor for same tracks
    - [ ] Verify smart merge combines data from both sources

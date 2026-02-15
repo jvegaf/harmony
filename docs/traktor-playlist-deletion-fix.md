@@ -270,7 +270,6 @@ delete parentNode.SUBNODES.NODE (limpieza)
 ### Implicaciones
 
 1. **Playlists creados directamente en Traktor**:
-
    - Si un usuario crea un playlist directamente en Traktor
    - Y NO está en Harmony
    - Será **eliminado** en el próximo export desde Harmony
@@ -359,7 +358,6 @@ if (parentNode.SUBNODES.NODE.length === 0) {
 **No requiere migración** - El cambio es transparente:
 
 1. **Primera ejecución después del update**:
-
    - Si hay playlists en Traktor que no están en Harmony
    - Serán eliminados en el próximo export
    - **Recomendación**: Hacer import antes de export

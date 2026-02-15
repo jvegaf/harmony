@@ -203,6 +203,7 @@ async function applyPerfectMatchesInBackground(
  * @param onProgress Callback opcional para reportar progreso (processed, total, currentTrackTitle)
  * @param onAutoApplyProgress Callback opcional para reportar progreso del auto-apply en background
  * @param onAutoApplyComplete Callback opcional para notificar cuando el auto-apply termine
+ * @param options Opciones adicionales: autoApply (default: true) controla si se aplican matches perfectos automáticamente
  * @returns Lista de TrackCandidatesResult con top 4 candidatos (excluye matches perfectos ya aplicados)
  */
 export const FindCandidates = async (
@@ -210,7 +211,10 @@ export const FindCandidates = async (
   onProgress?: ProgressCallback,
   onAutoApplyProgress?: AutoApplyProgressCallback,
   onAutoApplyComplete?: AutoApplyCompleteCallback,
+  options?: { autoApply?: boolean },
 ): Promise<TrackCandidatesResult[]> => {
+  // AIDEV-NOTE: autoApply defaults to true to maintain backward compatibility
+  const autoApply = options?.autoApply ?? true;
   // Create orchestrator for scoring/ranking (not for searching - workers do that)
   const orchestrator = new ProviderOrchestrator(
     [createBeatportProvider(), createTraxsourceProvider(), createBandcampProvider()],
@@ -297,7 +301,8 @@ export const FindCandidates = async (
 
         // AIDEV-NOTE: Check if best candidate has >= 90% match - auto-apply and skip preselection
         // Changed from === 0.9 to >= 0.9 to handle float precision issues
-        if (candidates.length > 0 && candidates[0].similarity_score >= 0.9) {
+        // Only auto-apply if autoApply flag is true (default behavior)
+        if (autoApply && candidates.length > 0 && candidates[0].similarity_score >= 0.9) {
           log.info(
             `[AUTO-APPLY] Perfect match for ${track.title} - ${candidates[0].source}:${candidates[0].id} (score: ${(candidates[0].similarity_score * 100).toFixed(1)}%)`,
           );

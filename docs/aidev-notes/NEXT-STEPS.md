@@ -8,7 +8,6 @@
 ## ✅ What's Complete
 
 1. **Core Implementation**
-
    - ✅ Drag & drop functionality for playlist track reordering
    - ✅ Conditional enablement based on sort state (only when sorted by `#`)
    - ✅ Visual drop indicator with above/below positioning
@@ -17,7 +16,6 @@
    - ✅ **NEW:** Custom drag ghost showing `🎵 {Title - Artist}`
 
 2. **Code Quality**
-
    - ✅ TypeScript compilation passing (`yarn typecheck`)
    - ✅ ESLint passing (`yarn lint`)
    - ✅ Accessibility fix applied (`<section>` with aria-label)
@@ -25,7 +23,6 @@
    - ✅ Event handlers use `useCallback` for performance
 
 3. **Performance Instrumentation** ⭐ NEW
-
    - ✅ Performance logger utility created (`performance-logger.ts`)
    - ✅ Detailed timing logs throughout drag & drop pipeline
    - ✅ CSV export functionality for data analysis
@@ -154,13 +151,11 @@ When you drag & drop a track, you'll see detailed logs like this:
 ### Primary Questions:
 
 1. **What's the total lag?**
-
    - Acceptable: < 100ms
    - Noticeable: 100-200ms
    - Problematic: > 200ms
 
 2. **Where's the bottleneck?**
-
    - IPC overhead?
    - Database queries (`findOnlyByID` or `getAll`)?
    - Router revalidate?

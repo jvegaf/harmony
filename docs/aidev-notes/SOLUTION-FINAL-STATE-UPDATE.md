@@ -298,16 +298,13 @@ console.log(rowData[0]);
 #### Cambios principales:
 
 1. **Líneas 156-169:** `defaultColDef`
-
    - ✅ Agregado `rowDragText` callback con emoji 🎵
 
 2. **Líneas 129-141:** Columna `playlistOrder`
-
    - ✅ Solo tiene `rowDrag: isDragEnabled`
    - ✅ Eliminado `rowDragText` (movido a defaultColDef)
 
 3. **Líneas 351-450:** `onRowDragEnd`
-
    - ✅ Calcula orden desde `rowData` state (no del grid)
    - ✅ Usa `splice()` para reordenar
    - ✅ Actualiza estado con `setRowData()` inmediatamente

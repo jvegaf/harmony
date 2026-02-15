@@ -46,7 +46,6 @@ Create a test music folder with:
 ### Steps
 
 1. **First Import**:
-
    - Open Harmony
    - Navigate to Library/Import
    - Select your test music folder
@@ -55,13 +54,11 @@ Create a test music folder with:
    - **Record**: Number of tracks imported (e.g., "45 tracks imported")
 
 2. **Verify Import**:
-
    - Check the library view - all tracks should appear
    - Note track count in UI
    - Open a few tracks and check metadata
 
 3. **Second Import (Same Folder)**:
-
    - Select the SAME folder again
    - Click "Import Tracks"
    - **Watch the logs** for:
@@ -99,25 +96,21 @@ Create a test music folder with:
 ### Steps
 
 1. **First Import**:
-
    - Import tracks with incomplete metadata (no artist, missing album, etc.)
    - Record which tracks have missing fields
 
 2. **Manually Edit Metadata**:
-
    - Select a track with missing artist
    - Edit and add: Artist = "Test Artist", Genre = "Test Genre"
    - Save changes
 
 3. **Update File Tags**:
-
    - Using an external tool (MP3Tag, Kid3, etc.):
      - Add/update metadata for the SAME file
      - Set: Artist = "Different Artist", Album = "New Album"
      - Leave Genre empty in file
 
 4. **Re-import Folder**:
-
    - Import the same folder again
    - Should be very fast (pre-filter)
 
@@ -156,12 +149,10 @@ Create a test music folder with:
 ### Steps
 
 1. **Import from Filesystem**:
-
    - Import your test music folder into Harmony
    - Record track count (e.g., 45 tracks)
 
 2. **Add Same Tracks to Traktor**:
-
    - Open Traktor Pro
    - Import the SAME music folder
    - Add metadata in Traktor:
@@ -171,7 +162,6 @@ Create a test music folder with:
    - Save Traktor collection
 
 3. **Sync Harmony with Traktor**:
-
    - In Harmony, go to Traktor Sync
    - Click "Sync Collection" or similar
    - **Watch logs** for deduplication messages
@@ -208,12 +198,10 @@ Create a test music folder with:
 ### Steps
 
 1. **Start Fresh**:
-
    - Delete Harmony database
    - Launch Harmony (creates new empty DB)
 
 2. **Prepare Traktor Collection**:
-
    - In Traktor, have tracks with:
      - BPM: 128
      - Key: Am
@@ -221,14 +209,12 @@ Create a test music folder with:
      - Rating: 5 stars
 
 3. **Import Filesystem FIRST**:
-
    - Import music folder to Harmony
    - Tracks should have:
      - Artist, Title, Album (from file tags)
      - No BPM, no key, no cue points
 
 4. **Sync with Traktor SECOND**:
-
    - Sync Harmony with Traktor
    - Watch for deduplication logs
 
@@ -257,14 +243,12 @@ Create a test music folder with:
 ### Steps
 
 1. **First Import (Cold)**:
-
    - Start with empty database
    - Import folder with 100+ tracks
    - **Record time**: e.g., "180 seconds"
    - Note log messages about scanning
 
 2. **Second Import (Warm)**:
-
    - Import the SAME folder again
    - **Record time**: e.g., "5 seconds"
    - **Watch logs** for:
@@ -375,7 +359,6 @@ yarn db:clean-dupes
 ### Steps
 
 1. **Verify Migration Applied**:
-
    - Check migration status:
      ```bash
      # In SQLite viewer or CLI

@@ -65,7 +65,7 @@ type LibraryState = {
     updateTrackMetadata: (trackID: string, newFields: TrackEditableFields) => Promise<void>;
     highlightPlayingTrack: (highlight: boolean) => void;
     getCover: (track: Track) => Promise<string | null>;
-    findCandidates: (tracks: Track[]) => Promise<void>;
+    findCandidates: (tracks: Track[], options?: { autoApply?: boolean }) => Promise<void>;
     setTagCandidates: (candidates: TrackCandidatesResult[] | null) => void;
     applyTrackTagsSelections: (selections: TrackSelection[]) => Promise<void>;
     fixTrack: (trackID: string) => Promise<void>;
@@ -295,7 +295,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     getCover: async (track: Track): Promise<string | null> => {
       return await covers.getCoverAsBase64(track);
     },
-    findCandidates: async (tracks: Track[]): Promise<void> => {
+    findCandidates: async (tracks: Track[], options?: { autoApply?: boolean }): Promise<void> => {
       try {
         set({
           candidatesSearching: true,
@@ -305,7 +305,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         logger.info(`Starting candidate search for ${tracks.length} tracks`);
 
         // Llamar a la API (que procesa internamente todos los tracks)
-        const trkCandidates = await library.findTagCandidates(tracks);
+        const trkCandidates = await library.findTagCandidates(tracks, options);
 
         // AIDEV-NOTE: Si no hay candidatos manuales (todos fueron perfect matches >= 0.9),
         // no mostrar modal de selección. El renderer escuchará TAG_AUTO_APPLY_COMPLETE
@@ -423,10 +423,15 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
           tagsApplyProgress: { processed: 0, total: 0 },
         });
 
-        // AIDEV-NOTE: Revalidate router and navigate to recently added to show updated tracks
+        // AIDEV-NOTE: Revalidate router to refresh data
         router.revalidate();
-        // Use window.location.hash for navigation with HashRouter
-        window.location.hash = '#/recent_added';
+
+        // AIDEV-NOTE: Only navigate to recent_added if NOT in Detail View
+        // If in Detail View, stay there to show updated track data
+        const currentPath = window.location.hash.replace('#', '');
+        if (!currentPath.startsWith('/details/')) {
+          window.location.hash = '#/recent_added';
+        }
 
         logger.info(
           `Tag application complete: ${totalUpdated} updated, ${totalErrors} errors, ${selections.length - validSelections.length} skipped`,

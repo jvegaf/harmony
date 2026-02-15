@@ -275,20 +275,16 @@ console.log('Drag enabled:', isDragEnabled);
 #### Cambios:
 
 1. **Líneas 129-148:** Columna `playlistOrder`
-
    - Agregado `rowDrag: isDragEnabled`
    - Agregado `rowDragText` con emoji 🎵
 
 2. **Línea 154:** `colDefs` useMemo
-
    - Dependencia: `[type, isDragEnabled]`
 
 3. **Líneas 233-238:** `useEffect` para sync de tracks
-
    - Actualiza `rowData` cuando cambian los tracks (fix cambio de playlists)
 
 4. **Líneas 349-430:** `onRowDragEnd` simplificado
-
    - AG Grid managed hace el reordenamiento
    - Sincronizamos estado con `setRowData()`
    - Backend fire-and-forget (sin await)

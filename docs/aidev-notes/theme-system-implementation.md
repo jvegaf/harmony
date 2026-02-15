@@ -13,19 +13,16 @@ Implemented a comprehensive light/dark theme system for Harmony, transitioning f
 ### Core Components
 
 1. **CSS Design Token System** (`src/renderer/src/App.css`)
-
    - Dual color scheme support using PostCSS Mantine mixins
    - Semantic design tokens with `--hm-*` prefix
    - Legacy variable aliases for backward compatibility
 
 2. **Backend Configuration** (`src/main/modules/ConfigModule.ts`)
-
    - Added `theme: 'light' | 'dark' | 'auto'` to Config interface
    - Default theme: `'auto'` (follows system preference)
    - Persisted to electron-store
 
 3. **Theme Loading** (`src/renderer/src/Providers.tsx`)
-
    - Dynamic theme loading via IPC on app startup
    - Mantine color scheme integration
 

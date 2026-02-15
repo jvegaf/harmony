@@ -23,19 +23,16 @@ Feature comparison, migration guide, and decision framework for choosing between
 ### ✅ Choose Drizzle if you need:
 
 1. **Performance-critical applications**
-
    - Microservices with tight latency requirements
    - High-throughput APIs (>10K req/s)
    - Serverless/edge functions with cold start concerns
 
 2. **Minimal bundle size**
-
    - Client-side database (SQLite in browser)
    - Edge runtime deployments
    - Mobile applications with bundle constraints
 
 3. **SQL control**
-
    - Complex queries with CTEs, window functions
    - Raw SQL for specific database features
    - Database-specific optimizations
@@ -67,19 +64,16 @@ export async function GET() {
 ### ✅ Choose Prisma if you need:
 
 1. **Rapid prototyping**
-
    - Quick schema iterations
    - Automatic migrations
    - Less SQL knowledge required
 
 2. **Team with varied SQL experience**
-
    - Abstracted query interface
    - Declarative migrations
    - Generated documentation
 
 3. **Mature ecosystem**
-
    - Extensive community resources
    - Third-party integrations (Nexus, tRPC)
    - Enterprise support options

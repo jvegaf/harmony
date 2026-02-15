@@ -266,14 +266,12 @@ const artworkUrl = dynamic_uri.replace('{w}', '500').replace('{h}', '500');
 ### Key Takeaways
 
 1. **Genre Field Handling**: Always expect `genre` and `sub_genre` to potentially come in multiple formats:
-
    - Array format (scraping): `track.genre[0]`
    - Object format (scraping): `track.genre`
    - Singular format (API v4): `data.genre`
    - Plural format (API v4 fallback): `data.genres[0]`
 
 2. **Image Field Handling**: The Beatport API v4 uses `uri` and `dynamic_uri` field names for image objects, NOT `url`:
-
    - Always read `data.release.image.uri` and `data.release.image.dynamic_uri`
    - Always read `data.image.uri` and `data.image.dynamic_uri`
    - Use `BeatportImageUtils.getUrl()` to handle `{w}` and `{h}` placeholder replacement

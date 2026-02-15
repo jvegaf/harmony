@@ -179,7 +179,6 @@ yarn dev
 ## Files Modified
 
 1. **`src/main/lib/db/database.ts`**
-
    - `insertTracks()`: Pre-check for path conflicts before insert (lines 151-219)
    - `findTracksByPath()`: Case-insensitive matching on Windows/macOS (lines 225-245)
 
@@ -198,19 +197,16 @@ yarn dev
 To verify the fix works in practice:
 
 1. **Filesystem import test**:
-
    - Import a music folder
    - Import the same folder again (or overlapping folder)
    - Verify no duplicates appear in the library
 
 2. **Traktor sync test**:
-
    - Do a manual Traktor sync
    - Do an auto-sync (or another manual sync)
    - Verify no duplicates for tracks that exist in both
 
 3. **Cross-source test**:
-
    - Import a track via filesystem
    - Import the same track via Traktor sync
    - Verify only one track exists, with merged metadata

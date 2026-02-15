@@ -31,7 +31,6 @@ Cannot access "crypto.createHash" in client code.
 **Split the module by process context:**
 
 1. **`src/preload/lib/id-provider.ts`** (browser-compatible)
-
    - Keeps `makeID()` using `uuid` library only
    - Can be imported by renderer
    - No Node.js dependencies
@@ -48,18 +47,15 @@ Cannot access "crypto.createHash" in client code.
 ### Modified
 
 1. **`src/preload/lib/id-provider.ts`**
-
    - **Removed**: `makeTrackID()` function
    - **Removed**: `import { createHash } from 'crypto'`
    - **Kept**: `makeID()` function using `uuid`
    - **Added**: Comment explaining why crypto is not used
 
 2. **`src/main/modules/IPCLibraryModule.ts`**
-
    - **Changed**: Import from `'../lib/track-id'` instead of `'../../preload/lib/id-provider'`
 
 3. **`src/main/lib/traktor/mappers/track-mapper.ts`**
-
    - **Changed**: Import from `'../../track-id'` instead of `'../../../../preload/lib/id-provider'`
 
 4. **`src/preload/lib/__tests__/id-provider.test.ts`**
@@ -69,7 +65,6 @@ Cannot access "crypto.createHash" in client code.
 ### Created
 
 5. **`src/main/lib/track-id.ts`** (NEW)
-
    - Contains `makeTrackID()` with full crypto implementation
    - Main process only
    - Clear documentation about Node.js requirement

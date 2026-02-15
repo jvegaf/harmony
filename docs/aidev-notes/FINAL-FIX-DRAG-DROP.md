@@ -349,22 +349,18 @@ console.log('New rowData:', newOrderWithIndex);
 ### Líneas modificadas:
 
 1. **91-154:** `colDefs` useMemo
-
    - Agregado `rowDrag: isDragEnabled` en columna `playlistOrder`
    - Agregado `rowDragText` con emoji 🎵
    - Dependencia actualizada: `[type, isDragEnabled]`
 
 2. **156-162:** `defaultColDef` useMemo
-
    - Eliminado `rowDragText` (movido a columna específica)
 
 3. **233-238:** Nuevo `useEffect`
-
    - Actualiza `rowData` cuando cambian `tracksWithOrder`
    - **Corrige bug de cambio de playlists** ✅
 
 4. **350-460:** `onRowDragEnd` callback
-
    - Captura nuevo orden con `forEachNode()`
    - Actualiza estado con `setRowData()`
    - Backend sync en background

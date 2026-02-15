@@ -72,6 +72,7 @@ class IPCLibraryModule extends ModuleWindow {
     ipcMain.handle(channels.LIBRARY_IMPORT_TRACKS, this.importTracks.bind(this));
     ipcMain.handle(channels.LIBRARY_LOOKUP, this.libraryLookup.bind(this));
     ipcMain.handle(channels.LIBRARY_CHECK_CHANGES, this.checkLibraryChanges.bind(this));
+    ipcMain.handle(channels.TRACK_REPLACE_FILE, this.replaceTrackFile.bind(this));
     ipcMain.on(channels.TRACK_UPDATE_RATING, (_: IpcMainEvent, payload: UpdateRatingPayload) =>
       UpdateTrackRating(payload),
     );
@@ -290,6 +291,74 @@ class IPCLibraryModule extends ModuleWindow {
     // }
 
     return metadata as Track;
+  }
+
+  /**
+   * Replace a track file on disk with a new file, re-read metadata, and update database.
+   * AIDEV-NOTE: Validates same extension, copies new file over old path,
+   * re-reads metadata, updates DB, and marks pending Traktor sync.
+   */
+  private async replaceTrackFile(
+    _e: IpcMainInvokeEvent,
+    trackId: string,
+    trackPath: string,
+    newFilePath: string,
+  ): Promise<Track> {
+    try {
+      log.info(`[File Replacement] Starting replacement for track ${trackId}`);
+      log.info(`[File Replacement] Old path: ${trackPath}`);
+      log.info(`[File Replacement] New path: ${newFilePath}`);
+
+      // 1. Validate same extension
+      const oldExt = path.extname(trackPath).toLowerCase();
+      const newExt = path.extname(newFilePath).toLowerCase();
+      if (oldExt !== newExt) {
+        const error = `Extension mismatch: old file is ${oldExt}, new file is ${newExt}. Only same extension replacement is allowed.`;
+        log.error(`[File Replacement] ${error}`);
+        throw new Error(error);
+      }
+
+      // 2. Copy new file over old path (overwrites old file)
+      await fs.promises.copyFile(newFilePath, trackPath);
+      log.info(`[File Replacement] File copied successfully`);
+
+      // 3. Re-read metadata from the new file
+      const freshMetadata = await this.getMetadata(trackPath);
+      log.info(
+        `[File Replacement] Metadata re-read: duration=${freshMetadata.duration}s, bitrate=${freshMetadata.bitrate}kbps`,
+      );
+
+      // 4. Preserve identity fields (id, path, addedAt stay the same)
+      const updatedTrack: Track = {
+        ...freshMetadata,
+        id: trackId, // Keep original ID (same path = same hash)
+        path: trackPath, // Keep original path
+        // addedAt is already set by getMetadata, but we should preserve the original
+      };
+
+      // Get the original addedAt from database
+      const db = (await import('../lib/db/database')).Database.getInstance();
+      const originalTrack = await db.findTrackByID(trackId);
+      if (originalTrack) {
+        updatedTrack.addedAt = originalTrack.addedAt;
+      }
+
+      // 5. Update database
+      await db.updateTrack(updatedTrack);
+      log.info(`[File Replacement] Database updated for track ${trackId}`);
+
+      // 6. Emit library change event to mark pending Traktor sync
+      emitLibraryChanged('tracks-updated', 1);
+      log.info(`[File Replacement] Library change event emitted`);
+
+      // 7. Invalidate duplicates cache since file changed
+      this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
+
+      return updatedTrack;
+    } catch (error) {
+      log.error(`[File Replacement] Failed to replace file for track ${trackId}:`, error);
+      throw error;
+    }
   }
 
   /**

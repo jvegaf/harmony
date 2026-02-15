@@ -1,10 +1,10 @@
-import { type ReactNode, useCallback, useState } from 'react';
+import { type ReactNode, useCallback, useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { IconSearch, IconPlus, IconMusic, IconVinyl, IconClock } from '@tabler/icons-react';
 
 import { Playlist } from '../../../../preload/types/harmony';
 import PlaylistsAPI from '@renderer/stores/PlaylistsAPI';
-import useLibraryStore from '@renderer/stores/useLibraryStore';
+import useLibraryStore, { useLibraryAPI } from '@renderer/stores/useLibraryStore';
 
 import styles from './Sidebar.module.css';
 
@@ -24,12 +24,21 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
   const { playlistID } = useParams();
   const location = useLocation();
   const { renamingPlaylist, api } = useLibraryStore();
+  const libraryAPI = useLibraryAPI();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
   // AIDEV-NOTE: Determine active nav item based on current route
   const isLibraryRoute = location.pathname === '/library' || location.pathname === '/';
   const isRecentRoute = location.pathname === '/recent_added';
+
+  // AIDEV-NOTE: Clear search when navigating to track detail view
+  useEffect(() => {
+    if (location.pathname.startsWith('/details/')) {
+      setSearchQuery('');
+      libraryAPI.search('');
+    }
+  }, [location.pathname, libraryAPI]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

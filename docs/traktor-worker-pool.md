@@ -329,14 +329,12 @@ yarn start
 ### Verificación
 
 1. **Sync en Background**
-
    - Iniciar la app con auto-sync habilitado
    - ✓ La UI debe permanecer responsive
    - ✓ Ver eventos de progreso en el renderer
    - ✓ Tracks se importan/actualizan correctamente
 
 2. **Export en Background**
-
    - Hacer cambios en tracks/playlists
    - Ejecutar export desde settings
    - ✓ La UI no se congela

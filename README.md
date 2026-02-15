@@ -6,8 +6,6 @@
 
 Harmony is a music manager designed specifically for old-school DJs. It allows you to organize and manage your music collection efficiently.
 
-![harmony main](./img/harmony1.png) ![harmony duplicate finder](./img/harmony2.png)
-
 ## Features
 
 - 🎵 Easy music management with automated tasks
@@ -17,6 +15,31 @@ Harmony is a music manager designed specifically for old-school DJs. It allows y
 - 🔄 Automatic background synchronization
 - 🔗 **Track URLs** - Store and access track pages from Beatport, Traxsource, and Bandcamp
 - 🎧 Intuitive interface designed for DJs
+
+## Screenshots
+
+<details>
+<summary><b>📸 Click to view screenshots</b></summary>
+
+### Main Library View
+
+Manage your entire music collection with powerful search and filtering capabilities.
+
+![Main Library](./img/harmony1.png)
+
+### Track Detail View
+
+Edit track metadata, find tag candidates from Beatport/Traxsource/Bandcamp, replace files, and manage ratings.
+
+![Track Detail](./img/harmony-track-detail.png)
+
+### Duplicate Finder
+
+Identify and manage duplicate tracks in your collection with advanced comparison tools.
+
+![Duplicate Finder](./img/harmony2.png)
+
+</details>
 
 ## Tech Stack
 

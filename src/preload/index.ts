@@ -85,8 +85,8 @@ const api = {
   library: {
     parseUri,
     fixTags: async (track: Track) => ipcRenderer.invoke(channels.FIX_TAGS, track),
-    findTagCandidates: async (tracks: Track[]) => {
-      const results = await ipcRenderer.invoke(channels.FIND_TAG_CANDIDATES, tracks);
+    findTagCandidates: async (tracks: Track[], options?: { autoApply?: boolean }) => {
+      const results = await ipcRenderer.invoke(channels.FIND_TAG_CANDIDATES, tracks, options);
       return results.map((result: any) => ({
         ...result,
         candidates: result.candidates.map((c: any) => ({
@@ -116,6 +116,8 @@ const api = {
     updateRating: (payload: UpdateRatingPayload) => ipcRenderer.send(channels.TRACK_UPDATE_RATING, payload),
     updateMetadata: async (track: Track) => ipcRenderer.send(channels.TRACK_UPDATE_METADATA, track),
     deleteTracks: async (tracks: Track[]) => ipcRenderer.send(channels.TRACKS_DELETE, tracks),
+    replaceFile: async (trackId: string, trackPath: string, newFilePath: string) =>
+      ipcRenderer.invoke(channels.TRACK_REPLACE_FILE, trackId, trackPath, newFilePath),
   },
   playlists: {
     resolveM3U: (m3uPath: string) => ipcRenderer.invoke(channels.PLAYLISTS_RESOLVE_M3U, m3uPath),

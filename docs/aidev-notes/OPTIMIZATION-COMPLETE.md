@@ -201,7 +201,6 @@ Open DevTools Console (`Ctrl+Shift+I`)
    ```
 3. Drag track #10 to position #5 (drag upward)
 4. **Verify:**
-
    - ✅ Track moves INSTANTLY (no visible lag)
    - ✅ Track appears in correct position
    - ✅ Order is visually correct
@@ -209,7 +208,6 @@ Open DevTools Console (`Ctrl+Shift+I`)
 
 5. Reload playlist (navigate away and back)
 6. **Verify:**
-
    - ✅ Track order persists (backend sync succeeded)
 
 7. View performance summary:
@@ -344,18 +342,15 @@ Background sync: ~183ms (invisible to user)
 ### Potential Issues to Watch For:
 
 1. **Index calculation edge cases**
-
    - Dragging first track
    - Dragging last track
    - Dragging to very top/bottom
 
 2. **Race conditions**
-
    - Multiple rapid drags before backend sync completes
    - User navigating away during backend sync
 
 3. **Error recovery**
-
    - Backend fails silently
    - Database lock errors
    - IPC timeout
@@ -496,7 +491,6 @@ Background: Backend sync complete         [Done!]
 5. **Fill in actual measurements** in `drag-drop-performance-analysis.md`
 
 6. **Update documentation:**
-
    - Mark optimizations as "✅ TESTED" in this document
    - Update NEXT-STEPS.md with new status
 
@@ -508,7 +502,6 @@ Background: Backend sync complete         [Done!]
 ### If Tests Fail
 
 8. **Debug issues:**
-
    - Check console for errors
    - Verify index calculation with test data
    - Test edge cases (first/last track)

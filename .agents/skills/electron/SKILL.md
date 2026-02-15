@@ -24,7 +24,6 @@ Use this skill whenever the user wants to:
 This skill is organized to match the Electron official documentation structure (https://www.electronjs.org/zh/docs/latest/, https://www.electronjs.org/zh/docs/latest/api/app). When working with Electron:
 
 1. **Identify the topic** from the user's request:
-
    - Getting started/快速开始 → `examples/getting-started/installation.md` or `examples/getting-started/quick-start.md`
    - Main process/主进程 → `examples/processes/main-process.md`
    - Renderer process/渲染进程 → `examples/processes/renderer-process.md`
@@ -37,19 +36,16 @@ This skill is organized to match the Electron official documentation structure (
 2. **Load the appropriate example file** from the `examples/` directory:
 
    **Getting Started (快速开始) - `examples/getting-started/`**:
-
    - `examples/getting-started/installation.md` - Installing Electron and basic setup
    - `examples/getting-started/quick-start.md` - Quick start tutorial
 
    **Processes (进程) - `examples/processes/`**:
-
    - `examples/processes/main-process.md` - Main process concepts and usage
    - `examples/processes/renderer-process.md` - Renderer process concepts
    - `examples/processes/preload-scripts.md` - Preload scripts usage
    - `examples/processes/ipc-communication.md` - IPC communication patterns
 
    **API Examples (API 示例) - `examples/api/`**:
-
    - `examples/api/browser-window.md` - BrowserWindow usage
    - `examples/api/menu.md` - Menu and context menu
    - `examples/api/tray.md` - System tray
@@ -58,21 +54,18 @@ This skill is organized to match the Electron official documentation structure (
    - `examples/api/ipc-renderer.md` - ipcRenderer usage
 
    **Advanced (高级) - `examples/advanced/`**:
-
    - `examples/advanced/packaging.md` - Application packaging
    - `examples/advanced/security.md` - Security best practices
    - `examples/advanced/auto-updater.md` - Auto updater
    - `examples/advanced/native-modules.md` - Native modules
 
    **Tools (工具) - `examples/tools/`**:
-
    - `examples/tools/electron-forge.md` - Electron Forge usage
    - `examples/tools/electron-fiddle.md` - Electron Fiddle usage
 
 3. **Follow the specific instructions** in that example file for syntax, structure, and best practices
 
    **Important Notes**:
-
    - All examples follow Electron latest API
    - Examples use both CommonJS (require) and ES modules (import)
    - Each example file includes key concepts, code examples, and key points
@@ -80,7 +73,6 @@ This skill is organized to match the Electron official documentation structure (
    - Electron supports Windows, macOS, and Linux
 
 4. **Reference API documentation** in the `api/` directory when needed:
-
    - `api/app.md` - app module API
    - `api/browser-window.md` - BrowserWindow API
    - `api/ipc-main.md` - ipcMain API

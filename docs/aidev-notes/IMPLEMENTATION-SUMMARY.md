@@ -304,18 +304,15 @@ From the logs, identify:
 ## 📈 Next Steps After Testing
 
 1. **Collect Data:**
-
    - Run test cases and export CSV
    - Fill in `drag-drop-performance-analysis.md` template
 
 2. **Analyze Bottlenecks:**
-
    - Identify which operations take most time
    - Calculate % of total lag for each operation
    - Check if lag scales linearly with playlist size
 
 3. **Propose Optimizations:**
-
    - High priority: Operations taking > 30% of total time
    - Medium priority: Operations taking 10-30%
    - Low priority: Operations taking < 10%

@@ -101,12 +101,10 @@ Add AIDEV documentation when you encounter:
 ### Documentation Process
 
 1. **During Development:**
-
    - Add inline `AIDEV-NOTE:` comments in the code near the relevant logic
    - Keep notes concise - just enough to explain the "why"
 
 2. **Periodic Consolidation:**
-
    - Extract related notes into topic-specific documents in `docs/aidev-notes/`
    - Keep the inline comments as short anchor references
    - Update this index

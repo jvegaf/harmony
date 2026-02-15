@@ -32,6 +32,11 @@ export default [
     plugins: {
       prettier: prettierPlugin,
     },
+    settings: {
+      react: {
+        version: '18.2',
+      },
+    },
     rules: {
       ...prettierConfig.rules,
       'prettier/prettier': 'warn',

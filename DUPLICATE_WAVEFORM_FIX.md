@@ -256,7 +256,6 @@ Track B: [Playing 🎵] [█▌▌██▌███▌] ← Reproduciendo inmed
    ```
 
 2. **Verificar comportamiento**:
-
    - [ ] Primera carga genera y guarda peaks
    - [ ] Segunda carga usa peaks de BD (más rápido)
    - [ ] Solo un "Loading..." a la vez

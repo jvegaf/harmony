@@ -325,7 +325,6 @@ console.log('Current tracks:', tracksWithOrder);
    ```
 
 2. **Línea 349-450:** ✅ Simplificado `onRowDragEnd` para modo managed
-
    - Eliminada lógica de transacciones manuales
    - AG Grid maneja el reordenamiento
    - Solo sincronizamos con backend en background

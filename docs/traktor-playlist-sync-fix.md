@@ -222,12 +222,10 @@ Próximo auto-sync detectará que hay nuevos cambios
 ### Posibles Mejoras
 
 1. **Granularidad de eventos**: Distinguir entre tipos de cambios de playlist
-
    - `playlist-created`, `playlist-deleted`, `playlist-modified`
    - Permitiría optimizaciones más específicas
 
 2. **Batch operations**: Emitir un solo evento para múltiples cambios
-
    - Ejemplo: `emitLibraryChanged('playlists-changed', deletedCount)`
 
 3. **Cue points**: Considerar emitir eventos cuando se añaden/modifican cue points
