@@ -14,12 +14,12 @@
 ### Resumen de Progreso
 
 - **Total hallazgos**: 23 (3 P0, 6 P1, 8 P2, 6 P3)
-- **Implementados**: 12 hallazgos (52.2%)
-- **Pendientes**: 11 hallazgos (47.8%)
+- **Implementados**: 14 hallazgos (60.9%)
+- **Pendientes**: 9 hallazgos (39.1%)
   - 3 P0 bloqueados por riesgo de breaking changes
   - 1 P1 requiere decisión de producto/arquitectura
-  - 7 P2 en backlog para próximas iteraciones
-  - 2 P3 mejoras incrementales planificadas
+  - 5 P2 en backlog para próximas iteraciones
+  - 0 P3 mejoras incrementales (todas completadas)
 
 ### ✅ Hallazgos Implementados
 
@@ -37,6 +37,8 @@
 | **DEBT-002** | P3 | Re-import de tracks existentes | Implementado filtrado pre-insert (10-100x más rápido) | 2026-02-17 |
 | **DEBT-003** | P2 | highlightPlayingTrack código muerto | Removido dead code (11 líneas), highlighting funciona correctamente | 2026-02-18 |
 | **DEBT-005** | P2 | Reordenamiento single-track en playlists | Multi-track drag-and-drop implementado preservando orden relativo | 2026-02-18 |
+| **DEBT-007** | P3 | Settings page support en useCurrentViewTracks | Documentado comportamiento intencional (no requiere cambios) | 2026-02-18 |
+| **DEBT-008** | P3 | compat.ts legacy Beatport types | Eliminado archivo dead code (100 líneas), cero breaking changes | 2026-02-18 |
 
 ### 📊 Validación de Cambios
 
@@ -290,9 +292,9 @@ Harmony es una aplicación Electron bien estructurada con un modelo de tres proc
 - Template para issues de GitHub
 
 **Estado actual**:
-- 4 implementados (DEBT-001: arquitectura, DEBT-002: performance, DEBT-003: cleanup, DEBT-005: UX)
+- 6 implementados (DEBT-001: arquitectura, DEBT-002: performance, DEBT-003: cleanup, DEBT-005: UX, DEBT-007: documentación, DEBT-008: dead code)
 - 1 analizado y cerrado (DEBT-004: comportamiento correcto confirmado)
-- 3 pendientes con plan de implementación claro
+- 1 pendiente (DEBT-006: investigación M3U paths)
 
 **Impacto**:
 - **Mantenibilidad**: TODOs movidos de código a documentación estructurada
