@@ -8,7 +8,7 @@ import LibraryView from './Library/Library';
 import RecentlyAddedView from './RecentlyAdded/RecentlyAdded';
 import DetailsView from './Details/Details';
 import SettingsView from './Settings/Settings';
-import PlaylistView from './PLaylist/PlaylistView';
+import PlaylistView from './Playlist/PlaylistView';
 import PruneView from './Prune/PruneView';
 import PreparationView from './Preparation/PreparationView';
 import ToolsView from './Tools/ToolsView';

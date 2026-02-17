@@ -5,7 +5,7 @@ import { RootLoaderData } from '../views/Root';
 // import { PlaylistLoaderData } from '../views/ViewPlaylistDetails';
 
 import { Track } from '../../../preload/types/harmony';
-import { PlaylistLoaderData } from '@renderer/views/PLaylist/PlaylistView';
+import { PlaylistLoaderData } from '@renderer/views/Playlist/PlaylistView';
 
 type Maybe<T> = T | undefined;
 

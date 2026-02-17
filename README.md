@@ -46,9 +46,9 @@ Identify and manage duplicate tracks in your collection with advanced comparison
 - **Desktop Framework**: Electron with TypeScript
 - **Frontend**: React 18 + Vite + Mantine UI
 - **State Management**: Zustand
-- **Database**: TypeORM + SQLite
+- **Database**: Drizzle ORM + SQLite (better-sqlite3)
 - **Build Tools**: electron-vite, electron-builder
-- **Package Manager**: Yarn
+- **Package Manager**: npm
 
 ## Recommended IDE Setup
 

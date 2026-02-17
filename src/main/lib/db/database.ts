@@ -170,35 +170,42 @@ export class Database {
   public async insertTracks(tracks: Track[]): Promise<void> {
     if (tracks.length === 0) return;
 
-    // AIDEV-NOTE: Handle both ID and path conflicts to prevent duplicates.
+    // Handle both ID and path conflicts to prevent duplicates.
     // Now that makeTrackID() normalizes slashes and mapTraktorPathToSystem() produces
     // OS-native paths, both import sources (filesystem + Traktor) should generate
     // identical IDs and paths for the same file. The onConflictDoUpdate on ID will
     // handle the common case. The path check is a defensive fallback.
     //
-    // Strategy: For each track, check if a track with that path already exists.
+    // Strategy: Pre-load all existing paths once, then for each track check if path exists.
     // If yes, update the existing track (preserving its ID and FK references).
     // If no, insert with onConflictDoUpdate on ID as a safety net.
+
+    const isLinux = process.platform === 'linux';
+
+    // Pre-load all existing tracks' paths once (optimized for batch inserts)
+    const allExistingTracks = this.db
+      .select({ id: schema.tracks.id, path: schema.tracks.path })
+      .from(schema.tracks)
+      .all();
+
+    // Build a lookup map for fast path checking
+    const existingByPath = new Map<string, string>(); // Map<normalizedPath, trackId>
+    for (const track of allExistingTracks) {
+      const key = isLinux ? track.path : track.path.toLowerCase();
+      existingByPath.set(key, track.id);
+    }
+
     for (const track of tracks) {
       // Check if a track with this path already exists
-      // On Windows/macOS, do case-insensitive comparison to match filesystem behavior
-      const isLinux = process.platform === 'linux';
-      const existing = isLinux
-        ? // Linux: case-sensitive exact match
-          (this.db.select().from(schema.tracks).where(eq(schema.tracks.path, track.path)).get() as Track | undefined)
-        : // Windows/macOS: case-insensitive search
-          (this.db
-            .select()
-            .from(schema.tracks)
-            .all()
-            .find(t => t.path.toLowerCase() === track.path.toLowerCase()) as Track | undefined);
+      const lookupKey = isLinux ? track.path : track.path.toLowerCase();
+      const existingId = existingByPath.get(lookupKey);
 
-      if (existing) {
+      if (existingId) {
         // Path exists - update the existing track (preserve original ID to avoid breaking FKs)
         this.db
           .update(schema.tracks)
           .set({
-            // Keep existing.id - never change ID
+            // Keep existing ID - never change ID
             path: track.path,
             title: track.title,
             artist: track.artist,
@@ -215,7 +222,7 @@ export class Database {
             waveformPeaks: track.waveformPeaks,
             url: track.url,
           })
-          .where(eq(schema.tracks.id, existing.id))
+          .where(eq(schema.tracks.id, existingId))
           .run();
       } else {
         // Path doesn't exist - insert with onConflictDoUpdate on ID as safety net
@@ -293,13 +300,12 @@ export class Database {
   public async findTracksByPath(paths: string[]): Promise<Track[]> {
     if (paths.length === 0) return [];
 
-    // AIDEV-NOTE: Case-sensitivity handling for path matching.
+    // Case-sensitivity handling for path matching.
     // On Windows/macOS (case-insensitive filesystems), we need to normalize paths
     // to match how makeTrackID() generates IDs (lowercase on non-Linux).
     // However, tracks are stored with their original case in the DB.
     //
-    // Strategy: On Windows/macOS, do case-insensitive matching by normalizing both
-    // the input paths and the stored paths to lowercase before comparison.
+    // Strategy: On Windows/macOS, do case-insensitive matching using SQL LOWER()
     // On Linux, do case-sensitive matching (exact match).
     const isLinux = process.platform === 'linux';
 
@@ -307,12 +313,13 @@ export class Database {
       // Linux: case-sensitive, exact match
       return this.db.select().from(schema.tracks).where(inArray(schema.tracks.path, paths)).all() as Track[];
     } else {
-      // Windows/macOS: case-insensitive matching
-      // We need to find tracks where LOWER(path) matches any of the lowercase input paths
-      // Since inArray doesn't support LOWER(), we'll fetch all tracks and filter in-memory
-      const normalizedPaths = new Set(paths.map(p => p.toLowerCase()));
-      const allTracks = this.db.select().from(schema.tracks).all() as Track[];
-      return allTracks.filter(track => normalizedPaths.has(track.path.toLowerCase()));
+      // Windows/macOS: case-insensitive matching using SQL LOWER()
+      // Build a WHERE clause: LOWER(path) IN ('path1', 'path2', ...)
+      const normalizedPaths = paths.map(p => p.toLowerCase());
+
+      // Use sql template to create LOWER(path) comparison
+      const lowerPath = sql`LOWER(${schema.tracks.path})`;
+      return this.db.select().from(schema.tracks).where(inArray(lowerPath, normalizedPaths)).all() as Track[];
     }
   }
 

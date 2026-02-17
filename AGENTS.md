@@ -5,7 +5,7 @@
 **Harmony** is an Electron-based music manager for old-school DJs, built with TypeScript, React, and Vite. The project uses:
 
 - **Frontend**: React 18 with Mantine UI components and React Router
-- **Backend**: Electron with TypeScript, TypeORM (SQLite), and IPC-based architecture
+- **Backend**: Electron with TypeScript, Drizzle ORM (SQLite), and IPC-based architecture
 - **Build**: electron-vite, Vite, electron-builder
 - **Package Manager**: npm
 
@@ -224,11 +224,11 @@ import icon from '../../resources/icon.png?asset';
 - **Main**: `ipcMain.handle()` for async request/response
 - **Renderer**: `window.Main.db.*`, `window.Main.cover.*`, etc. (see `preload/index.d.ts`)
 
-### Database (TypeORM + SQLite)
+### Database (Drizzle ORM + SQLite)
 
 - **Location**: `~/.config/harmony/database/harmony.db` (Linux), similar on Win/Mac
-- **Entities**: `TrackEntity`, `PlaylistEntity` in `src/main/lib/db/entities/`
-- **Access**: Via `Database` class in `src/main/lib/db/database.ts`
+- **Schema**: Tables defined in `src/main/lib/db/schema.ts` (tracks, playlists, playlistTracks, cuePoints, folders)
+- **Access**: Via `Database` singleton class in `src/main/lib/db/database.ts` with better-sqlite3
 
 ---
 

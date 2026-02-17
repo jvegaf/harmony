@@ -88,10 +88,10 @@ jobs:
           ## Technology Stack
 
           - **Frontend**: React 18 with Mantine UI components and React Router
-          - **Backend**: Electron with TypeScript, TypeORM (SQLite), and IPC-based architecture
+          - **Backend**: Electron with TypeScript, Drizzle ORM (SQLite), and IPC-based architecture
           - **Build**: electron-vite, Vite, electron-builder
           - **Package Manager**: npm
-          - **Database**: SQLite with TypeORM
+          - **Database**: SQLite with Drizzle ORM (better-sqlite3)
           - **Styling**: CSS Modules + Mantine UI components
 
           ## Core Development Principles

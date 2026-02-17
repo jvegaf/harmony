@@ -11,30 +11,40 @@ import type { TrackRating } from '../../../preload/types/harmony';
 // ── Track Table ──
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const tracks = sqliteTable('track', {
-  id: text('id').primaryKey(),
-  path: text('path').notNull().unique(),
-  title: text('title').notNull(),
-  artist: text('artist'),
-  album: text('album'),
-  genre: text('genre'),
-  year: integer('year'),
-  duration: integer('duration').notNull(),
-  bitrate: integer('bitrate'),
-  comment: text('comment'),
-  bpm: integer('bpm'),
-  initialKey: text('initialKey'),
-  // AIDEV-NOTE: JSON columns use text with mode 'json' in SQLite
-  // SQLite doesn't have native JSON type, stores as TEXT with JSON functions support
-  rating: text('rating', { mode: 'json' }).$type<TrackRating | null>(),
-  label: text('label'),
-  waveformPeaks: text('waveformPeaks', { mode: 'json' }).$type<number[] | null>(),
-  // AIDEV-NOTE: Timestamp when the track was added to Harmony (Unix timestamp in milliseconds)
-  addedAt: integer('addedAt'),
-  // AIDEV-NOTE: URL of the track page from the tag provider (Beatport, Traxsource, Bandcamp)
-  // Persisted as WOAR frame (artistUrl in node-id3) / common.website in music-metadata
-  url: text('url'),
-});
+export const tracks = sqliteTable(
+  'track',
+  {
+    id: text('id').primaryKey(),
+    path: text('path').notNull().unique(),
+    title: text('title').notNull(),
+    artist: text('artist'),
+    album: text('album'),
+    genre: text('genre'),
+    year: integer('year'),
+    duration: integer('duration').notNull(),
+    bitrate: integer('bitrate'),
+    comment: text('comment'),
+    bpm: integer('bpm'),
+    initialKey: text('initialKey'),
+    // AIDEV-NOTE: JSON columns use text with mode 'json' in SQLite
+    // SQLite doesn't have native JSON type, stores as TEXT with JSON functions support
+    rating: text('rating', { mode: 'json' }).$type<TrackRating | null>(),
+    label: text('label'),
+    waveformPeaks: text('waveformPeaks', { mode: 'json' }).$type<number[] | null>(),
+    // AIDEV-NOTE: Timestamp when the track was added to Harmony (Unix timestamp in milliseconds)
+    addedAt: integer('addedAt'),
+    // AIDEV-NOTE: URL of the track page from the tag provider (Beatport, Traxsource, Bandcamp)
+    // Persisted as WOAR frame (artistUrl in node-id3) / common.website in music-metadata
+    url: text('url'),
+  },
+  table => [
+    // Performance indexes for frequently queried columns
+    index('IDX_track_addedAt').on(table.addedAt),
+    index('IDX_track_artist').on(table.artist),
+    index('IDX_track_genre').on(table.genre),
+    index('IDX_track_bpm').on(table.bpm),
+  ],
+);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── Folder Table (for playlist hierarchy) ──

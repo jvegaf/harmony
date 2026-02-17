@@ -10,10 +10,10 @@
 ## Technology Stack
 
 - **Frontend**: React 18 with Mantine UI components and React Router
-- **Backend**: Electron with TypeScript, TypeORM (SQLite), and IPC-based architecture
+- **Backend**: Electron with TypeScript, Drizzle ORM (SQLite), and IPC-based architecture
 - **Build**: electron-vite, Vite, electron-builder
 - **Package Manager**: npm
-- **Database**: SQLite with TypeORM
+- **Database**: SQLite with Drizzle ORM (better-sqlite3)
 - **Styling**: CSS Modules + Mantine UI components
 
 ## Core Development Principles
@@ -22,7 +22,7 @@
 - **Three-Process Model**: Main (Node.js/Electron), Preload (IPC bridge), Renderer (React UI)
 - **Module System**: Base classes in `src/main/modules/` with standardized lifecycle methods
 - **IPC Communication**: Strongly typed channels defined in `src/preload/lib/ipc-channels.ts`
-- **Database Layer**: TypeORM entities in `src/main/lib/db/entities/`
+- **Database Layer**: Drizzle schema in `src/main/lib/db/schema.ts`, Database singleton with better-sqlite3
 
 ### Code Quality Standards
 - **TypeScript Strict Mode**: All code must be TypeScript with strict type checking
@@ -74,7 +74,7 @@ src/
 ### Implementation Standards
 - **Module Creation**: Extend `BaseModule` or `BaseWindowModule` for main process modules
 - **IPC Channels**: Define typed channels in `preload/lib/ipc-channels.ts`
-- **Database**: Use TypeORM entities and repositories, never raw SQL
+- **Database**: Use Drizzle ORM with schema-defined tables, better-sqlite3 for queries
 - **UI Components**: Use Mantine UI components with CSS Modules for custom styling
 - **State Management**: Zustand stores in `src/renderer/src/stores/`
 
