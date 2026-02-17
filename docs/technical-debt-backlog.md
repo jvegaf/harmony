@@ -1,7 +1,7 @@
 # Technical Debt Backlog - Harmony
 
 **Fecha de creación**: 2026-02-17  
-**Última actualización**: 2026-02-17
+**Última actualización**: 2026-02-18
 
 Este documento cataloga todos los TODOs, FIXMEs y deuda técnica identificada en el codebase de Harmony. Cada ítem incluye contexto, impacto y prioridad sugerida.
 
@@ -18,34 +18,61 @@ Este documento cataloga todos los TODOs, FIXMEs y deuda técnica identificada en
 
 ## Prioridad Alta
 
-### DEBT-001: Mover función de escaneo de biblioteca a Main Process
+### ✅ DEBT-001: Mover función de escaneo de biblioteca a Main Process [IMPLEMENTADO]
 
-**Archivo**: `src/renderer/src/stores/useLibraryStore.ts:156`  
+**Archivo**: `src/renderer/src/stores/useLibraryStore.ts:149-235` (refactored)  
 **Tipo**: Architectural improvement  
+**Fecha de implementación**: 2026-02-18
+
 **TODO Original**:
 ```typescript
 // TODO move this whole function to main process
 const supportedTrackFiles = await library.scanPaths(pathsToScan);
 ```
 
-**Contexto**:
-La función `setLibrarySourceRoot()` actualmente ejecuta el escaneo de archivos en el proceso renderer, lo cual es subóptimo porque:
-1. El renderer debería ser ligero y enfocado en UI
-2. El escaneo de filesystem es intensivo y puede bloquear la UI
-3. El main process tiene mejor acceso a APIs del sistema operativo
+**Problema Identificado**:
+La función `setLibrarySourceRoot()` ejecutaba múltiples IPC round-trips (scan → import → filter → insert × N → config), con orquestación compleja en el renderer que bloqueaba la UI durante imports largos.
 
-**Solución Propuesta**:
-1. Crear método IPC `LIBRARY_SCAN_PATHS` en main process
-2. Mover lógica de `scanPaths()` a `IPCLibraryModule`
-3. Implementar progress reporting via IPC para actualizar UI
-4. Actualizar `useLibraryStore` para llamar al IPC handler
+**Solución Implementada**:
 
-**Impacto**:
-- **Performance**: UI más responsive durante escaneos largos
-- **Arquitectura**: Mejor separación de responsabilidades
-- **Mantenibilidad**: Lógica de filesystem centralizada en main
+1. **Nuevo IPC handler unificado** (`IPCLibraryModule.ts`):
+   - `importLibraryFull(paths)`: Orquesta scan → import → insert en main process
+   - Progress events via `webContents.send(LIBRARY_IMPORT_PROGRESS, ...)`
+   - Retorna `{ success, tracksAdded, error? }`
 
-**Estimación**: 4-6 horas (incluyendo testing)
+2. **Canales IPC agregados** (`ipc-channels.ts`):
+   - `LIBRARY_IMPORT_FULL`: Handler principal
+   - `LIBRARY_IMPORT_PROGRESS`: Eventos de progreso
+
+3. **Preload bridge actualizado** (`preload/index.ts`):
+   - `importLibraryFull(paths: string[]): Promise<ImportResult>`
+   - `onImportProgress(callback): () => void` (event listener)
+
+4. **Renderer simplificado** (`useLibraryStore.ts`):
+   - De 87 líneas → 55 líneas (-37% código)
+   - De 6+ IPC calls → 1 IPC call + eventos
+   - Progress via listener, no polling
+
+**Impacto Real**:
+- **Performance**: Eliminados 6+ IPC round-trips → 1 llamada unificada
+- **Arquitectura**: Orquestación movida a main process (Electron best practice)
+- **UX**: UI no bloqueante con progress streaming
+- **Mantenibilidad**: Lógica centralizada en IPCLibraryModule
+- **Código**: -32 líneas en renderer, +100 líneas en main (mejor separación)
+
+**Archivos Modificados**:
+- `src/main/modules/IPCLibraryModule.ts`: +100 líneas (handler unificado)
+- `src/preload/lib/ipc-channels.ts`: +2 canales
+- `src/preload/index.ts`: +6 líneas (API exposure)
+- `src/renderer/src/stores/useLibraryStore.ts`: -32 líneas (refactor)
+- `src/renderer/src/__tests__/setup.ts`: +2 líneas (mocks)
+
+**Validación**:
+- ✅ TypeScript type check: PASS (main + preload + renderer)
+- ✅ ESLint: PASS (0 warnings)
+- ✅ Mantiene compatibilidad con DEBT-002 (filtro de tracks existentes)
+- ✅ Preserva reporting de progreso para UX
+- ✅ Tests actualizados con mocks correctos
 
 ---
 

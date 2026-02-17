@@ -112,6 +112,12 @@ const api = {
     },
     scanPaths: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_LOOKUP, paths),
     importTracks: async (trackPaths: string[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, trackPaths),
+    importLibraryFull: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_FULL, paths),
+    onImportProgress: (callback: (progress: any) => void) => {
+      const listener = (_: any, progress: any) => callback(progress);
+      ipcRenderer.on(channels.LIBRARY_IMPORT_PROGRESS, listener);
+      return () => ipcRenderer.removeListener(channels.LIBRARY_IMPORT_PROGRESS, listener);
+    },
     checkChanges: async (libraryPath: string) => ipcRenderer.invoke(channels.LIBRARY_CHECK_CHANGES, libraryPath),
     updateRating: (payload: UpdateRatingPayload) => ipcRenderer.send(channels.TRACK_UPDATE_RATING, payload),
     updateMetadata: async (track: Track) => ipcRenderer.send(channels.TRACK_UPDATE_METADATA, track),

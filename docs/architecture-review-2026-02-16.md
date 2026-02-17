@@ -1,7 +1,7 @@
 # Revisión Arquitectónica Completa — Harmony
 
 **Fecha**: 2026-02-16  
-**Última actualización**: 2026-02-17  
+**Última actualización**: 2026-02-18  
 **Alcance**: Auditoría completa de todas las capas del sistema  
 **Versión analizada**: Codebase actual (main branch)
 
@@ -9,17 +9,17 @@
 
 ## 🚀 Estado de Implementación
 
-**Última actualización**: 2026-02-17
+**Última actualización**: 2026-02-18
 
 ### Resumen de Progreso
 
 - **Total hallazgos**: 23 (3 P0, 6 P1, 8 P2, 6 P3)
-- **Implementados**: 9 hallazgos (39.1%)
-- **Pendientes**: 14 hallazgos (60.9%)
+- **Implementados**: 10 hallazgos (43.5%)
+- **Pendientes**: 13 hallazgos (56.5%)
   - 3 P0 bloqueados por riesgo de breaking changes
   - 1 P1 requiere decisión de producto/arquitectura
   - 7 P2 en backlog para próximas iteraciones
-  - 3 P3 mejoras incrementales planificadas
+  - 2 P3 mejoras incrementales planificadas
 
 ### ✅ Hallazgos Implementados
 
@@ -33,6 +33,7 @@
 | **P2-ARCH-04** | P2 | Typo en carpeta `PLaylist/` | Renombrado a `Playlist/`, imports actualizados | 2026-02-17 |
 | **P3-DX-01** | P3 | Tipo incorrecto en `store-helpers.ts` | Corregido de `zustand/persist` → `zustand/devtools` | 2026-02-17 |
 | **P3-CODE-04** | P3 | 8 TODOs/FIXMEs sin catalogar | Creado `docs/technical-debt-backlog.md` con análisis completo | 2026-02-17 |
+| **DEBT-001** | P3 | Orquestación de import en renderer | Handler unificado en main process (1 IPC vs 6+ round-trips) | 2026-02-18 |
 | **DEBT-002** | P3 | Re-import de tracks existentes | Implementado filtrado pre-insert (10-100x más rápido) | 2026-02-17 |
 
 ### 📊 Validación de Cambios
@@ -104,9 +105,9 @@ npm run lint
 - **PERF-03**: Batch chunking en renderer vs main process
 - **BUILD-01**: macOS build completamente comentado
 
-#### 🔵 P3 — Bajo (Mejoras Incrementales, 3 ítems)
+#### 🔵 P3 — Bajo (Mejoras Incrementales, 2 ítems + 6 completados)
 
-- **DEBT-001**: Mover scan de biblioteca a main process (ver backlog técnico)
+- ✅ **DEBT-001**: Mover scan de biblioteca a main process [IMPLEMENTADO 2026-02-18]
 - **DEBT-003** a **DEBT-008**: Mejoras catalogadas en technical-debt-backlog.md
 
 ---
@@ -269,25 +270,27 @@ Harmony es una aplicación Electron bien estructurada con un modelo de tres proc
 ### P3 — Bajo (mejora incremental)
 
 #### ✅ CODE-04: TODOs y FIXMEs sin resolver en código [RESUELTO]
-**Fecha de resolución**: 2026-02-17
+**Fecha de resolución**: 2026-02-17  
+**Última actualización**: 2026-02-18
 
 **Solución implementada**:
 - ✅ Creado documento `docs/technical-debt-backlog.md` con análisis detallado de 8 TODOs/FIXMEs
 - ✅ Cada TODO catalogado con contexto, impacto, prioridad y estimación
+- ✅ DEBT-001 implementado: Orquestación de import movida a main process
 - ✅ DEBT-002 implementado: Evitar re-import de tracks existentes
 - ✅ DEBT-004 analizado: AG Grid maneja selección internamente (no requiere cambios)
 
 **Contenido del backlog**:
-- 2 ítems de prioridad alta (DEBT-001, DEBT-002 ✅)
+- 2 ítems de prioridad alta (DEBT-001 ✅, DEBT-002 ✅)
 - 4 ítems de prioridad media (DEBT-003, DEBT-004 ✅, DEBT-005, DEBT-006)
 - 2 ítems de prioridad baja (DEBT-007, DEBT-008)
 - Roadmap de implementación sugerido
 - Template para issues de GitHub
 
 **Estado actual**:
-- 1 implementado (DEBT-002: 10-100x más rápido en re-escaneos)
+- 2 implementados (DEBT-001: arquitectura refactorizada, DEBT-002: 10-100x más rápido)
 - 1 analizado y cerrado (DEBT-004: comportamiento correcto confirmado)
-- 6 pendientes con plan de implementación claro
+- 5 pendientes con plan de implementación claro
 
 **Impacto**:
 - **Mantenibilidad**: TODOs movidos de código a documentación estructurada

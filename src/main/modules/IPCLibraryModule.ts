@@ -72,6 +72,7 @@ class IPCLibraryModule extends ModuleWindow {
     ipcMain.handle(channels.LIBRARY_IMPORT_TRACKS, this.importTracks.bind(this));
     ipcMain.handle(channels.LIBRARY_LOOKUP, this.libraryLookup.bind(this));
     ipcMain.handle(channels.LIBRARY_CHECK_CHANGES, this.checkLibraryChanges.bind(this));
+    ipcMain.handle(channels.LIBRARY_IMPORT_FULL, this.importLibraryFull.bind(this));
     ipcMain.handle(channels.TRACK_REPLACE_FILE, this.replaceTrackFile.bind(this));
     ipcMain.on(channels.TRACK_UPDATE_RATING, (_: IpcMainEvent, payload: UpdateRatingPayload) =>
       UpdateTrackRating(payload),
@@ -136,6 +137,106 @@ class IPCLibraryModule extends ModuleWindow {
     loggerExtras.timeEnd('Library lookup');
 
     return supportedTrackFiles;
+  }
+
+  /**
+   * Unified library import: scan, import metadata, and insert tracks.
+   * Orchestrates the entire import workflow in the main process, reducing IPC round-trips.
+   *
+   * DEBT-001: This method moves the orchestration logic from renderer to main process,
+   * simplifying the renderer and improving performance by eliminating multiple IPC calls.
+   *
+   * Progress is reported via LIBRARY_IMPORT_PROGRESS events sent to the renderer.
+   *
+   * @param pathsToScan - Array of file/folder paths to scan for music files
+   * @returns Object with success flag, count of tracks added, and optional error
+   */
+  private async importLibraryFull(
+    _e: IpcMainInvokeEvent,
+    pathsToScan: string[],
+  ): Promise<{ success: boolean; tracksAdded: number; error?: string }> {
+    try {
+      log.info('[ImportLibraryFull] Starting unified library import', pathsToScan);
+
+      // Step 1: Scan filesystem for supported audio files
+      this.window.webContents.send(channels.LIBRARY_IMPORT_PROGRESS, {
+        step: 'scanning',
+        processed: 0,
+        total: 0,
+        message: 'Scanning filesystem...',
+      });
+
+      const filePaths = await this.libraryLookup(_e, pathsToScan);
+      log.info(`[ImportLibraryFull] Found ${filePaths.length} audio files`);
+
+      if (filePaths.length === 0) {
+        log.info('[ImportLibraryFull] No audio files found');
+        return { success: true, tracksAdded: 0 };
+      }
+
+      // Step 2: Import metadata (with DEBT-002 optimization - skips existing tracks)
+      this.window.webContents.send(channels.LIBRARY_IMPORT_PROGRESS, {
+        step: 'importing',
+        processed: 0,
+        total: filePaths.length,
+        message: 'Reading track metadata...',
+      });
+
+      const tracks = await this.importTracks(_e, filePaths);
+      log.info(`[ImportLibraryFull] Imported metadata for ${tracks.length} new tracks`);
+
+      if (tracks.length === 0) {
+        log.info('[ImportLibraryFull] All tracks already in database, nothing to add');
+        this.window.webContents.send(channels.LIBRARY_IMPORT_PROGRESS, {
+          step: 'complete',
+          processed: 0,
+          total: 0,
+          message: 'All tracks already imported',
+        });
+        return { success: true, tracksAdded: 0 };
+      }
+
+      // Step 3: Insert tracks into database
+      this.window.webContents.send(channels.LIBRARY_IMPORT_PROGRESS, {
+        step: 'saving',
+        processed: 0,
+        total: tracks.length,
+        message: 'Saving tracks to database...',
+      });
+
+      const db = (await import('../lib/db/database')).Database.getInstance();
+      await db.insertTracks(tracks as Track[]);
+
+      log.info(`[ImportLibraryFull] Successfully inserted ${tracks.length} tracks`);
+
+      // Step 4: Emit library change event for auto-sync
+      emitLibraryChanged('tracks-added', tracks.length);
+
+      // Step 5: Invalidate duplicates cache since library changed
+      this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
+
+      // Step 6: Send completion event
+      this.window.webContents.send(channels.LIBRARY_IMPORT_PROGRESS, {
+        step: 'complete',
+        processed: tracks.length,
+        total: tracks.length,
+        message: `Successfully imported ${tracks.length} tracks`,
+      });
+
+      return { success: true, tracksAdded: tracks.length };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error('[ImportLibraryFull] Import failed:', error);
+
+      this.window.webContents.send(channels.LIBRARY_IMPORT_PROGRESS, {
+        step: 'error',
+        processed: 0,
+        total: 0,
+        message: `Import failed: ${errorMessage}`,
+      });
+
+      return { success: false, tracksAdded: 0, error: errorMessage };
+    }
   }
 
   /**

@@ -146,79 +146,62 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     setSearched: (trackSearched: Track | null) => set({ searched: trackSearched }),
     /**
      * Add tracks to Library
+     *
+     * DEBT-001: Refactored to use unified importLibraryFull handler in main process.
+     * This replaces the previous multi-IPC approach (scan → import → filter → insert)
+     * with a single IPC call. Progress is tracked via IPC events.
      */
     setLibrarySourceRoot: async (pathsToScan): Promise<void> => {
       set({ refreshing: true });
       logger.info(`Adding tracks to library: ${pathsToScan.length} paths`);
 
-      try {
-        // Get all valid track paths
-        // TODO move this whole function to main process
-        const supportedTrackFiles = await library.scanPaths(pathsToScan);
+      // Set up progress listener
+      const unsubscribe = library.onImportProgress(progress => {
+        logger.debug('[Import Progress]', progress);
 
-        if (supportedTrackFiles.length === 0) {
+        if (progress.step === 'importing' || progress.step === 'saving') {
           set({
-            refreshing: false,
-            refresh: { processed: 0, total: 0 },
+            refresh: {
+              processed: progress.processed,
+              total: progress.total,
+            },
           });
+        }
+
+        if (progress.step === 'complete') {
+          logger.info(progress.message);
+        }
+
+        if (progress.step === 'error') {
+          logger.error(progress.message);
+        }
+      });
+
+      try {
+        // Single IPC call - orchestration happens in main process
+        const result = await library.importLibraryFull(pathsToScan);
+
+        if (!result.success) {
+          logger.error('Library import failed:', result.error);
           return;
         }
 
-        // 5. Import the music tracks found the directories
-        const tracks: Track[] = await library.importTracks(supportedTrackFiles);
-
-        // Filter out existing tracks to avoid re-importing (see docs/technical-debt-backlog.md DEBT-002)
-        const trackPaths = tracks.map(t => t.path);
-        const existingTracks = await db.tracks.findByPath(trackPaths);
-        const existingPathsSet = new Set(existingTracks.map(t => t.path));
-        const newTracks = tracks.filter(t => !existingPathsSet.has(t.path));
-
-        logger.info(
-          `Found ${tracks.length} total tracks, ${newTracks.length} are new, ${existingTracks.length} already in library`,
-        );
-
-        if (newTracks.length === 0) {
-          logger.info('No new tracks to import');
-          await config.set('libraryPath', pathsToScan[0]);
-          set({ refreshing: false, refresh: { processed: 0, total: 0 }, librarySourceRoot: '' });
-          return;
-        }
-
-        const batchSize = 100;
-        const chunkedTracks = chunk(newTracks, batchSize);
-        let processed = 0;
-        set({ librarySourceRoot: pathsToScan[0] });
-        logger.info(`setting library source root to ${pathsToScan[0]}`);
-
-        await Promise.allSettled(
-          chunkedTracks.map(async chunk => {
-            logger.info(`Inserting ${chunk.length} new tracks into the database`);
-            const insertedChunk = await db.tracks.insertMultiple(chunk);
-            logger.info(`Inserted ${insertedChunk.length} tracks into the database`);
-
-            processed += batchSize;
-
-            // Progress bar update
-            set({
-              refresh: {
-                processed: Math.min(processed, newTracks.length),
-                total: newTracks.length,
-              },
-            });
-
-            return insertedChunk;
-          }),
-        );
+        logger.info(`Import complete: ${result.tracksAdded} tracks added`);
 
         // Save the library path to config for future change detection
-        await config.set('libraryPath', pathsToScan[0]);
-        logger.info(`Saved library path to config: ${pathsToScan[0]}`);
+        if (pathsToScan.length > 0) {
+          await config.set('libraryPath', pathsToScan[0]);
+          logger.info(`Saved library path to config: ${pathsToScan[0]}`);
+        }
 
         return;
       } catch (err: any) {
-        logger.error(err);
+        logger.error('Library import error:', err);
         return;
       } finally {
+        // Clean up progress listener
+        unsubscribe();
+
         set({
           refreshing: false,
           refresh: { processed: 0, total: 0 },
