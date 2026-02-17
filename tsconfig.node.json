@@ -7,7 +7,7 @@
     "src/preload/**/*.ts"
   ],
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "composite": true,
     "types": [
       "electron-vite/node"

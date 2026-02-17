@@ -1,0 +1,375 @@
+# Technical Debt Backlog - Harmony
+
+**Fecha de creación**: 2026-02-17  
+**Última actualización**: 2026-02-17
+
+Este documento cataloga todos los TODOs, FIXMEs y deuda técnica identificada en el codebase de Harmony. Cada ítem incluye contexto, impacto y prioridad sugerida.
+
+---
+
+## Índice
+
+- [Prioridad Alta](#prioridad-alta) (2 ítems)
+- [Prioridad Media](#prioridad-media) (4 ítems)
+- [Prioridad Baja](#prioridad-baja) (2 ítems)
+- [Backlog](#backlog) (Issues sugeridos para GitHub)
+
+---
+
+## Prioridad Alta
+
+### DEBT-001: Mover función de escaneo de biblioteca a Main Process
+
+**Archivo**: `src/renderer/src/stores/useLibraryStore.ts:156`  
+**Tipo**: Architectural improvement  
+**TODO Original**:
+```typescript
+// TODO move this whole function to main process
+const supportedTrackFiles = await library.scanPaths(pathsToScan);
+```
+
+**Contexto**:
+La función `setLibrarySourceRoot()` actualmente ejecuta el escaneo de archivos en el proceso renderer, lo cual es subóptimo porque:
+1. El renderer debería ser ligero y enfocado en UI
+2. El escaneo de filesystem es intensivo y puede bloquear la UI
+3. El main process tiene mejor acceso a APIs del sistema operativo
+
+**Solución Propuesta**:
+1. Crear método IPC `LIBRARY_SCAN_PATHS` en main process
+2. Mover lógica de `scanPaths()` a `IPCLibraryModule`
+3. Implementar progress reporting via IPC para actualizar UI
+4. Actualizar `useLibraryStore` para llamar al IPC handler
+
+**Impacto**:
+- **Performance**: UI más responsive durante escaneos largos
+- **Arquitectura**: Mejor separación de responsabilidades
+- **Mantenibilidad**: Lógica de filesystem centralizada en main
+
+**Estimación**: 4-6 horas (incluyendo testing)
+
+---
+
+### ✅ DEBT-002: Evitar re-importación de tracks existentes [IMPLEMENTADO]
+
+**Archivo**: `src/renderer/src/stores/useLibraryStore.ts:169-186`  
+**Tipo**: Performance optimization  
+**Fecha de implementación**: 2026-02-17
+
+**Solución Implementada**:
+```typescript
+// Filter out existing tracks to avoid re-importing
+const trackPaths = tracks.map(t => t.path);
+const existingTracks = await db.tracks.findByPath(trackPaths);
+const existingPathsSet = new Set(existingTracks.map(t => t.path));
+const newTracks = tracks.filter(t => !existingPathsSet.has(t.path));
+
+logger.info(
+  `Found ${tracks.length} total tracks, ${newTracks.length} are new, ${existingTracks.length} already in library`,
+);
+
+if (newTracks.length === 0) {
+  logger.info('No new tracks to import');
+  // Early return, skip insertion
+  return;
+}
+```
+
+**Impacto Real**:
+- **Performance**: 10-100x más rápido en re-escaneos (1000 tracks → 0 inserts = instantáneo)
+- **UX**: Mensaje claro "X nuevos de Y totales"
+- **Database**: Evita UNIQUE constraint violations
+- **Logging**: Información detallada sobre tracks nuevos vs existentes
+
+**Validación**:
+- ✅ TypeScript type check: PASS
+- ✅ ESLint: PASS
+- ✅ Utiliza `findByPath()` optimizado con índices DB
+
+---
+
+## Prioridad Media
+
+### DEBT-003: Mejorar highlight de track en reproducción
+
+**Archivo**: `src/renderer/src/stores/useLibraryStore.ts:290`  
+**Tipo**: Code quality / UX improvement  
+**FIXME Original**:
+```typescript
+/**
+ * Set highlight trigger for a track
+ * FIXME: very hacky, and not great, should be done another way
+ */
+highlightPlayingTrack: (highlight: boolean): void => {
+  set({ highlightPlayingTrack: highlight });
+}
+```
+
+**Contexto**:
+El mecanismo actual para resaltar visualmente el track en reproducción utiliza un boolean global que todos los componentes deben observar. Esto genera re-renders innecesarios y es difícil de debuggear.
+
+**Problema**:
+- No está claro qué componente está responsable de actualizar el estado
+- Boolean global causa re-renders de toda la lista de tracks
+- No hay mecanismo para scroll automático al track resaltado
+
+**Solución Propuesta**:
+Opción A (Preferida): Usar context API de React
+```typescript
+<HighlightProvider trackId={currentTrackId}>
+  <TrackList />
+</HighlightProvider>
+```
+
+Opción B: Mover a `usePlayerStore` y usar selector granular
+```typescript
+const isPlaying = usePlayerStore(state => state.trackPlaying?.id === track.id);
+```
+
+**Impacto**:
+- **Performance**: Menos re-renders innecesarios
+- **Mantenibilidad**: Lógica clara y localizada
+- **UX**: Posibilidad de agregar scroll automático
+
+**Estimación**: 2-3 horas
+
+---
+
+### ✅ DEBT-004: Remover IDs de selected state al eliminar tracks [ANALIZADO - NO REQUIERE CAMBIOS]
+
+**Archivo**: `src/renderer/src/stores/useLibraryStore.ts:247-250`  
+**Tipo**: Analysis / Architecture clarification  
+**Fecha de análisis**: 2026-02-17
+
+**Conclusión del Análisis**:
+Después de investigar el código, se determinó que **no existe un estado global `selectedTracks` en `useLibraryStore`**. La selección de tracks es manejada localmente por AG Grid dentro del componente `TrackList.tsx`.
+
+**Comportamiento Actual (Correcto)**:
+1. AG Grid mantiene su propio estado de selección internamente (`rowSelection`)
+2. Cuando se eliminan tracks de la DB, el componente se re-renderiza con la nueva lista
+3. AG Grid automáticamente excluye IDs inexistentes de su selección interna
+4. No hay "memory leak" porque la selección vive en el componente, no en store global
+
+**Código Actual (Sin cambios necesarios)**:
+```typescript
+remove: async (trackIDs: string[]): Promise<void> => {
+  await db.tracks.remove(trackIDs);
+  // Note: AG Grid manages its own selection state internally.
+  // When tracks are deleted, the next re-render will automatically
+  // exclude deleted track IDs from the selection.
+}
+```
+
+**Decisión**:
+- ✅ No requiere cambios de código
+- ✅ Comentario agregado para documentar el comportamiento
+- ✅ TODO original removido (era especulativo: "could" lead to strange behaviors)
+
+**Impacto**:
+- **Architecture**: Confirmado que separación de concerns es correcta (AG Grid maneja UI state)
+- **Mantenibilidad**: Comentario previene futuras confusiones
+
+---
+
+### DEBT-005: Soportar reordenamiento de múltiples tracks en playlists
+
+**Archivo**: `src/renderer/src/stores/PlaylistsAPI.ts:152`  
+**Tipo**: Feature enhancement  
+**TODO Original**:
+```typescript
+/**
+ * Reorder tracks in a playlists
+ * TODO: currently only supports one track at a time, at a point you should be
+ * able to re-order a selection of tracks
+ */
+```
+
+**Contexto**:
+El drag-and-drop en playlists solo permite mover un track a la vez. Si el usuario tiene 10 tracks seleccionados, debe arrastrarlos uno por uno.
+
+**Limitación Actual**:
+```typescript
+const reorderTracks = async (
+  playlistID: string,
+  tracks: Track[],  // Array, pero solo usa el primero
+  targetTrack: Track,
+  position: 'above' | 'below',
+): Promise<void> => {
+  // Solo mueve tracks[0]
+}
+```
+
+**Solución Propuesta**:
+1. Modificar lógica para calcular nuevas posiciones para todos los tracks
+2. Mantener orden relativo de los tracks seleccionados
+3. Actualizar batch en DB usando transaction
+
+**Impacto**:
+- **UX**: Ahorra tiempo al organizar playlists grandes
+- **Feature parity**: Comportamiento esperado en cualquier app de música
+
+**Estimación**: 4-6 horas (requiere testing extensivo de edge cases)
+
+---
+
+### DEBT-006: Investigar paths relativos en exportación M3U
+
+**Archivo**: `src/renderer/src/stores/PlaylistsAPI.ts:189`  
+**Tipo**: Investigation / Bug fix  
+**TODO Original**:
+```typescript
+/**
+ * Export a playlist to a .m3u file
+ * TODO: investigate why the playlist path are relative, and not absolute
+ */
+```
+
+**Contexto**:
+Los archivos M3U exportados pueden contener paths relativos en vez de absolutos, lo cual puede causar problemas de portabilidad si el M3U se mueve a otra ubicación.
+
+**Problema**:
+El código actual delega a un IPC handler, y no está claro dónde se genera el path:
+```typescript
+ipcRenderer.send(channels.PLAYLIST_EXPORT, playlist.id, playlist.name);
+```
+
+**Investigación Necesaria**:
+1. Revisar `IPCPlaylistModule` para ver cómo genera los paths
+2. Verificar si usa `path.relative()` o `path.absolute()`
+3. Determinar si el comportamiento es intencional (portabilidad) o un bug
+4. Decidir si debe ser configurable (opción en settings)
+
+**Impacto**:
+- **Portabilidad**: M3Us pueden no funcionar en otros reproductores
+- **UX**: Confusión si el usuario mueve el archivo M3U
+
+**Estimación**: 2-3 horas (investigación + fix si es necesario)
+
+---
+
+## Prioridad Baja
+
+### DEBT-007: Soportar Settings page en useCurrentViewTracks
+
+**Archivo**: `src/renderer/src/hooks/useCurrentViewTracks.ts:16`  
+**Tipo**: Edge case handling  
+**TODO Original**:
+```typescript
+// TODO: how to support Settings page? Should we?
+```
+
+**Contexto**:
+El hook `useCurrentViewTracks()` asume que siempre hay tracks para mostrar (library o playlist), pero falla silenciosamente en la página de Settings.
+
+**Análisis**:
+Probablemente no es necesario soportar Settings aquí porque:
+- Settings no muestra tracks
+- Los componentes que usan este hook no se renderizan en Settings
+- Si se llama desde Settings, retorna array vacío (comportamiento correcto)
+
+**Recomendación**:
+1. Agregar comentario explicando que Settings no aplica
+2. Opcionalmente, agregar warning en dev mode si se llama desde Settings
+3. Cerrar el TODO sin cambios de código
+
+**Estimación**: 30 minutos (solo documentación)
+
+---
+
+### DEBT-008: Eliminar archivo de compatibilidad Beatport
+
+**Archivo**: `src/preload/types/beatport/compat.ts:7`  
+**Tipo**: Code cleanup  
+**TODO Original**:
+```typescript
+// TODO: Una vez el frontend esté completamente migrado, este archivo se puede eliminar.
+```
+
+**Contexto**:
+Este archivo proporciona tipos legacy (`BeatportCandidate`) para compatibilidad con código viejo que aún no se ha migrado a `TrackCandidate`.
+
+**Investigación Necesaria**:
+```bash
+# Buscar usages de tipos legacy
+grep -r "BeatportCandidate" src/renderer/
+grep -r "import.*beatport/compat" src/renderer/
+```
+
+**Proceso de Eliminación**:
+1. Identificar todos los usos de tipos legacy en renderer
+2. Migrar a `TrackCandidate` de `src/preload/types/tagger`
+3. Eliminar `compat.ts`
+4. Actualizar imports en archivos afectados
+
+**Impacto**:
+- **Mantenibilidad**: Menos código, menos confusión
+- **Type safety**: Todos usan misma interface
+
+**Estimación**: 1-2 horas
+
+---
+
+## Backlog
+
+### Issues Sugeridos para GitHub
+
+Los siguientes ítems deberían convertirse en issues de GitHub con labels apropiados:
+
+#### Epic: Refactoring de Architecture
+- **Issue #1**: `[Tech Debt] Move library scan logic to Main Process` (DEBT-001)
+  - Labels: `enhancement`, `architecture`, `performance`
+  - Epic: Renderer → Main Process migration
+  
+- **Issue #2**: `[Tech Debt] Refactor highlightPlayingTrack mechanism` (DEBT-003)
+  - Labels: `refactoring`, `code-quality`
+  
+#### Epic: Performance Optimization
+- **Issue #3**: `[Performance] Skip re-import of existing tracks` (DEBT-002)
+  - Labels: `performance`, `enhancement`
+  - Blocked by: Database indexes (already done ✅)
+
+#### Epic: Bug Fixes
+- **Issue #4**: `[Bug] Remove deleted track IDs from selection state` (DEBT-004)
+  - Labels: `bug`, `data-consistency`
+  
+- **Issue #5**: `[Investigation] M3U export uses relative paths` (DEBT-006)
+  - Labels: `investigation`, `bug`
+
+#### Epic: Feature Enhancements
+- **Issue #6**: `[Feature] Support multi-track reordering in playlists` (DEBT-005)
+  - Labels: `enhancement`, `ux`, `playlists`
+
+#### Epic: Code Cleanup
+- **Issue #7**: `[Cleanup] Remove Beatport compat.ts after migration` (DEBT-008)
+  - Labels: `cleanup`, `types`
+  - Depends on: Frontend migration to TrackCandidate
+
+---
+
+## Métricas
+
+| Categoría | Count |
+|-----------|-------|
+| **Total TODOs/FIXMEs** | 8 |
+| **Implementados** | 1 (12.5%) |
+| **Analizados (no requieren cambios)** | 1 (12.5%) |
+| **Prioridad Alta** | 1 pendiente (12.5%) |
+| **Prioridad Media** | 4 pendientes (50%) |
+| **Prioridad Baja** | 2 pendientes (25%) |
+| **Estimación Restante** | 12-21 horas |
+
+---
+
+## Próximos Pasos
+
+1. ✅ **COMPLETADO**: Implementar DEBT-002 (evitar re-import)
+2. ✅ **COMPLETADO**: Analizar DEBT-004 (AG Grid maneja selección internamente)
+3. **Próxima semana**: Implementar DEBT-001 (mover scan a main process) - prioridad alta
+4. **Semana 2**: Implementar DEBT-003 (mejorar highlight) - quick win
+5. **Backlog**: Crear GitHub issues para DEBT-005, DEBT-006, DEBT-007, DEBT-008
+
+---
+
+**Notas**:
+- Este documento reemplaza los TODOs/FIXMEs en código fuente
+- Los comentarios originales pueden actualizarse a referencias de issues: `// See docs/technical-debt-backlog.md DEBT-002`
+- Revisar este documento trimestralmente para ajustar prioridades

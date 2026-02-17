@@ -167,16 +167,32 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         // 5. Import the music tracks found the directories
         const tracks: Track[] = await library.importTracks(supportedTrackFiles);
 
+        // Filter out existing tracks to avoid re-importing (see docs/technical-debt-backlog.md DEBT-002)
+        const trackPaths = tracks.map(t => t.path);
+        const existingTracks = await db.tracks.findByPath(trackPaths);
+        const existingPathsSet = new Set(existingTracks.map(t => t.path));
+        const newTracks = tracks.filter(t => !existingPathsSet.has(t.path));
+
+        logger.info(
+          `Found ${tracks.length} total tracks, ${newTracks.length} are new, ${existingTracks.length} already in library`,
+        );
+
+        if (newTracks.length === 0) {
+          logger.info('No new tracks to import');
+          await config.set('libraryPath', pathsToScan[0]);
+          set({ refreshing: false, refresh: { processed: 0, total: 0 }, librarySourceRoot: '' });
+          return;
+        }
+
         const batchSize = 100;
-        const chunkedTracks = chunk(tracks, batchSize);
+        const chunkedTracks = chunk(newTracks, batchSize);
         let processed = 0;
         set({ librarySourceRoot: pathsToScan[0] });
         logger.info(`setting library source root to ${pathsToScan[0]}`);
 
         await Promise.allSettled(
           chunkedTracks.map(async chunk => {
-            logger.info(`Inserting ${chunk.length} tracks into the database`);
-            // First, let's see if some of those files are already inserted
+            logger.info(`Inserting ${chunk.length} new tracks into the database`);
             const insertedChunk = await db.tracks.insertMultiple(chunk);
             logger.info(`Inserted ${insertedChunk.length} tracks into the database`);
 
@@ -185,16 +201,14 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
             // Progress bar update
             set({
               refresh: {
-                processed,
-                total: tracks.length,
+                processed: Math.min(processed, newTracks.length),
+                total: newTracks.length,
               },
             });
 
             return insertedChunk;
           }),
         );
-
-        // TODO: do not re-import existing tracks
 
         // Save the library path to config for future change detection
         await config.set('libraryPath', pathsToScan[0]);
@@ -232,9 +246,11 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         // Remove tracks from the Track collection
         await db.tracks.remove(trackIDs);
 
+        // Note: AG Grid manages its own selection state internally. When tracks are deleted,
+        // the next re-render will automatically exclude deleted track IDs from the selection.
+        // See docs/technical-debt-backlog.md DEBT-004 for analysis
         // That would be great to remove those ids from all the playlists, but it's not easy
         // and should not cause strange behaviors, all PR for that would be really appreciated
-        // TODO: see if it's possible to remove the IDs from the selected state of TracksList as it "could" lead to strange behaviors
       }
     },
 
