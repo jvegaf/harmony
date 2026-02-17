@@ -29,7 +29,6 @@ type LibraryState = {
     processed: number;
     total: number;
   };
-  highlightPlayingTrack: boolean;
   trackTagsCandidates: TrackCandidatesResult[] | null;
   candidatesSearching: boolean;
   candidatesSearchProgress: {
@@ -63,7 +62,6 @@ type LibraryState = {
     reset: () => Promise<void>;
     refresh: () => Promise<void>;
     updateTrackMetadata: (trackID: string, newFields: TrackEditableFields) => Promise<void>;
-    highlightPlayingTrack: (highlight: boolean) => void;
     getCover: (track: Track) => Promise<string | null>;
     findCandidates: (tracks: Track[], options?: { autoApply?: boolean }) => Promise<void>;
     setTagCandidates: (candidates: TrackCandidatesResult[] | null) => void;
@@ -108,7 +106,6 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     processed: 0,
     total: 0,
   },
-  highlightPlayingTrack: false,
   trackTagsCandidates: null,
   candidatesSearching: false,
   candidatesSearchProgress: {
@@ -284,13 +281,6 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       set({ updated: track });
     },
 
-    /**
-     * Set highlight trigger for a track
-     * FIXME: very hacky, and not great, should be done another way
-     */
-    highlightPlayingTrack: (highlight: boolean): void => {
-      set({ highlightPlayingTrack: highlight });
-    },
     getCover: async (track: Track): Promise<string | null> => {
       return await covers.getCoverAsBase64(track);
     },

@@ -116,10 +116,12 @@ if (newTracks.length === 0) {
 
 ## Prioridad Media
 
-### DEBT-003: Mejorar highlight de track en reproducción
+### ✅ DEBT-003: Mejorar highlight de track en reproducción [IMPLEMENTADO]
 
-**Archivo**: `src/renderer/src/stores/useLibraryStore.ts:290`  
-**Tipo**: Code quality / UX improvement  
+**Archivo**: `src/renderer/src/stores/useLibraryStore.ts` (refactored)  
+**Tipo**: Code quality / Dead code removal  
+**Fecha de implementación**: 2026-02-18
+
 **FIXME Original**:
 ```typescript
 /**
@@ -131,33 +133,44 @@ highlightPlayingTrack: (highlight: boolean): void => {
 }
 ```
 
-**Contexto**:
-El mecanismo actual para resaltar visualmente el track en reproducción utiliza un boolean global que todos los componentes deben observar. Esto genera re-renders innecesarios y es difícil de debuggear.
+**Análisis Realizado**:
+Tras investigación exhaustiva del codebase, se determinó que `highlightPlayingTrack` era **código muerto (dead code)**:
+- El state boolean no se usaba en ningún componente
+- El método nunca se invocaba en el codebase
+- El highlighting real funciona correctamente via `trackPlayingID` (prop) + AG Grid `rowClassRules`
 
-**Problema**:
-- No está claro qué componente está responsable de actualizar el estado
-- Boolean global causa re-renders de toda la lista de tracks
-- No hay mecanismo para scroll automático al track resaltado
-
-**Solución Propuesta**:
-Opción A (Preferida): Usar context API de React
+**Implementación Actual (Correcta)**:
+El highlight de track en reproducción se gestiona eficientemente en `TrackList.tsx`:
 ```typescript
-<HighlightProvider trackId={currentTrackId}>
-  <TrackList />
-</HighlightProvider>
+// 1. Track ID se obtiene del playerStore y se pasa como prop
+const { playingTrack } = usePlayerStore();
+<TrackList trackPlayingID={playingTrack?.id || null} />
+
+// 2. AG Grid aplica clase CSS solo a la fila activa
+const rowClassRules = useMemo(() => ({
+  'playing-style': (params: RowClassParams) => {
+    return params.data.id === trackPlayingID;
+  }
+}), [trackPlayingID]);
 ```
 
-Opción B: Mover a `usePlayerStore` y usar selector granular
-```typescript
-const isPlaying = usePlayerStore(state => state.trackPlaying?.id === track.id);
-```
+**Solución Implementada**:
+✅ Removidas 4 referencias de código muerto:
+1. State type definition: `highlightPlayingTrack: boolean;`
+2. State initialization: `highlightPlayingTrack: false,`
+3. API method type: `highlightPlayingTrack: (highlight: boolean) => void;`
+4. Method implementation (7 líneas incluyendo comentario FIXME)
 
 **Impacto**:
-- **Performance**: Menos re-renders innecesarios
-- **Mantenibilidad**: Lógica clara y localizada
-- **UX**: Posibilidad de agregar scroll automático
+- **Code Quality**: -11 líneas de código no utilizado
+- **Mantenibilidad**: FIXME resuelto, código más limpio
+- **Performance**: Sin cambios (el mecanismo actual ya era óptimo)
+- **Funcionalidad**: Sin cambios (el highlighting sigue funcionando correctamente)
 
-**Estimación**: 2-3 horas
+**Validación**:
+- ✅ TypeScript type check: PASS
+- ✅ ESLint: PASS
+- ✅ Highlighting visual funciona correctamente (usa `trackPlayingID`)
 
 ---
 
