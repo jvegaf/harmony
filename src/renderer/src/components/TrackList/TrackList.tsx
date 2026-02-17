@@ -424,10 +424,24 @@ const TrackList = (props: Props) => {
         targetTrack: targetTrack.title,
       });
 
-      // Don't reorder if dropped on itself
-      if (draggedTrack.id === targetTrack.id) {
-        logger.info('[TracksTable] Track dropped on itself, no reorder needed');
-        perfLogger.measure('Early return (dropped on itself)');
+      // DEBT-005: Get selected tracks for multi-track reordering
+      const selectedRows = event.api.getSelectedRows() as Track[];
+      const selectedTrackIds = new Set(selectedRows.map(t => t.id));
+
+      // Determine which tracks to move:
+      // - If dragged track is selected, move all selected tracks
+      // - Otherwise, move only the dragged track
+      const tracksToMove = selectedTrackIds.has(draggedTrack.id) ? selectedRows : [draggedTrack];
+
+      perfLogger.measure('Tracks to move determined', {
+        count: tracksToMove.length,
+        isMultiTrack: tracksToMove.length > 1,
+      });
+
+      // Don't reorder if any of the tracks being moved is the target
+      if (tracksToMove.some(t => t.id === targetTrack.id)) {
+        logger.info('[TracksTable] Target track is in selection, no reorder needed');
+        perfLogger.measure('Early return (target in selection)');
         perfLogger.endSession();
         return;
       }
@@ -440,40 +454,40 @@ const TrackList = (props: Props) => {
 
       perfLogger.measure('Position calculated', { position });
 
-      logger.info(`[TracksTable] Reordering: ${draggedTrack.title} ${position} ${targetTrack.title}`);
+      logger.info(
+        `[TracksTable] Reordering: ${tracksToMove.length} track(s) ${position} ${targetTrack.title}`,
+      );
 
       // IMMEDIATE UPDATE: Calculate new order manually and update state
       // Get current order from rowData state (not from grid, as managed mode hasn't updated state)
       const currentOrder = [...rowData];
 
-      // Find indices
-      const draggedIndex = currentOrder.findIndex(t => t.id === draggedTrack.id);
-      const targetIndex = currentOrder.findIndex(t => t.id === targetTrack.id);
+      // DEBT-005: Multi-track reordering logic
+      // 1. Extract the tracks being moved (preserving their relative order)
+      const trackIdsToMove = new Set(tracksToMove.map(t => t.id));
+      const movedTracks = currentOrder.filter(t => trackIdsToMove.has(t.id));
+      const remainingTracks = currentOrder.filter(t => !trackIdsToMove.has(t.id));
 
-      if (draggedIndex === -1 || targetIndex === -1) {
-        logger.error('[TracksTable] Could not find track indices');
+      // 2. Find target position in the remaining tracks
+      const targetIndex = remainingTracks.findIndex(t => t.id === targetTrack.id);
+
+      if (targetIndex === -1) {
+        logger.error('[TracksTable] Could not find target track');
         perfLogger.endSession();
         return;
       }
 
-      // Remove dragged track
-      const [removed] = currentOrder.splice(draggedIndex, 1);
-
-      // Calculate new position
+      // 3. Calculate insertion index
       let insertIndex = targetIndex;
       if (position === 'below') {
         insertIndex = targetIndex + 1;
       }
-      // Adjust if dragged was before target
-      if (draggedIndex < targetIndex) {
-        insertIndex--;
-      }
 
-      // Insert at new position
-      currentOrder.splice(insertIndex, 0, removed);
+      // 4. Insert moved tracks at new position (maintaining their relative order)
+      remainingTracks.splice(insertIndex, 0, ...movedTracks);
 
       // Recalculate playlistOrder
-      const newOrderWithIndex = currentOrder.map((track, index) => ({
+      const newOrderWithIndex = remainingTracks.map((track, index) => ({
         ...track,
         playlistOrder: index + 1,
       }));
@@ -491,10 +505,13 @@ const TrackList = (props: Props) => {
         perfLogger.endSession();
       });
 
-      logger.info('[TracksTable] UI updated immediately, sending to backend...');
+      logger.info(
+        `[TracksTable] UI updated immediately (${tracksToMove.length} tracks), sending to backend...`,
+      );
 
       // FIRE AND FORGET: Send event to backend queue (non-blocking, no await)
-      PlaylistsAPI.reorderTracks(currentPlaylist, [draggedTrack], targetTrack, position)
+      // DEBT-005: Now supports multi-track reordering
+      PlaylistsAPI.reorderTracks(currentPlaylist, tracksToMove, targetTrack, position)
         .then(() => {
           logger.info('[TracksTable] Backend processed reorder successfully');
         })

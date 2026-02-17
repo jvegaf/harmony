@@ -148,9 +148,9 @@ const duplicate = async (playlistID: string): Promise<void> => {
 };
 
 /**
- * Reorder tracks in a playlists
- * TODO: currently only supports one track at a time, at a point you should be
- * able to re-order a selection of tracks
+ * Reorder tracks in a playlist.
+ * Supports reordering multiple tracks at once while preserving their relative order.
+ * DEBT-005: Multi-track reordering implemented 2026-02-18
  */
 const reorderTracks = async (
   playlistID: string,

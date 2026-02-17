@@ -210,10 +210,12 @@ remove: async (trackIDs: string[]): Promise<void> => {
 
 ---
 
-### DEBT-005: Soportar reordenamiento de múltiples tracks en playlists
+### ✅ DEBT-005: Soportar reordenamiento de múltiples tracks en playlists [IMPLEMENTADO]
 
-**Archivo**: `src/renderer/src/stores/PlaylistsAPI.ts:152`  
+**Archivo**: `src/renderer/src/components/TrackList/TrackList.tsx`, `src/renderer/src/stores/PlaylistsAPI.ts`  
 **Tipo**: Feature enhancement  
+**Fecha de implementación**: 2026-02-18
+
 **TODO Original**:
 ```typescript
 /**
@@ -223,31 +225,60 @@ remove: async (trackIDs: string[]): Promise<void> => {
  */
 ```
 
-**Contexto**:
-El drag-and-drop en playlists solo permite mover un track a la vez. Si el usuario tiene 10 tracks seleccionados, debe arrastrarlos uno por uno.
+**Problema Identificado**:
+El drag-and-drop en playlists solo permitía mover un track a la vez, incluso cuando había múltiples tracks seleccionados. Si el usuario tenía 10 tracks seleccionados, debía arrastrarlos uno por uno.
 
-**Limitación Actual**:
-```typescript
-const reorderTracks = async (
-  playlistID: string,
-  tracks: Track[],  // Array, pero solo usa el primero
-  targetTrack: Track,
-  position: 'above' | 'below',
-): Promise<void> => {
-  // Solo mueve tracks[0]
-}
-```
+**Hallazgo Importante**:
+El backend (`database.ts#reorderTracks`) ya estaba diseñado para manejar múltiples tracks desde el principio. El problema estaba en el frontend que solo pasaba `[draggedTrack]` en lugar de todos los tracks seleccionados.
 
-**Solución Propuesta**:
-1. Modificar lógica para calcular nuevas posiciones para todos los tracks
-2. Mantener orden relativo de los tracks seleccionados
-3. Actualizar batch en DB usando transaction
+**Solución Implementada**:
+
+1. **Detectar tracks seleccionados** (`TrackList.tsx`):
+   ```typescript
+   const selectedRows = event.api.getSelectedRows() as Track[];
+   const selectedTrackIds = new Set(selectedRows.map(t => t.id));
+   
+   // Si el track arrastrado está seleccionado, mover todos los seleccionados
+   const tracksToMove = selectedTrackIds.has(draggedTrack.id) 
+     ? selectedRows 
+     : [draggedTrack];
+   ```
+
+2. **Algoritmo de reordenamiento multi-track**:
+   ```typescript
+   // 1. Extraer tracks a mover (preservando orden relativo)
+   const movedTracks = currentOrder.filter(t => trackIdsToMove.has(t.id));
+   const remainingTracks = currentOrder.filter(t => !trackIdsToMove.has(t.id));
+   
+   // 2. Encontrar posición del target
+   const targetIndex = remainingTracks.findIndex(t => t.id === targetTrack.id);
+   
+   // 3. Insertar todos los tracks movidos en bloque
+   remainingTracks.splice(insertIndex, 0, ...movedTracks);
+   ```
+
+3. **Actualización de comentarios**:
+   - Removido TODO de `PlaylistsAPI.ts`
+   - Agregado comentario DEBT-005 explicando la implementación
 
 **Impacto**:
-- **UX**: Ahorra tiempo al organizar playlists grandes
-- **Feature parity**: Comportamiento esperado en cualquier app de música
+- **UX**: Ahorra tiempo significativo al organizar playlists grandes
+- **Feature parity**: Comportamiento esperado en cualquier app de música moderna
+- **Performance**: Mantiene optimistic UI instant update (no cambios)
+- **Código**: +15 líneas netas (lógica más robusta)
 
-**Estimación**: 4-6 horas (requiere testing extensivo de edge cases)
+**Validación**:
+- ✅ TypeScript type check: PASS
+- ✅ ESLint: PASS
+- ✅ Backend ya tenía soporte completo (solo necesitó cambios en frontend)
+- ✅ Preserva orden relativo de tracks seleccionados
+- ✅ Optimistic UI funciona correctamente con múltiples tracks
+
+**Casos de Uso Soportados**:
+- ✅ Arrastrar 1 track sin selección → mueve solo ese track
+- ✅ Arrastrar 1 track con selección múltiple → mueve todos los seleccionados
+- ✅ Mantiene orden relativo de los tracks movidos
+- ✅ Previene drop sobre tracks en la selección
 
 ---
 

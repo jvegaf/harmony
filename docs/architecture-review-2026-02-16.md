@@ -14,8 +14,8 @@
 ### Resumen de Progreso
 
 - **Total hallazgos**: 23 (3 P0, 6 P1, 8 P2, 6 P3)
-- **Implementados**: 11 hallazgos (47.8%)
-- **Pendientes**: 12 hallazgos (52.2%)
+- **Implementados**: 12 hallazgos (52.2%)
+- **Pendientes**: 11 hallazgos (47.8%)
   - 3 P0 bloqueados por riesgo de breaking changes
   - 1 P1 requiere decisión de producto/arquitectura
   - 7 P2 en backlog para próximas iteraciones
@@ -36,6 +36,7 @@
 | **DEBT-001** | P3 | Orquestación de import en renderer | Handler unificado en main process (1 IPC vs 6+ round-trips) | 2026-02-18 |
 | **DEBT-002** | P3 | Re-import de tracks existentes | Implementado filtrado pre-insert (10-100x más rápido) | 2026-02-17 |
 | **DEBT-003** | P2 | highlightPlayingTrack código muerto | Removido dead code (11 líneas), highlighting funciona correctamente | 2026-02-18 |
+| **DEBT-005** | P2 | Reordenamiento single-track en playlists | Multi-track drag-and-drop implementado preservando orden relativo | 2026-02-18 |
 
 ### 📊 Validación de Cambios
 
@@ -289,9 +290,9 @@ Harmony es una aplicación Electron bien estructurada con un modelo de tres proc
 - Template para issues de GitHub
 
 **Estado actual**:
-- 3 implementados (DEBT-001: arquitectura refactorizada, DEBT-002: 10-100x más rápido, DEBT-003: dead code removido)
+- 4 implementados (DEBT-001: arquitectura, DEBT-002: performance, DEBT-003: cleanup, DEBT-005: UX)
 - 1 analizado y cerrado (DEBT-004: comportamiento correcto confirmado)
-- 4 pendientes con plan de implementación claro
+- 3 pendientes con plan de implementación claro
 
 **Impacto**:
 - **Mantenibilidad**: TODOs movidos de código a documentación estructurada
