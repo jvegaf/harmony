@@ -16,12 +16,12 @@ import { TrackCandidatesResult, TrackSelection, TagCandidatesProgress } from '@p
 import { getTaggerWorkerManager } from '../lib/tagger/worker/tagger-worker-manager';
 
 /**
- * Module in charge of returning the track with tags fixed
- * AIDEV-NOTE: Manages tagger worker lifecycle and emits progress events during candidate searches
+ * Module in charge of returning the track with tags fixed.
+ * Manages tagger worker lifecycle and emits progress events during candidate searches.
  */
 class IPCTaggerModule extends ModuleWindow {
   async load(): Promise<void> {
-    // AIDEV-NOTE: Initialize tagger workers on module load
+    // Initialize tagger workers on module load
     try {
       const taggerManager = getTaggerWorkerManager();
       await taggerManager.initialize();
@@ -34,16 +34,16 @@ class IPCTaggerModule extends ModuleWindow {
       return FixTags(track);
     });
 
-    // AIDEV-NOTE: Handler con callback de progreso para reportar avances al renderer
+    // Handler with progress callback to report advances to renderer
     ipcMain.handle(
       channels.FIND_TAG_CANDIDATES,
       (_e, tracks: Track[], options?: { autoApply?: boolean }): Promise<TrackCandidatesResult[]> => {
-        // Callback para emitir progreso de búsqueda al renderer
+        // Emit search progress to renderer
         const onProgress = (progress: TagCandidatesProgress) => {
           this.window.webContents.send(channels.TAG_CANDIDATES_PROGRESS, progress);
         };
 
-        // AIDEV-NOTE: Callback para emitir progreso del auto-apply en background
+        // Emit auto-apply progress in background
         const onAutoApplyProgress: AutoApplyProgressCallback = progress => {
           this.window.webContents.send(channels.TAG_AUTO_APPLY_COMPLETE, {
             type: 'progress',
@@ -51,7 +51,7 @@ class IPCTaggerModule extends ModuleWindow {
           });
         };
 
-        // AIDEV-NOTE: Callback para emitir evento de completado del auto-apply
+        // Emit auto-apply complete event
         const onAutoApplyComplete: AutoApplyCompleteCallback = result => {
           log.info(
             `[IPCTaggerModule] Auto-apply completed: ${result.updated} updated, ${result.failed} failed, trackIds: ${result.trackIds.join(', ')}`,
@@ -78,7 +78,6 @@ class IPCTaggerModule extends ModuleWindow {
     );
   }
 
-  // AIDEV-NOTE: Shutdown tagger workers when module unloads
   async unload(): Promise<void> {
     try {
       const taggerManager = getTaggerWorkerManager();

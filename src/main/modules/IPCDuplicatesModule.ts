@@ -20,12 +20,12 @@ let duplicatesCache: {
 
 /**
  * IPC Module for Duplicate Finder functionality.
- * AIDEV-NOTE: Handles duplicate detection scan requests, caching, and progress reporting.
+ * Handles duplicate detection scan requests, caching, and progress reporting.
  */
 export default class IPCDuplicatesModule extends ModuleWindow {
   /**
-   * Generate a hash of the current library state (track count + total duration)
-   * AIDEV-NOTE: Simple but effective - if tracks are added/removed, hash changes
+   * Generate a hash of the current library state (track count + total duration).
+   * Simple but effective - if tracks are added/removed, hash changes.
    */
   private async getLibraryHash(): Promise<string> {
     const db = Database.getInstance();
@@ -78,10 +78,7 @@ export default class IPCDuplicatesModule extends ModuleWindow {
   }
 
   async load(): Promise<void> {
-    /**
-     * Start a duplicate scan with the given configuration
-     * AIDEV-NOTE: Now checks cache first before scanning
-     */
+    // Start a duplicate scan with the given configuration (checks cache first)
     ipcMain.handle(
       channels.DUPLICATES_FIND,
       async (_e, config: Config['duplicateFinderConfig']): Promise<DuplicateScanResult> => {

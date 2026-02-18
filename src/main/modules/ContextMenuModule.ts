@@ -9,7 +9,7 @@ import { SanitizedTitle } from '../../preload/utils';
 
 /**
  * Module in charge of context menus for tracks, playlists, and common actions.
- * AIDEV-NOTE: Search engines are now loaded dynamically from ConfigModule.
+ * Search engines are loaded dynamically from ConfigModule.
  * Users can configure custom search engines via Settings > General.
  */
 class ContextMenuModule extends ModuleWindow {
@@ -91,7 +91,7 @@ class ContextMenuModule extends ModuleWindow {
 
       if (selectedCount < 2) {
         const track = selected[0];
-        // AIDEV-NOTE: Use sanitized query for all search engines (removes remix info, etc.)
+        // Use sanitized query for all search engines (removes remix info, etc.)
         const sanitizedQuery = encodeURIComponent(`${track.artist} ${SanitizedTitle(track.title)}`);
 
         // Build search menu from configured search engines

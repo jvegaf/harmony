@@ -9,8 +9,8 @@ import channels from '../../preload/lib/ipc-channels';
 import ModuleWindow from './BaseWindowModule';
 
 /**
- * Module in charge of playlist import/export operations
- * AIDEV-NOTE: Handles M3U playlist format for import/export functionality
+ * Module in charge of playlist import/export operations.
+ * Handles M3U playlist format for import/export functionality.
  */
 class IPCPlaylistModule extends ModuleWindow {
   constructor(window: BrowserWindow) {
@@ -30,8 +30,7 @@ class IPCPlaylistModule extends ModuleWindow {
   // ---------------------------------------------------------------------------
 
   /**
-   * Export a playlist to M3U format
-   * AIDEV-NOTE: Creates an extended M3U file with track metadata
+   * Export a playlist to M3U format (creates extended M3U file)
    */
   private async exportPlaylistToM3U(_event: IpcMainEvent, playlistName: string, trackPaths: string[]): Promise<void> {
     try {
@@ -66,8 +65,8 @@ class IPCPlaylistModule extends ModuleWindow {
   }
 
   /**
-   * Parse and resolve tracks from an M3U playlist file
-   * AIDEV-NOTE: Returns array of absolute track paths found in the M3U file
+   * Parse and resolve tracks from an M3U playlist file.
+   * Returns array of absolute track paths found in the M3U file.
    */
   private async resolveM3UPlaylist(_event: Electron.IpcMainInvokeEvent, m3uPath: string): Promise<string[]> {
     try {

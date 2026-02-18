@@ -1,7 +1,7 @@
 /**
  * IPC Audio Analysis Module
  *
- * AIDEV-NOTE: Provides IPC handlers for manual audio analysis with parallel processing.
+ * Provides IPC handlers for manual audio analysis with parallel processing.
  * Uses AudioAnalysisWorkerPool for efficient batch processing with progress reporting.
  * Automatically saves BPM, Key, and Waveform data to the database after analysis.
  *
@@ -74,7 +74,6 @@ export default class IPCAudioAnalysisModule extends ModuleWindow {
 
   constructor(window: Electron.BrowserWindow) {
     super(window);
-    // AIDEV-NOTE: Use singleton instance to prevent multiple database connections
     this.db = Database.getInstance();
   }
 
@@ -86,7 +85,7 @@ export default class IPCAudioAnalysisModule extends ModuleWindow {
         const workerPool = getWorkerPool(request.poolSize);
         const result = await workerPool.analyzeFile(request.filePath, request.options);
 
-        // AIDEV-NOTE: Save analysis results to database
+        // Save analysis results to database
         if (result) {
           await this.saveAnalysisToDatabase(request.filePath, result);
         }
@@ -122,7 +121,7 @@ export default class IPCAudioAnalysisModule extends ModuleWindow {
           const results: Record<string, AudioAnalysisResult> = {};
           const errors: Record<string, string> = {};
 
-          // AIDEV-NOTE: Save successful results to database
+          // Save successful results to database
           const savePromises: Promise<void>[] = [];
 
           resultsMap.forEach((value, filePath) => {
@@ -167,7 +166,6 @@ export default class IPCAudioAnalysisModule extends ModuleWindow {
         return;
       }
 
-      // AIDEV-NOTE: Update track with analysis results
       // Only update fields that have values
       const updatedTrack = { ...track };
       let hasChanges = false;
@@ -197,8 +195,7 @@ export default class IPCAudioAnalysisModule extends ModuleWindow {
         await this.db.updateTrack(updatedTrack);
         log.info(`[IPCAudioAnalysis] Saved to database: ${track.title}`);
 
-        // AIDEV-NOTE: Send track complete event to renderer for real-time UI updates
-        // This allows the TrackList to update each row as analysis completes
+        // Send track complete event to renderer for real-time UI updates
         this.window.webContents.send(channels.AUDIO_ANALYSIS_TRACK_COMPLETE, updatedTrack);
       } else {
         log.warn(`[IPCAudioAnalysis] No valid data to save for: ${track.title}`);

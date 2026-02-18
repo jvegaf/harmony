@@ -25,14 +25,14 @@ export default class ConfigModule extends Module {
       defaults: this.getDefaultConfig(),
     });
 
-    // AIDEV-NOTE: Migrate existing configs to add new properties
+    // Migrate existing configs to add new properties
     this.migrateConfig();
   }
 
   /**
-   * Migrate existing configs to add new properties that may be missing
-   * AIDEV-NOTE: electron-store only applies defaults to top-level keys,
-   * so we need to manually ensure nested properties exist
+   * Migrate existing configs to add new properties that may be missing.
+   * electron-store only applies defaults to top-level keys,
+   * so we need to manually ensure nested properties exist.
    */
   private migrateConfig(): void {
     const defaults = this.getDefaultConfig();
@@ -99,7 +99,7 @@ export default class ConfigModule extends Module {
         colId: 'path',
         mode: 'desc',
       },
-      // AIDEV-NOTE: Default search engines for context menu. Users can add custom ones via Settings > General.
+      // Default search engines for context menu. Users can add custom ones via Settings > General.
       searchEngines: [
         {
           id: 'default-beatport',
@@ -120,13 +120,13 @@ export default class ConfigModule extends Module {
           isDefault: true,
         },
       ],
-      // AIDEV-NOTE: UI theme configuration - 'auto' follows system preference
+      // UI theme configuration - 'auto' follows system preference
       theme: 'auto',
-      // AIDEV-NOTE: Root path of music collection for change detection and re-scanning
+      // Root path of music collection for change detection and re-scanning
       libraryPath: '',
-      // AIDEV-NOTE: Auto-fix metadata for newly imported tracks with missing tags
+      // Auto-fix metadata for newly imported tracks with missing tags
       autoFixMetadata: false,
-      // AIDEV-NOTE: Traktor NML integration configuration, persisted to settings
+      // Traktor NML integration configuration, persisted to settings
       traktorConfig: {
         nmlPath: '',
         syncStrategy: 'smart_merge',
@@ -141,7 +141,7 @@ export default class ConfigModule extends Module {
           debounceMs: 5000, // 5 seconds debounce for library changes
         },
       },
-      // AIDEV-NOTE: Duplicate finder configuration with hierarchical logic.
+      // Duplicate finder configuration with hierarchical logic.
       // Title and artist are always required (mandatory matching).
       // Duration is optional - when enabled, adds additional filtering.
       duplicateFinderConfig: {

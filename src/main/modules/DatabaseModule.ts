@@ -16,7 +16,6 @@ class DatabaseModule extends ModuleWindow {
 
   constructor(window: Electron.BrowserWindow) {
     super(window);
-    // AIDEV-NOTE: Use singleton instance to prevent multiple database connections
     this.db = Database.getInstance();
   }
 
@@ -32,7 +31,7 @@ class DatabaseModule extends ModuleWindow {
     ipcMain.handle(channels.TRACKS_ADD, async (_, tracks: Track[]): Promise<Track[]> => {
       log.info(`Adding ${tracks.length} tracks to the database`);
 
-      // AIDEV-NOTE: Deduplicate and smart merge tracks
+      // Deduplicate and smart merge tracks
       // Get existing tracks by path to detect duplicates
       const existingTracks = await this.db.findTracksByPath(tracks.map(track => track.path));
 
@@ -60,8 +59,6 @@ class DatabaseModule extends ModuleWindow {
 
       // Invalidate duplicates cache since library changed
       this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
-
-      // AIDEV-NOTE: Emit library change event for auto-sync
       emitLibraryChanged('tracks-added', newTracks.length);
 
       return [...newTracks, ...tracksToUpdate];
@@ -69,7 +66,6 @@ class DatabaseModule extends ModuleWindow {
 
     ipcMain.handle(channels.TRACK_UPDATE, async (_, track: Track): Promise<void> => {
       await this.db.updateTrack(track);
-      // AIDEV-NOTE: Emit library change event for auto-sync
       emitLibraryChanged('tracks-updated', 1);
     });
 
@@ -78,8 +74,6 @@ class DatabaseModule extends ModuleWindow {
 
       // Invalidate duplicates cache since library changed
       this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
-
-      // AIDEV-NOTE: Emit library change event for auto-sync
       emitLibraryChanged('tracks-removed', trackIDs.length);
     });
 
@@ -105,20 +99,17 @@ class DatabaseModule extends ModuleWindow {
 
     ipcMain.handle(channels.PLAYLIST_ADD, async (_, playlist: Playlist): Promise<Playlist> => {
       const result = await this.db.insertPlaylist(playlist);
-      // AIDEV-NOTE: Emit library change event for auto-sync
       emitLibraryChanged('playlists-changed', 1);
       return result;
     });
 
     ipcMain.handle(channels.PLAYLIST_RENAME, async (_, playlistID: string, name: string): Promise<void> => {
       await this.db.renamePlaylist(playlistID, name);
-      // AIDEV-NOTE: Emit library change event for auto-sync
       emitLibraryChanged('playlists-changed', 1);
     });
 
     ipcMain.handle(channels.PLAYLIST_REMOVE, async (_, playlistID: string): Promise<void> => {
       await this.db.removePlaylist(playlistID);
-      // AIDEV-NOTE: Emit library change event for auto-sync
       emitLibraryChanged('playlists-changed', 1);
     });
 
@@ -132,11 +123,10 @@ class DatabaseModule extends ModuleWindow {
 
     ipcMain.handle(channels.PLAYLIST_SET_TRACKS, async (_, playlistID: string, tracks: Track[]): Promise<void> => {
       await this.db.setTracks(playlistID, tracks);
-      // AIDEV-NOTE: Emit library change event for auto-sync
       emitLibraryChanged('playlists-changed', 1);
     });
 
-    // AIDEV-NOTE: New optimized IPC handler for track reordering
+    // Optimized IPC handler for track reordering (DEBT-005)
     ipcMain.handle(
       channels.PLAYLIST_REORDER_TRACKS,
       async (
@@ -147,7 +137,6 @@ class DatabaseModule extends ModuleWindow {
         position: 'above' | 'below',
       ): Promise<void> => {
         await this.db.reorderTracks(playlistID, tracksToMove, targetTrack, position);
-        // AIDEV-NOTE: Emit library change event for auto-sync
         emitLibraryChanged('playlists-changed', 1);
       },
     );
@@ -156,7 +145,7 @@ class DatabaseModule extends ModuleWindow {
       return this.db.reset();
     });
 
-    // AIDEV-NOTE: Prune Mode - To Delete Playlist IPC Handlers
+    // Prune Mode - To Delete Playlist IPC Handlers
     ipcMain.handle(channels.PLAYLIST_TO_DELETE_GET, (): Promise<Playlist> => {
       return this.db.getOrCreateToDeletePlaylist();
     });
@@ -173,7 +162,7 @@ class DatabaseModule extends ModuleWindow {
       return this.db.clearToDeletePlaylist();
     });
 
-    // AIDEV-NOTE: Preparation Mode - Set Preparation Playlist IPC Handlers
+    // Preparation Mode - Set Preparation Playlist IPC Handlers
     ipcMain.handle(channels.PLAYLIST_PREPARATION_GET, (): Promise<Playlist> => {
       return this.db.getOrCreatePreparationPlaylist();
     });

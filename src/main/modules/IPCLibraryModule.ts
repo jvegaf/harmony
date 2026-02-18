@@ -83,8 +83,6 @@ class IPCLibraryModule extends ModuleWindow {
 
       // Invalidate duplicates cache since library changed
       this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
-
-      // AIDEV-NOTE: Emit library change event for auto-sync
       emitLibraryChanged('tracks-removed', trackFiles.length);
     });
   }
@@ -242,7 +240,7 @@ class IPCLibraryModule extends ModuleWindow {
   /**
    * Import tracks metadata from file paths.
    *
-   * AIDEV-NOTE: Pre-filters paths that already exist in DB before scanning metadata.
+   * Pre-filters paths that already exist in DB before scanning metadata.
    * This optimization avoids expensive file I/O and metadata parsing for tracks
    * that are already imported.
    */
@@ -250,7 +248,7 @@ class IPCLibraryModule extends ModuleWindow {
     log.info(`Starting import of ${tracksPath.length} tracks`);
     loggerExtras.time('Tracks scan');
 
-    // AIDEV-NOTE: Pre-filter optimization - check DB for existing paths
+    // Pre-filter optimization - check DB for existing paths
     // This avoids scanning metadata for tracks that are already imported
     const db = (await import('../lib/db/database')).Database.getInstance();
     const resolvedPaths = tracksPath.map(p => path.resolve(p));
@@ -359,9 +357,9 @@ class IPCLibraryModule extends ModuleWindow {
   }
 
   /**
-   * Get a file ID3 metadata
+   * Get a file ID3 metadata.
    *
-   * AIDEV-NOTE: Uses makeTrackID() for deterministic ID generation based on file path.
+   * Uses makeTrackID() for deterministic ID generation based on file path.
    * This ensures the same file always gets the same ID regardless of import source.
    */
   private async getMetadata(trackPath: string): Promise<Track> {
@@ -379,7 +377,7 @@ class IPCLibraryModule extends ModuleWindow {
       ...parsedData,
       id: trackId,
       path: trackPath,
-      addedAt: Date.now(), // AIDEV-NOTE: Timestamp when track was imported
+      addedAt: Date.now(), // Timestamp when track was imported
     };
 
     // Let's try another wat to retrieve a track duration
@@ -396,7 +394,7 @@ class IPCLibraryModule extends ModuleWindow {
 
   /**
    * Replace a track file on disk with a new file, re-read metadata, and update database.
-   * AIDEV-NOTE: Validates same extension, copies new file over old path,
+   * Validates same extension, copies new file over old path,
    * re-reads metadata, updates DB, and marks pending Traktor sync.
    */
   private async replaceTrackFile(
@@ -476,7 +474,7 @@ class IPCLibraryModule extends ModuleWindow {
    * Check for changes in the library path compared to the database.
    * Detects new files added by user and tracks whose files no longer exist.
    *
-   * AIDEV-NOTE: Reuses libraryLookup logic for filesystem scanning and
+   * Reuses libraryLookup logic for filesystem scanning and
    * compares with database state to identify additions and removals.
    */
   private async checkLibraryChanges(_e: IpcMainInvokeEvent, libraryPath: string): Promise<LibraryChanges> {
