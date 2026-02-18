@@ -28,7 +28,7 @@ function WavePlayer({ config }: WavePlayerProps) {
   const [time, setTime] = useState<string>('0:00');
   const [totalDuration, setTotalDuration] = useState<string>('0:00');
 
-  // AIDEV-NOTE: Create theme-aware waveform gradients
+  // Create theme-aware waveform gradients
   const optionsMemo = useMemo((): Omit<WaveSurferOptions, 'container'> => {
     let gradient, progressGradient;
     if (typeof window !== 'undefined') {
@@ -67,7 +67,8 @@ function WavePlayer({ config }: WavePlayerProps) {
       url: audioUrl,
     };
   }, [audioUrl, colorScheme]);
-  // AIDEV-NOTE: Pass playingTrack to useWavesurfer so it can use cached waveform peaks from DB
+  
+  // Pass playingTrack to useWavesurfer so it can use cached waveform peaks from DB
   const wavesurfer = useWavesurfer(containerRef, optionsMemo, playingTrack);
   // Initialize wavesurfer when the container mounts
   // or any of the props change

@@ -69,7 +69,7 @@ export default function DetailsView() {
 
   const handleSubmit = useCallback(
     async values => {
-      // AIDEV-NOTE: Changed behavior - Save no longer navigates away
+      // Changed behavior - Save no longer navigates away
       // User can continue editing or navigate manually with Cancel or Prev/Next buttons
       await libraryAPI.updateTrackMetadata(track.id, values);
       form.resetDirty(values);
@@ -86,7 +86,7 @@ export default function DetailsView() {
     [track, libraryAPI, form, revalidator],
   );
 
-  // AIDEV-NOTE: Navigation handlers with unsaved changes confirmation
+  // Navigation handlers with unsaved changes confirmation
   const confirmNavigation = useCallback(
     (action: () => void) => {
       if (form.isDirty()) {
@@ -143,7 +143,7 @@ export default function DetailsView() {
     form.setValues({ comment: '' });
   }, []);
 
-  // AIDEV-NOTE: Handler to replace underscores with spaces in all text fields
+  // Handler to replace underscores with spaces in all text fields
   const replaceUnderscoresWithSpaces = useCallback(() => {
     const currentValues = form.getValues();
     const updatedValues: Record<string, string> = {};
@@ -166,14 +166,14 @@ export default function DetailsView() {
   }, [form]);
 
   const findCandidates = useCallback(async () => {
-    // AIDEV-NOTE: Disable auto-apply when finding candidates from Detail View
+    // Disable auto-apply when finding candidates from Detail View
     // User should always see the selection modal, even for perfect matches
     await libraryAPI.findCandidates([track], { autoApply: false });
   }, [track, libraryAPI]);
 
   const replaceFile = useCallback(async () => {
     try {
-      // AIDEV-NOTE: Get the current file extension to restrict picker to same format
+      // Get the current file extension to restrict picker to same format
       const currentExt = track.path.split('.').pop()?.toLowerCase() || 'mp3';
 
       // Open file picker restricted to the same extension

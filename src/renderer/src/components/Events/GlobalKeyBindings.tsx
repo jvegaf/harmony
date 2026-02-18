@@ -30,7 +30,7 @@ function GlobalKeyBindings() {
           }
           break;
         case 'k':
-          // AIDEV-NOTE: Ctrl+K focuses the search input in the Sidebar
+          // Ctrl+K focuses the search input in the Sidebar
           if (isCtrlKey(e)) {
             e.preventDefault();
             e.stopPropagation();

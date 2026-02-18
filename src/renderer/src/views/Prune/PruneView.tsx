@@ -23,7 +23,7 @@ export default function PruneView() {
   const [isAtEnd, setIsAtEnd] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
 
-  // AIDEV-NOTE: Load To Delete playlist on mount
+  // Load To Delete playlist on mount
   useEffect(() => {
     const loadToDeletePlaylist = async () => {
       try {
@@ -39,7 +39,7 @@ export default function PruneView() {
 
   useEffect(() => {
     const startPruneMode = async () => {
-      // AIDEV-NOTE: Only start if user has confirmed via "Start Prune Mode" button
+      // Only start if user has confirmed via "Start Prune Mode" button
       if (!isStarted || tracks.length === 0) {
         return;
       }
@@ -58,15 +58,15 @@ export default function PruneView() {
     return () => {
       playerAPI.setPruneMode(false);
     };
-    // AIDEV-NOTE: Run when isStarted changes or on mount
+    // Run when isStarted changes or on mount
   }, [isStarted, tracks, playerAPI]);
 
-  // AIDEV-NOTE: Check if we're at the end of the queue
+  // Check if we're at the end of the queue
   useEffect(() => {
     setIsAtEnd(queueCursor === queue.length - 1);
   }, [queueCursor, queue.length]);
 
-  // AIDEV-NOTE: Reload playlist count when track is marked for deletion
+  // Reload playlist count when track is marked for deletion
   const reloadToDeleteCount = useCallback(async () => {
     try {
       const playlist = await db.playlists.getToDeletePlaylist();
@@ -76,7 +76,7 @@ export default function PruneView() {
     }
   }, []);
 
-  // AIDEV-NOTE: Handle D key - Mark for deletion and advance
+  // Handle D key - Mark for deletion and advance
   const handleDelete = useCallback(async () => {
     if (!playingTrack || isAtEnd) {
       return;
@@ -100,7 +100,7 @@ export default function PruneView() {
     }
   }, [playingTrack, isAtEnd, reloadToDeleteCount, playerAPI]);
 
-  // AIDEV-NOTE: Handle K key - Keep and advance
+  // Handle K key - Keep and advance
   const handleKeep = useCallback(async () => {
     if (isAtEnd) {
       return;
@@ -116,7 +116,7 @@ export default function PruneView() {
     }
   }, [isAtEnd, playerAPI]);
 
-  // AIDEV-NOTE: Handle Q key - Quit prune mode
+  // Handle Q key - Quit prune mode
   const handleQuit = useCallback(async () => {
     const tracksCount = toDeletePlaylist?.tracks?.length ?? 0;
 
@@ -129,7 +129,7 @@ export default function PruneView() {
     }
   }, [toDeletePlaylist, navigate]);
 
-  // AIDEV-NOTE: Keyboard event handler
+  // Keyboard event handler
   const onKey = useCallback(
     async (e: KeyboardEvent) => {
       switch (e.key.toLowerCase()) {
@@ -155,7 +155,7 @@ export default function PruneView() {
     [handleDelete, handleKeep, handleQuit],
   );
 
-  // AIDEV-NOTE: Handle empty library
+  // Handle empty library
   if (tracks.length === 0) {
     return (
       <div className={styles.container}>
@@ -176,7 +176,7 @@ export default function PruneView() {
     );
   }
 
-  // AIDEV-NOTE: Show confirmation screen before starting
+  // Show confirmation screen before starting
   if (!isStarted) {
     return (
       <div className={styles.container}>
@@ -209,7 +209,7 @@ export default function PruneView() {
     );
   }
 
-  // AIDEV-NOTE: Show end message when reaching end of queue
+  // Show end message when reaching end of queue
   if (isAtEnd && queueCursor >= 0) {
     return (
       <div className={styles.container}>
@@ -284,7 +284,7 @@ export default function PruneView() {
   );
 }
 
-// AIDEV-NOTE: Loader for preloading data (not strictly necessary but follows pattern)
+// Loader for preloading data (not strictly necessary but follows pattern)
 PruneView.loader = async () => {
   return {};
 };

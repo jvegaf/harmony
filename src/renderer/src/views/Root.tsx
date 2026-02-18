@@ -33,13 +33,13 @@ export default function ViewRoot() {
   const { trackTagsCandidates, candidatesSearching, candidatesSearchProgress, tagsApplying, tagsApplyProgress, api } =
     useLibraryStore();
 
-  // AIDEV-NOTE: Show auto-sync notifications when syncing with Traktor
+  // Show auto-sync notifications when syncing with Traktor
   useAutoSyncNotification();
 
-  // AIDEV-NOTE: Show auto-apply notifications when perfect matches (>= 90%) are applied in background
+  // Show auto-apply notifications when perfect matches (>= 90%) are applied in background
   useAutoApplyNotification();
 
-  // AIDEV-NOTE: Suscribirse a los eventos de progreso de búsqueda de candidatos
+  // Subscribe to tag candidate search progress events
   useEffect(() => {
     const unsubscribe = library.onTagCandidatesProgress(progress => {
       useLibraryStore.setState({

@@ -106,7 +106,7 @@ function CandidateCard({
   const scorePercent = Math.round(candidate.similarity_score * 100);
   const durationMatches = isDurationMatch(localDuration, candidate.duration_secs);
 
-  // AIDEV-NOTE: Obtener el provider source (beatport, traxsource, bandcamp) del candidato
+  // Get provider source (beatport, traxsource, bandcamp) from candidate
   const providerSource = candidate.source;
 
   // Mapeo de provider a nombre legible

@@ -7,7 +7,8 @@ import styles from './DuplicateFinderTool.module.css';
 
 /**
  * DuplicateGroup - Displays a group of duplicate tracks
- * AIDEV-NOTE: Shows all tracks in a duplicate group with comparison columns.
+ * 
+ * Shows all tracks in a duplicate group with comparison columns.
  * First track (highest quality score) is highlighted as the recommended keeper.
  * Uses interactive DuplicateWavePlayer components for audio preview.
  */
@@ -77,7 +78,7 @@ function getParentFolder(path: string): string {
 
 /**
  * Format bitrate for display (e.g., 320, 256)
- * AIDEV-NOTE: Bitrate is stored in kbps, no conversion needed
+ * Bitrate is stored in kbps, no conversion needed
  */
 function formatBitrate(bitrate: number | undefined): string {
   if (!bitrate || bitrate === 0) return '—';
@@ -86,7 +87,7 @@ function formatBitrate(bitrate: number | undefined): string {
 
 /**
  * Get CSS class for bitrate based on quality
- * AIDEV-NOTE: Green for 320+, yellow for 256-319, red for <256 (bitrate is already in kbps)
+ * Green for 320+, yellow for 256-319, red for <256 (bitrate is already in kbps)
  */
 function getBitrateClass(bitrate: number | undefined): string {
   if (!bitrate || bitrate === 0) return '';

@@ -1,7 +1,7 @@
 /**
  * useAutoApplyNotification Hook
  *
- * AIDEV-NOTE: Subscribes to auto-apply events (TAG_AUTO_APPLY_COMPLETE) and shows/updates
+ * Subscribes to auto-apply events (TAG_AUTO_APPLY_COMPLETE) and shows/updates
  * a notification with detailed progress during auto-apply of perfect matches (>= 90% score).
  * Shows track-by-track progress and refreshes the UI when complete.
  * Should be mounted once at the app root level.
@@ -100,7 +100,7 @@ export function useAutoApplyNotification(): void {
           });
         }
 
-        // AIDEV-NOTE: Refresh UI to show updated tracks
+        // Refresh UI to show updated tracks
         // We update the store to trigger AG Grid row updates for each track
         if (event.trackIds.length > 0) {
           (async () => {

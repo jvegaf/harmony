@@ -12,7 +12,8 @@ const { config } = window.Main;
 
 /**
  * Settings panel for managing custom search engines.
- * AIDEV-NOTE: Search engines are persisted via electron-store and used in ContextMenuModule
+ * 
+ * Search engines are persisted via electron-store and used in ContextMenuModule
  * for the track context menu "Search" submenu.
  */
 export default function SettingsGeneral() {

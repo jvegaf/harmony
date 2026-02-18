@@ -23,7 +23,7 @@ export default function PreparationView() {
   const [isAtEnd, setIsAtEnd] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
 
-  // AIDEV-NOTE: Load Preparation playlist on mount
+  // Load Preparation playlist on mount
   useEffect(() => {
     const loadPreparationPlaylist = async () => {
       try {
@@ -39,7 +39,7 @@ export default function PreparationView() {
 
   useEffect(() => {
     const startPreparationMode = async () => {
-      // AIDEV-NOTE: Only start if user has confirmed via "Start Preparation Mode" button
+      // Only start if user has confirmed via "Start Preparation Mode" button
       if (!isStarted || tracks.length === 0) {
         return;
       }
@@ -58,15 +58,15 @@ export default function PreparationView() {
     return () => {
       playerAPI.setPruneMode(false);
     };
-    // AIDEV-NOTE: Run when isStarted changes or on mount
+    // Run when isStarted changes or on mount
   }, [isStarted, tracks, playerAPI]);
 
-  // AIDEV-NOTE: Check if we're at the end of the queue
+  // Check if we're at the end of the queue
   useEffect(() => {
     setIsAtEnd(queueCursor === queue.length - 1);
   }, [queueCursor, queue.length]);
 
-  // AIDEV-NOTE: Reload playlist count when track is added to preparation
+  // Reload playlist count when track is added to preparation
   const reloadPreparationCount = useCallback(async () => {
     try {
       const playlist = await db.playlists.getPreparationPlaylist();
@@ -76,7 +76,7 @@ export default function PreparationView() {
     }
   }, []);
 
-  // AIDEV-NOTE: Handle K key - Keep for set and advance
+  // Handle K key - Keep for set and advance
   const handleKeep = useCallback(async () => {
     if (!playingTrack || isAtEnd) {
       return;
@@ -100,7 +100,7 @@ export default function PreparationView() {
     }
   }, [playingTrack, isAtEnd, reloadPreparationCount, playerAPI]);
 
-  // AIDEV-NOTE: Handle D key - Skip and advance
+  // Handle D key - Skip and advance
   const handleSkip = useCallback(async () => {
     if (isAtEnd) {
       return;
@@ -116,7 +116,7 @@ export default function PreparationView() {
     }
   }, [isAtEnd, playerAPI]);
 
-  // AIDEV-NOTE: Handle Q key - Quit preparation mode
+  // Handle Q key - Quit preparation mode
   const handleQuit = useCallback(async () => {
     const tracksCount = preparationPlaylist?.tracks?.length ?? 0;
 
@@ -129,7 +129,7 @@ export default function PreparationView() {
     }
   }, [preparationPlaylist, navigate]);
 
-  // AIDEV-NOTE: Keyboard event handler
+  // Keyboard event handler
   const onKey = useCallback(
     async (e: KeyboardEvent) => {
       switch (e.key.toLowerCase()) {
@@ -155,7 +155,7 @@ export default function PreparationView() {
     [handleKeep, handleSkip, handleQuit],
   );
 
-  // AIDEV-NOTE: Handle empty library
+  // Handle empty library
   if (tracks.length === 0) {
     return (
       <div className={styles.container}>
@@ -176,7 +176,7 @@ export default function PreparationView() {
     );
   }
 
-  // AIDEV-NOTE: Show confirmation screen before starting
+  // Show confirmation screen before starting
   if (!isStarted) {
     return (
       <div className={styles.container}>
@@ -209,7 +209,7 @@ export default function PreparationView() {
     );
   }
 
-  // AIDEV-NOTE: Show end message when reaching end of queue
+  // Show end message when reaching end of queue
   if (isAtEnd && queueCursor >= 0) {
     return (
       <div className={styles.container}>
@@ -284,7 +284,7 @@ export default function PreparationView() {
   );
 }
 
-// AIDEV-NOTE: Loader for preloading data (not strictly necessary but follows pattern)
+// Loader for preloading data (not strictly necessary but follows pattern)
 PreparationView.loader = async () => {
   return {};
 };

@@ -7,7 +7,8 @@ import styles from './DuplicateFinderTool.module.css';
 
 /**
  * MiniWaveform - Compact waveform visualization for duplicate finder using WaveSurfer.js
- * AIDEV-NOTE: Uses WaveSurfer for rendering with pre-computed waveformPeaks from database.
+ * 
+ * Uses WaveSurfer for rendering with pre-computed waveformPeaks from database.
  * When no waveform data exists, shows a deterministic placeholder.
  * This is a static display (no playback) - clicking triggers onPlay callback.
  */
@@ -72,7 +73,7 @@ export default function MiniWaveform({
       cursorWidth: 0, // No cursor for static display
       interact: false, // Disable interaction (we handle clicks ourselves)
       normalize: true,
-      // AIDEV-NOTE: Load peaks directly without audio file
+      // Load peaks directly without audio file
       peaks: [peaks],
       duration: track.duration || 180, // Fallback duration if not available
     });

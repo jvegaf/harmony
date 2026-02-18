@@ -13,7 +13,7 @@ const { ipcRenderer } = window.ElectronAPI;
  */
 function IPCMenuEvents() {
   const libraryAPI = useLibraryAPI();
-  // AIDEV-NOTE: Use refs to store unsubscribe functions for audio analysis listeners
+  // Use refs to store unsubscribe functions for audio analysis listeners
   // This allows cleanup when analysis completes or component unmounts
   const analysisUnsubscribesRef = useRef<(() => void)[]>([]);
 
@@ -55,7 +55,7 @@ function IPCMenuEvents() {
         autoClose: false,
       });
 
-      // AIDEV-NOTE: Listen to progress events and update notification
+      // Listen to progress events and update notification
       const unsubscribeProgress = window.Main.audioAnalysis.onProgress(progress => {
         const { completed, total, percentage } = progress;
         notifications.update({
@@ -67,7 +67,7 @@ function IPCMenuEvents() {
         });
       });
 
-      // AIDEV-NOTE: Listen for track completion events to update TrackList in real-time
+      // Listen for track completion events to update TrackList in real-time
       // This triggers the store's `updated` state which AG Grid watches for row updates
       const unsubscribeTrackComplete = window.Main.audioAnalysis.onTrackComplete(track => {
         useLibraryStore.setState({ updated: track });
@@ -78,7 +78,7 @@ function IPCMenuEvents() {
 
       const filePaths = selected.map(track => track.path);
 
-      // AIDEV-NOTE: Fire-and-forget pattern - don't await the batch analysis
+      // Fire-and-forget pattern - don't await the batch analysis
       // This prevents UI blocking while analysis runs in the background
       window.Main.audioAnalysis
         .analyzeBatch(filePaths)
@@ -163,7 +163,7 @@ function IPCMenuEvents() {
       ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_EXPORT);
       ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_REMOVE);
 
-      // AIDEV-NOTE: Cleanup any active audio analysis listeners on unmount
+      // Cleanup any active audio analysis listeners on unmount
       for (const unsub of analysisUnsubscribesRef.current) {
         unsub();
       }

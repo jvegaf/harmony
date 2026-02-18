@@ -34,7 +34,7 @@ type LibraryState = {
   candidatesSearchProgress: {
     processed: number;
     total: number;
-    currentTrackTitle: string; // AIDEV-NOTE: Título del track siendo procesado
+    currentTrackTitle: string; // Currently processing track title
   };
   tagsApplying: boolean;
   tagsApplyProgress: {
@@ -46,9 +46,9 @@ type LibraryState = {
     mode: string;
   };
   renamingPlaylist: string | null;
-  checking: boolean; // AIDEV-NOTE: true while checking library changes
-  libraryChanges: LibraryChanges | null; // AIDEV-NOTE: result of library changes scan
-  applyingChanges: boolean; // AIDEV-NOTE: true while applying changes
+  checking: boolean; // True while checking library changes
+  libraryChanges: LibraryChanges | null; // Result of library changes scan
+  applyingChanges: boolean; // True while applying changes
   applyChangesProgress: {
     processed: number;
     total: number;
@@ -293,19 +293,19 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
 
         logger.info(`Starting candidate search for ${tracks.length} tracks`);
 
-        // Llamar a la API (que procesa internamente todos los tracks)
+        // Call API (internally processes all tracks)
         const trkCandidates = await library.findTagCandidates(tracks, options);
 
-        // AIDEV-NOTE: Si no hay candidatos manuales (todos fueron perfect matches >= 0.9),
-        // no mostrar modal de selección. El renderer escuchará TAG_AUTO_APPLY_COMPLETE
-        // para mostrar progreso y actualizar la UI cuando los perfect matches terminen.
+        // If no manual candidates (all were perfect matches >= 0.9),
+        // don't show selection modal. Renderer will listen to TAG_AUTO_APPLY_COMPLETE
+        // to show progress and update UI when perfect matches finish.
         if (trkCandidates.length === 0) {
           logger.info('All tracks were perfect matches (>= 90%) - auto-applied in background');
           set({
             candidatesSearching: false,
             candidatesSearchProgress: { processed: tracks.length, total: tracks.length, currentTrackTitle: '' },
             trackTagsCandidates: null,
-            tagsSelecting: false, // No mostrar modal
+            tagsSelecting: false, // Don't show modal
           });
           return;
         }
@@ -412,10 +412,10 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
           tagsApplyProgress: { processed: 0, total: 0 },
         });
 
-        // AIDEV-NOTE: Revalidate router to refresh data
+        // Revalidate router to refresh data
         router.revalidate();
 
-        // AIDEV-NOTE: Only navigate to recent_added if NOT in Detail View
+        // Only navigate to recent_added if NOT in Detail View
         // If in Detail View, stay there to show updated track data
         const currentPath = window.location.hash.replace('#', '');
         if (!currentPath.startsWith('/details/')) {
@@ -563,7 +563,8 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     },
     /**
      * Apply library changes (import new tracks and remove deleted ones)
-     * AIDEV-NOTE: If autoFixMetadata is enabled, this will:
+     * 
+     * If autoFixMetadata is enabled, this will:
      * 1. Import new tracks
      * 2. Check if they have complete metadata
      * 3. Extract title/artist from filename if missing
@@ -675,8 +676,8 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
             try {
               const candidates = await library.findTagCandidates(tracksNeedingFix);
 
-              // AIDEV-NOTE: Si no hay candidatos manuales (todos fueron perfect matches >= 0.9),
-              // no mostrar modal de selección y navegar directamente a recent_added
+              // If no manual candidates (all were perfect matches >= 0.9),
+              // don't show selection modal and navigate directly to recent_added
               if (candidates.length === 0) {
                 logger.info(
                   'Auto-fix: All tracks were perfect matches (>= 90%) - auto-applied in background. Navigating to recent_added.',

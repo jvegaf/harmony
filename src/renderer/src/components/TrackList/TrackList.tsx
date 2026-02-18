@@ -34,7 +34,7 @@ import { perfLogger } from '../../lib/performance-logger';
 import { themeQuartz, iconSetMaterial } from 'ag-grid-community';
 import styles from './TrackList.module.css';
 
-// AIDEV-NOTE: AG Grid theme configurations for light and dark modes
+// AG Grid theme configurations for light and dark modes
 // These themes use hardcoded color values because AG Grid's theming API doesn't support CSS variables
 // Color values are matched to the design tokens in App.css
 const harmonyDarkTheme = themeQuartz.withPart(iconSetMaterial).withParams({
@@ -106,11 +106,12 @@ const TrackList = (props: Props) => {
 
   const gridStyle = useMemo(() => ({ height: '100%', width: '100%' }), []);
 
-  // AIDEV-NOTE: Select appropriate AG Grid theme based on current color scheme
+  // Select appropriate AG Grid theme based on current color scheme
   const harmonyTheme = useMemo(() => {
     return colorScheme === 'dark' ? harmonyDarkTheme : harmonyLightTheme;
   }, [colorScheme]);
-  // AIDEV-NOTE: Helper to check if drag should be enabled
+  
+  // Helper to check if drag should be enabled
   // Drag is only enabled in playlist view when sorted by playlistOrder or no sorting
   const checkDragEnabled = useCallback(() => {
     if (type !== 'playlist' || !props.reorderable || !gridApi) {
@@ -131,7 +132,7 @@ const TrackList = (props: Props) => {
     return false; // Sorted by other column
   }, [type, props.reorderable, gridApi]);
 
-  // AIDEV-NOTE: Column definitions with conditional order column for playlists
+  // Column definitions with conditional order column for playlists
   const colDefs = useMemo(() => {
     const baseColumns: ColDef[] = [
       {
@@ -167,7 +168,7 @@ const TrackList = (props: Props) => {
       { field: 'bpm', maxWidth: 70 },
       {
         field: 'bitrate',
-        // AIDEV-NOTE: Bitrate is stored in kbps, no conversion needed
+        // Bitrate is stored in kbps, no conversion needed
         valueFormatter: (p: { value: number }) => (p.value ? p.value + 'kbps' : ''),
         minWidth: 80,
         maxWidth: 90,
@@ -175,7 +176,7 @@ const TrackList = (props: Props) => {
       { field: 'initialKey', headerName: 'Key', maxWidth: 70 },
     ];
 
-    // AIDEV-NOTE: Add order column at the beginning for playlists with drag handle
+    // Add order column at the beginning for playlists with drag handle
     if (type === 'playlist') {
       return [
         {
@@ -214,7 +215,7 @@ const TrackList = (props: Props) => {
     return `🎵 ${title} - ${artist}`;
   }, []);
 
-  // AIDEV-NOTE: Add playlistOrder field to tracks when in playlist view for sortable order column
+  // Add playlistOrder field to tracks when in playlist view for sortable order column
   const tracksWithOrder = useMemo(() => {
     if (type === 'playlist') {
       return tracks.map((track, index) => ({
@@ -256,7 +257,7 @@ const TrackList = (props: Props) => {
     }
   }, [gridApi]);
 
-  // AIDEV-NOTE: CRITICAL FIX - Update rowData when tracks change (e.g., switching playlists)
+  // CRITICAL FIX - Update rowData when tracks change (e.g., switching playlists)
   // Without this, the grid shows stale data when navigating between playlists
   useEffect(() => {
     setRowData(tracksWithOrder);
@@ -302,7 +303,7 @@ const TrackList = (props: Props) => {
 
       const selected = event.api.getSelectedRows() as Track[];
 
-      // AIDEV-NOTE: Save navigation context for Details view
+      // Save navigation context for Details view
       // When user opens Details from context menu, they can navigate prev/next within the current track list
       if (selected.length === 1 && gridApi) {
         const allDisplayedTracks: Track[] = [];
@@ -357,7 +358,7 @@ const TrackList = (props: Props) => {
     [libraryAPI, checkDragEnabled],
   );
 
-  // AIDEV-NOTE: Drag & Drop handlers for playlist track reordering
+  // Drag & Drop handlers for playlist track reordering
   const onRowDragMove = useCallback(
     (event: RowDragMoveEvent) => {
       if (!isDragEnabled) return;
@@ -382,7 +383,7 @@ const TrackList = (props: Props) => {
     [isDragEnabled],
   );
 
-  // AIDEV-NOTE: Immediate state update on drag - Manual reorder with instant UI update
+  // Immediate state update on drag - Manual reorder with instant UI update
   const onRowDragEnd = useCallback(
     (event: RowDragEndEvent) => {
       // Start performance session
@@ -595,7 +596,7 @@ const TrackList = (props: Props) => {
   );
 };
 
-// AIDEV-NOTE: Export styles for external use (e.g., custom cell renderers)
+// Export styles for external use (e.g., custom cell renderers)
 export { styles as TrackListStyles };
 
 export default TrackList;

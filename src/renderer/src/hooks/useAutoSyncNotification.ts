@@ -1,7 +1,7 @@
 /**
  * useAutoSyncNotification Hook
  *
- * AIDEV-NOTE: Subscribes to auto-sync status events and shows/updates
+ * Subscribes to auto-sync status events and shows/updates
  * a notification with detailed progress during auto-sync operations.
  * Shows percentage and current phase (parsing, syncing, writing, etc.)
  * Should be mounted once at the app root level.

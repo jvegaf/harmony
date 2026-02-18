@@ -14,7 +14,8 @@ const { config, duplicates, db, library, logger } = window.Main;
 
 /**
  * DuplicateFinderTool - Main component for finding and managing duplicate tracks
- * AIDEV-NOTE: Uses IPC to scan library for duplicates based on configured criteria.
+ * 
+ * Uses IPC to scan library for duplicates based on configured criteria.
  * Allows user to select which tracks to keep and delete the rest.
  */
 export default function DuplicateFinderTool() {
@@ -31,7 +32,7 @@ export default function DuplicateFinderTool() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // AIDEV-NOTE: Track which duplicate is currently active (only one plays at a time)
+  // Track which duplicate is currently active (only one plays at a time)
   // Each WavePlayer manages its own playback independently
   const [activePlayingId, setActivePlayingId] = useState<TrackId | null>(null);
 
@@ -48,7 +49,7 @@ export default function DuplicateFinderTool() {
 
   /**
    * Start scanning for duplicates
-   * AIDEV-NOTE: Now checks cache first before scanning
+   * Now checks cache first before scanning
    */
   const handleScan = useCallback(async () => {
     setIsScanning(true);
@@ -115,7 +116,7 @@ export default function DuplicateFinderTool() {
 
   /**
    * Set a track as the active player (only one can be active at a time)
-   * AIDEV-NOTE: When a track becomes active, all others will pause automatically
+   * When a track becomes active, all others will pause automatically
    */
   const handleSetActiveTrack = useCallback((trackId: TrackId) => {
     setActivePlayingId(trackId);
@@ -168,7 +169,8 @@ export default function DuplicateFinderTool() {
 
   /**
    * Confirm and execute deletion
-   * AIDEV-NOTE: Must clear scan results BEFORE deleting files to ensure
+   * 
+   * Must clear scan results BEFORE deleting files to ensure
    * WaveSurfer instances are destroyed and release file handles.
    *
    * Auto-sync flow when Traktor sync is enabled:

@@ -8,8 +8,9 @@ const { db } = window.Main;
 
 /**
  * DuplicateWavePlayer - Simplified independent waveform player
- * AIDEV-NOTE: Create WaveSurfer lazily only when user clicks to play
- * Show static canvas preview of waveform until then
+ * 
+ * Create WaveSurfer lazily only when user clicks to play.
+ * Show static canvas preview of waveform until then.
  */
 
 type DuplicateWavePlayerProps = {
@@ -89,7 +90,7 @@ export default function DuplicateWavePlayer({
     const barsCount = Math.floor(width / barTotalWidth);
     const step = peaks.length / barsCount;
 
-    // AIDEV-NOTE: Theme-aware waveform colors - lighter grays for light mode, darker for dark mode
+    // Theme-aware waveform colors - lighter grays for light mode, darker for dark mode
     const waveColor = hasPreComputedPeaks
       ? colorScheme === 'dark'
         ? '#4b5563' // dark mode: gray-600
@@ -128,7 +129,7 @@ export default function DuplicateWavePlayer({
     peaksSavedRef.current = false;
 
     const peaks = hasPreComputedPeaks ? track.waveformPeaks! : placeholderPeaks;
-    // AIDEV-NOTE: Theme-aware waveform colors for WaveSurfer instance
+    // Theme-aware waveform colors for WaveSurfer instance
     const waveColor = hasPreComputedPeaks
       ? colorScheme === 'dark'
         ? '#4b5563' // dark mode: gray-600

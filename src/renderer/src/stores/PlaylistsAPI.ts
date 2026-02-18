@@ -70,7 +70,7 @@ const rename = async (playlistID: string, name: string): Promise<void> => {
 const remove = async (playlistID: string): Promise<void> => {
   logger.debug('calling remove playlist api');
   try {
-    // AIDEV-NOTE: Check if user is currently viewing the playlist being deleted
+    // Check if user is currently viewing the playlist being deleted
     // If so, navigate away to prevent app crash due to lost reference
     const currentPath = router.state.location.pathname;
     const isViewingPlaylist = currentPath === `/playlists/${playlistID}`;
@@ -165,7 +165,7 @@ const reorderTracks = async (
 
     perfLogger.measure('Before IPC call (db.playlists.reorderTracks)');
 
-    // AIDEV-NOTE: Now uses optimized backend method instead of full reload
+    // Now uses optimized backend method instead of full reload
     await db.playlists.reorderTracks(playlistID, tracks, targetTrack, position);
 
     perfLogger.measure('After IPC call completed', {

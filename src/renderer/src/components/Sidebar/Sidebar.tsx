@@ -15,11 +15,13 @@ type SidebarProps = {
 
 const { menu, logger } = window.Main;
 
-// AIDEV-NOTE: Sidebar navigation with Collection, Recently Added, and Playlists.
-// Active state is determined by the current route:
-// - /library → Collection is active
-// - /playlists/:id → that playlist is active
-// - Neither Collection nor any playlist → no active state (e.g. /settings, /tools)
+/**
+ * Sidebar navigation with Collection, Recently Added, and Playlists.
+ * Active state is determined by the current route:
+ * - /library → Collection is active
+ * - /playlists/:id → that playlist is active
+ * - Neither Collection nor any playlist → no active state (e.g. /settings, /tools)
+ */
 export default function Sidebar({ playlists, onSearch }: SidebarProps) {
   const { playlistID } = useParams();
   const location = useLocation();
@@ -28,11 +30,11 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
-  // AIDEV-NOTE: Determine active nav item based on current route
+  // Determine active nav item based on current route
   const isLibraryRoute = location.pathname === '/library' || location.pathname === '/';
   const isRecentRoute = location.pathname === '/recent_added';
 
-  // AIDEV-NOTE: Clear search when navigating to track detail view
+  // Clear search when navigating to track detail view
   useEffect(() => {
     if (location.pathname.startsWith('/details/')) {
       setSearchQuery('');
@@ -46,7 +48,7 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
     onSearch(value);
   };
 
-  // AIDEV-NOTE: Handle Escape key to clear search and remove focus
+  // Handle Escape key to clear search and remove focus
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       setSearchQuery('');
@@ -114,7 +116,7 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
     [navigate],
   );
 
-  // AIDEV-NOTE: Render playlist items with active state based on URL params
+  // Render playlist items with active state based on URL params
   const playlistItems = playlists.map(elem => {
     const isPlaylistActive = playlistID === elem.id;
     let content: ReactNode;

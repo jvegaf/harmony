@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import { TrackId } from '../../../preload/types/harmony';
 
-// AIDEV-NOTE: Store for managing track navigation context in Details view
-// Stores the current list of tracks being viewed and the current position
-// Allows Previous/Next navigation while maintaining the original view context
-
+/**
+ * Store for managing track navigation context in Details view.
+ * Stores the current list of tracks being viewed and the current position.
+ * Allows Previous/Next navigation while maintaining the original view context.
+ */
 type DetailsNavigationStore = {
   trackIds: TrackId[];
   currentIndex: number;

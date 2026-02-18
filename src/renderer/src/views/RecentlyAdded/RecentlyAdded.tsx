@@ -19,7 +19,7 @@ export default function RecentlyAddedView() {
   const { tracks: allTracks } = useRouteLoaderData('root') as RootLoaderData;
 
   const getRecentlyAddedComponent = useMemo(() => {
-    // AIDEV-NOTE: Show empty state if no tracks were added in the last 30 days
+    // Show empty state if no tracks were added in the last 30 days
     if (recentTracks.length === 0) {
       return (
         <div className={styles.viewMessage}>
@@ -45,7 +45,7 @@ export default function RecentlyAddedView() {
       );
     }
 
-    // AIDEV-NOTE: Show recent tracks using the same TrackList component as Library
+    // Show recent tracks using the same TrackList component as Library
     return (
       <div className={styles.viewRecentlyAdded}>
         <TrackList
@@ -64,7 +64,7 @@ export default function RecentlyAddedView() {
 
 export type RecentlyAddedLoaderData = LoaderData<typeof RecentlyAddedView.loader>;
 
-// AIDEV-NOTE: Loader fetches recent tracks (30 days) and playlists for context menu
+// Loader fetches recent tracks (30 days) and playlists for context menu
 RecentlyAddedView.loader = async () => {
   const [playlists, recentTracks] = await Promise.all([
     db.playlists.getAll(),

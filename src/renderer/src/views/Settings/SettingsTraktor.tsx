@@ -1,7 +1,7 @@
 /**
  * Traktor Integration Settings
  *
- * AIDEV-NOTE: Settings panel for configuring Traktor NML sync.
+ * Settings panel for configuring Traktor NML sync.
  * Allows users to:
  * - Select collection.nml file path
  * - Configure sync strategy
