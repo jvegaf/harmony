@@ -1,4 +1,4 @@
-import { app, contextBridge, ipcRenderer, shell } from 'electron';
+import { contextBridge, ipcRenderer, shell } from 'electron';
 import { ElectronAPI, electronAPI } from '@electron-toolkit/preload';
 import channels from './lib/ipc-channels';
 import {
@@ -150,7 +150,7 @@ const api = {
   },
   shell: {
     openExternal: shell.openExternal,
-    openUserDataDirectory: () => shell.openPath(app.getPath('userData')),
+    openUserDataDirectory: () => ipcRenderer.invoke(channels.APP_OPEN_USER_DATA),
   },
   audioAnalysis: {
     analyze: (filePath: string, options?: any) => ipcRenderer.invoke(channels.AUDIO_ANALYZE, { filePath, options }),

@@ -1,4 +1,4 @@
-import { app, ipcMain } from 'electron';
+import { app, ipcMain, shell } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
 import { logger, rendererLogger } from '../lib/log/logger';
@@ -39,6 +39,18 @@ class IPCLoggerModule extends ModuleWindow {
       const logs = await getLogsFromFile(logPath);
       logger.info(`Fetched ${logs.length} log entries`);
       return logs;
+    });
+
+    // AIDEV-NOTE: Opens user data directory in file explorer
+    ipcMain.handle(channels.APP_OPEN_USER_DATA, async _ => {
+      const pathUserData = app.getPath('userData');
+      logger.info(`Opening user data directory: ${pathUserData}`);
+      const result = await shell.openPath(pathUserData);
+      if (result) {
+        logger.error(`Failed to open user data directory: ${result}`);
+        throw new Error(result);
+      }
+      return pathUserData;
     });
   }
 }
