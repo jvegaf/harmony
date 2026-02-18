@@ -1,16 +1,16 @@
 import { useEffect } from 'react';
 
-import { usePlayerAPI } from '../../stores/usePlayerStore';
-import useCurrentViewTracks from '../../hooks/useCurrentViewTracks';
-import player from '../../lib/player';
-import channels from '../../../../preload/lib/ipc-channels';
+import { usePlayerAPI } from '../stores/usePlayerStore';
+import useCurrentViewTracks from './useCurrentViewTracks';
+import player from '../lib/player';
+import channels from '../../../preload/lib/ipc-channels';
 
 const { ipcRenderer } = window.ElectronAPI;
 
 /**
- * Handle app-level IPC Events init and cleanup
+ * Handle IPC player events from main process (global media keys, app menu)
  */
-function IPCPlayerEvents() {
+export function useIPCPlayerEvents() {
   const playerAPI = usePlayerAPI();
   const tracks = useCurrentViewTracks();
 
@@ -19,9 +19,6 @@ function IPCPlayerEvents() {
       if (player.getTrack()) {
         playerAPI.play();
       }
-      // else {
-      //   playerAPI.start(tracks);
-      // }
     }
 
     function onPlay() {
@@ -59,8 +56,4 @@ function IPCPlayerEvents() {
       player.getAudio().removeEventListener('pause', onPause);
     };
   }, [playerAPI, tracks]);
-
-  return null;
 }
-
-export default IPCPlayerEvents;

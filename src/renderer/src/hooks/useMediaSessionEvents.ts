@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 
-import { usePlayerAPI } from '../../stores/usePlayerStore';
-import player from '../../lib/player';
+import { usePlayerAPI } from '../stores/usePlayerStore';
+import player from '../lib/player';
 
 /**
- * Integration for MediaSession (mpris, macOS player controls etc)...
+ * Integration for MediaSession (mpris, macOS player controls etc)
  */
-function MediaSessionEvents() {
+export function useMediaSessionEvents() {
   const playerAPI = usePlayerAPI();
 
   useEffect(() => {
@@ -30,11 +30,7 @@ function MediaSessionEvents() {
       navigator.mediaSession.setActionHandler('nexttrack', null);
     };
   }, [playerAPI]);
-
-  return null;
 }
-
-export default MediaSessionEvents;
 
 /**
  * Helpers

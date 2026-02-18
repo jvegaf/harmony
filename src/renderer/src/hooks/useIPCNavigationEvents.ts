@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import channels from '../../../../preload/lib/ipc-channels';
+import channels from '../../../preload/lib/ipc-channels';
 
 const { ipcRenderer } = window.ElectronAPI;
 
 /**
- * Handle app-level IPC Navigation events
+ * Handle IPC navigation events from main process (app menu shortcuts)
  */
-function IPCNavigationEvents() {
+export function useIPCNavigationEvents() {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,8 +41,4 @@ function IPCNavigationEvents() {
       ipcRenderer.removeAllListeners(channels.CMD_TRACK_DETAIL);
     };
   }, [navigate]);
-
-  return null;
 }
-
-export default IPCNavigationEvents;

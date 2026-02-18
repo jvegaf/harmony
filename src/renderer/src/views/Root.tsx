@@ -1,21 +1,21 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation, useRouteLoaderData } from 'react-router-dom';
 
-import AppEvents from '../components/Events/AppEvents';
 import GlobalKeyBindings from '../components/Events/GlobalKeyBindings';
-import IPCNavigationEvents from '../components/Events/IPCNavigationEvents';
-import IPCPlayerEvents from '../components/Events/IPCPlayerEvents';
-import MediaSessionEvents from '../components/Events/MediaSessionEvents';
-import PlayerEvents from '../components/Events/PlayerEvents';
 import AppActions from '../stores/AppAPI';
 
-import IPCMenuEvents from '../components/Events/IPCMenuEvents';
 import AppHeader from '../components/AppHeader/AppHeader';
 import Sidebar from '../components/Sidebar/Sidebar';
 import NowPlayingBar from '../components/NowPlayingBar/NowPlayingBar';
 import usePlayingTrack from '../hooks/usePlayingTrack';
 import { useAutoSyncNotification } from '../hooks/useAutoSyncNotification';
 import { useAutoApplyNotification } from '../hooks/useAutoApplyNotification';
+import { useAppEvents } from '../hooks/useAppEvents';
+import { usePlayerEvents } from '../hooks/usePlayerEvents';
+import { useMediaSessionEvents } from '../hooks/useMediaSessionEvents';
+import { useIPCNavigationEvents } from '../hooks/useIPCNavigationEvents';
+import { useIPCPlayerEvents } from '../hooks/useIPCPlayerEvents';
+import { useIPCMenuEvents } from '../hooks/useIPCMenuEvents';
 import useLibraryStore, { useLibraryAPI } from '../stores/useLibraryStore';
 import styles from './Root.module.css';
 import { LoaderData } from './router';
@@ -38,6 +38,14 @@ export default function ViewRoot() {
 
   // Show auto-apply notifications when perfect matches (>= 90%) are applied in background
   useAutoApplyNotification();
+
+  // Initialize event listeners as hooks (ARCH-05: Converted from components to hooks)
+  useAppEvents();
+  usePlayerEvents();
+  useMediaSessionEvents();
+  useIPCNavigationEvents();
+  useIPCPlayerEvents();
+  useIPCMenuEvents();
 
   // Subscribe to tag candidate search progress events
   useEffect(() => {
@@ -80,14 +88,8 @@ export default function ViewRoot() {
   };
   return (
     <div className={styles.root}>
-      {/** Bunch of global event handlers */}
-      <IPCNavigationEvents />
-      <IPCPlayerEvents />
-      <AppEvents />
-      <PlayerEvents />
-      <MediaSessionEvents />
+      {/** Global keyboard bindings (retains JSX for react-keybinding-component) */}
       <GlobalKeyBindings />
-      <IPCMenuEvents />
 
       {/* Modal de búsqueda de candidatos */}
       {candidatesSearching && (

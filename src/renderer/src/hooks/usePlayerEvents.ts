@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 
-import { usePlayerAPI } from '../../stores/usePlayerStore';
-import { useLibraryAPI } from '../../stores/useLibraryStore';
-import player from '../../lib/player';
+import { usePlayerAPI } from '../stores/usePlayerStore';
+import { useLibraryAPI } from '../stores/useLibraryStore';
+import player from '../lib/player';
 
 const AUDIO_ERRORS = {
   aborted: 'The video playback was aborted.',
@@ -12,29 +12,12 @@ const AUDIO_ERRORS = {
 };
 
 /**
- * Handle app-level IPC Events init and cleanup
+ * Handle player-level events: audio errors and playback completion
  */
-function PlayerEvents() {
+export function usePlayerEvents() {
   const playerAPI = usePlayerAPI();
   const libraryAPI = useLibraryAPI();
   const { logger } = window.Main;
-
-  // // If no queue is provided, we create it based on the screen the user is on
-  // if (!newQueue) {
-  //   if (hash.startsWith('#/playlists')) {
-  //     newQueue = library.tracks.playlist;
-  //     newQueue = [];
-  //   } else {
-  //     // we are either on the library or the settings view
-  //     // so let's play the whole library
-  //     // Because the tracks in the store are not ordered, let's filter
-  //     // and sort everything
-  //     const { sort, search } = library;
-  //     newQueue = library.tracks;
-
-  //     newQueue = sortTracks(filterTracks(newQueue, search), SORT_ORDERS[sort.by][sort.order]);
-  //   }
-  // }
 
   useEffect(() => {
     function handleAudioError(e: ErrorEvent) {
@@ -65,7 +48,6 @@ function PlayerEvents() {
     }
 
     // Bind player events
-    // Audio Events
     player.getAudio().addEventListener('ended', playerAPI.next);
     player.getAudio().addEventListener('error', handleAudioError);
 
@@ -73,9 +55,5 @@ function PlayerEvents() {
       player.getAudio().removeEventListener('ended', playerAPI.next);
       player.getAudio().removeEventListener('error', handleAudioError);
     };
-  }, [libraryAPI, playerAPI]);
-
-  return null;
+  }, [libraryAPI, playerAPI, logger]);
 }
-
-export default PlayerEvents;

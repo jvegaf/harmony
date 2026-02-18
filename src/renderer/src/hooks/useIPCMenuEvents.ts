@@ -1,17 +1,17 @@
 import { useEffect, useRef } from 'react';
 
-import channels from '../../../../preload/lib/ipc-channels';
-import PlaylistsAPI from '../../stores/PlaylistsAPI';
-import { CommandPayload, Track } from '../../../../preload/types/harmony';
-import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
+import channels from '../../../preload/lib/ipc-channels';
+import PlaylistsAPI from '../stores/PlaylistsAPI';
+import { CommandPayload, Track } from '../../../preload/types/harmony';
+import useLibraryStore, { useLibraryAPI } from '../stores/useLibraryStore';
 import { notifications } from '@mantine/notifications';
 
 const { ipcRenderer } = window.ElectronAPI;
 
 /**
- * Handle app-level IPC Events init and cleanup
+ * Handle IPC menu events from main process (context menus, app menu commands)
  */
-function IPCMenuEvents() {
+export function useIPCMenuEvents() {
   const libraryAPI = useLibraryAPI();
   // Use refs to store unsubscribe functions for audio analysis listeners
   // This allows cleanup when analysis completes or component unmounts
@@ -170,8 +170,4 @@ function IPCMenuEvents() {
       analysisUnsubscribesRef.current = [];
     };
   }, [libraryAPI]);
-
-  return null;
 }
-
-export default IPCMenuEvents;
