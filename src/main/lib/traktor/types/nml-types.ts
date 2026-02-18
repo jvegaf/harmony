@@ -2,7 +2,7 @@
  * TypeScript interfaces for Traktor NML (Native Instruments Music Library) format.
  * Based on reverse-engineered XSD schema and real collection.nml data.
  *
- * AIDEV-NOTE: These types match Traktor Pro 3.x NML format (VERSION="19").
+ * These types match Traktor Pro 3.x NML format (VERSION="19").
  * All attributes are strings as they come from XML parsing.
  */
 
@@ -17,7 +17,7 @@ export interface TraktorNML {
     COLLECTION: TraktorCollection;
     PLAYLISTS?: TraktorPlaylists;
     SORTING_ORDER?: TraktorSortingOrder[];
-    INDEXING?: TraktorIndexing; // AIDEV-NOTE: Traktor uses this for sorting info, must be preserved
+    INDEXING?: TraktorIndexing; // Traktor uses this for sorting info, must be preserved
   };
 }
 
@@ -25,7 +25,7 @@ export interface TraktorNML {
  * INDEXING section at the end of NML file.
  * Contains SORTING_INFO elements that Traktor uses for collection ordering.
  *
- * AIDEV-NOTE: This section appears at the end of the NML file and must be preserved
+ * This section appears at the end of the NML file and must be preserved
  * for proper Traktor compatibility. Without it, Traktor may have issues reading the file.
  */
 export interface TraktorIndexing {
@@ -134,7 +134,7 @@ export interface TraktorMusicalKey {
 /**
  * Traktor Cue Point (V2 format)
  *
- * AIDEV-NOTE: Cue types:
+ * Cue types:
  * - 0 = Cue (hot cue)
  * - 1 = Fade-in
  * - 2 = Fade-out
@@ -142,7 +142,7 @@ export interface TraktorMusicalKey {
  * - 4 = Grid (beatgrid marker)
  * - 5 = Loop
  *
- * AIDEV-NOTE: TYPE=4 (Grid/AutoGrid) cues contain a nested <GRID BPM="..."> element
+ * TYPE=4 (Grid/AutoGrid) cues contain a nested <GRID BPM="..."> element
  * that stores the precise BPM for beatgrid alignment. This must be preserved.
  */
 export interface TraktorCue {
@@ -172,7 +172,7 @@ export interface TraktorPlaylists {
 /**
  * Recursive node structure for playlists and folders
  *
- * AIDEV-NOTE: Traktor uses a tree structure where:
+ * Traktor uses a tree structure where:
  * - TYPE="FOLDER" nodes contain other nodes
  * - TYPE="PLAYLIST" nodes contain track entries
  */
@@ -242,7 +242,7 @@ export const TRAKTOR_RATING_SCALE = {
 /**
  * Traktor key notation mapping
  *
- * AIDEV-NOTE: Traktor uses Open Key notation:
+ * Traktor uses Open Key notation:
  * - "1m" through "12m" for minor keys
  * - "1d" through "12d" for major keys (d = dur = major in German)
  */

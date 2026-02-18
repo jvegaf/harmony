@@ -3,7 +3,7 @@
  *
  * Orchestrates the synchronization between Traktor NML and Harmony database.
  *
- * AIDEV-NOTE: Main responsibilities:
+ * Main responsibilities:
  * 1. Match tracks by file path
  * 2. Merge metadata using conflict resolver
  * 3. Sync cue points per track
@@ -224,7 +224,7 @@ export class SyncEngine {
       }
     }
 
-    // AIDEV-NOTE: Collect cue points for tracks that will be imported
+    // Collect cue points for tracks that will be imported
     const cuePointsForNewTracks = new Map<string, CuePoint[]>();
     for (const track of matches.unmatchedTraktor) {
       const normalizedPath = this.normalizePath(track.path);
@@ -252,7 +252,7 @@ export class SyncEngine {
   /**
    * Execute sync and return the changes
    *
-   * AIDEV-NOTE: This does not persist to database - caller is responsible
+   * This does not persist to database - caller is responsible
    * for saving the returned tracks and cue points.
    */
   executeSync(
@@ -282,7 +282,7 @@ export class SyncEngine {
       }
     }
 
-    // AIDEV-NOTE: Include tracks to import and their cue points
+    // Include tracks to import and their cue points
     const tracksImported = plan.unmatchedTraktorTracks;
     const cuePointsImported: CuePoint[] = [];
     for (const [, cues] of plan.cuePointsForNewTracks) {

@@ -3,7 +3,7 @@
  *
  * Maps between Traktor NML entries and Harmony Track objects.
  *
- * AIDEV-NOTE: Key conversions:
+ * Key conversions:
  * - Path: Traktor uses "/:dir/:subdir/:" format, we use Unix paths
  * - Rating: Traktor 0-255 -> Harmony 0-5 stars
  * - Bitrate: Traktor stores bps, we use kbps
@@ -21,7 +21,7 @@ import { makeTrackID } from '../../track-id';
 /**
  * Convert Traktor path format to system path.
  *
- * AIDEV-NOTE: Produces OS-native paths with proper drive letters and separators.
+ * Produces OS-native paths with proper drive letters and separators.
  * This ensures Traktor imports generate the same paths as filesystem imports,
  * enabling proper deduplication via makeTrackID().
  *
@@ -59,7 +59,7 @@ export function mapTraktorPathToSystem(dir: string, file: string, volume?: strin
 /**
  * Convert system path to Traktor format.
  *
- * AIDEV-NOTE: Handles both Unix-style and Windows-style paths.
+ * Handles both Unix-style and Windows-style paths.
  * Extracts Windows drive letter (e.g., "C:") to VOLUME attribute.
  *
  * @param systemPath - OS-native absolute path (Unix or Windows style)
@@ -155,7 +155,7 @@ export function parseTraktorDate(dateStr: string | undefined): Date | undefined 
 /**
  * Map a Traktor NML entry to a Harmony Track object.
  *
- * AIDEV-NOTE: Uses makeTrackID() for deterministic ID generation.
+ * Uses makeTrackID() for deterministic ID generation.
  * This ensures the same file always gets the same ID regardless of
  * import source (Traktor vs filesystem scanner).
  *
@@ -186,7 +186,7 @@ export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
   let year: number | undefined;
   let releaseDate: string | undefined;
   if (info?.RELEASE_DATE) {
-    // AIDEV-NOTE: Preserve full release date for round-trip
+    // Preserve full release date for round-trip
     releaseDate = info.RELEASE_DATE;
     const parsedDate = parseTraktorDate(info.RELEASE_DATE);
     if (parsedDate) {
@@ -217,11 +217,11 @@ export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
     album: entry.ALBUM?.TITLE,
     genre: info?.GENRE,
     year,
-    releaseDate, // AIDEV-NOTE: Preserve full date for round-trip
+    releaseDate, // Preserve full date for round-trip
     duration: info?.PLAYTIME ? parseInt(info.PLAYTIME, 10) : 0,
     bitrate,
     bpm: tempo?.BPM ? mapTraktorBpm(tempo.BPM) : undefined,
-    bpmPrecise: tempo?.BPM, // AIDEV-NOTE: Preserve precise BPM for round-trip
+    bpmPrecise: tempo?.BPM, // Preserve precise BPM for round-trip
     initialKey,
     rating,
     label: info?.LABEL,
@@ -233,7 +233,7 @@ export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
  * Map a Harmony Track to Traktor entry (partial).
  * Used for syncing changes back to NML.
  *
- * AIDEV-NOTE: This returns partial data that needs to be merged
+ * This returns partial data that needs to be merged
  * with existing NML entry data. Full entry construction is in the writer.
  * Uses bpmPrecise and releaseDate when available for round-trip accuracy.
  *
@@ -243,10 +243,10 @@ export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
 export function mapTrackToTraktorEntry(track: Track): Partial<TraktorEntry> {
   const { dir, file, volume } = mapSystemPathToTraktor(track.path);
 
-  // AIDEV-NOTE: Use releaseDate if available, otherwise fallback to year/1/1
+  // Use releaseDate if available, otherwise fallback to year/1/1
   const releaseDate = track.releaseDate || (track.year ? `${track.year}/1/1` : undefined);
 
-  // AIDEV-NOTE: Use bpmPrecise if available for full precision, otherwise use rounded bpm
+  // Use bpmPrecise if available for full precision, otherwise use rounded bpm
   const bpmValue = track.bpmPrecise || (track.bpm ? String(track.bpm) : undefined);
 
   return {

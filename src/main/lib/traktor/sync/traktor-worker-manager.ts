@@ -1,7 +1,7 @@
 /**
  * Traktor Worker Manager
  *
- * AIDEV-NOTE: Manages worker pool for Traktor sync and export operations.
+ * Manages worker pool for Traktor sync and export operations.
  * Uses a shared worker pool to handle multiple concurrent operations efficiently
  * without blocking the Electron main thread.
  *
@@ -64,7 +64,7 @@ export class TraktorWorkerManager {
   private exportPool: WorkerPool<ExportWorkerInput, ExportWorkerResult>;
 
   private constructor() {
-    // AIDEV-NOTE: Create separate pools for sync and export operations
+    // Create separate pools for sync and export operations
     // This allows both operations to run concurrently without blocking each other
     const syncWorkerPath = join(__dirname, 'sync-worker.js');
     const exportWorkerPath = join(__dirname, 'export-worker.js');

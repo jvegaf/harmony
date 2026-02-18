@@ -4,7 +4,7 @@
  * Parses Traktor's collection.nml XML files into typed TypeScript objects.
  * Uses fast-xml-parser for high-performance XML parsing.
  *
- * AIDEV-NOTE: NML files use XML attributes heavily. The parser is configured
+ * NML files use XML attributes heavily. The parser is configured
  * to extract attributes with @ prefix, which we then map to our interfaces.
  * Single child elements vs arrays are normalized in post-processing.
  */
@@ -48,7 +48,7 @@ export class TraktorNMLParser {
   private parser: XMLParser;
 
   constructor() {
-    // AIDEV-NOTE: fast-xml-parser config for NML format:
+    // fast-xml-parser config for NML format:
     // - ignoreAttributes: false - we need all XML attributes
     // - attributeNamePrefix: '' - don't prefix attribute names
     // - parseAttributeValue: false - keep values as strings (matches our types)
@@ -101,7 +101,7 @@ export class TraktorNMLParser {
         COLLECTION: this.transformCollection(rawNML.COLLECTION as Record<string, unknown>),
         PLAYLISTS: rawNML.PLAYLISTS ? this.transformPlaylists(rawNML.PLAYLISTS as Record<string, unknown>) : undefined,
         SORTING_ORDER: undefined, // Not commonly used, can add if needed
-        // AIDEV-NOTE: INDEXING may be an empty string "" for <INDEXING></INDEXING>
+        // INDEXING may be an empty string "" for <INDEXING></INDEXING>
         // Check for !== undefined to preserve empty INDEXING sections
         INDEXING: rawNML.INDEXING !== undefined ? this.transformIndexing(rawNML.INDEXING) : undefined,
       },
@@ -306,7 +306,7 @@ export class TraktorNMLParser {
   /**
    * Transform INDEXING section with SORTING_INFO elements.
    *
-   * AIDEV-NOTE: INDEXING contains sorting preferences for collection views.
+   * INDEXING contains sorting preferences for collection views.
    * Each SORTING_INFO may have an optional CRITERIA child with ATTRIBUTE and DIRECTION.
    * Empty INDEXING elements (from XML like <INDEXING></INDEXING>) are parsed as "" by fast-xml-parser.
    */

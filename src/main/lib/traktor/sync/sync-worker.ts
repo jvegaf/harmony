@@ -1,7 +1,7 @@
 /**
  * Traktor Sync Worker
  *
- * AIDEV-NOTE: Worker thread for executing CPU-intensive Traktor sync operations.
+ * Worker thread for executing CPU-intensive Traktor sync operations.
  * Runs parsing, track matching, and sync logic in a separate thread to avoid
  * blocking the Electron main thread.
  *

@@ -3,7 +3,7 @@
  *
  * Writes changes back to Traktor's collection.nml format.
  *
- * AIDEV-NOTE: Strategy for writing:
+ * Strategy for writing:
  * 1. Work with parsed NML structure (preserve original data)
  * 2. Update only the fields that have changed
  * 3. Generate valid XML that Traktor can read
@@ -124,7 +124,7 @@ export function buildEntryXml(track: Track, cuePoints?: CuePoint[]): string {
   if (track.rating?.rating) {
     infoAttrs.push(`RANKING="${mapHarmonyRatingToTraktor(track.rating.rating)}"`);
   }
-  // AIDEV-NOTE: Use releaseDate for full precision, fallback to year/1/1
+  // Use releaseDate for full precision, fallback to year/1/1
   if (track.releaseDate) {
     infoAttrs.push(`RELEASE_DATE="${track.releaseDate}"`);
   } else if (track.year) {
@@ -134,7 +134,7 @@ export function buildEntryXml(track: Track, cuePoints?: CuePoint[]): string {
     lines.push(`  <INFO ${infoAttrs.join(' ')}></INFO>`);
   }
 
-  // TEMPO element - AIDEV-NOTE: Use bpmPrecise for full precision when available
+  // TEMPO element - Use bpmPrecise for full precision when available
   const bpmValue = track.bpmPrecise || (track.bpm ? String(track.bpm) : undefined);
   if (bpmValue) {
     lines.push(`  <TEMPO BPM="${bpmValue}" BPM_QUALITY="100.000000"></TEMPO>`);
@@ -154,7 +154,7 @@ export function buildEntryXml(track: Track, cuePoints?: CuePoint[]): string {
 /**
  * Writer for Traktor NML files.
  *
- * AIDEV-NOTE: The writer preserves the original structure and only updates
+ * The writer preserves the original structure and only updates
  * changed entries. This ensures Traktor can still read all analysis data,
  * cue points, and other metadata.
  */
@@ -238,14 +238,14 @@ export class TraktorNMLWriter {
     if (track.rating?.rating) {
       entry.INFO.RANKING = mapHarmonyRatingToTraktor(track.rating.rating);
     }
-    // AIDEV-NOTE: Use releaseDate for full precision, fallback to year/1/1
+    // Use releaseDate for full precision, fallback to year/1/1
     if (track.releaseDate) {
       entry.INFO.RELEASE_DATE = track.releaseDate;
     } else if (track.year) {
       entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
     }
 
-    // Build TEMPO - AIDEV-NOTE: Use bpmPrecise for full precision when available
+    // Build TEMPO - Use bpmPrecise for full precision when available
     const bpmValue = track.bpmPrecise || (track.bpm ? String(track.bpm) : undefined);
     if (bpmValue) {
       entry.TEMPO = {
@@ -292,14 +292,14 @@ export class TraktorNMLWriter {
     if (track.rating?.rating) {
       entry.INFO.RANKING = mapHarmonyRatingToTraktor(track.rating.rating);
     }
-    // AIDEV-NOTE: Use releaseDate for full precision, fallback to year/1/1
+    // Use releaseDate for full precision, fallback to year/1/1
     if (track.releaseDate) {
       entry.INFO.RELEASE_DATE = track.releaseDate;
     } else if (track.year) {
       entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
     }
 
-    // Update TEMPO - AIDEV-NOTE: Use bpmPrecise for full precision when available
+    // Update TEMPO - Use bpmPrecise for full precision when available
     const bpmValue = track.bpmPrecise || (track.bpm ? String(track.bpm) : undefined);
     if (bpmValue) {
       entry.TEMPO = entry.TEMPO || { BPM: '0' };
@@ -337,7 +337,7 @@ export class TraktorNMLWriter {
     lines.push('  </COLLECTION>');
 
     // SETS - Remix Sets container (typically empty, Harmony doesn't manage Remix Sets)
-    // AIDEV-NOTE: SETS element is required for full Traktor NML compatibility
+    // SETS element is required for full Traktor NML compatibility
     lines.push('  <SETS ENTRIES="0"></SETS>');
 
     // PLAYLISTS (if present)
@@ -347,7 +347,7 @@ export class TraktorNMLWriter {
       lines.push('  </PLAYLISTS>');
     }
 
-    // AIDEV-NOTE: INDEXING section must be preserved for Traktor compatibility
+    // INDEXING section must be preserved for Traktor compatibility
     // It contains SORTING_INFO elements with optional CRITERIA for collection ordering
     if (nml.NML.INDEXING) {
       lines.push('  <INDEXING>');
@@ -492,14 +492,14 @@ export class TraktorNMLWriter {
   /**
    * Convert a TraktorCue to XML
    *
-   * AIDEV-NOTE: Critical for Traktor compatibility:
+   * Critical for Traktor compatibility:
    * - NAME must ALWAYS be present (use "n.n." for unnamed cues)
    * - TYPE=4 (AutoGrid) cues must include nested <GRID BPM="..."> element
    */
   private cueToXml(cue: TraktorCue): string {
     const attrs: string[] = [];
 
-    // AIDEV-NOTE: NAME is required by Traktor - use "n.n." (no name) as default
+    // NAME is required by Traktor - use "n.n." (no name) as default
     attrs.push(`NAME="${escapeXml(cue.NAME || 'n.n.')}"`);
     if (cue.DISPL_ORDER !== undefined) attrs.push(`DISPL_ORDER="${cue.DISPL_ORDER}"`);
     attrs.push(`TYPE="${cue.TYPE}"`);
@@ -508,7 +508,7 @@ export class TraktorNMLWriter {
     if (cue.REPEATS !== undefined) attrs.push(`REPEATS="${cue.REPEATS}"`);
     if (cue.HOTCUE !== undefined) attrs.push(`HOTCUE="${cue.HOTCUE}"`);
 
-    // AIDEV-NOTE: TYPE=4 (Grid/AutoGrid) cues contain a nested GRID element with precise BPM
+    // TYPE=4 (Grid/AutoGrid) cues contain a nested GRID element with precise BPM
     // This is critical for beatgrid alignment - without it Traktor loses sync precision
     if (cue.GRID?.BPM) {
       return `<CUE_V2 ${attrs.join(' ')}><GRID BPM="${cue.GRID.BPM}"></GRID>\n</CUE_V2>`;
@@ -658,7 +658,7 @@ export class TraktorNMLWriter {
   /**
    * Remove a playlist from NML by UUID
    *
-   * AIDEV-NOTE: Recursively removes a playlist node from the NML tree structure.
+   * Recursively removes a playlist node from the NML tree structure.
    * Used to delete playlists that were removed in Harmony.
    *
    * @param nml - Original parsed NML
@@ -722,7 +722,7 @@ export class TraktorNMLWriter {
    * - Updates existing playlists
    * - REMOVES playlists that exist in NML but not in Harmony (Harmony is source of truth)
    *
-   * AIDEV-NOTE: Changed behavior - now deletes playlists that are not in Harmony.
+   * Changed behavior - now deletes playlists that are not in Harmony.
    * This ensures that when a user deletes a playlist in Harmony, it also gets
    * removed from Traktor on the next export.
    *

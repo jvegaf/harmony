@@ -3,7 +3,7 @@
  *
  * Handles merge strategies for syncing Traktor data with Harmony.
  *
- * AIDEV-NOTE: The approved strategy is "smart merge":
+ * The approved strategy is "smart merge":
  * - Traktor data fills empty Harmony fields
  * - Harmony data takes precedence when both have values
  * - Identity fields (id, path) always come from Harmony
@@ -53,7 +53,7 @@ export interface CueMergeResult {
 
 /**
  * Fields that can be merged from Traktor to Harmony
- * AIDEV-NOTE: Excludes id, path, duration, waveformPeaks which are Harmony-controlled
+ * Excludes id, path, duration, waveformPeaks which are Harmony-controlled
  */
 const MERGEABLE_FIELDS: (keyof Track)[] = [
   'title',

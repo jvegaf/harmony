@@ -1,7 +1,7 @@
 /**
  * AutoSyncService
  *
- * AIDEV-NOTE: Background synchronization service for Traktor integration.
+ * Background synchronization service for Traktor integration.
  * Handles automatic sync based on configuration:
  * - On app startup
  * - On library changes (debounced)
@@ -85,12 +85,12 @@ export class AutoSyncService {
 
   /**
    * Trigger auto-sync based on current configuration
-   * AIDEV-NOTE: Called on startup and library changes
+   * Called on startup and library changes
    */
   async triggerSync(reason: 'startup' | 'library_change' | 'manual'): Promise<void> {
     const config = this.operations.getConfig();
 
-    // AIDEV-NOTE: Handle legacy configs that don't have autoSync property yet
+    // Handle legacy configs that don't have autoSync property yet
     if (!config.autoSync) {
       log.debug('[AutoSync] autoSync config not found (legacy config), skipping');
       return;
@@ -135,7 +135,7 @@ export class AutoSyncService {
   triggerSyncDebounced(reason: 'library_change'): void {
     const config = this.operations.getConfig();
 
-    // AIDEV-NOTE: Handle legacy configs that don't have autoSync property yet
+    // Handle legacy configs that don't have autoSync property yet
     if (!config.autoSync?.enabled || !config.autoSync?.onLibraryChange) {
       return;
     }
@@ -201,7 +201,7 @@ export class AutoSyncService {
 
       // Export to Traktor
       if (direction === 'export' || direction === 'bidirectional') {
-        // AIDEV-NOTE: Check if there are pending changes before exporting
+        // Check if there are pending changes before exporting
         const config = this.operations.getConfig();
         const hasPendingChanges = config.hasPendingExportChanges ?? false;
 

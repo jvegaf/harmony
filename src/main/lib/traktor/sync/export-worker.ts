@@ -1,7 +1,7 @@
 /**
  * Traktor Export Worker
  *
- * AIDEV-NOTE: Worker thread for exporting Harmony data back to Traktor NML.
+ * Worker thread for exporting Harmony data back to Traktor NML.
  * Runs XML generation and file writing in a separate thread to avoid
  * blocking the Electron main thread.
  *

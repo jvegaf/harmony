@@ -3,7 +3,7 @@
  *
  * Maps between Traktor CUE_V2 entries and Harmony CuePoint objects.
  *
- * AIDEV-NOTE: Traktor cue types:
+ * Traktor cue types:
  * - 0 = Hot Cue (jump marker)
  * - 1 = Fade-in
  * - 2 = Fade-out
@@ -132,7 +132,7 @@ export function mapTraktorCueToHarmony(traktorCue: TraktorCue, trackId: string):
     }
   }
 
-  // AIDEV-NOTE: Preserve GRID.BPM for grid cues (TYPE=4)
+  // Preserve GRID.BPM for grid cues (TYPE=4)
   // This is critical for beatgrid precision in Traktor round-trips
   if (traktorCue.GRID?.BPM) {
     cue.gridBpm = traktorCue.GRID.BPM;
@@ -203,7 +203,7 @@ export function mapHarmonyCueToTraktor(cue: CuePoint): TraktorCue {
     traktor.HOTCUE = String(cue.hotcueSlot);
   }
 
-  // AIDEV-NOTE: Restore GRID element for grid cues (TYPE=4)
+  // Restore GRID element for grid cues (TYPE=4)
   // This preserves beatgrid precision during Traktor round-trips
   if (cue.gridBpm) {
     traktor.GRID = { BPM: cue.gridBpm };

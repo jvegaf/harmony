@@ -3,7 +3,7 @@
  *
  * Maps between Traktor NML playlist/folder structure and Harmony playlists.
  *
- * AIDEV-NOTE: Traktor uses a tree structure with:
+ * Traktor uses a tree structure with:
  * - $ROOT folder at the top
  * - TYPE="FOLDER" for folders containing other nodes
  * - TYPE="PLAYLIST" for actual playlists with track entries
@@ -43,7 +43,7 @@ export interface FolderTreeNode {
 /**
  * Convert Traktor PRIMARYKEY path to system path.
  *
- * AIDEV-NOTE: Now delegates to mapTraktorPathToSystem() to ensure playlist track paths
+ * Now delegates to mapTraktorPathToSystem() to ensure playlist track paths
  * match the exact format stored in the database (OS-native separators, volume on Windows).
  * This fixes the issue where playlist imports failed because paths didn't match.
  *
@@ -194,7 +194,7 @@ export function mapHarmonyPlaylistToTraktor(playlist: { id: string; name: string
   for (const path of playlist.trackPaths) {
     const { dir, file, volume } = mapSystemPathToTraktor(path);
     // Construct the PRIMARYKEY path format with volume
-    // AIDEV-NOTE: Traktor format is "C:" + dir (without trailing /:) + "/:" + file
+    // Traktor format is "C:" + dir (without trailing /:) + "/:" + file
     const traktorPath = volume + dir.replace(/\/:$/, '') + '/:' + file;
 
     entries.push({

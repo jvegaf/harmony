@@ -1,7 +1,7 @@
 /**
  * Worker Pool
  *
- * AIDEV-NOTE: Generic worker pool for managing multiple worker threads.
+ * Generic worker pool for managing multiple worker threads.
  * Provides task queuing, worker reuse, and automatic scaling.
  *
  * Usage:
