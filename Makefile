@@ -33,7 +33,7 @@ lint:
 	@echo "Linting code..."
 	@$(NPM_CMD) run lint
 
-check:
+check: lint
 	@echo "Linting code..."
 	@$(NPM_CMD) run typecheck
 
