@@ -60,8 +60,8 @@ const channels = {
   FIX_TAGS: 'FIX_TAGS',
   FIND_TAG_CANDIDATES: 'FIND_TAG_CANDIDATES',
   APPLY_TAG_SELECTIONS: 'APPLY_TAG_SELECTIONS',
-  TAG_CANDIDATES_PROGRESS: 'TAG_CANDIDATES_PROGRESS', // AIDEV-NOTE: Progress updates durante búsqueda de candidatos
-  TAG_AUTO_APPLY_COMPLETE: 'TAG_AUTO_APPLY_COMPLETE', // AIDEV-NOTE: Emitted when background auto-apply of 100% matches completes
+  TAG_CANDIDATES_PROGRESS: 'TAG_CANDIDATES_PROGRESS', // Progress updates during candidate search
+  TAG_AUTO_APPLY_COMPLETE: 'TAG_AUTO_APPLY_COMPLETE', // Emitted when background auto-apply of 100% matches completes
 
   LOGGER: 'LOGGER',
 

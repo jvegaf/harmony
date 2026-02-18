@@ -4,7 +4,7 @@
  * Represents cue points, hotcues, loops, and beatgrid markers.
  * Compatible with Traktor NML import/export.
  *
- * AIDEV-NOTE: Position values are in milliseconds for precision.
+ * Position values are in milliseconds for precision.
  * Traktor NML stores positions in milliseconds too.
  */
 
@@ -50,7 +50,7 @@ export interface CuePoint {
   order?: number;
   /**
    * Precise BPM for grid markers (TYPE=GRID).
-   * AIDEV-NOTE: Traktor stores this in a nested <GRID BPM="..."> element.
+   * Traktor stores this in a nested <GRID BPM="..."> element.
    * Must be preserved for beatgrid alignment precision.
    */
   gridBpm?: string;

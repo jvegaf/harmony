@@ -1,13 +1,13 @@
 /**
  * Traktor Integration Types
  *
- * AIDEV-NOTE: Types shared between main and renderer for Traktor NML integration.
+ * Types shared between main and renderer for Traktor NML integration.
  * These define the configuration, sync progress, and NML info structures.
  */
 
 /**
  * Cue point merge strategy (duplicated here to avoid circular imports)
- * AIDEV-NOTE: Must match CueMergeStrategy in conflict-resolver.ts
+ * Must match CueMergeStrategy in conflict-resolver.ts
  */
 export type CueMergeStrategy = 'SMART_MERGE' | 'REPLACE';
 
@@ -26,13 +26,13 @@ export interface TraktorConfig {
   /** Create backup before writing to NML */
   autoBackup: boolean;
   /**
-   * AIDEV-NOTE: Flag indicating there are pending changes in Harmony
+   * Flag indicating there are pending changes in Harmony
    * that need to be exported to Traktor. Set by library event handlers,
    * cleared after successful export.
    */
   hasPendingExportChanges?: boolean;
   /**
-   * AIDEV-NOTE: Auto-sync configuration for background synchronization
+   * Auto-sync configuration for background synchronization
    * When enabled, Harmony will automatically sync with Traktor in the background
    */
   autoSync: {
@@ -83,7 +83,7 @@ export interface TraktorNMLInfo {
 
 /**
  * Sync plan summary for preview UI
- * AIDEV-NOTE: Simplified version of SyncPlan from sync-engine for renderer use
+ * Simplified version of SyncPlan from sync-engine for renderer use
  */
 export interface TraktorSyncPlanSummary {
   totalMatched: number;
@@ -95,7 +95,7 @@ export interface TraktorSyncPlanSummary {
 
 /**
  * Sync plan for preview before applying
- * AIDEV-NOTE: Serializable version for IPC (Maps converted to counts)
+ * Serializable version for IPC (Maps converted to counts)
  */
 export interface TraktorSyncPlan {
   /** Summary statistics */
@@ -116,7 +116,7 @@ export interface TraktorSyncResultStats {
 
 /**
  * Sync result for UI display
- * AIDEV-NOTE: Simplified version of SyncResult for renderer use
+ * Simplified version of SyncResult for renderer use
  */
 export interface TraktorSyncResult {
   stats: TraktorSyncResultStats;
@@ -124,7 +124,7 @@ export interface TraktorSyncResult {
 
 /**
  * Auto-sync status for tracking background sync state
- * AIDEV-NOTE: Used by renderer to display sync status in notification
+ * Used by renderer to display sync status in notification
  */
 export interface AutoSyncStatus {
   /** Whether auto-sync is currently running */

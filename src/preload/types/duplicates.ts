@@ -2,7 +2,7 @@ import type { Track, TrackId } from './harmony';
 
 /**
  * Duplicate detection result types.
- * AIDEV-NOTE: These types are used for IPC communication between
+ * These types are used for IPC communication between
  * main process (detection) and renderer (UI display).
  */
 
@@ -26,7 +26,7 @@ export interface DuplicateTrackInfo {
 
 /**
  * A group of tracks identified as duplicates of each other.
- * AIDEV-NOTE: All tracks in a group are considered duplicates based on
+ * All tracks in a group are considered duplicates based on
  * the enabled detection criteria. UI displays these as expandable groups.
  */
 export interface DuplicateGroup {
@@ -60,7 +60,7 @@ export interface DuplicateScanResult {
 
 /**
  * Progress update during duplicate scan.
- * AIDEV-NOTE: Sent via IPC event during scanning for UI progress bar.
+ * Sent via IPC event during scanning for UI progress bar.
  */
 export interface DuplicateScanProgress {
   /** Current phase of the scan */

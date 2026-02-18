@@ -98,13 +98,13 @@ const api = {
     applyTagSelections: async (selections: any[], tracks: Track[]) => {
       return ipcRenderer.invoke(channels.APPLY_TAG_SELECTIONS, selections, tracks);
     },
-    // AIDEV-NOTE: Listen for tag candidates search progress updates
+    // Listen for tag candidates search progress updates
     onTagCandidatesProgress: (callback: (progress: any) => void) => {
       const listener = (_: any, progress: any) => callback(progress);
       ipcRenderer.on(channels.TAG_CANDIDATES_PROGRESS, listener);
       return () => ipcRenderer.removeListener(channels.TAG_CANDIDATES_PROGRESS, listener);
     },
-    // AIDEV-NOTE: Listen for auto-apply progress and completion events
+    // Listen for auto-apply progress and completion events
     onTagAutoApplyComplete: (callback: (event: any) => void) => {
       const listener = (_: any, event: any) => callback(event);
       ipcRenderer.on(channels.TAG_AUTO_APPLY_COMPLETE, listener);
@@ -159,7 +159,7 @@ const api = {
       ipcRenderer.on(channels.AUDIO_ANALYSIS_PROGRESS, listener);
       return () => ipcRenderer.removeListener(channels.AUDIO_ANALYSIS_PROGRESS, listener);
     },
-    // AIDEV-NOTE: Listen for individual track completion events for real-time UI updates
+    // Listen for individual track completion events for real-time UI updates
     onTrackComplete: (callback: (track: Track) => void) => {
       const listener = (_: any, track: Track) => callback(track);
       ipcRenderer.on(channels.AUDIO_ANALYSIS_TRACK_COMPLETE, listener);
@@ -168,7 +168,7 @@ const api = {
   },
   /**
    * Traktor NML integration API
-   * AIDEV-NOTE: Provides sync between Harmony and Traktor's collection.nml
+   * Provides sync between Harmony and Traktor's collection.nml
    */
   traktor: {
     /** Get current Traktor configuration */
@@ -197,7 +197,7 @@ const api = {
     },
     /**
      * Auto-sync API
-     * AIDEV-NOTE: Background synchronization with Traktor
+     * Background synchronization with Traktor
      */
     autoSync: {
       /** Start auto-sync manually */
@@ -216,7 +216,7 @@ const api = {
   },
   /**
    * Duplicate Finder API
-   * AIDEV-NOTE: Detects and manages duplicate tracks in the library
+   * Detects and manages duplicate tracks in the library
    */
   duplicates: {
     /** Scan library for duplicates using configured criteria */

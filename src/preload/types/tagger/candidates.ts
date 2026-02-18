@@ -120,8 +120,8 @@ export interface SearchCandidatesResult {
 }
 
 /**
- * AIDEV-NOTE: Progreso de búsqueda de candidatos
- * Usado para actualizar el progress modal con información en tiempo real
+ * Tag candidate search progress.
+ * Used to update the progress modal with real-time information.
  */
 export interface TagCandidatesProgress {
   /** Número de tracks procesados hasta ahora */

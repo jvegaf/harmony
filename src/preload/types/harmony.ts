@@ -32,7 +32,7 @@ export interface Track {
   bpm?: number;
   /**
    * Precise BPM as string for round-trip preservation.
-   * AIDEV-NOTE: Traktor stores BPM with high precision (e.g., "123.000061").
+   * Traktor stores BPM with high precision (e.g., "123.000061").
    * This field preserves the original value for re-export.
    */
   bpmPrecise?: string;
@@ -45,20 +45,20 @@ export interface Track {
   year?: number;
   /**
    * Full release date string for round-trip preservation.
-   * AIDEV-NOTE: Traktor uses "YYYY/M/D" format. This preserves month/day
+   * Traktor uses "YYYY/M/D" format. This preserves month/day
    * that would otherwise be lost when only storing `year`.
    */
   releaseDate?: string;
-  /** Bitrate in kilobits per second (kbps). AIDEV-NOTE: Traktor stores bps, converted on import. */
+  /** Bitrate in kilobits per second (kbps). Traktor stores bps, converted on import. */
   bitrate?: number;
   rating?: TrackRating;
   comment?: string;
   label?: string;
   /** Waveform peaks for visualization (~300 values, normalized 0-1) */
   waveformPeaks?: number[];
-  /** Timestamp when the track was added to Harmony. AIDEV-NOTE: Used for "Recently Added" view */
+  /** Timestamp when the track was added to Harmony. Used for "Recently Added" view */
   addedAt?: number;
-  /** URL of the track page from the tag provider (Beatport, Traxsource, Bandcamp). AIDEV-NOTE: Persisted as WOAR frame (artistUrl in node-id3) */
+  /** URL of the track page from the tag provider (Beatport, Traxsource, Bandcamp). Persisted as WOAR frame (artistUrl in node-id3) */
   url?: string;
 }
 
@@ -85,7 +85,7 @@ export interface PlaylistTrack {
   playlistId: string;
   trackId: string;
   order: number;
-  // AIDEV-NOTE: Optional relations for Drizzle relational queries
+  // Optional relations for Drizzle relational queries
   playlist?: Playlist;
   track?: Track;
 }
@@ -95,7 +95,7 @@ export interface Playlist {
   name: string;
   tracks?: Track[];
   playlistTracks?: PlaylistTrack[];
-  /** AIDEV-NOTE: Optional folder ID for Traktor playlist hierarchy support */
+  /** Optional folder ID for Traktor playlist hierarchy support */
   folderId?: string;
   folder?: Folder;
 }
@@ -104,7 +104,7 @@ export interface Playlist {
  * Folder for organizing playlists in a hierarchical structure.
  * Supports nested folders via parentId for Traktor-style folder trees.
  *
- * AIDEV-NOTE: Used for Traktor bidirectional sync to preserve
+ * Used for Traktor bidirectional sync to preserve
  * the complete playlist folder hierarchy from collection.nml
  */
 export interface Folder {
@@ -171,7 +171,7 @@ export type UpdateRatingPayload = {
 
 /**
  * Configuration for a custom search engine in the context menu.
- * AIDEV-NOTE: Users can add custom search engines via Settings > General.
+ * Users can add custom search engines via Settings > General.
  * The urlTemplate must contain {query} placeholder which gets replaced with the search term.
  */
 export interface SearchEngineConfig {
@@ -224,7 +224,7 @@ export interface Config {
   };
   /**
    * Duplicate finder configuration.
-   * AIDEV-NOTE: Configures which detection criteria are enabled and their parameters.
+   * Configures which detection criteria are enabled and their parameters.
    * Users can toggle individual criteria in Settings > Duplicates panel.
    */
   duplicateFinderConfig: {

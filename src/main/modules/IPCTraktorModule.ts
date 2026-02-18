@@ -64,12 +64,12 @@ export default class IPCTraktorModule extends ModuleWindow {
   protected db: Database;
   private configModule: ConfigModule;
   private autoSyncService: AutoSyncService | null = null;
-  // AIDEV-NOTE: Singleton worker manager with pool for background operations
+  // Singleton worker manager with pool for background operations
   private workerManager: TraktorWorkerManager;
 
   constructor(window: Electron.BrowserWindow, configModule: ConfigModule) {
     super(window);
-    // AIDEV-NOTE: Use singleton instance to prevent multiple database connections
+    // Use singleton instance to prevent multiple database connections
     this.db = Database.getInstance();
     this.configModule = configModule;
     this.workerManager = TraktorWorkerManager.getInstance();
@@ -77,7 +77,7 @@ export default class IPCTraktorModule extends ModuleWindow {
 
   /**
    * Get the current Traktor config from persistent storage
-   * AIDEV-NOTE: Ensures autoSync defaults are applied for legacy configs
+   * Ensures autoSync defaults are applied for legacy configs
    */
   private getConfig(): TraktorConfig {
     const config = this.configModule.getConfig().get('traktorConfig');
@@ -387,7 +387,7 @@ export default class IPCTraktorModule extends ModuleWindow {
             log.info('[IPCTraktor] Updated cue points for', cuesByTrack.size, 'tracks');
           }
 
-          // AIDEV-NOTE: Import new tracks from Traktor that don't exist in Harmony
+          // Import new tracks from Traktor that don't exist in Harmony
           // Smart merge with existing tracks to avoid duplicates
           if (result.tracksImported.length > 0) {
             this.sendProgress({
@@ -458,7 +458,7 @@ export default class IPCTraktorModule extends ModuleWindow {
             }
           }
 
-          // AIDEV-NOTE: Import playlists from Traktor
+          // Import playlists from Traktor
           let playlistsImported = 0;
           if (nml.NML.PLAYLISTS?.NODE) {
             this.sendProgress({
@@ -630,7 +630,7 @@ export default class IPCTraktorModule extends ModuleWindow {
 
         this.sendProgress({ phase: 'writing', message: 'Syncing playlists...', progress: 65 });
 
-        // AIDEV-NOTE: Merge Harmony playlists into NML (add new + update existing)
+        // Merge Harmony playlists into NML (add new + update existing)
         // This ensures playlists created in Harmony are exported to Traktor
         const harmonyPlaylists = await this.db.getAllPlaylists();
         if (harmonyPlaylists.length > 0) {
@@ -655,7 +655,7 @@ export default class IPCTraktorModule extends ModuleWindow {
 
         log.info('[IPCTraktor] Export complete');
 
-        // AIDEV-NOTE: Clear pending export changes flag after successful export
+        // Clear pending export changes flag after successful export
         this.setConfig({ hasPendingExportChanges: false });
         log.debug('[IPCTraktor] Cleared pending export changes flag');
 
@@ -759,7 +759,7 @@ export default class IPCTraktorModule extends ModuleWindow {
       getConfig: () => this.getConfig(),
     });
 
-    // AIDEV-NOTE: Subscribe to library change events to trigger auto-sync
+    // Subscribe to library change events to trigger auto-sync
     libraryEventBus.on('library-changed', () => {
       // Mark that there are pending changes to export
       const config = this.getConfig();
@@ -789,7 +789,7 @@ export default class IPCTraktorModule extends ModuleWindow {
 
   /**
    * Internal sync execution used by AutoSyncService
-   * AIDEV-NOTE: Uses worker thread to avoid blocking the main thread.
+   * Uses worker thread to avoid blocking the main thread.
    * Worker handles parsing and sync logic; main thread handles database operations.
    */
   private async executeSyncInternal(): Promise<SyncResult> {
@@ -867,7 +867,7 @@ export default class IPCTraktorModule extends ModuleWindow {
     }
 
     // Import new tracks from Traktor that don't exist in Harmony
-    // AIDEV-NOTE: Apply same deduplication logic as manual sync to prevent duplicates
+    // Apply same deduplication logic as manual sync to prevent duplicates
     if (result.tracksImported.length > 0) {
       // Get existing tracks by path to detect duplicates
       const existingByPath = await this.db.findTracksByPath(result.tracksImported.map(t => t.path));
@@ -961,7 +961,7 @@ export default class IPCTraktorModule extends ModuleWindow {
 
   /**
    * Internal NML export used by AutoSyncService
-   * AIDEV-NOTE: Uses worker thread to avoid blocking the main thread.
+   * Uses worker thread to avoid blocking the main thread.
    * Worker handles XML generation and file writing; main thread prepares data.
    */
   private async exportToNmlInternal(): Promise<void> {
@@ -1017,7 +1017,7 @@ export default class IPCTraktorModule extends ModuleWindow {
 
     log.info('[IPCTraktor] Export complete:', result.tracksExported, 'tracks,', result.playlistsExported, 'playlists');
 
-    // AIDEV-NOTE: Clear pending export changes flag after successful export
+    // Clear pending export changes flag after successful export
     this.setConfig({ hasPendingExportChanges: false });
     log.debug('[IPCTraktor] Cleared pending export changes flag');
   }
