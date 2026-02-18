@@ -9,10 +9,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Track } from '../../../../preload/types/harmony';
 
-// Mock node-id3 before importing the module under test
+// AIDEV-NOTE: Mock node-id3 with both read (used by safeId3Update to read existing tags)
+// and Promise.write (used to write sanitized + merged tags back)
 vi.mock('node-id3', () => ({
+  read: vi.fn().mockReturnValue({}),
   Promise: {
     update: vi.fn().mockResolvedValue(true),
+    write: vi.fn().mockResolvedValue(true),
   },
 }));
 
@@ -59,8 +62,8 @@ describe('PersistTrack', () => {
 
       await PersistTrack(track);
 
-      expect(NodeId3.Promise.update).toHaveBeenCalledWith(
-        {
+      expect(NodeId3.Promise.write).toHaveBeenCalledWith(
+        expect.objectContaining({
           title: 'My Song',
           artist: 'My Artist',
           album: 'My Album',
@@ -68,7 +71,7 @@ describe('PersistTrack', () => {
           genre: 'Electronic',
           bpm: '128',
           initialKey: 'Am',
-        },
+        }),
         '/test/path.mp3',
       );
     });
@@ -97,7 +100,7 @@ describe('PersistTrack', () => {
 
       await PersistTrack(track);
 
-      const callArgs = (NodeId3.Promise.update as any).mock.calls[0][0];
+      const callArgs = (NodeId3.Promise.write as any).mock.calls[0][0];
       expect(callArgs.bpm).toBe('140');
       expect(typeof callArgs.bpm).toBe('string');
     });
@@ -107,7 +110,7 @@ describe('PersistTrack', () => {
 
       await PersistTrack(track);
 
-      const callArgs = (NodeId3.Promise.update as any).mock.calls[0][0];
+      const callArgs = (NodeId3.Promise.write as any).mock.calls[0][0];
       expect(callArgs.year).toBe('2023');
       expect(typeof callArgs.year).toBe('string');
     });
@@ -117,7 +120,7 @@ describe('PersistTrack', () => {
 
       await PersistTrack(track);
 
-      const callArgs = (NodeId3.Promise.update as any).mock.calls[0][0];
+      const callArgs = (NodeId3.Promise.write as any).mock.calls[0][0];
       expect(callArgs.bpm).toBeUndefined();
     });
 
@@ -126,7 +129,7 @@ describe('PersistTrack', () => {
 
       await PersistTrack(track);
 
-      const callArgs = (NodeId3.Promise.update as any).mock.calls[0][0];
+      const callArgs = (NodeId3.Promise.write as any).mock.calls[0][0];
       expect(callArgs.year).toBeUndefined();
     });
 
@@ -135,7 +138,7 @@ describe('PersistTrack', () => {
 
       await PersistTrack(track);
 
-      const callArgs = (NodeId3.Promise.update as any).mock.calls[0][0];
+      const callArgs = (NodeId3.Promise.write as any).mock.calls[0][0];
       // 0 is falsy, so should be undefined per current implementation
       expect(callArgs.bpm).toBeUndefined();
     });
@@ -146,14 +149,14 @@ describe('PersistTrack', () => {
       const track = createTrack();
       const mockError = new Error('ID3 write failed');
 
-      vi.mocked(NodeId3.Promise.update).mockRejectedValueOnce(mockError);
+      vi.mocked(NodeId3.Promise.write).mockRejectedValueOnce(mockError);
 
       await expect(PersistTrack(track)).rejects.toThrow('ID3 write failed');
     });
 
     it('should not log info if update fails', async () => {
       const track = createTrack();
-      vi.mocked(NodeId3.Promise.update).mockRejectedValueOnce(new Error('Failed'));
+      vi.mocked(NodeId3.Promise.write).mockRejectedValueOnce(new Error('Failed'));
 
       try {
         await PersistTrack(track);
@@ -179,8 +182,8 @@ describe('PersistTrack', () => {
 
       await PersistTrack(track);
 
-      expect(NodeId3.Promise.update).toHaveBeenCalledWith(
-        {
+      expect(NodeId3.Promise.write).toHaveBeenCalledWith(
+        expect.objectContaining({
           title: 'Minimal',
           artist: undefined,
           album: undefined,
@@ -188,7 +191,7 @@ describe('PersistTrack', () => {
           genre: undefined,
           bpm: undefined,
           initialKey: undefined,
-        },
+        }),
         '/test/path.mp3',
       );
     });
@@ -204,7 +207,7 @@ describe('PersistTrack', () => {
 
       await PersistTrack(track);
 
-      const callArgs = (NodeId3.Promise.update as any).mock.calls[0][0];
+      const callArgs = (NodeId3.Promise.write as any).mock.calls[0][0];
       expect(callArgs.title).toBe('');
       expect(callArgs.artist).toBe('');
     });

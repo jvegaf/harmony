@@ -1,6 +1,7 @@
 import * as NodeId3 from 'node-id3';
 import log from 'electron-log';
 import { Track } from '../../../preload/types/harmony';
+import { safeId3Update } from './safe-id3-update';
 
 const PersistTrack = async (track: Track): Promise<void> => {
   const { title, artist, album, year, genre, bpm, label, initialKey, url } = track;
@@ -19,7 +20,7 @@ const PersistTrack = async (track: Track): Promise<void> => {
     artistUrl: url ? [url] : undefined,
   } as NodeId3.Tags;
 
-  await NodeId3.Promise.update(tags, track.path);
+  await safeId3Update(tags, track.path);
   log.info('track persisted', track.path);
 };
 

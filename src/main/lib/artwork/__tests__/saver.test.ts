@@ -9,10 +9,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Artwork } from '../../../../preload/types/harmony';
 
-// Mock node-id3 before importing the module under test
+// AIDEV-NOTE: Mock node-id3 with both read (used by safeId3Update to read existing tags)
+// and Promise.write (used to write sanitized + merged tags back)
 vi.mock('node-id3', () => ({
+  read: vi.fn().mockReturnValue({}),
   Promise: {
     update: vi.fn().mockResolvedValue(true),
+    write: vi.fn().mockResolvedValue(true),
   },
 }));
 
@@ -52,10 +55,10 @@ describe('PersistArtwork', () => {
 
       await PersistArtwork(trackPath, artwork);
 
-      expect(NodeId3.Promise.update).toHaveBeenCalledWith(
-        {
+      expect(NodeId3.Promise.write).toHaveBeenCalledWith(
+        expect.objectContaining({
           image: artwork,
-        },
+        }),
         trackPath,
       );
     });
@@ -89,7 +92,7 @@ describe('PersistArtwork', () => {
 
       await PersistArtwork('/test.mp3', artwork);
 
-      const callArgs = (NodeId3.Promise.update as any).mock.calls[0][0];
+      const callArgs = (NodeId3.Promise.write as any).mock.calls[0][0];
       expect(callArgs.image.mime).toBe('image/png');
     });
 
@@ -98,7 +101,7 @@ describe('PersistArtwork', () => {
 
       await PersistArtwork('/test.mp3', artwork);
 
-      const callArgs = (NodeId3.Promise.update as any).mock.calls[0][0];
+      const callArgs = (NodeId3.Promise.write as any).mock.calls[0][0];
       expect(callArgs.image.description).toBeUndefined();
     });
 
@@ -108,7 +111,7 @@ describe('PersistArtwork', () => {
 
       await PersistArtwork('/test.mp3', artwork);
 
-      const callArgs = (NodeId3.Promise.update as any).mock.calls[0][0];
+      const callArgs = (NodeId3.Promise.write as any).mock.calls[0][0];
       expect(callArgs.image.imageBuffer).toBe(largeBuffer);
     });
 
@@ -122,7 +125,7 @@ describe('PersistArtwork', () => {
 
       await PersistArtwork('/test.mp3', artwork);
 
-      const callArgs = (NodeId3.Promise.update as any).mock.calls[0][0];
+      const callArgs = (NodeId3.Promise.write as any).mock.calls[0][0];
       expect(callArgs.image).toEqual(artwork);
     });
   });
@@ -134,7 +137,7 @@ describe('PersistArtwork', () => {
 
       await PersistArtwork(windowsPath, artwork);
 
-      expect(NodeId3.Promise.update).toHaveBeenCalledWith(expect.anything(), windowsPath);
+      expect(NodeId3.Promise.write).toHaveBeenCalledWith(expect.anything(), windowsPath);
     });
 
     it('should handle Unix-style paths', async () => {
@@ -143,7 +146,7 @@ describe('PersistArtwork', () => {
 
       await PersistArtwork(unixPath, artwork);
 
-      expect(NodeId3.Promise.update).toHaveBeenCalledWith(expect.anything(), unixPath);
+      expect(NodeId3.Promise.write).toHaveBeenCalledWith(expect.anything(), unixPath);
     });
 
     it('should handle paths with spaces', async () => {
@@ -152,7 +155,7 @@ describe('PersistArtwork', () => {
 
       await PersistArtwork(pathWithSpaces, artwork);
 
-      expect(NodeId3.Promise.update).toHaveBeenCalledWith(expect.anything(), pathWithSpaces);
+      expect(NodeId3.Promise.write).toHaveBeenCalledWith(expect.anything(), pathWithSpaces);
     });
   });
 
@@ -161,14 +164,14 @@ describe('PersistArtwork', () => {
       const artwork = createArtwork();
       const mockError = new Error('ID3 write failed');
 
-      vi.mocked(NodeId3.Promise.update).mockRejectedValueOnce(mockError);
+      vi.mocked(NodeId3.Promise.write).mockRejectedValueOnce(mockError);
 
       await expect(PersistArtwork('/test.mp3', artwork)).rejects.toThrow('ID3 write failed');
     });
 
     it('should not log info if update fails', async () => {
       const artwork = createArtwork();
-      vi.mocked(NodeId3.Promise.update).mockRejectedValueOnce(new Error('Failed'));
+      vi.mocked(NodeId3.Promise.write).mockRejectedValueOnce(new Error('Failed'));
 
       try {
         await PersistArtwork('/test.mp3', artwork);
@@ -183,7 +186,7 @@ describe('PersistArtwork', () => {
       const artwork = createArtwork();
       const permissionError = new Error('EACCES: permission denied');
 
-      vi.mocked(NodeId3.Promise.update).mockRejectedValueOnce(permissionError);
+      vi.mocked(NodeId3.Promise.write).mockRejectedValueOnce(permissionError);
 
       await expect(PersistArtwork('/test.mp3', artwork)).rejects.toThrow('EACCES: permission denied');
     });
