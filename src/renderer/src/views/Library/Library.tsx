@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Link, useLoaderData, useRouteLoaderData } from 'react-router-dom';
 
 import * as ViewMessage from '../../elements/ViewMessage/ViewMessage';
-import useLibraryStore from '../../stores/useLibraryStore';
+import useLibraryUIStore from '../../stores/useLibraryUIStore';
 import usePlayingTrackID from '../../hooks/usePlayingTrackID';
 
 import { RootLoaderData } from '../Root';
@@ -15,7 +15,7 @@ const { db } = window.Main;
 
 export default function LibraryView() {
   const trackPlayingID = usePlayingTrackID();
-  const { refreshing, search } = useLibraryStore();
+  const { refreshing, search } = useLibraryUIStore();
 
   const { playlists } = useLoaderData() as LibraryLoaderData;
   const { tracks } = useRouteLoaderData('root') as RootLoaderData;

@@ -3,7 +3,9 @@ import { useEffect, useRef } from 'react';
 import channels from '../../../preload/lib/ipc-channels';
 import { usePlaylistsAPI } from '../stores/usePlaylistsStore';
 import { CommandPayload, Track } from '../../../preload/types/harmony';
-import useLibraryStore, { useLibraryAPI } from '../stores/useLibraryStore';
+import useTaggerStore, { useTaggerAPI } from '../stores/useTaggerStore';
+import { useLibraryAPI } from '../stores/useLibraryStore';
+import useLibraryUIStore from '../stores/useLibraryUIStore';
 import { notifications } from '@mantine/notifications';
 
 const { ipcRenderer } = window.ElectronAPI;
@@ -14,6 +16,8 @@ const { ipcRenderer } = window.ElectronAPI;
 export function useIPCMenuEvents() {
   const libraryAPI = useLibraryAPI();
   const playlistsAPI = usePlaylistsAPI();
+  const taggerAPI = useTaggerAPI();
+  const uiAPI = useLibraryUIStore(state => state.api);
   // Use refs to store unsubscribe functions for audio analysis listeners
   // This allows cleanup when analysis completes or component unmounts
   const analysisUnsubscribesRef = useRef<(() => void)[]>([]);
@@ -38,11 +42,11 @@ export function useIPCMenuEvents() {
     }
 
     function filenameToTags(selected: Track[]) {
-      libraryAPI.filenameToTags(selected);
+      taggerAPI.filenameToTags(selected);
     }
 
     function findCandidates(selected: Track[]) {
-      libraryAPI.findCandidates(selected);
+      taggerAPI.findCandidates(selected);
     }
 
     function analyzeAudio(selected: Track[]) {
@@ -71,7 +75,7 @@ export function useIPCMenuEvents() {
       // Listen for track completion events to update TrackList in real-time
       // This triggers the store's `updated` state which AG Grid watches for row updates
       const unsubscribeTrackComplete = window.Main.audioAnalysis.onTrackComplete(track => {
-        useLibraryStore.setState({ updated: track });
+        useTaggerStore.setState({ updated: track });
       });
 
       // Store unsubscribe functions for cleanup
@@ -122,7 +126,7 @@ export function useIPCMenuEvents() {
     }
 
     function renamePlaylist(playlistId: string) {
-      libraryAPI.setRenamingPlaylist(playlistId);
+      uiAPI.setRenamingPlaylist(playlistId);
     }
 
     async function duplicatePlaylist(playlistId: string) {

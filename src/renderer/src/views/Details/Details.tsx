@@ -23,6 +23,7 @@ import styles from './Details.module.css';
 import Cover from '../../components/Cover/Cover';
 import TrackRatingComponent from '../../components/TrackRatingComponent/TrackRatingComponent';
 import { useLibraryAPI } from '../../stores/useLibraryStore';
+import { useTaggerAPI } from '../../stores/useTaggerStore';
 import { useDetailsNavigationAPI, useDetailsNavigationStore } from '../../stores/useDetailsNavigationStore';
 import { GetFilenameWithoutExtension } from '../../lib/utils-library';
 import { parseDuration } from '../../lib/utils';
@@ -36,6 +37,7 @@ export default function DetailsView() {
   const revalidator = useRevalidator();
   const { track } = useLoaderData() as DetailsLoaderData;
   const libraryAPI = useLibraryAPI();
+  const taggerAPI = useTaggerAPI();
   const detailsNavAPI = useDetailsNavigationAPI();
   const { getPreviousTrackId, getNextTrackId } = useDetailsNavigationStore();
 
@@ -168,8 +170,8 @@ export default function DetailsView() {
   const findCandidates = useCallback(async () => {
     // Disable auto-apply when finding candidates from Detail View
     // User should always see the selection modal, even for perfect matches
-    await libraryAPI.findCandidates([track], { autoApply: false });
-  }, [track, libraryAPI]);
+    await taggerAPI.findCandidates([track], { autoApply: false });
+  }, [track, taggerAPI]);
 
   const replaceFile = useCallback(async () => {
     try {

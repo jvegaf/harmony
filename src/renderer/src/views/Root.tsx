@@ -15,7 +15,8 @@ import { useMediaSessionEvents } from '../hooks/useMediaSessionEvents';
 import { useIPCNavigationEvents } from '../hooks/useIPCNavigationEvents';
 import { useIPCPlayerEvents } from '../hooks/useIPCPlayerEvents';
 import { useIPCMenuEvents } from '../hooks/useIPCMenuEvents';
-import useLibraryStore, { useLibraryAPI } from '../stores/useLibraryStore';
+import { useLibraryAPI } from '../stores/useLibraryStore';
+import useTaggerStore from '../stores/useTaggerStore';
 import styles from './Root.module.css';
 import { LoaderData } from './router';
 import { Track } from '../../../preload/types/harmony';
@@ -30,7 +31,7 @@ export default function ViewRoot() {
   const libraryAPI = useLibraryAPI();
   const location = useLocation();
   const { trackTagsCandidates, candidatesSearching, candidatesSearchProgress, tagsApplying, tagsApplyProgress, api } =
-    useLibraryStore();
+    useTaggerStore();
 
   // Show auto-sync notifications when syncing with Traktor
   useAutoSyncNotification();
@@ -49,7 +50,7 @@ export default function ViewRoot() {
   // Subscribe to tag candidate search progress events
   useEffect(() => {
     const unsubscribe = library.onTagCandidatesProgress(progress => {
-      useLibraryStore.setState({
+      useTaggerStore.setState({
         candidatesSearchProgress: {
           processed: progress.processed,
           total: progress.total,

@@ -10,7 +10,7 @@
 import { useEffect, useRef } from 'react';
 import { notifications } from '@mantine/notifications';
 import router from '../views/router';
-import useLibraryStore from '../stores/useLibraryStore';
+import useTaggerStore from '../stores/useTaggerStore';
 
 const { library, db } = window.Main;
 
@@ -108,7 +108,7 @@ export function useAutoApplyNotification(): void {
               const updatedTracks = await db.tracks.findByID(event.trackIds);
               // Update each track in the store to trigger AG Grid refresh
               updatedTracks.forEach(track => {
-                useLibraryStore.setState({ updated: track });
+                useTaggerStore.setState({ updated: track });
               });
               // Also revalidate router to refresh loaders
               router.revalidate();

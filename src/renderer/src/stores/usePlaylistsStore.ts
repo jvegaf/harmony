@@ -5,7 +5,7 @@ import channels from '../../../preload/lib/ipc-channels';
 import router from '../views/router';
 import makeID from '../../../preload/lib/id-provider';
 import usePlayerStore from './usePlayerStore';
-import useLibraryStore from './useLibraryStore';
+import useLibraryUIStore from './useLibraryUIStore';
 import { Playlist, Track } from '../../../preload/types/harmony';
 import { perfLogger } from '../lib/performance-logger';
 
@@ -61,7 +61,7 @@ const usePlaylistsStore = create<PlaylistsState>()(
 
             const doc = await db.playlists.insert(playlist);
             router.revalidate();
-            useLibraryStore.getState().api.setRenamingPlaylist(doc.id);
+            useLibraryUIStore.getState().api.setRenamingPlaylist(doc.id);
 
             if (redirect) router.navigate(`/playlists/${doc.id}`);
 
@@ -154,7 +154,7 @@ const usePlaylistsStore = create<PlaylistsState>()(
 
             await db.playlists.insert(newPlaylist);
             router.revalidate();
-            useLibraryStore.getState().api.setRenamingPlaylist(newPlaylist.id);
+            useLibraryUIStore.getState().api.setRenamingPlaylist(newPlaylist.id);
           } catch (err: any) {
             logger.warn(err);
           }

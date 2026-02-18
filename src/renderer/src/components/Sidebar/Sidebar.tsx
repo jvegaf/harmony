@@ -4,7 +4,8 @@ import { IconSearch, IconPlus, IconMusic, IconVinyl, IconClock } from '@tabler/i
 
 import { Playlist } from '../../../../preload/types/harmony';
 import { usePlaylistsAPI } from '@renderer/stores/usePlaylistsStore';
-import useLibraryStore, { useLibraryAPI } from '@renderer/stores/useLibraryStore';
+import { useLibraryAPI } from '@renderer/stores/useLibraryStore';
+import useLibraryUIStore from '@renderer/stores/useLibraryUIStore';
 
 import styles from './Sidebar.module.css';
 
@@ -25,7 +26,8 @@ const { menu, logger } = window.Main;
 export default function Sidebar({ playlists, onSearch }: SidebarProps) {
   const { playlistID } = useParams();
   const location = useLocation();
-  const { renamingPlaylist, api } = useLibraryStore();
+  const { renamingPlaylist } = useLibraryUIStore();
+  const uiAPI = useLibraryUIStore(state => state.api);
   const libraryAPI = useLibraryAPI();
   const playlistsAPI = usePlaylistsAPI();
   const navigate = useNavigate();
@@ -74,12 +76,12 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
         case 'Enter': {
           if (renamingPlaylist && e.currentTarget) {
             await rename(renamingPlaylist, e.currentTarget.value);
-            api.setRenamingPlaylist(null);
+            uiAPI.setRenamingPlaylist(null);
           }
           break;
         }
         case 'Escape': {
-          api.setRenamingPlaylist(null);
+          uiAPI.setRenamingPlaylist(null);
           break;
         }
         default: {
@@ -87,7 +89,7 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
         }
       }
     },
-    [renamingPlaylist, rename, api],
+    [renamingPlaylist, rename, uiAPI],
   );
 
   const blur = useCallback(
@@ -96,9 +98,9 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
         await rename(renamingPlaylist, e.currentTarget.value);
       }
 
-      api.setRenamingPlaylist(null);
+      uiAPI.setRenamingPlaylist(null);
     },
-    [rename, renamingPlaylist, api],
+    [rename, renamingPlaylist, uiAPI],
   );
 
   const focus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {

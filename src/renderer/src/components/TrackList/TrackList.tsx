@@ -24,7 +24,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useMantineColorScheme } from '@mantine/core';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
-import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
+import { useLibraryAPI } from '../../stores/useLibraryStore';
+import useLibraryUIStore from '../../stores/useLibraryUIStore';
+import useTaggerStore from '../../stores/useTaggerStore';
 import { useDetailsNavigationAPI } from '../../stores/useDetailsNavigationStore';
 import { ParseDuration } from '../../../../preload/utils';
 import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
@@ -97,7 +99,8 @@ const TrackList = (props: Props) => {
   const libraryAPI = useLibraryAPI();
   const playlistsAPI = usePlaylistsAPI();
   const detailsNavAPI = useDetailsNavigationAPI();
-  const { search, updated, deleting, tracklistSort } = useLibraryStore();
+  const { search, deleting, tracklistSort } = useLibraryUIStore();
+  const { updated } = useTaggerStore();
   const { colorScheme } = useMantineColorScheme();
   const gridRef = useRef<AgGridReact>(null);
   const [lastUpdated, setLastUpdated] = useState<Track | null>(null);
@@ -348,7 +351,7 @@ const TrackList = (props: Props) => {
         const sortMode = sortedColumns[0].sort!;
 
         logger.info(`[TracksTable] Sort changed: ${colId}, mode: ${sortMode}`);
-        libraryAPI.setTracklistSort(colId, sortMode);
+        useLibraryUIStore.getState().api.setTracklistSort(colId, sortMode);
       }
 
       // Update drag enabled state based on new sort
@@ -356,7 +359,7 @@ const TrackList = (props: Props) => {
       setIsDragEnabled(dragEnabled);
       logger.info(`[TracksTable] Drag enabled: ${dragEnabled}`);
     },
-    [libraryAPI, checkDragEnabled],
+    [checkDragEnabled],
   );
 
   // Drag & Drop handlers for playlist track reordering

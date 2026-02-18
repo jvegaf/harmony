@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import * as Setting from '../../components/Setting/Setting';
 import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
+import useLibraryUIStore from '../../stores/useLibraryUIStore';
 import { Button, Stack, Tooltip, Switch } from '@mantine/core';
 import styles from './Settings.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +15,8 @@ const { logger, dialog, config } = window.Main;
 export default function SettingsLibrary() {
   const libraryAPI = useLibraryAPI();
   const navigate = useNavigate();
-  const { refreshing, checking, libraryChanges, applyingChanges, applyChangesProgress } = useLibraryStore();
+  const { libraryChanges } = useLibraryStore();
+  const { refreshing, checking, applyingChanges, applyChangesProgress } = useLibraryUIStore();
   const [importing, setImporting] = useState(false);
   const [libraryPath, setLibraryPath] = useState<string>('');
   const [autoFixMetadata, setAutoFixMetadata] = useState<boolean>(false);

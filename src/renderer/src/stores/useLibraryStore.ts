@@ -1,58 +1,20 @@
 import type { MessageBoxReturnValue } from 'electron';
 import { TrackEditableFields, Track, TrackId, TrackSrc, LibraryChanges } from '../../../preload/types/harmony';
-import { TrackSelection } from '../../../preload/types/tagger';
 import { stripAccents } from '../../../preload/lib/utils-id3';
 import { chunk } from '../../../preload/lib/utils';
 
 import { createStore } from './store-helpers';
 import usePlayerStore from './usePlayerStore';
+import useTaggerStore from './useTaggerStore';
+import useLibraryUIStore from './useLibraryUIStore';
 import router from '../views/router';
-import { TrackCandidatesResult } from '@preload/types/tagger';
 import { GetFilenameWithoutExtension } from '@renderer/lib/utils-library';
 
 const { db, config, covers, logger, library, dialog } = window.Main;
 
 type LibraryState = {
   librarySourceRoot: string;
-  search: string;
-  searched: Track | null;
-  refreshing: boolean;
-  fixing: boolean;
-  tagsSelecting: boolean;
-  deleting: boolean;
-  refresh: {
-    processed: number;
-    total: number;
-  };
-  updated: Track | null;
-  fix: {
-    processed: number;
-    total: number;
-  };
-  trackTagsCandidates: TrackCandidatesResult[] | null;
-  candidatesSearching: boolean;
-  candidatesSearchProgress: {
-    processed: number;
-    total: number;
-    currentTrackTitle: string; // Currently processing track title
-  };
-  tagsApplying: boolean;
-  tagsApplyProgress: {
-    processed: number;
-    total: number;
-  };
-  tracklistSort: {
-    colId: string;
-    mode: string;
-  };
-  renamingPlaylist: string | null;
-  checking: boolean; // True while checking library changes
-  libraryChanges: LibraryChanges | null; // Result of library changes scan
-  applyingChanges: boolean; // True while applying changes
-  applyChangesProgress: {
-    processed: number;
-    total: number;
-  };
+  libraryChanges: LibraryChanges | null;
   api: {
     openHandler: (opts: Electron.OpenDialogOptions) => Promise<void>;
     search: (value: string) => void;
@@ -63,22 +25,15 @@ type LibraryState = {
     refresh: () => Promise<void>;
     updateTrackMetadata: (trackID: string, newFields: TrackEditableFields) => Promise<void>;
     getCover: (track: Track) => Promise<string | null>;
-    findCandidates: (tracks: Track[], options?: { autoApply?: boolean }) => Promise<void>;
-    setTagCandidates: (candidates: TrackCandidatesResult[] | null) => void;
-    applyTrackTagsSelections: (selections: TrackSelection[]) => Promise<void>;
-    fixTrack: (trackID: string) => Promise<void>;
-    toFix: (total: number) => void;
     updateTrackRating: (trackSrc: TrackSrc, rating: number) => Promise<void>;
     deleteTracks: (tracks: Track[]) => Promise<void>;
-    setTracklistSort: (colId: string, mode: string) => Promise<void>;
-    filenameToTags: (tracks: Track[]) => Promise<void>;
-    setRenamingPlaylist: (playlistID: string | null) => void;
     checkLibraryChanges: () => Promise<void>;
     applyLibraryChanges: (changes: LibraryChanges) => Promise<void>;
     dismissLibraryChanges: () => void;
   };
 };
 
+// Helper: Extract title/artist from filename
 const filenameToTag = (track: Track) => {
   const filename = GetFilenameWithoutExtension(track.path);
   const parts = filename.split(' - ');
@@ -86,47 +41,9 @@ const filenameToTag = (track: Track) => {
   return { ...track, title: parts[1], artist: parts[0] };
 };
 
-// See docs/aidev-notes/tracklist-sorting.md for details on sort persistence
-const initialTracklistSort = config.__initialConfig.tracklistSort || { colId: 'path', mode: 'desc' };
-
 const useLibraryStore = createStore<LibraryState>((set, get) => ({
   librarySourceRoot: '',
-  search: '',
-  searched: null,
-  refreshing: false,
-  fixing: false,
-  tagsSelecting: false,
-  deleting: false,
-  refresh: {
-    processed: 0,
-    total: 0,
-  },
-  updated: null,
-  fix: {
-    processed: 0,
-    total: 0,
-  },
-  trackTagsCandidates: null,
-  candidatesSearching: false,
-  candidatesSearchProgress: {
-    processed: 0,
-    total: 0,
-    currentTrackTitle: '',
-  },
-  tagsApplying: false,
-  tagsApplyProgress: {
-    processed: 0,
-    total: 0,
-  },
-  tracklistSort: initialTracklistSort,
-  renamingPlaylist: null,
-  checking: false,
   libraryChanges: null,
-  applyingChanges: false,
-  applyChangesProgress: {
-    processed: 0,
-    total: 0,
-  },
   api: {
     openHandler: async (opts: Electron.OpenDialogOptions) => {
       const paths = await dialog.open(opts);
@@ -134,35 +51,22 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         get().api.setLibrarySourceRoot(paths);
       }
     },
-    /**
-     * Filter tracks by search
-     */
     search: (search): void => {
-      set({ search: stripAccents(search) });
+      useLibraryUIStore.getState().api.setSearch(stripAccents(search));
     },
-    setSearched: (trackSearched: Track | null) => set({ searched: trackSearched }),
-    /**
-     * Add tracks to Library
-     *
-     * DEBT-001: Refactored to use unified importLibraryFull handler in main process.
-     * This replaces the previous multi-IPC approach (scan → import → filter → insert)
-     * with a single IPC call. Progress is tracked via IPC events.
-     */
+    setSearched: (trackSearched: Track | null) => {
+      useLibraryUIStore.getState().api.setSearched(trackSearched);
+    },
     setLibrarySourceRoot: async (pathsToScan): Promise<void> => {
-      set({ refreshing: true });
+      const uiStore = useLibraryUIStore.getState();
+      uiStore.api.setRefreshing(true);
       logger.info(`Adding tracks to library: ${pathsToScan.length} paths`);
 
-      // Set up progress listener
       const unsubscribe = library.onImportProgress(progress => {
         logger.debug('[Import Progress]', progress);
 
         if (progress.step === 'importing' || progress.step === 'saving') {
-          set({
-            refresh: {
-              processed: progress.processed,
-              total: progress.total,
-            },
-          });
+          uiStore.api.setRefreshProgress(progress.processed, progress.total);
         }
 
         if (progress.step === 'complete') {
@@ -175,7 +79,6 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       });
 
       try {
-        // Single IPC call - orchestration happens in main process
         const result = await library.importLibraryFull(pathsToScan);
 
         if (!result.success) {
@@ -185,7 +88,6 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
 
         logger.info(`Import complete: ${result.tracksAdded} tracks added`);
 
-        // Save the library path to config for future change detection
         if (pathsToScan.length > 0) {
           await config.set('libraryPath', pathsToScan[0]);
           logger.info(`Saved library path to config: ${pathsToScan[0]}`);
@@ -196,22 +98,13 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         logger.error('Library import error:', err);
         return;
       } finally {
-        // Clean up progress listener
         unsubscribe();
-
-        set({
-          refreshing: false,
-          refresh: { processed: 0, total: 0 },
-          librarySourceRoot: '',
-        });
+        uiStore.api.setRefreshing(false);
+        uiStore.api.setRefreshProgress(0, 0);
+        set({ librarySourceRoot: '' });
       }
     },
-
-    /**
-     * remove tracks from library
-     */
     remove: async trackIDs => {
-      // not calling await on it as it calls the synchonous message box
       const options: Electron.MessageBoxOptions = {
         buttons: ['Cancel', 'Remove'],
         title: 'Remove tracks from library?',
@@ -222,21 +115,9 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       const result: MessageBoxReturnValue = await dialog.msgbox(options);
 
       if (result.response === 1) {
-        // button possition, here 'remove'
-        // Remove tracks from the Track collection
         await db.tracks.remove(trackIDs);
-
-        // Note: AG Grid manages its own selection state internally. When tracks are deleted,
-        // the next re-render will automatically exclude deleted track IDs from the selection.
-        // See docs/technical-debt-backlog.md DEBT-004 for analysis
-        // That would be great to remove those ids from all the playlists, but it's not easy
-        // and should not cause strange behaviors, all PR for that would be really appreciated
       }
     },
-
-    /**
-     * Reset the library
-     */
     reset: async (): Promise<void> => {
       usePlayerStore.getState().api.stop();
       try {
@@ -250,20 +131,19 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         const result = await dialog.msgbox(options);
 
         if (result.response === 1) {
-          set({ refreshing: true });
+          useLibraryUIStore.getState().api.setRefreshing(true);
           await db.reset();
-          set({ refreshing: false, librarySourceRoot: '' });
+          useLibraryUIStore.getState().api.setRefreshing(false);
+          set({ librarySourceRoot: '' });
           router.revalidate();
         }
       } catch (err) {
         logger.error(err as any);
       }
     },
-
     refresh: async (): Promise<void> => {
       router.revalidate();
     },
-
     updateTrackMetadata: async (trackID: string, newFields: TrackEditableFields): Promise<void> => {
       let track = await db.tracks.findOnlyByID(trackID);
 
@@ -278,159 +158,10 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
 
       await library.updateMetadata(track);
       await db.tracks.update(track);
-      set({ updated: track });
+      useTaggerStore.getState().api.setUpdated(track);
     },
-
     getCover: async (track: Track): Promise<string | null> => {
       return await covers.getCoverAsBase64(track);
-    },
-    findCandidates: async (tracks: Track[], options?: { autoApply?: boolean }): Promise<void> => {
-      try {
-        set({
-          candidatesSearching: true,
-          candidatesSearchProgress: { processed: 0, total: tracks.length, currentTrackTitle: '' },
-        });
-
-        logger.info(`Starting candidate search for ${tracks.length} tracks`);
-
-        // Call API (internally processes all tracks)
-        const trkCandidates = await library.findTagCandidates(tracks, options);
-
-        // If no manual candidates (all were perfect matches >= 0.9),
-        // don't show selection modal. Renderer will listen to TAG_AUTO_APPLY_COMPLETE
-        // to show progress and update UI when perfect matches finish.
-        if (trkCandidates.length === 0) {
-          logger.info('All tracks were perfect matches (>= 90%) - auto-applied in background');
-          set({
-            candidatesSearching: false,
-            candidatesSearchProgress: { processed: tracks.length, total: tracks.length, currentTrackTitle: '' },
-            trackTagsCandidates: null,
-            tagsSelecting: false, // Don't show modal
-          });
-          return;
-        }
-
-        // Marcar como completado con candidatos para selección manual
-        set({
-          candidatesSearching: false,
-          candidatesSearchProgress: { processed: tracks.length, total: tracks.length, currentTrackTitle: '' },
-          trackTagsCandidates: trkCandidates,
-          tagsSelecting: true,
-        });
-
-        logger.info(`Candidate search completed: ${trkCandidates.length} results`);
-      } catch (err) {
-        logger.error('Error finding candidates:', err as any);
-        set({
-          candidatesSearching: false,
-          candidatesSearchProgress: { processed: 0, total: 0, currentTrackTitle: '' },
-        });
-      }
-    },
-    setTagCandidates: (candidates: TrackCandidatesResult[] | null) => {
-      set({ trackTagsCandidates: candidates, tagsSelecting: candidates !== null });
-    },
-    applyTrackTagsSelections: async (selections: TrackSelection[]) => {
-      try {
-        logger.info(`Applying Tags selections for ${selections.length} tracks`);
-
-        // Filter valid selections (with selected candidate)
-        const validSelections = selections.filter(s => s.selected_candidate_id !== null);
-
-        if (validSelections.length === 0) {
-          logger.info('No valid selections to apply');
-          set({ tagsSelecting: false, trackTagsCandidates: null });
-          return;
-        }
-
-        logger.info(`Processing ${validSelections.length} valid selections`);
-
-        set({
-          tagsSelecting: false,
-          trackTagsCandidates: null,
-          tagsApplying: true,
-          tagsApplyProgress: { processed: 0, total: validSelections.length },
-        });
-
-        // Get all local tracks from database
-        const trackIds = validSelections.map(s => s.local_track_id);
-        const tracks = await db.tracks.findByID(trackIds);
-
-        // PERF-03: Single batch IPC call instead of N individual calls
-        // Apply tags to all tracks at once using the main process
-        const result = await library.applyTagSelections(validSelections, tracks);
-
-        // Update progress after tag application
-        set({
-          tagsApplyProgress: { processed: validSelections.length, total: validSelections.length },
-        });
-
-        // PERF-03: Batch database update instead of N individual updates
-        if (result.updated.length > 0) {
-          await db.tracks.updateMultiple(result.updated);
-
-          // Update UI state with last updated track
-          set({ updated: result.updated[result.updated.length - 1] });
-
-          logger.info(`Batch update complete: ${result.updated.length} tracks persisted to DB`);
-        }
-
-        // Log errors if any
-        if (result.errors.length > 0) {
-          logger.error(`Tag application errors: ${result.errors.length}`);
-          result.errors.forEach(err => {
-            logger.error(`  - Track ${err.trackId}: ${err.error}`);
-          });
-        }
-
-        // Finalize
-        set({
-          tagsApplying: false,
-          tagsApplyProgress: { processed: 0, total: 0 },
-        });
-
-        // Revalidate router to refresh data
-        router.revalidate();
-
-        // Only navigate to recent_added if NOT in Detail View
-        // If in Detail View, stay there to show updated track data
-        const currentPath = window.location.hash.replace('#', '');
-        if (!currentPath.startsWith('/details/')) {
-          window.location.hash = '#/recent_added';
-        }
-
-        logger.info(
-          `Tag application complete: ${result.updated.length} updated, ${result.errors.length} errors, ${selections.length - validSelections.length} skipped`,
-        );
-      } catch (err) {
-        logger.error('Error in applyTrackTagsSelections:', err as any);
-        set({
-          tagsSelecting: false,
-          trackTagsCandidates: null,
-          tagsApplying: false,
-          tagsApplyProgress: { processed: 0, total: 0 },
-        });
-      }
-    },
-    fixTrack: async (trackID: string): Promise<void> => {
-      let track = await db.tracks.findOnlyByID(trackID);
-      const fixedTrack = await library.fixTags(track);
-      track = {
-        ...track,
-        ...fixedTrack,
-      };
-      await db.tracks.update(track);
-      const fixed = get().fix.processed + 1;
-      const totalToFix = get().fix.total;
-
-      set({
-        fix: { processed: get().fix.processed + 1, total: get().fix.total },
-        updated: track,
-        fixing: fixed < totalToFix,
-      });
-    },
-    toFix: (total: number): void => {
-      set({ fixing: true, fix: { processed: 0, total: total } });
     },
     updateTrackRating: async (trackSrc: TrackSrc, newRating: number): Promise<void> => {
       const track = await db.tracks.findOnlyByPath(trackSrc);
@@ -438,7 +169,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       const updatedTrack = { ...track, rating: rate };
       window.Main.library.updateRating({ trackSrc, rating: newRating });
       window.Main.db.tracks.update(updatedTrack);
-      set({ updated: updatedTrack });
+      useTaggerStore.getState().api.setUpdated(updatedTrack);
     },
     deleteTracks: async (tracks: Track[]) => {
       usePlayerStore.getState().api.stop();
@@ -453,64 +184,18 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         const result = await dialog.msgbox(options);
 
         if (result.response === 1) {
-          set({ deleting: true });
+          useLibraryUIStore.getState().api.setDeleting(true);
           await db.tracks.remove(tracks.map(track => track.id));
           await library.deleteTracks(tracks);
-          set({ deleting: false });
+          useLibraryUIStore.getState().api.setDeleting(false);
           router.revalidate();
         }
       } catch (err) {
         logger.error(err as any);
       }
     },
-    setTracklistSort: async (colId: string, mode: string): Promise<void> => {
-      const tracklistSort = { colId, mode };
-      set({ tracklistSort });
-      await config.set('tracklistSort', tracklistSort);
-      logger.debug('Tracklist sort saved:', tracklistSort);
-    },
-    filenameToTags: async (tracks: Track[]): Promise<void> => {
-      try {
-        const options: Electron.MessageBoxOptions = {
-          buttons: ['Cancel', 'Accept'],
-          title: 'File name to tags?',
-          message: 'Are you sure you want to update tags from file names? ',
-          type: 'warning',
-        };
-
-        const result = await dialog.msgbox(options);
-
-        if (result.response === 1) {
-          // PERF-03: Process all tracks at once instead of sequential loop
-          const updatedTracks = tracks.map(track => filenameToTag(track));
-
-          // PERF-03: Batch metadata update (parallel file I/O)
-          await library.updateMetadataBatch(updatedTracks);
-
-          // PERF-03: Batch database update (single IPC call)
-          await db.tracks.updateMultiple(updatedTracks);
-
-          // Update UI state with last updated track
-          set({ updated: updatedTracks[updatedTracks.length - 1] });
-
-          // Revalidate router to refresh the track list
-          router.revalidate();
-
-          logger.info(`Updated ${tracks.length} tracks from filenames`);
-        }
-      } catch (err) {
-        logger.error(err as any);
-      }
-    },
-    setRenamingPlaylist: (playlistID: string | null): void => {
-      set({ renamingPlaylist: playlistID });
-    },
-    /**
-     * Check for library changes comparing filesystem with database
-     */
     checkLibraryChanges: async (): Promise<void> => {
       try {
-        // Get library path from config
         const libraryPath = await config.get('libraryPath');
 
         if (!libraryPath) {
@@ -525,10 +210,9 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
           return;
         }
 
-        set({ checking: true });
+        useLibraryUIStore.getState().api.setChecking(true);
         logger.info(`Checking library changes for path: ${libraryPath}`);
 
-        // Call IPC to check changes
         const changes = await library.checkChanges(libraryPath);
         logger.info(`Changes detected: ${changes.added.length} new, ${changes.removed.length} removed`);
 
@@ -536,32 +220,22 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       } catch (err) {
         logger.error('Error checking library changes:', err as any);
       } finally {
-        set({ checking: false });
+        useLibraryUIStore.getState().api.setChecking(false);
       }
     },
-    /**
-     * Apply library changes (import new tracks and remove deleted ones)
-     * 
-     * If autoFixMetadata is enabled, this will:
-     * 1. Import new tracks
-     * 2. Check if they have complete metadata
-     * 3. Extract title/artist from filename if missing
-     * 4. Search for tag candidates for tracks with incomplete metadata
-     * 5. Navigate to /recent_added to show results
-     */
     applyLibraryChanges: async (changes: LibraryChanges): Promise<void> => {
       try {
-        set({
-          applyingChanges: true,
-          libraryChanges: null,
-          applyChangesProgress: { processed: 0, total: changes.added.length + changes.removed.length },
-        });
+        const uiStore = useLibraryUIStore.getState();
+        const taggerStore = useTaggerStore.getState();
+
+        uiStore.api.setApplyingChanges(true);
+        uiStore.api.setApplyChangesProgress(0, changes.added.length + changes.removed.length);
+        set({ libraryChanges: null });
 
         logger.info(`Applying library changes: ${changes.added.length} to add, ${changes.removed.length} to remove`);
 
         const importedTracks: Track[] = [];
 
-        // 1. Import new tracks (reuse existing pipeline)
         if (changes.added.length > 0) {
           logger.info(`Importing ${changes.added.length} new tracks`);
           const tracks: Track[] = await library.importTracks(changes.added);
@@ -574,19 +248,11 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
             chunkedTracks.map(async chunk => {
               const insertedChunk = await db.tracks.insertMultiple(chunk);
               processed += chunk.length;
-
-              set({
-                applyChangesProgress: {
-                  processed,
-                  total: changes.added.length + changes.removed.length,
-                },
-              });
-
+              uiStore.api.setApplyChangesProgress(processed, changes.added.length + changes.removed.length);
               return insertedChunk;
             }),
           );
 
-          // Collect all successfully imported tracks
           results.forEach(result => {
             if (result.status === 'fulfilled') {
               importedTracks.push(...result.value);
@@ -596,41 +262,32 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
           logger.info(`Successfully imported ${importedTracks.length} tracks`);
         }
 
-        // 2. Remove tracks whose files no longer exist
         if (changes.removed.length > 0) {
           logger.info(`Removing ${changes.removed.length} tracks`);
           await db.tracks.remove(changes.removed.map(t => t.id));
-
-          set({
-            applyChangesProgress: {
-              processed: changes.added.length + changes.removed.length,
-              total: changes.added.length + changes.removed.length,
-            },
-          });
+          uiStore.api.setApplyChangesProgress(
+            changes.added.length + changes.removed.length,
+            changes.added.length + changes.removed.length,
+          );
         }
 
-        // 3. Auto-fix metadata if enabled
         const autoFixEnabled = await config.get('autoFixMetadata');
         if (autoFixEnabled && importedTracks.length > 0) {
           logger.info('Auto-fix metadata is enabled, checking imported tracks...');
 
-          // Helper: Check if track has complete metadata
           const hasCompleteMetadata = (track: Track): boolean => {
             return !!(track.title && track.artist && track.album && track.genre && track.bpm && track.initialKey);
           };
 
-          // Helper: Check if track has at least title and artist
           const hasTitleAndArtist = (track: Track): boolean => {
             return !!(track.title && track.artist);
           };
 
-          // Filter tracks that need metadata fixing
           let tracksNeedingFix = importedTracks.filter(t => !hasCompleteMetadata(t));
 
           if (tracksNeedingFix.length > 0) {
             logger.info(`Found ${tracksNeedingFix.length} tracks with incomplete metadata`);
 
-            // Extract title/artist from filename if missing
             tracksNeedingFix = tracksNeedingFix.map(track => {
               if (!hasTitleAndArtist(track)) {
                 logger.info(`Extracting title/artist from filename for: ${track.path}`);
@@ -639,92 +296,48 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
               return track;
             });
 
-            // Update tracks in DB with extracted title/artist
             await Promise.all(tracksNeedingFix.map(track => db.tracks.update(track)));
 
-            // Search for tag candidates
             logger.info(`Searching tag candidates for ${tracksNeedingFix.length} tracks...`);
-
-            // Set state to show we're searching for candidates
-            set({
-              candidatesSearching: true,
-              candidatesSearchProgress: { processed: 0, total: tracksNeedingFix.length, currentTrackTitle: '' },
-            });
 
             try {
               const candidates = await library.findTagCandidates(tracksNeedingFix);
 
-              // If no manual candidates (all were perfect matches >= 0.9),
-              // don't show selection modal and navigate directly to recent_added
               if (candidates.length === 0) {
                 logger.info(
                   'Auto-fix: All tracks were perfect matches (>= 90%) - auto-applied in background. Navigating to recent_added.',
                 );
-                set({
-                  candidatesSearching: false,
-                  candidatesSearchProgress: {
-                    processed: tracksNeedingFix.length,
-                    total: tracksNeedingFix.length,
-                    currentTrackTitle: '',
-                  },
-                  trackTagsCandidates: null,
-                  tagsSelecting: false,
-                  applyingChanges: false,
-                  applyChangesProgress: { processed: 0, total: 0 },
-                });
-
-                // Navigate to recently added (perfect matches will update in background)
+                uiStore.api.setApplyingChanges(false);
+                uiStore.api.setApplyChangesProgress(0, 0);
                 router.revalidate();
                 window.location.hash = '#/recent_added';
                 return;
               }
 
-              // Show tag candidates modal for user selection
-              set({
-                candidatesSearching: false,
-                candidatesSearchProgress: {
-                  processed: tracksNeedingFix.length,
-                  total: tracksNeedingFix.length,
-                  currentTrackTitle: '',
-                },
-                trackTagsCandidates: candidates,
-                tagsSelecting: true,
-                applyingChanges: false,
-                applyChangesProgress: { processed: 0, total: 0 },
-              });
-
+              taggerStore.api.setTagCandidates(candidates);
+              uiStore.api.setApplyingChanges(false);
+              uiStore.api.setApplyChangesProgress(0, 0);
               logger.info('Tag candidates ready for user selection');
-              return; // Exit early - user will select candidates and then we navigate
+              return;
             } catch (err) {
               logger.error('Error searching tag candidates:', err as any);
-              set({
-                candidatesSearching: false,
-                candidatesSearchProgress: { processed: 0, total: 0, currentTrackTitle: '' },
-              });
             }
           } else {
             logger.info('All imported tracks have complete metadata');
           }
         }
 
-        // 4. Refresh UI and navigate to recently added
         router.revalidate();
-        // Use window.location.hash for navigation with HashRouter
         window.location.hash = '#/recent_added';
 
         logger.info('Library changes applied successfully');
       } catch (err) {
         logger.error('Error applying library changes:', err as any);
       } finally {
-        set({
-          applyingChanges: false,
-          applyChangesProgress: { processed: 0, total: 0 },
-        });
+        useLibraryUIStore.getState().api.setApplyingChanges(false);
+        useLibraryUIStore.getState().api.setApplyChangesProgress(0, 0);
       }
     },
-    /**
-     * Dismiss library changes modal without applying
-     */
     dismissLibraryChanges: (): void => {
       set({ libraryChanges: null });
     },
