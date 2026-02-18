@@ -2,13 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as Setting from '../../components/Setting/Setting';
-import { ActionIcon, Group, Stack, Text, TextInput, Tooltip } from '@mantine/core';
+import { ActionIcon, Button, Group, Stack, Text, TextInput, Tooltip } from '@mantine/core';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { SearchEngineConfig } from '@preload/types/harmony';
 
 import styles from './Settings.module.css';
 
-const { config } = window.Main;
+const { config, shell } = window.Main;
 
 /**
  * Settings panel for managing custom search engines.
@@ -114,8 +114,20 @@ export default function SettingsGeneral() {
     [searchEngines, saveEngines],
   );
 
+  // AIDEV-NOTE: Handler to open config folder using shell.openPath
+  const handleOpenConfigFolder = useCallback(() => {
+    shell.openUserDataDirectory();
+  }, []);
+
   return (
     <div className={styles.settingsContainer}>
+      <Setting.Section>
+        <Setting.Description>Configuration Folder</Setting.Description>
+        <Setting.Action>
+          <Button onClick={handleOpenConfigFolder}>Open Config Folder</Button>
+        </Setting.Action>
+      </Setting.Section>
+
       <Setting.Section>
         <Setting.Description>Search Engines</Setting.Description>
         <Setting.Action>
