@@ -50,6 +50,7 @@ const api = {
       getRecent: (days?: number) => ipcRenderer.invoke(channels.TRACKS_RECENT, days),
       insertMultiple: (tracks: Track[]) => ipcRenderer.invoke(channels.TRACKS_ADD, tracks),
       update: (track: Track) => ipcRenderer.invoke(channels.TRACK_UPDATE, track),
+      updateMultiple: (tracks: Track[]) => ipcRenderer.invoke(channels.TRACKS_UPDATE_MULTIPLE, tracks),
       remove: (trackIDs: TrackId[]) => ipcRenderer.invoke(channels.TRACKS_REMOVE, trackIDs),
       findByID: (tracksIDs: string[]) => ipcRenderer.invoke(channels.TRACKS_BY_ID, tracksIDs),
       findByPath: (paths: string[]) => ipcRenderer.invoke(channels.TRACKS_BY_PATH, paths),
@@ -121,6 +122,7 @@ const api = {
     checkChanges: async (libraryPath: string) => ipcRenderer.invoke(channels.LIBRARY_CHECK_CHANGES, libraryPath),
     updateRating: (payload: UpdateRatingPayload) => ipcRenderer.send(channels.TRACK_UPDATE_RATING, payload),
     updateMetadata: async (track: Track) => ipcRenderer.send(channels.TRACK_UPDATE_METADATA, track),
+    updateMetadataBatch: async (tracks: Track[]) => ipcRenderer.invoke(channels.TRACKS_UPDATE_METADATA_BATCH, tracks),
     deleteTracks: async (tracks: Track[]) => ipcRenderer.send(channels.TRACKS_DELETE, tracks),
     replaceFile: async (trackId: string, trackPath: string, newFilePath: string) =>
       ipcRenderer.invoke(channels.TRACK_REPLACE_FILE, trackId, trackPath, newFilePath),

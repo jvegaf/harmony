@@ -69,6 +69,15 @@ class DatabaseModule extends ModuleWindow {
       emitLibraryChanged('tracks-updated', 1);
     });
 
+    ipcMain.handle(channels.TRACKS_UPDATE_MULTIPLE, async (_, tracks: Track[]): Promise<void> => {
+      log.info(`Batch updating ${tracks.length} tracks in database`);
+      for (const track of tracks) {
+        await this.db.updateTrack(track);
+      }
+      emitLibraryChanged('tracks-updated', tracks.length);
+      log.info(`Batch update complete: ${tracks.length} tracks`);
+    });
+
     ipcMain.handle(channels.TRACKS_REMOVE, async (_, trackIDs: TrackId[]): Promise<void> => {
       await this.db.removeTracks(trackIDs);
 

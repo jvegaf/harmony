@@ -78,6 +78,14 @@ class IPCLibraryModule extends ModuleWindow {
       UpdateTrackRating(payload),
     );
     ipcMain.on(channels.TRACK_UPDATE_METADATA, (_: IpcMainEvent, track: Track) => PersistTrack(track));
+    ipcMain.handle(channels.TRACKS_UPDATE_METADATA_BATCH, async (_: IpcMainInvokeEvent, tracks: Track[]) => {
+      log.info(`Batch updating metadata for ${tracks.length} tracks`);
+      const results = await Promise.allSettled(tracks.map(track => PersistTrack(track)));
+      const succeeded = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+      log.info(`Batch metadata update complete: ${succeeded} succeeded, ${failed} failed`);
+      return { succeeded, failed };
+    });
     ipcMain.on(channels.TRACKS_DELETE, (_: IpcMainEvent, trackFiles: Track[]) => {
       trackFiles.forEach(t => RemoveFile(t.path));
 

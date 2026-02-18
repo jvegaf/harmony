@@ -334,7 +334,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       try {
         logger.info(`Applying Tags selections for ${selections.length} tracks`);
 
-        // Filtrar selecciones válidas (con candidato seleccionado)
+        // Filter valid selections (with selected candidate)
         const validSelections = selections.filter(s => s.selected_candidate_id !== null);
 
         if (validSelections.length === 0) {
@@ -352,61 +352,38 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
           tagsApplyProgress: { processed: 0, total: validSelections.length },
         });
 
-        // Obtener todos los tracks locales desde la base de datos
+        // Get all local tracks from database
         const trackIds = validSelections.map(s => s.local_track_id);
         const tracks = await db.tracks.findByID(trackIds);
 
-        let totalUpdated = 0;
-        let totalErrors = 0;
+        // PERF-03: Single batch IPC call instead of N individual calls
+        // Apply tags to all tracks at once using the main process
+        const result = await library.applyTagSelections(validSelections, tracks);
 
-        for (let i = 0; i < validSelections.length; i++) {
-          const selection = validSelections[i];
-          const track = tracks.find((t: { id: string }) => t.id === selection.local_track_id);
+        // Update progress after tag application
+        set({
+          tagsApplyProgress: { processed: validSelections.length, total: validSelections.length },
+        });
 
-          if (!track) {
-            logger.error(`Track ${selection.local_track_id} not found`);
-            totalErrors++;
-            set({
-              tagsApplyProgress: { processed: i + 1, total: validSelections.length },
-            });
-            continue;
-          }
+        // PERF-03: Batch database update instead of N individual updates
+        if (result.updated.length > 0) {
+          await db.tracks.updateMultiple(result.updated);
 
-          try {
-            // Aplicar tags a un solo track
-            const result = await library.applyTagSelections([selection], [track]);
+          // Update UI state with last updated track
+          set({ updated: result.updated[result.updated.length - 1] });
 
-            // Si hubo éxito, actualizar en la BD y UI
-            if (result.updated.length > 0) {
-              const updatedTrack = result.updated[0];
-              await db.tracks.update(updatedTrack);
-
-              set({ updated: updatedTrack });
-
-              totalUpdated++;
-              logger.info(`[${i + 1}/${validSelections.length}] Tags applied to: ${updatedTrack.title}`);
-            }
-
-            // Log de errores si los hay
-            if (result.errors.length > 0) {
-              totalErrors++;
-              logger.error(`[${i + 1}/${validSelections.length}] Error: ${result.errors[0].error}`);
-            }
-          } catch (err) {
-            totalErrors++;
-            logger.error(`[${i + 1}/${validSelections.length}] Exception:`, err);
-          }
-
-          // Actualizar progreso
-          set({
-            tagsApplyProgress: { processed: i + 1, total: validSelections.length },
-          });
-
-          // Pequeña pausa para permitir que la UI se actualice
-          await new Promise(resolve => setTimeout(resolve, 10));
+          logger.info(`Batch update complete: ${result.updated.length} tracks persisted to DB`);
         }
 
-        // Finalizar
+        // Log errors if any
+        if (result.errors.length > 0) {
+          logger.error(`Tag application errors: ${result.errors.length}`);
+          result.errors.forEach(err => {
+            logger.error(`  - Track ${err.trackId}: ${err.error}`);
+          });
+        }
+
+        // Finalize
         set({
           tagsApplying: false,
           tagsApplyProgress: { processed: 0, total: 0 },
@@ -423,7 +400,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         }
 
         logger.info(
-          `Tag application complete: ${totalUpdated} updated, ${totalErrors} errors, ${selections.length - validSelections.length} skipped`,
+          `Tag application complete: ${result.updated.length} updated, ${result.errors.length} errors, ${selections.length - validSelections.length} skipped`,
         );
       } catch (err) {
         logger.error('Error in applyTrackTagsSelections:', err as any);
@@ -504,16 +481,17 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
         const result = await dialog.msgbox(options);
 
         if (result.response === 1) {
-          for (const track of tracks) {
-            const updatedTrack = filenameToTag(track);
-            await library.updateMetadata(updatedTrack);
+          // PERF-03: Process all tracks at once instead of sequential loop
+          const updatedTracks = tracks.map(track => filenameToTag(track));
 
-            // Update in database
-            await db.tracks.update(updatedTrack);
+          // PERF-03: Batch metadata update (parallel file I/O)
+          await library.updateMetadataBatch(updatedTracks);
 
-            // Update UI state
-            set({ updated: updatedTrack });
-          }
+          // PERF-03: Batch database update (single IPC call)
+          await db.tracks.updateMultiple(updatedTracks);
+
+          // Update UI state with last updated track
+          set({ updated: updatedTracks[updatedTracks.length - 1] });
 
           // Revalidate router to refresh the track list
           router.revalidate();
