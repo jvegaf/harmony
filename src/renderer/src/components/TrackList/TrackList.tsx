@@ -29,7 +29,7 @@ import { useDetailsNavigationAPI } from '../../stores/useDetailsNavigationStore'
 import { ParseDuration } from '../../../../preload/utils';
 import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
 import { GetParentFolderName, ratingComparator } from '../../lib/utils-library';
-import PlaylistsAPI from '../../stores/PlaylistsAPI';
+import { usePlaylistsAPI } from '../../stores/usePlaylistsStore';
 import { perfLogger } from '../../lib/performance-logger';
 import { themeQuartz, iconSetMaterial } from 'ag-grid-community';
 import styles from './TrackList.module.css';
@@ -95,6 +95,7 @@ const TrackList = (props: Props) => {
   const location = useLocation();
   const playerAPI = usePlayerAPI();
   const libraryAPI = useLibraryAPI();
+  const playlistsAPI = usePlaylistsAPI();
   const detailsNavAPI = useDetailsNavigationAPI();
   const { search, updated, deleting, tracklistSort } = useLibraryStore();
   const { colorScheme } = useMantineColorScheme();
@@ -512,7 +513,7 @@ const TrackList = (props: Props) => {
 
       // FIRE AND FORGET: Send event to backend queue (non-blocking, no await)
       // DEBT-005: Now supports multi-track reordering
-      PlaylistsAPI.reorderTracks(currentPlaylist, tracksToMove, targetTrack, position)
+      playlistsAPI.reorderTracks(currentPlaylist, tracksToMove, targetTrack, position)
         .then(() => {
           logger.info('[TracksTable] Backend processed reorder successfully');
         })
@@ -521,7 +522,7 @@ const TrackList = (props: Props) => {
           // Note: UI already updated, we don't revert (backend will retry in queue)
         });
     },
-    [isDragEnabled, currentPlaylist, rowData],
+    [isDragEnabled, currentPlaylist, rowData, playlistsAPI],
   );
 
   const onRowDragLeave = useCallback((event: RowDragLeaveEvent) => {

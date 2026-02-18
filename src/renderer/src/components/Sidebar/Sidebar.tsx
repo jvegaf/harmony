@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { IconSearch, IconPlus, IconMusic, IconVinyl, IconClock } from '@tabler/icons-react';
 
 import { Playlist } from '../../../../preload/types/harmony';
-import PlaylistsAPI from '@renderer/stores/PlaylistsAPI';
+import { usePlaylistsAPI } from '@renderer/stores/usePlaylistsStore';
 import useLibraryStore, { useLibraryAPI } from '@renderer/stores/useLibraryStore';
 
 import styles from './Sidebar.module.css';
@@ -27,6 +27,7 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
   const location = useLocation();
   const { renamingPlaylist, api } = useLibraryStore();
   const libraryAPI = useLibraryAPI();
+  const playlistsAPI = usePlaylistsAPI();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -58,12 +59,12 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
   };
 
   const createPlaylist = useCallback(async () => {
-    await PlaylistsAPI.create('New playlist', [], false);
-  }, []);
+    await playlistsAPI.create('New playlist', [], false);
+  }, [playlistsAPI]);
 
   const rename = useCallback(async (playlistID: string, name: string) => {
-    await PlaylistsAPI.rename(playlistID, name);
-  }, []);
+    await playlistsAPI.rename(playlistID, name);
+  }, [playlistsAPI]);
 
   const keyDown = useCallback(
     async (e: React.KeyboardEvent<HTMLInputElement>) => {

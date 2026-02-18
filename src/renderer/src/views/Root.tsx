@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { Outlet, useLocation, useRouteLoaderData } from 'react-router-dom';
 
 import GlobalKeyBindings from '../components/Events/GlobalKeyBindings';
-import AppActions from '../stores/AppAPI';
 
 import AppHeader from '../components/AppHeader/AppHeader';
 import Sidebar from '../components/Sidebar/Sidebar';
@@ -71,7 +70,7 @@ export default function ViewRoot() {
     location.pathname.startsWith('/playlists');
 
   useEffect(() => {
-    AppActions.init();
+    window.Main.app.ready();
   }, []);
 
   const handleSearch = (query: string) => {

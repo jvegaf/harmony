@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import channels from '../../../preload/lib/ipc-channels';
-import PlaylistsAPI from '../stores/PlaylistsAPI';
+import { usePlaylistsAPI } from '../stores/usePlaylistsStore';
 import { CommandPayload, Track } from '../../../preload/types/harmony';
 import useLibraryStore, { useLibraryAPI } from '../stores/useLibraryStore';
 import { notifications } from '@mantine/notifications';
@@ -13,23 +13,24 @@ const { ipcRenderer } = window.ElectronAPI;
  */
 export function useIPCMenuEvents() {
   const libraryAPI = useLibraryAPI();
+  const playlistsAPI = usePlaylistsAPI();
   // Use refs to store unsubscribe functions for audio analysis listeners
   // This allows cleanup when analysis completes or component unmounts
   const analysisUnsubscribesRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
     async function playlistNew(selected: Track[]) {
-      await PlaylistsAPI.create('New playlist', selected);
+      await playlistsAPI.create('New playlist', selected);
     }
 
     async function addTracksToPlaylist(payload: CommandPayload) {
       const { playlistId, selected } = payload;
-      await PlaylistsAPI.addTracks(playlistId, selected);
+      await playlistsAPI.addTracks(playlistId, selected);
     }
 
     async function removeTracksToPlaylist(payload: CommandPayload) {
       const { playlistId, selected } = payload;
-      await PlaylistsAPI.removeTracks(playlistId, selected);
+      await playlistsAPI.removeTracks(playlistId, selected);
     }
 
     function artistFind(artist: string) {
@@ -125,15 +126,15 @@ export function useIPCMenuEvents() {
     }
 
     async function duplicatePlaylist(playlistId: string) {
-      await PlaylistsAPI.duplicate(playlistId);
+      await playlistsAPI.duplicate(playlistId);
     }
 
     async function removePlaylist(playlistId: string) {
-      await PlaylistsAPI.remove(playlistId);
+      await playlistsAPI.remove(playlistId);
     }
 
     async function exportPlaylist(playlistId: string) {
-      await PlaylistsAPI.exportToM3u(playlistId);
+      await playlistsAPI.exportToM3u(playlistId);
     }
 
     ipcRenderer.on(channels.CMD_PLAYLIST_NEW, (_, selected) => playlistNew(selected));
@@ -169,5 +170,5 @@ export function useIPCMenuEvents() {
       }
       analysisUnsubscribesRef.current = [];
     };
-  }, [libraryAPI]);
+  }, [libraryAPI, playlistsAPI]);
 }
