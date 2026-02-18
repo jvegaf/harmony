@@ -32,8 +32,9 @@ interface PlaylistsState {
 }
 
 const usePlaylistsStore = create<PlaylistsState>()(
-  devtools(() => ({
-    api: {
+  devtools(
+    () => ({
+      api: {
         /**
          * Start playing playlist (on double click)
          */

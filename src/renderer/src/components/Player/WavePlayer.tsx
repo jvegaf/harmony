@@ -67,7 +67,7 @@ function WavePlayer({ config }: WavePlayerProps) {
       url: audioUrl,
     };
   }, [audioUrl, colorScheme]);
-  
+
   // Pass playingTrack to useWavesurfer so it can use cached waveform peaks from DB
   const wavesurfer = useWavesurfer(containerRef, optionsMemo, playingTrack);
   // Initialize wavesurfer when the container mounts

@@ -14,7 +14,7 @@ const { config, duplicates, db, library, logger } = window.Main;
 
 /**
  * DuplicateFinderTool - Main component for finding and managing duplicate tracks
- * 
+ *
  * Uses IPC to scan library for duplicates based on configured criteria.
  * Allows user to select which tracks to keep and delete the rest.
  */
@@ -169,7 +169,7 @@ export default function DuplicateFinderTool() {
 
   /**
    * Confirm and execute deletion
-   * 
+   *
    * Must clear scan results BEFORE deleting files to ensure
    * WaveSurfer instances are destroyed and release file handles.
    *

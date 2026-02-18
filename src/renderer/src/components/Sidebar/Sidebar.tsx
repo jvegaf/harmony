@@ -64,9 +64,12 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
     await playlistsAPI.create('New playlist', [], false);
   }, [playlistsAPI]);
 
-  const rename = useCallback(async (playlistID: string, name: string) => {
-    await playlistsAPI.rename(playlistID, name);
-  }, [playlistsAPI]);
+  const rename = useCallback(
+    async (playlistID: string, name: string) => {
+      await playlistsAPI.rename(playlistID, name);
+    },
+    [playlistsAPI],
+  );
 
   const keyDown = useCallback(
     async (e: React.KeyboardEvent<HTMLInputElement>) => {

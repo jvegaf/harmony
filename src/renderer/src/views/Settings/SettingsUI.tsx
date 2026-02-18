@@ -11,7 +11,7 @@ const { config } = window.Main;
 
 /**
  * Settings panel for UI appearance (theme selection).
- * 
+ *
  * Theme preference is persisted via electron-store and applied on app startup.
  * The 'auto' option follows system color scheme preference via prefers-color-scheme media query.
  */

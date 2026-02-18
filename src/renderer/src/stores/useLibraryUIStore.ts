@@ -49,7 +49,7 @@ type LibraryUIState = {
 // See docs/aidev-notes/tracklist-sorting.md for details on sort persistence
 const initialTracklistSort = config.__initialConfig.tracklistSort || { colId: 'path', mode: 'desc' };
 
-const useLibraryUIStore = createStore<LibraryUIState>((set) => ({
+const useLibraryUIStore = createStore<LibraryUIState>(set => ({
   search: '',
   searched: null,
   renamingPlaylist: null,

@@ -10,7 +10,7 @@ const { config, duplicates } = window.Main;
 
 /**
  * Settings panel for configuring duplicate finder detection criteria.
- * 
+ *
  * Duplicate finder uses HIERARCHICAL logic:
  * - Title AND Artist are ALWAYS required (mandatory matching)
  * - Duration is OPTIONAL (additional filter to refine results)

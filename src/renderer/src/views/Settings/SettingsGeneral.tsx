@@ -12,7 +12,7 @@ const { config } = window.Main;
 
 /**
  * Settings panel for managing custom search engines.
- * 
+ *
  * Search engines are persisted via electron-store and used in ContextMenuModule
  * for the track context menu "Search" submenu.
  */

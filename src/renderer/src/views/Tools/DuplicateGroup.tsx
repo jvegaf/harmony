@@ -7,7 +7,7 @@ import styles from './DuplicateFinderTool.module.css';
 
 /**
  * DuplicateGroup - Displays a group of duplicate tracks
- * 
+ *
  * Shows all tracks in a duplicate group with comparison columns.
  * First track (highest quality score) is highlighted as the recommended keeper.
  * Uses interactive DuplicateWavePlayer components for audio preview.

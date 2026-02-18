@@ -8,7 +8,7 @@ const { db } = window.Main;
 
 /**
  * DuplicateWavePlayer - Simplified independent waveform player
- * 
+ *
  * Create WaveSurfer lazily only when user clicks to play.
  * Show static canvas preview of waveform until then.
  */

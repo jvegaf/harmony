@@ -7,7 +7,7 @@ import styles from './DuplicateFinderTool.module.css';
 
 /**
  * MiniWaveform - Compact waveform visualization for duplicate finder using WaveSurfer.js
- * 
+ *
  * Uses WaveSurfer for rendering with pre-computed waveformPeaks from database.
  * When no waveform data exists, shows a deterministic placeholder.
  * This is a static display (no playback) - clicking triggers onPlay callback.

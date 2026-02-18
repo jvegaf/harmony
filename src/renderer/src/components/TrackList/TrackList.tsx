@@ -24,7 +24,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useMantineColorScheme } from '@mantine/core';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
-import { useLibraryAPI } from '../../stores/useLibraryStore';
 import useLibraryUIStore from '../../stores/useLibraryUIStore';
 import useTaggerStore from '../../stores/useTaggerStore';
 import { useDetailsNavigationAPI } from '../../stores/useDetailsNavigationStore';
@@ -96,7 +95,6 @@ const TrackList = (props: Props) => {
   const { tracks, trackPlayingID, playlists, currentPlaylist, type } = props;
   const location = useLocation();
   const playerAPI = usePlayerAPI();
-  const libraryAPI = useLibraryAPI();
   const playlistsAPI = usePlaylistsAPI();
   const detailsNavAPI = useDetailsNavigationAPI();
   const { search, deleting, tracklistSort } = useLibraryUIStore();
@@ -114,7 +112,7 @@ const TrackList = (props: Props) => {
   const harmonyTheme = useMemo(() => {
     return colorScheme === 'dark' ? harmonyDarkTheme : harmonyLightTheme;
   }, [colorScheme]);
-  
+
   // Helper to check if drag should be enabled
   // Drag is only enabled in playlist view when sorted by playlistOrder or no sorting
   const checkDragEnabled = useCallback(() => {
@@ -459,9 +457,7 @@ const TrackList = (props: Props) => {
 
       perfLogger.measure('Position calculated', { position });
 
-      logger.info(
-        `[TracksTable] Reordering: ${tracksToMove.length} track(s) ${position} ${targetTrack.title}`,
-      );
+      logger.info(`[TracksTable] Reordering: ${tracksToMove.length} track(s) ${position} ${targetTrack.title}`);
 
       // IMMEDIATE UPDATE: Calculate new order manually and update state
       // Get current order from rowData state (not from grid, as managed mode hasn't updated state)
@@ -510,13 +506,12 @@ const TrackList = (props: Props) => {
         perfLogger.endSession();
       });
 
-      logger.info(
-        `[TracksTable] UI updated immediately (${tracksToMove.length} tracks), sending to backend...`,
-      );
+      logger.info(`[TracksTable] UI updated immediately (${tracksToMove.length} tracks), sending to backend...`);
 
       // FIRE AND FORGET: Send event to backend queue (non-blocking, no await)
       // DEBT-005: Now supports multi-track reordering
-      playlistsAPI.reorderTracks(currentPlaylist, tracksToMove, targetTrack, position)
+      playlistsAPI
+        .reorderTracks(currentPlaylist, tracksToMove, targetTrack, position)
         .then(() => {
           logger.info('[TracksTable] Backend processed reorder successfully');
         })
