@@ -185,10 +185,16 @@ const reorderTracks = async (
 };
 
 /**
- * a playlist to a .m3u file
- * TODO: investigate why the playlist path are relative, and not absolute
+ * Export a playlist to a .m3u file
+ * 
+ * DEBT-006: Uses ABSOLUTE paths (track.path from DB) for better compatibility.
+ * - Absolute paths work reliably on the same system
+ * - Relative paths would be portable but require preserving folder structure
+ * - Current approach matches standard DJ software behavior (Traktor, Rekordbox)
+ * 
+ * Future enhancement: Add option in settings to choose absolute vs relative paths
  */
-const exportToM3u = async (playlistID: string): Promise<void> => {
+const  exportToM3u = async (playlistID: string): Promise<void> => {
   const playlist: Playlist = await db.playlists.findOnlyByID(playlistID);
 
   ipcRenderer.send(

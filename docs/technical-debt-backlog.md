@@ -282,10 +282,10 @@ El backend (`database.ts#reorderTracks`) ya estaba diseñado para manejar múlti
 
 ---
 
-### DEBT-006: Investigar paths relativos en exportación M3U
+### DEBT-006: ✅ ANALIZADO (2026-02-18) - Paths en exportación M3U son absolutos (comportamiento correcto)
 
-**Archivo**: `src/renderer/src/stores/PlaylistsAPI.ts:189`  
-**Tipo**: Investigation / Bug fix  
+**Archivo**: `src/renderer/src/stores/PlaylistsAPI.ts:189` *(DOCUMENTADO)*  
+**Tipo**: Investigation / Documentation  
 **TODO Original**:
 ```typescript
 /**
@@ -295,25 +295,68 @@ El backend (`database.ts#reorderTracks`) ya estaba diseñado para manejar múlti
 ```
 
 **Contexto**:
-Los archivos M3U exportados pueden contener paths relativos en vez de absolutos, lo cual puede causar problemas de portabilidad si el M3U se mueve a otra ubicación.
+El TODO sugería que los M3U exportados usaban paths relativos cuando deberían ser absolutos.
 
-**Problema**:
-El código actual delega a un IPC handler, y no está claro dónde se genera el path:
-```typescript
-ipcRenderer.send(channels.PLAYLIST_EXPORT, playlist.id, playlist.name);
+**Investigación Realizada**:
+```bash
+# Análisis de flujo completo de exportación M3U
+1. PlaylistsAPI.ts línea 196: playlist.tracks?.map(track => track.path)
+   → Envía paths ABSOLUTOS de la base de datos
+
+2. IPCPlaylistModule.ts línea 126: lines.push(trackPath)
+   → Copia paths tal cual (sin conversión a relative)
+
+3. Resultado: M3U contiene paths ABSOLUTOS ✅
 ```
 
-**Investigación Necesaria**:
-1. Revisar `IPCPlaylistModule` para ver cómo genera los paths
-2. Verificar si usa `path.relative()` o `path.absolute()`
-3. Determinar si el comportamiento es intencional (portabilidad) o un bug
-4. Decidir si debe ser configurable (opción en settings)
+**Hallazgos**:
+- ✅ **El TODO está invertido**: El código SÍ genera paths ABSOLUTOS (no relativos)
+- ✅ **Comportamiento actual es CORRECTO** para el caso de uso principal
+- ✅ La importación (`resolveM3UPlaylist`) maneja AMBOS formatos (absolute y relative)
+- ✅ Coincide con comportamiento de software DJ estándar (Traktor, Rekordbox)
+
+**Análisis de Tradeoffs**:
+
+| Tipo de Path | Ventajas | Desventajas | Caso de Uso |
+|--------------|----------|-------------|-------------|
+| **Absoluto** (actual) | ✅ Funciona siempre en mismo sistema<br>✅ No depende de ubicación del M3U<br>✅ Compatible con DJ software | ❌ No portable entre sistemas<br>❌ Rompe si archivos se mueven | DJ usando biblioteca local |
+| **Relativo** | ✅ Portable entre sistemas<br>✅ Funciona si estructura de carpetas se preserva | ❌ Rompe si M3U se mueve<br>❌ Requiere paths relativos a ubicación del M3U | Compartir playlists |
+
+**Decisión de Diseño**:
+- **Mantener paths absolutos** (comportamiento actual) como default
+- Justificación: Harmony es para DJs gestionando bibliotecas locales (no compartiendo M3U)
+- Future enhancement: Agregar opción en settings para elegir absolute/relative
+
+**Implementación**:
+```bash
+# 1. Documentación agregada en PlaylistsAPI.ts
+# Comentario explicando que usa paths absolutos intencionalmente
+# Referencia a DEBT-006 y DJ software estándar
+
+# 2. Documentación agregada en IPCPlaylistModule.ts
+# Comentario en generateM3UContent() explicando diseño
+# Nota que resolveM3UPlaylist() maneja ambos formatos
+
+# 3. Validación
+npm run typecheck  # ✅ PASS - 0 errores
+```
+
+**Archivos Modificados**:
+- ✏️ **Modified**: `src/renderer/src/stores/PlaylistsAPI.ts` (documentación JSDoc actualizada)
+- ✏️ **Modified**: `src/main/modules/IPCPlaylistModule.ts` (documentación JSDoc actualizada)
 
 **Impacto**:
-- **Portabilidad**: M3Us pueden no funcionar en otros reproductores
-- **UX**: Confusión si el usuario mueve el archivo M3U
+- ✅ **Claridad**: TODO confuso reemplazado con documentación precisa
+- ✅ **Mantenibilidad**: Futuros desarrolladores entienden decisión de diseño
+- ✅ **Extensibilidad**: Comentario sugiere enhancement futuro si se necesita
 
-**Estimación**: 2-3 horas (investigación + fix si es necesario)
+**Tiempo de Implementación**: 30 minutos (vs. 2-3 horas estimadas)  
+**Razón**: No era bug, solo faltaba documentación del comportamiento correcto
+
+**Próximos Pasos (Opcional)**:
+- 💡 Agregar setting "M3U Export Format" (absolute/relative)
+- 💡 Al exportar con relative, calcular paths relativos al directorio del M3U
+- 💡 Agregar tooltip en UI explicando diferencia
 
 ---
 

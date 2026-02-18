@@ -14,11 +14,11 @@
 ### Resumen de Progreso
 
 - **Total hallazgos**: 23 (3 P0, 6 P1, 8 P2, 6 P3)
-- **Implementados**: 14 hallazgos (60.9%)
-- **Pendientes**: 9 hallazgos (39.1%)
+- **Implementados**: 15 hallazgos (65.2%)
+- **Pendientes**: 8 hallazgos (34.8%)
   - 3 P0 bloqueados por riesgo de breaking changes
   - 1 P1 requiere decisión de producto/arquitectura
-  - 5 P2 en backlog para próximas iteraciones
+  - 4 P2 en backlog para próximas iteraciones
   - 0 P3 mejoras incrementales (todas completadas)
 
 ### ✅ Hallazgos Implementados
@@ -37,6 +37,7 @@
 | **DEBT-002** | P3 | Re-import de tracks existentes | Implementado filtrado pre-insert (10-100x más rápido) | 2026-02-17 |
 | **DEBT-003** | P2 | highlightPlayingTrack código muerto | Removido dead code (11 líneas), highlighting funciona correctamente | 2026-02-18 |
 | **DEBT-005** | P2 | Reordenamiento single-track en playlists | Multi-track drag-and-drop implementado preservando orden relativo | 2026-02-18 |
+| **DEBT-006** | P3 | M3U export path investigation | Analizado y documentado: usa paths absolutos intencionalmente | 2026-02-18 |
 | **DEBT-007** | P3 | Settings page support en useCurrentViewTracks | Documentado comportamiento intencional (no requiere cambios) | 2026-02-18 |
 | **DEBT-008** | P3 | compat.ts legacy Beatport types | Eliminado archivo dead code (100 líneas), cero breaking changes | 2026-02-18 |
 
@@ -292,9 +293,16 @@ Harmony es una aplicación Electron bien estructurada con un modelo de tres proc
 - Template para issues de GitHub
 
 **Estado actual**:
-- 6 implementados (DEBT-001: arquitectura, DEBT-002: performance, DEBT-003: cleanup, DEBT-005: UX, DEBT-007: documentación, DEBT-008: dead code)
+- 7 analizados/implementados:
+  - DEBT-001: arquitectura (orquestación a main process)
+  - DEBT-002: performance (skip re-import)
+  - DEBT-003: cleanup (dead code)
+  - DEBT-005: UX (multi-track reordering)
+  - DEBT-006: documentación (M3U paths)
+  - DEBT-007: documentación (Settings page)
+  - DEBT-008: dead code (compat.ts)
 - 1 analizado y cerrado (DEBT-004: comportamiento correcto confirmado)
-- 1 pendiente (DEBT-006: investigación M3U paths)
+- 0 pendientes (todos los technical debt items completados)
 
 **Impacto**:
 - **Mantenibilidad**: TODOs movidos de código a documentación estructurada

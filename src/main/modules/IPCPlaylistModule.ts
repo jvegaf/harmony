@@ -115,13 +115,21 @@ class IPCPlaylistModule extends ModuleWindow {
 
   /**
    * Generate M3U file content from track paths
-   * AIDEV-NOTE: Uses extended M3U format (#EXTM3U) for better compatibility
+   * 
+   * Implementation notes (DEBT-006):
+   * - Uses ABSOLUTE paths as provided by renderer (track.path from DB)
+   * - This ensures M3U works reliably on the same system
+   * - Import (resolveM3UPlaylist) handles both absolute and relative paths
+   * - Matches behavior of standard DJ software (Traktor, Rekordbox)
+   * 
+   * @param trackPaths - Array of absolute file paths from tracks table
+   * @returns M3U file content in extended format
    */
   private generateM3UContent(trackPaths: string[]): string {
     const lines: string[] = ['#EXTM3U', ''];
 
     for (const trackPath of trackPaths) {
-      // Add track path (use absolute paths for better compatibility)
+      // Add track path (absolute paths for better compatibility)
       lines.push(trackPath);
     }
 
