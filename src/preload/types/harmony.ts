@@ -62,6 +62,62 @@ export interface Track {
   url?: string;
 }
 
+// AIDEV-NOTE: Beatport recommendations response structure
+export interface BeatportRecommendation {
+  track_id: number;
+  track_name: string;
+  mix_name: string;
+  track_length_ms: number;
+  bpm: number;
+  key: string;
+  key_camelot: string;
+  isrc?: string;
+  track_number?: string;
+  track_waveform_url?: string;
+  sample_url: string;
+  sample_start_ms: number;
+  sample_end_ms: number;
+  attributes?: string[];
+  artists: Array<{
+    id: number;
+    name: string;
+    type: string;
+  }>;
+  genre: {
+    id: number;
+    name: string;
+    sub_genre: {
+      id: number | null;
+      name: string | null;
+    };
+    category?: {
+      id: number;
+      name: string;
+    };
+  };
+  release: {
+    id: number;
+    name: string;
+    image_url: string;
+    catalog_number?: string;
+    release_date: string;
+  };
+  label: {
+    id: number;
+    name: string;
+  };
+  sale_type?: string;
+  price?: {
+    category: string[];
+    currency: string;
+    value: number;
+  };
+  availability?: {
+    tags: string[];
+    unavailability_reason: string | null;
+  };
+}
+
 export interface ResultTag {
   id?: string | number;
   album?: Maybe<string>;

@@ -10,6 +10,7 @@ import {
   AutoApplyProgressCallback,
   AutoApplyCompleteCallback,
 } from '../lib/tagger/tagger';
+import { SearchSimilars } from '../lib/track/similar';
 
 import ModuleWindow from './BaseWindowModule';
 import { TrackCandidatesResult, TrackSelection, TagCandidatesProgress } from '@preload/types/tagger';
@@ -76,6 +77,19 @@ class IPCTaggerModule extends ModuleWindow {
         return ApplyTagSelections(selections, tracks);
       },
     );
+
+    // AIDEV-NOTE: Handler for finding similar tracks from Beatport API
+    ipcMain.handle(channels.TRACK_FIND_SIMILARS, async (_e, bpTrackId: number): Promise<any> => {
+      try {
+        log.info(`[IPCTaggerModule] Finding similar tracks for Beatport track ID: ${bpTrackId}`);
+        const results = await SearchSimilars(bpTrackId);
+        log.info(`[IPCTaggerModule] Found ${results?.length || 0} similar tracks`);
+        return results;
+      } catch (error) {
+        log.error('[IPCTaggerModule] Error finding similar tracks:', error);
+        throw error;
+      }
+    });
   }
 
   async unload(): Promise<void> {

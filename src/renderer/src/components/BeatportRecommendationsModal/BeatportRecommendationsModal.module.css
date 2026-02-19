@@ -1,0 +1,147 @@
+/* AIDEV-NOTE: Horizontal layout for each recommended track - all elements in one row */
+.trackCard {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-xs);
+  border: 1px solid var(--mantine-color-dark-4);
+  border-radius: var(--mantine-radius-md);
+  background-color: var(--mantine-color-dark-6);
+  transition: background-color 0.2s ease;
+}
+
+.trackCard:hover {
+  background-color: var(--mantine-color-dark-5);
+}
+
+/* AIDEV-NOTE: Fixed-width container for track artwork (80x80px) */
+.trackArtwork {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--mantine-radius-sm);
+  overflow: hidden;
+}
+
+.artworkImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* AIDEV-NOTE: Track info (title + artists) takes minimum space needed */
+.trackInfo {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 350px;
+}
+
+.trackLabel {
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.trackRelease,
+.trackBpm {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.trackGenre {
+  width: 120px;
+  color: var(--hm-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.trackTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trackArtists {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* AIDEV-NOTE: Audio player grows to fill available space */
+.audioPlayer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 300px;
+}
+
+.audio {
+  width: 100%;
+  height: 32px;
+}
+
+/* AIDEV-NOTE: Open button stays at the end */
+.openButton {
+  flex-shrink: 0;
+}
+
+/* AIDEV-NOTE: Responsive layout for smaller screens - stack vertically */
+@media (max-width: 1200px) {
+  .trackCard {
+    flex-wrap: wrap;
+  }
+
+  .trackInfo {
+    min-width: 200px;
+    max-width: 250px;
+  }
+
+  .audioPlayer {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+
+  .openButton {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .trackCard {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .trackArtwork {
+    width: 100%;
+    height: 200px;
+  }
+
+  .trackInfo {
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  .audioPlayer {
+    min-width: 100%;
+  }
+
+  .openButton {
+    width: 100%;
+  }
+}

@@ -189,6 +189,19 @@ export class BeatportClient {
     }
   }
 
+  async findSimilar(beatportTrackId: number): Promise<any> {
+    try {
+      const token = await this.getToken();
+      const results = await this.getTrackSimilarsWithToken(beatportTrackId, token);
+      return results;
+    } catch (error) {
+      if (error instanceof BeatportError) {
+        throw error;
+      }
+      throw BeatportError.networkError(`Get Similar failed: ${error}`);
+    }
+  }
+
   /**
    * Obtiene el estado de rate limiting
    */
@@ -479,6 +492,37 @@ export class BeatportClient {
     const track = this.parseApiTrack(data);
 
     return track;
+  }
+
+  private async getTrackSimilarsWithToken(trackId: number, token: string): Promise<any> {
+    // https://api.beatport.com/catalog/v1/recommendations/tracks/?id=20528025
+    const url = `https://api.beatport.com/catalog/v1/recommendations/tracks/?id=${trackId}`;
+
+    const response = await this.httpClient(url, {
+      method: 'GET',
+      headers: {
+        'User-Agent': USER_AGENT,
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+
+    // Manejar rate limiting
+    if (response.status === 429) {
+      throw BeatportError.rateLimited(60);
+    }
+
+    if (response.status === 404) {
+      throw BeatportError.trackNotFound('Unknown', 'Unknown');
+    }
+
+    if (!response.ok) {
+      throw BeatportError.networkError(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    return data;
   }
 
   /**

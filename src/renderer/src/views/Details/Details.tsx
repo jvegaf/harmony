@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { LoaderFunctionArgs, useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
 import { Button, Grid, GridCol, Group, Stack, Textarea, TextInput } from '@mantine/core';
 import { hasLength, useForm } from '@mantine/form';
@@ -16,21 +16,31 @@ import {
   IconStarOff,
   IconWand,
   IconFileImport,
+  IconMusic,
 } from '@tabler/icons-react';
 import { LoaderData } from '../router';
 import appStyles from '../Root.module.css';
 import styles from './Details.module.css';
 import Cover from '../../components/Cover/Cover';
 import TrackRatingComponent from '../../components/TrackRatingComponent/TrackRatingComponent';
+import BeatportRecommendationsModal from '../../components/BeatportRecommendationsModal/BeatportRecommendationsModal';
 import { useLibraryAPI } from '../../stores/useLibraryStore';
 import { useTaggerAPI } from '../../stores/useTaggerStore';
 import { useDetailsNavigationAPI, useDetailsNavigationStore } from '../../stores/useDetailsNavigationStore';
 import { GetFilenameWithoutExtension } from '../../lib/utils-library';
 import { parseDuration } from '../../lib/utils';
-import { SearchEngine } from '../../../../preload/types/harmony';
+import { BeatportRecommendation, SearchEngine } from '../../../../preload/types/harmony';
 import { SanitizedTitle } from '../../../../preload/utils';
 
 const { menu, shell } = window.Main;
+
+// AIDEV-NOTE: Utility to extract Beatport track ID from URL
+// Beatport URLs format: https://www.beatport.com/track/{slug}/{id}
+const extractBeatportTrackId = (url: string): number | null => {
+  if (!url) return null;
+  const match = url.match(/beatport\.com\/track\/[^/]+\/(\d+)/);
+  return match ? parseInt(match[1], 10) : null;
+};
 
 export default function DetailsView() {
   const navigate = useNavigate();
@@ -40,6 +50,11 @@ export default function DetailsView() {
   const taggerAPI = useTaggerAPI();
   const detailsNavAPI = useDetailsNavigationAPI();
   const { getPreviousTrackId, getNextTrackId } = useDetailsNavigationStore();
+
+  // AIDEV-NOTE: State for Beatport Recommendations modal
+  const [recommendationsModalOpened, setRecommendationsModalOpened] = useState(false);
+  const [recommendations, setRecommendations] = useState<BeatportRecommendation[]>([]);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
 
   const form = useForm({
     mode: 'uncontrolled',
@@ -245,6 +260,35 @@ export default function DetailsView() {
     menu.common();
   }, []);
 
+  // AIDEV-NOTE: Fetch Beatport recommendations for the current track
+  const fetchBeatportRecommendations = useCallback(async () => {
+    const bpTrackId = extractBeatportTrackId(track.url);
+    if (!bpTrackId) {
+      notifications.show({
+        title: 'Invalid Beatport URL',
+        message: 'Could not extract Beatport track ID from URL',
+        color: 'red',
+      });
+      return;
+    }
+
+    try {
+      setLoadingRecommendations(true);
+      setRecommendationsModalOpened(true);
+      const results = await window.Main.library.findSimilars(bpTrackId);
+      setRecommendations(results);
+    } catch (error) {
+      notifications.show({
+        title: 'Failed to fetch recommendations',
+        message: error instanceof Error ? error.message : 'An unknown error occurred',
+        color: 'red',
+      });
+      setRecommendationsModalOpened(false);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  }, [track.url]);
+
   return (
     <div className={`${appStyles.view} ${styles.viewDetails}`}>
       <div className={styles.detailsLeft}>
@@ -332,6 +376,16 @@ export default function DetailsView() {
               fullWidth
             >
               Open Track Page
+            </Button>
+          )}
+          {track.url && extractBeatportTrackId(track.url) && (
+            <Button
+              variant='light'
+              leftSection={<IconMusic size={18} />}
+              onClick={fetchBeatportRecommendations}
+              fullWidth
+            >
+              Beatport Recommendations
             </Button>
           )}
         </Stack>
@@ -488,6 +542,12 @@ export default function DetailsView() {
           </Group>
         </form>
       </div>
+      <BeatportRecommendationsModal
+        opened={recommendationsModalOpened}
+        onClose={() => setRecommendationsModalOpened(false)}
+        recommendations={recommendations}
+        loading={loadingRecommendations}
+      />
     </div>
   );
 }

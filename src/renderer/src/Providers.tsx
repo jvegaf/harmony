@@ -131,6 +131,11 @@ export default function Providers({ children }: any) {
           },
         },
       },
+      Modal: {
+        styles: {
+          title: { fontSize: '1.25rem', fontWeight: 600 },
+        },
+      },
       ActionIcon: {
         styles: {
           root: {

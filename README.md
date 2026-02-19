@@ -1,6 +1,6 @@
 # Harmony
 
-[![CI](https://github.com/jvegaf/harmony/actions/workflows/ci.yml/badge.svg)](https://github.com/jvegaf/harmony/actions/workflows/ci.yml)
+[![CI](https://github.com/jvegaf/harmony/actions/workflows/build.yml/badge.svg)](https://github.com/jvegaf/harmony/actions/workflows/build.yml)
 
 ## Description
 
@@ -38,6 +38,12 @@ Edit track metadata, find tag candidates from Beatport/Traxsource/Bandcamp, repl
 Identify and manage duplicate tracks in your collection with advanced comparison tools.
 
 ![Duplicate Finder](./img/harmony2.png)
+
+### Beatport Recommendations
+
+Get track recommendations from Beatport
+
+![Beatport Recommendations](./img/harmony-track-recommendations.png)
 
 </details>
 

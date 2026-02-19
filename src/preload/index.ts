@@ -126,6 +126,7 @@ const api = {
     deleteTracks: async (tracks: Track[]) => ipcRenderer.send(channels.TRACKS_DELETE, tracks),
     replaceFile: async (trackId: string, trackPath: string, newFilePath: string) =>
       ipcRenderer.invoke(channels.TRACK_REPLACE_FILE, trackId, trackPath, newFilePath),
+    findSimilars: (bpTrackId: number) => ipcRenderer.invoke(channels.TRACK_FIND_SIMILARS, bpTrackId),
   },
   playlists: {
     resolveM3U: (m3uPath: string) => ipcRenderer.invoke(channels.PLAYLISTS_RESOLVE_M3U, m3uPath),
