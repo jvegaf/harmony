@@ -12,6 +12,45 @@
 export type CueMergeStrategy = 'SMART_MERGE' | 'REPLACE';
 
 /**
+ * Sync engine options
+ * Duplicated from sync-engine.ts to avoid importing main process files in preload
+ */
+export interface SyncOptions {
+  /** Track metadata merge strategy */
+  strategy?: 'traktor_wins' | 'harmony_wins' | 'smart_merge';
+  /** Cue point merge strategy */
+  cueStrategy?: CueMergeStrategy;
+  /** Case-insensitive path matching (for Windows/macOS) */
+  caseInsensitivePaths?: boolean;
+}
+
+/**
+ * Sync plan for preview before applying
+ * Duplicated from sync-engine.ts to avoid importing main process files in preload
+ */
+export interface SyncPlan {
+  /** Tracks that will be updated */
+  tracksToUpdate: Array<{
+    track: any; // Simplified - full Track type
+    metadataChanged: boolean;
+    fieldsUpdated: string[];
+    cuePointsChanged?: boolean;
+  }>;
+  /** Tracks matched but with no changes */
+  tracksWithNoChanges: any[]; // Simplified - Track[]
+  /** Traktor tracks not found in Harmony (will be imported) */
+  unmatchedTraktorTracks: any[]; // Simplified - Track[]
+  /** Summary statistics */
+  summary: {
+    totalMatched: number;
+    tracksWithChanges: number;
+    tracksWithNoChanges: number;
+    unmatchedTraktor: number;
+    tracksToImport: number;
+  };
+}
+
+/**
  * Traktor configuration stored in app settings
  */
 export interface TraktorConfig {

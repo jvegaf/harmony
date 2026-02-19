@@ -16,8 +16,9 @@ import type {
   TraktorNMLInfo,
   TraktorSyncResult,
   AutoSyncStatus,
+  SyncPlan,
+  SyncOptions,
 } from './types/traktor';
-import type { SyncPlan, SyncOptions } from '../main/lib/traktor';
 import type { DuplicateScanProgress, DuplicateScanResult, TrackFileInfo } from './types/duplicates';
 import parseUri from './lib/utils-uri';
 
