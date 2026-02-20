@@ -65,50 +65,50 @@ Get track recommendations from Beatport
 ### Install
 
 ```bash
-yarn
+npm install
 ```
 
 ### Development
 
 ```bash
-yarn dev                # Start development mode with hot reload
-yarn start              # Preview built app
+npm run dev             # Start development mode with hot reload
+npm start               # Preview built app
 ```
 
 ### Build
 
 ```bash
 # For windows
-yarn build:win
+npm run build:win
 
 # For macOS
-yarn build:mac
+npm run build:mac
 
 # For Linux
-yarn build:linux
+npm run build:linux
 
 # Current platform
-yarn build
+npm run build
 
 # Production release
-yarn release
+npm run release
 ```
 
 ### Code Quality
 
 ```bash
-yarn lint               # ESLint with auto-fix
-yarn format             # Prettier auto-format all files
-yarn typecheck          # Run both node + web type checks
+npm run lint            # ESLint with auto-fix
+npm run format          # Prettier auto-format all files
+npm run typecheck       # Run both node + web type checks
 ```
 
 ### Testing
 
 ```bash
-yarn test               # Run tests in watch mode
-yarn test:run           # Run all tests once (CI mode)
-yarn test:ui            # Open Vitest UI
-yarn test:coverage      # Run tests with coverage report
+npm test                # Run tests in watch mode
+npm run test:run        # Run all tests once (CI mode)
+npm run test:ui         # Open Vitest UI
+npm run test:coverage   # Run tests with coverage report
 ```
 
 ## Documentation
