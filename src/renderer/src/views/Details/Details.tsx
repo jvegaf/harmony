@@ -240,7 +240,7 @@ export default function DetailsView() {
 
       switch (engine) {
         case SearchEngine.BEATPORT:
-          shell.openExternal(`https://www.beatport.com/tracks/search?q=${sanitizedQuery}`);
+          shell.openExternal(`https://www.beatport.com/search/tracks?q=${sanitizedQuery}`);
           break;
         case SearchEngine.TRAXSOURCE:
           shell.openExternal(`https://www.traxsource.com/search/tracks?term=${sanitizedQuery}`);

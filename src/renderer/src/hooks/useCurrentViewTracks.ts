@@ -2,10 +2,8 @@ import { useRouteLoaderData } from 'react-router-dom';
 import { useMemo } from 'react';
 
 import { RootLoaderData } from '../views/Root';
-// import { PlaylistLoaderData } from '../views/ViewPlaylistDetails';
-
-import { Track } from '../../../preload/types/harmony';
 import { PlaylistLoaderData } from '@renderer/views/Playlist/PlaylistView';
+import { Track } from '@preload/types/harmony';
 
 type Maybe<T> = T | undefined;
 
