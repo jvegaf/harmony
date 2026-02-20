@@ -15,6 +15,7 @@ import { makeTrackID } from '../lib/track-id';
 import { ParseDuration } from '../../preload/utils';
 import { loggerExtras } from '../lib/log/logger';
 import { emitLibraryChanged } from '../lib/library-events';
+import { Database } from '../lib/db/database';
 import UpdateTrackRating from '../lib/track/rating-manager';
 import PersistTrack from '../lib/track/saver';
 import RemoveFile from '../lib/track/remover';
@@ -210,7 +211,7 @@ class IPCLibraryModule extends ModuleWindow {
         message: 'Saving tracks to database...',
       });
 
-      const db = (await import('../lib/db/database')).Database.getInstance();
+      const db = Database.getInstance();
       await db.insertTracks(tracks as Track[]);
 
       log.info(`[ImportLibraryFull] Successfully inserted ${tracks.length} tracks`);
@@ -258,7 +259,7 @@ class IPCLibraryModule extends ModuleWindow {
 
     // Pre-filter optimization - check DB for existing paths
     // This avoids scanning metadata for tracks that are already imported
-    const db = (await import('../lib/db/database')).Database.getInstance();
+    const db = Database.getInstance();
     const resolvedPaths = tracksPath.map(p => path.resolve(p));
     const existingTracks = await db.findTracksByPath(resolvedPaths);
 
@@ -444,7 +445,7 @@ class IPCLibraryModule extends ModuleWindow {
       };
 
       // Get the original addedAt from database
-      const db = (await import('../lib/db/database')).Database.getInstance();
+      const db = Database.getInstance();
       const originalTrack = await db.findTrackByID(trackId);
       if (originalTrack) {
         updatedTrack.addedAt = originalTrack.addedAt;
@@ -493,7 +494,7 @@ class IPCLibraryModule extends ModuleWindow {
     log.info(`Found ${filesInFilesystem.length} audio files in filesystem`);
 
     // 2. Get all tracks from database
-    const db = (await import('../lib/db/database')).Database.getInstance();
+    const db = Database.getInstance();
     const tracksInDb = await db.getAllTracks();
     log.info(`Found ${tracksInDb.length} tracks in database`);
 
