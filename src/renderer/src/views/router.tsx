@@ -11,7 +11,7 @@ import SettingsView from './Settings/Settings';
 import PruneView from './Prune/PruneView';
 import PreparationView from './Preparation/PreparationView';
 import ToolsView from './Tools/ToolsView';
-import PlaylistView from './Playlist/PlaylistView';
+import PlaylistView from './Playlist/Playlist';
 
 const { logger } = window.Main;
 

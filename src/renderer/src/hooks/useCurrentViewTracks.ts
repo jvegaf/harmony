@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 
 import { RootLoaderData } from '../views/Root';
 import { Track } from '@preload/types/harmony';
-import { PlaylistLoaderData } from '@renderer/views/Playlist/PlaylistView';
+import { PlaylistLoaderData } from '@renderer/views/Playlist/Playlist';
 
 type Maybe<T> = T | undefined;
 

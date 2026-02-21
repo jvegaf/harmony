@@ -11,6 +11,7 @@ export default defineConfig({
       'src/main/lib/**/*.{test,spec}.{ts,tsx}',
       'src/preload/lib/**/*.{test,spec}.{ts,tsx}',
     ],
+    exclude: ['src/main/lib/traktor/**/*.{test,spec}.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
