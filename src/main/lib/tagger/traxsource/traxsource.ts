@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import log from 'electron-log';
+import log from '../worker/worker-logger';
 import * as cheerio from 'cheerio';
 import { createHttpClient, minifyHtml, parseDurationToSeconds, parseDateIso } from './utils';
 import { SanitizedTitle } from '../../../../preload/utils';
@@ -140,7 +140,7 @@ export class Traxsource {
 
       return tracks;
     } catch (err) {
-      log.error(err);
+      log.error('[Traxsource] Search failed:', err);
       return []; // fail gracefully
     }
   }
@@ -181,7 +181,7 @@ export class Traxsource {
         // optionally prefetch art to bypass hotlink protections
       }
     } catch (err) {
-      log.error(err);
+      log.error('[Traxsource] Extend track failed:', err);
     }
     return track;
   }
@@ -209,7 +209,7 @@ export class Traxsource {
         .map(t => ({ track: t, score: scoreCandidate(t) }) as TraxSourceMatch)
         .sort((a, b) => b.score - a.score);
     } catch (err) {
-      log.error(err);
+      log.error('[Traxsource] Match track failed:', err);
       return [];
     }
   }

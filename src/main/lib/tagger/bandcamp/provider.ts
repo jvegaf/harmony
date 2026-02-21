@@ -11,7 +11,7 @@
  * to detect BPM and Key.
  */
 
-import log from 'electron-log';
+import log from '../worker/worker-logger';
 
 import { TrackProvider, RawTrackData } from '../providers/types';
 import { BandcampClient, getBandcampClient } from './client';

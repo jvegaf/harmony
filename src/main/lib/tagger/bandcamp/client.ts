@@ -10,7 +10,7 @@
  * - Two-phase approach: quick search -> full details on apply
  */
 
-import log from 'electron-log';
+import log from '../worker/worker-logger';
 import bcfetch, { type SearchResultTrack, type Track as BandcampTrack } from 'bandcamp-fetch';
 
 /**
