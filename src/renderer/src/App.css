@@ -27,6 +27,7 @@
 
   /* === Base palette (theme-independent) === */
   --hm-primary: #fa8905;
+  --hm-primary-darker: #59350e;
   --hm-primary-hover: #fb9f2d;
   --hm-primary-light: rgba(250, 137, 5, 0.2);
   --hm-primary-muted: rgba(250, 137, 5, 0.15);

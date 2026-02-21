@@ -153,7 +153,7 @@ const useTaggerStore = createStore<TaggerState>((set, get) => ({
 
         const currentPath = window.location.hash.replace('#', '');
         if (!currentPath.startsWith('/details/')) {
-          window.location.hash = '#/recent_added';
+          window.location.hash = '#/library';
         }
 
         logger.info(
