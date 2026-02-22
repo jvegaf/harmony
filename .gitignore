@@ -16,3 +16,4 @@ opencode.json
 tsconfig.web.tsbuildinfo
 /drizzle/meta/*.json
 /coverage
+.astro
