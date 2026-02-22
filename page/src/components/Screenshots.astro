@@ -1,0 +1,144 @@
+---
+import { translations } from '@/i18n/translations';
+
+const base = import.meta.env.BASE_URL;
+const en = translations.en.screenshots;
+const es = translations.es.screenshots;
+
+const screenshotImages = [
+  'harmony-main-screen.png',
+  'harmony-track-detail.png',
+  'harmony-track-fixing.png',
+  'harmony-duplicate-finder.png',
+  'harmony-settings-traktor.png',
+  'harmony-track-recommendations.png',
+];
+
+const screenshotAlts = [
+  'Harmony music library with waveform player and playlist sidebar',
+  'Track metadata editor with cover art and quick actions',
+  'Auto-tagging candidates from Beatport and Traxsource',
+  'Duplicate finder with side-by-side waveform comparison',
+  'Traktor NML sync settings with merge strategies',
+  'Beatport track recommendations panel',
+];
+---
+
+<section class="screenshots section" id="screenshots">
+  <div class="container">
+    <div class="section-header fade-in">
+      <h2>
+        <span data-lang="en">{en.title}</span>
+        <span data-lang="es" class="hidden">{es.title}</span>
+      </h2>
+      <p>
+        <span data-lang="en">{en.subtitle}</span>
+        <span data-lang="es" class="hidden">{es.subtitle}</span>
+      </p>
+    </div>
+
+    <div class="screenshots-list">
+      {en.items.map((item, i) => (
+        <div class={`screenshot-row fade-in ${i % 2 !== 0 ? 'reverse' : ''}`}>
+          <div class="screenshot-image">
+            <img
+              src={`${base}assets/${screenshotImages[i]}`}
+              alt={screenshotAlts[i]}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="screenshot-info">
+            <span class="badge">{String(i + 1).padStart(2, '0')}</span>
+            <h3>
+              <span data-lang="en">{item.title}</span>
+              <span data-lang="es" class="hidden">{es.items[i].title}</span>
+            </h3>
+            <p>
+              <span data-lang="en">{item.description}</span>
+              <span data-lang="es" class="hidden">{es.items[i].description}</span>
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .screenshots-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+  }
+
+  .screenshot-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    align-items: center;
+  }
+
+  .screenshot-image {
+    flex: 1 1 60%;
+    min-width: 0;
+  }
+
+  .screenshot-image img {
+    width: 100%;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-screenshot);
+    border: 1px solid var(--color-border);
+    transition: transform var(--transition-slow);
+  }
+
+  .screenshot-image img:hover {
+    transform: scale(1.02);
+  }
+
+  .screenshot-info {
+    flex: 1 1 40%;
+    min-width: 0;
+  }
+
+  .screenshot-info .badge {
+    margin-bottom: var(--space-4);
+  }
+
+  .screenshot-info h3 {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-3);
+  }
+
+  .screenshot-info p {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+  }
+
+  /* Tablet+ : zigzag side by side */
+  @media (min-width: 768px) {
+    .screenshot-row {
+      flex-direction: row;
+      gap: var(--space-12);
+    }
+
+    .screenshot-row.reverse {
+      flex-direction: row-reverse;
+    }
+
+    .screenshot-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .screenshots-list {
+      gap: var(--space-24);
+    }
+  }
+</style>

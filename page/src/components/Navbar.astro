@@ -1,0 +1,302 @@
+---
+import { translations } from '@/i18n/translations';
+
+const base = import.meta.env.BASE_URL;
+const en = translations.en.nav;
+const es = translations.es.nav;
+---
+
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner container">
+    <a href={base} class="navbar-brand">
+      <img src={`${base}assets/harmony-logo.png`} alt="Harmony logo" width="36" height="36" />
+      <span class="navbar-brand-text">Harmony</span>
+    </a>
+
+    <div class="navbar-links" id="navbar-links">
+      <a href="#features" class="nav-link" data-i18n="nav.features">
+        <span data-lang="en">{en.features}</span>
+        <span data-lang="es" class="hidden">{es.features}</span>
+      </a>
+      <a href="#screenshots" class="nav-link" data-i18n="nav.screenshots">
+        <span data-lang="en">{en.screenshots}</span>
+        <span data-lang="es" class="hidden">{es.screenshots}</span>
+      </a>
+      <a href="#download" class="nav-link" data-i18n="nav.download">
+        <span data-lang="en">{en.download}</span>
+        <span data-lang="es" class="hidden">{es.download}</span>
+      </a>
+    </div>
+
+    <div class="navbar-actions">
+      <!-- Language Toggle -->
+      <button class="toggle-btn" id="lang-toggle" aria-label="Switch language" title="Switch language">
+        <span class="toggle-label" id="lang-label">EN</span>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button class="toggle-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle dark/light mode">
+        <!-- Sun icon (shown in dark mode) -->
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <!-- Moon icon (shown in light mode) -->
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
+      <!-- Hamburger -->
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    height: var(--navbar-height);
+    background-color: var(--color-navbar-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color var(--transition-base), border-color var(--transition-base);
+  }
+
+  .navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    gap: var(--space-4);
+  }
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .navbar-brand img {
+    border-radius: var(--border-radius-sm);
+  }
+
+  .navbar-brand-text {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    transition: color var(--transition-fast);
+  }
+
+  .navbar-brand:hover .navbar-brand-text {
+    color: var(--color-accent);
+  }
+
+  .navbar-links {
+    display: none;
+    gap: var(--space-8);
+  }
+
+  .nav-link {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    padding: var(--space-2) 0;
+  }
+
+  .nav-link:hover {
+    color: var(--color-accent);
+  }
+
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-sm);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+  }
+
+  .toggle-btn:hover {
+    background-color: var(--color-bg-secondary);
+    color: var(--color-accent);
+  }
+
+  .toggle-label {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  /* Theme icon visibility */
+  [data-theme='dark'] .icon-sun {
+    display: block;
+  }
+  [data-theme='dark'] .icon-moon {
+    display: none;
+  }
+  [data-theme='light'] .icon-sun,
+  :root:not([data-theme='dark']) .icon-sun {
+    display: none;
+  }
+  [data-theme='light'] .icon-moon,
+  :root:not([data-theme='dark']) .icon-moon {
+    display: block;
+  }
+
+  /* Hamburger */
+  .hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    border-radius: var(--border-radius-sm);
+    transition: background-color var(--transition-fast);
+  }
+
+  .hamburger:hover {
+    background-color: var(--color-bg-secondary);
+  }
+
+  .hamburger span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--color-text-secondary);
+    border-radius: 1px;
+    transition: all var(--transition-fast);
+  }
+
+  .hamburger[aria-expanded='true'] span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .hamburger[aria-expanded='true'] span:nth-child(2) {
+    opacity: 0;
+  }
+  .hamburger[aria-expanded='true'] span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Mobile menu open */
+  .navbar-links.open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: var(--navbar-height);
+    left: 0;
+    right: 0;
+    background-color: var(--color-navbar-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-4) var(--container-padding);
+    gap: var(--space-4);
+  }
+
+  /* Desktop */
+  @media (min-width: 768px) {
+    .navbar-links {
+      display: flex;
+    }
+
+    .hamburger {
+      display: none;
+    }
+
+    .navbar-links.open {
+      position: static;
+      flex-direction: row;
+      padding: 0;
+      border-bottom: none;
+      background-color: transparent;
+      backdrop-filter: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    // --- Theme Toggle ---
+    var themeToggle = document.getElementById('theme-toggle');
+    themeToggle.addEventListener('click', function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('harmony-theme', next);
+    });
+
+    // --- Language Toggle ---
+    var langToggle = document.getElementById('lang-toggle');
+    var langLabel = document.getElementById('lang-label');
+    var currentLang = localStorage.getItem('harmony-lang') || 'en';
+
+    function applyLang(lang) {
+      currentLang = lang;
+      langLabel.textContent = lang.toUpperCase();
+      document.querySelectorAll('[data-lang]').forEach(function (el) {
+        if (el.getAttribute('data-lang') === lang) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+      document.documentElement.setAttribute('lang', lang);
+      localStorage.setItem('harmony-lang', lang);
+    }
+
+    applyLang(currentLang);
+
+    langToggle.addEventListener('click', function () {
+      applyLang(currentLang === 'en' ? 'es' : 'en');
+    });
+
+    // --- Hamburger Menu ---
+    var hamburger = document.getElementById('hamburger');
+    var navLinks = document.getElementById('navbar-links');
+
+    hamburger.addEventListener('click', function () {
+      var expanded = hamburger.getAttribute('aria-expanded') === 'true';
+      hamburger.setAttribute('aria-expanded', !expanded);
+      navLinks.classList.toggle('open');
+    });
+
+    // Close mobile menu on link click
+    navLinks.querySelectorAll('.nav-link').forEach(function (link) {
+      link.addEventListener('click', function () {
+        hamburger.setAttribute('aria-expanded', 'false');
+        navLinks.classList.remove('open');
+      });
+    });
+  })();
+</script>

@@ -1,0 +1,154 @@
+---
+import { translations } from '@/i18n/translations';
+
+const GITHUB_RELEASES = 'https://github.com/jvegaf/harmony/releases';
+const en = translations.en.download;
+const es = translations.es.download;
+---
+
+<section class="download section" id="download">
+  <div class="container">
+    <div class="download-card fade-in">
+      <div class="download-content">
+        <h2>
+          <span data-lang="en">{en.title}</span>
+          <span data-lang="es" class="hidden">{es.title}</span>
+        </h2>
+        <p class="download-subtitle">
+          <span data-lang="en">{en.subtitle}</span>
+          <span data-lang="es" class="hidden">{es.subtitle}</span>
+        </p>
+
+        <div class="download-platforms">
+          <!-- Windows -->
+          <div class="platform-icon" title="Windows">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
+            </svg>
+          </div>
+          <!-- Linux -->
+          <div class="platform-icon" title="Linux">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.368 1.884 1.43.777.07 1.591-.267 2.075-.95.487-.68.725-1.49.457-2.58-.167-.666-.38-1.197-.652-1.593-.27-.382-.605-.601-1.015-.665-.402-.064-.784.084-1.182.217-.398.136-.795.268-1.192.268a1.14 1.14 0 01-.466-.135c.258-.604.216-1.215-.082-1.69a2.332 2.332 0 00-.264-.335c.247-.344.452-.733.601-1.148.149-.401.315-.89.135-1.46-.174-.56-.534-.799-.97-.933-.434-.131-.927-.132-1.416-.069-.398.058-.728.19-1.058.33-.326.133-.657.273-.926.273-.259 0-.564-.13-.86-.267a3.483 3.483 0 00-.994-.333 2.504 2.504 0 00-.126-.001zm.012 1.21c.075-.003.14.01.19.027.264.076.4.233.564.396.16.166.324.37.518.526.386.33.91.468 1.31.534.398.066.726.066.992.066.26 0 .459.058.6.13.127.066.224.17.288.396.058.2-.04.467-.158.798-.118.326-.27.7-.462 1.058a4.473 4.473 0 01-.33.466 2.28 2.28 0 00-.399.002c-.066 0-.127.004-.193.008-.332.016-.665.131-.993.334-.199.13-.398.291-.597.396-.404.2-.794.268-1.127.268-.328 0-.594-.064-.86-.198-.258-.134-.524-.33-.858-.465a3.2 3.2 0 00-.67-.202c-.27-.04-.531-.03-.794.098a.41.41 0 00-.057-.072c-.36-.338-.93-.468-1.555-.468-.623 0-1.3.13-1.89.398a5.53 5.53 0 01-.396-1.127c-.126-.474-.176-1.058.002-1.622.178-.563.525-1.121 1.21-1.586.683-.466 1.623-.8 2.935-.998.34-.064.54-.068.74-.133a3.39 3.39 0 01.327-.066c.108-.006.157-.007.34-.007z"/>
+            </svg>
+          </div>
+          <!-- macOS -->
+          <div class="platform-icon" title="macOS">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+            </svg>
+          </div>
+        </div>
+
+        <a href={GITHUB_RELEASES} class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span data-lang="en">{en.button}</span>
+          <span data-lang="es" class="hidden">{es.button}</span>
+        </a>
+
+        <p class="download-note">
+          <span data-lang="en">{en.platforms}</span>
+          <span data-lang="es" class="hidden">{es.platforms}</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .download {
+    padding-block: var(--space-16);
+  }
+
+  .download-card {
+    background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-card) 100%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    padding: var(--space-10) var(--space-6);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .download-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  }
+
+  .download-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .download-content h2 {
+    font-size: var(--font-size-section);
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-3);
+  }
+
+  .download-subtitle {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-8);
+    max-width: 500px;
+    margin-inline: auto;
+  }
+
+  .download-platforms {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+  }
+
+  .platform-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--border-radius-md);
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+  }
+
+  .platform-icon:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-large {
+    padding: 1rem 2rem;
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-4);
+  }
+
+  .download-note {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 768px) {
+    .download-card {
+      padding: var(--space-16) var(--space-10);
+    }
+  }
+
+  @media (max-width: 639px) {
+    .btn-large {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

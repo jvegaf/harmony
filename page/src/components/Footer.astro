@@ -1,0 +1,124 @@
+---
+import { translations } from '@/i18n/translations';
+
+const en = translations.en.footer;
+const es = translations.es.footer;
+const GITHUB_REPO = 'https://github.com/jvegaf/harmony';
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <span class="footer-logo gradient-text">Harmony</span>
+      <p class="footer-tagline">
+        <span data-lang="en">{en.tagline}</span>
+        <span data-lang="es" class="hidden">{es.tagline}</span>
+      </p>
+    </div>
+
+    <div class="footer-links">
+      <a href={GITHUB_REPO} target="_blank" rel="noopener noreferrer">
+        <span data-lang="en">{en.github}</span>
+        <span data-lang="es" class="hidden">{es.github}</span>
+      </a>
+      <a href={`${GITHUB_REPO}/issues`} target="_blank" rel="noopener noreferrer">
+        <span data-lang="en">{en.issues}</span>
+        <span data-lang="es" class="hidden">{es.issues}</span>
+      </a>
+      <a href={`${GITHUB_REPO}/releases`} target="_blank" rel="noopener noreferrer">
+        <span data-lang="en">Releases</span>
+        <span data-lang="es" class="hidden">Versiones</span>
+      </a>
+    </div>
+
+    <div class="footer-bottom">
+      <p>
+        <span data-lang="en">{en.built_by}</span>
+        <span data-lang="es" class="hidden">{es.built_by}</span>
+        {' '}
+        <a href={GITHUB_REPO} target="_blank" rel="noopener noreferrer">{en.author}</a>
+      </p>
+      <p class="footer-license">
+        <span data-lang="en">{en.license}</span>
+        <span data-lang="es" class="hidden">{es.license}</span>
+        {' · '}
+        {currentYear}
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--color-border);
+    padding-block: var(--space-10);
+    background-color: var(--color-bg-secondary);
+    transition: background-color var(--transition-base), border-color var(--transition-base);
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    text-align: center;
+  }
+
+  .footer-logo {
+    font-size: var(--font-size-xl);
+    font-weight: 800;
+  }
+
+  .footer-tagline {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-top: var(--space-1);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .footer-links a {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    transition: color var(--transition-fast);
+  }
+
+  .footer-links a:hover {
+    color: var(--color-accent);
+  }
+
+  .footer-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .footer-bottom p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+
+  .footer-license {
+    font-size: var(--font-size-xs) !important;
+  }
+
+  @media (min-width: 768px) {
+    .footer-inner {
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: left;
+    }
+
+    .footer-bottom {
+      align-items: flex-end;
+      text-align: right;
+    }
+  }
+</style>

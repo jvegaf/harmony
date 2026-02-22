@@ -1,0 +1,88 @@
+---
+export interface Props {
+  title?: string;
+  description?: string;
+  lang?: string;
+}
+
+const {
+  title = 'Harmony — Music Manager for Old-School DJs',
+  description = 'Harmony is a powerful desktop music manager built for DJs. Organize your collection, auto-tag tracks, detect duplicates, and sync with Traktor.',
+  lang = 'en',
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang={lang} data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="author" content="Jose Vega" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={`${base}assets/harmony-main-screen.png`} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="icon" type="image/png" href={`${base}assets/harmony-logo.png`} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+
+    <!-- Theme & Language script (runs before paint to avoid flash) -->
+    <script is:inline>
+      (function () {
+        // Theme
+        const saved = localStorage.getItem('harmony-theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = saved || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+
+        // AIDEV-NOTE: Apply saved language before first paint to prevent
+        // both-languages-visible flash. The Navbar script handles toggle interactions.
+        var lang = localStorage.getItem('harmony-lang') || 'en';
+        document.documentElement.setAttribute('lang', lang);
+        document.querySelectorAll('[data-lang]').forEach(function (el) {
+          if (el.getAttribute('data-lang') !== lang) {
+            el.classList.add('hidden');
+          } else {
+            el.classList.remove('hidden');
+          }
+        });
+      })();
+    </script>
+
+    <!-- Scroll animation observer -->
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', function () {
+        const observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+              }
+            });
+          },
+          { threshold: 0.1, rootMargin: '0px 0px -40px 0px' },
+        );
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+          observer.observe(el);
+        });
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+</style>
