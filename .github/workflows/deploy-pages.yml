@@ -5,23 +5,19 @@ on:
     branches: [main]
     paths:
       - 'page/**'
+      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: 'pages'
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: page
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,23 +30,23 @@ jobs:
           cache-dependency-path: page/package-lock.json
 
       - name: Install dependencies
+        working-directory: page
         run: npm ci
 
       - name: Build Astro site
+        working-directory: page
         run: npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: page/dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd page/dist
+          touch .nojekyll
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+          git add .
+          git commit -m "Deploy landing page from ${{ github.sha }}"
+          git push --force origin HEAD:gh-pages
