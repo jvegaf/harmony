@@ -17,9 +17,11 @@ import {
   IconSettings,
   IconLayersIntersect,
   IconPalette,
+  IconTag,
 } from '@tabler/icons-react';
 import SettingsLog from './SettingsLog';
 import SettingsDuplicates from './SettingsDuplicates';
+import SettingsTagger from './SettingsTagger';
 import { RootLoaderData } from '../Root';
 
 export default function SettingsView() {
@@ -88,6 +90,12 @@ export default function SettingsView() {
               Duplicates
             </Tabs.Tab>
             <Tabs.Tab
+              value='tagger'
+              leftSection={<IconTag size={14} />}
+            >
+              Tagger
+            </Tabs.Tab>
+            <Tabs.Tab
               value='logs'
               leftSection={<IconPencilCog size={14} />}
             >
@@ -115,6 +123,12 @@ export default function SettingsView() {
           </Tabs.Panel>
           <Tabs.Panel value='duplicates'>
             <SettingsDuplicates />
+          </Tabs.Panel>
+          <Tabs.Panel value='tagger'>
+            <SettingsTagger />
+          </Tabs.Panel>
+          <Tabs.Panel value='logs'>
+            <SettingsLog />
           </Tabs.Panel>
         </Tabs>
       </div>
