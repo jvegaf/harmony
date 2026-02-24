@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [Unreleased]
+
+### ✨ Added
+
+- **Library import progress toast:** Selecting a music collection folder now shows a live Mantine notification with an animated progress bar, track counter (`X / Y (Z%)`), and phase labels (Scanning → Importing → Saving). The toast auto-closes with a green success message on completion or a red error message on failure.
+- `LibraryImportProgress` type exported from `@preload/types/harmony` for strongly-typed IPC progress events.
+
+### ⚡ Performance
+
+- Main process now emits per-track `LIBRARY_IMPORT_PROGRESS` IPC events during metadata scanning (throttled to every 10 tracks, or every track for libraries < 50 files), enabling smooth real-time progress reporting without saturating the IPC channel.
+
+---
+
 ## [0.17.0] - 2026-01-18
 
 ### ✨ Added
