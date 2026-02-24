@@ -21,7 +21,7 @@ import { Worker as NodeWorker } from 'worker_threads';
 import { join } from 'path';
 import log from 'electron-log';
 
-import { ProviderSource } from '@preload/types/tagger';
+import { ProviderSource, TaggerProviderConfig } from '@preload/types/tagger';
 import { RawTrackData } from '../providers/types';
 import { TagCandidatesProgress } from '@preload/types/tagger';
 
@@ -54,26 +54,41 @@ export class TaggerWorkerManager {
   private taskIdCounter = 0;
   private initialized = false;
   private initializing = false;
+  /** Active providers in priority order (index 0 = highest priority) */
+  private activeProviders: ProviderSource[] = [];
 
   /**
-   * Initialize the 3 workers (one per provider)
+   * Initialize workers for the given provider configs.
+   * Only providers with `enabled: true` get a worker.
+   * If already initialized, this is a no-op — call reinitialize() to update.
    */
-  async initialize(): Promise<void> {
+  async initialize(providerConfigs?: TaggerProviderConfig[]): Promise<void> {
     if (this.initialized || this.initializing) return;
 
     this.initializing = true;
 
+    // Default to all 3 providers if no config supplied (backward-compat)
+    const configs: TaggerProviderConfig[] = providerConfigs ?? [
+      { name: 'beatport', displayName: 'Beatport', enabled: true, maxResults: 10 },
+      { name: 'traxsource', displayName: 'Traxsource', enabled: true, maxResults: 10 },
+      { name: 'bandcamp', displayName: 'Bandcamp', enabled: true, maxResults: 10 },
+    ];
+
+    const enabledConfigs = configs.filter(c => c.enabled);
+    this.activeProviders = enabledConfigs.map(c => c.name);
+
     try {
-      log.info('[TaggerWorkerManager] Initializing 3 workers (Beatport, Traxsource, Bandcamp)...');
+      log.info(
+        `[TaggerWorkerManager] Initializing ${enabledConfigs.length} workers: ${this.activeProviders.join(', ')}`,
+      );
 
       const workerScriptPath = getWorkerScriptPath();
       log.info(`[TaggerWorkerManager] Worker script path: ${workerScriptPath}`);
 
-      const providers: ProviderSource[] = ['beatport', 'traxsource', 'bandcamp'];
       const initPromises: Promise<void>[] = [];
 
-      providers.forEach((provider, index) => {
-        initPromises.push(this.spawnWorker(provider, index));
+      enabledConfigs.forEach((config, index) => {
+        initPromises.push(this.spawnWorker(config.name, index));
       });
 
       await Promise.all(initPromises);
@@ -85,6 +100,24 @@ export class TaggerWorkerManager {
       this.initializing = false;
       throw error;
     }
+  }
+
+  /**
+   * Re-initialize workers with a new provider configuration.
+   * Shuts down all current workers and spawns new ones for enabled providers.
+   * AIDEV-NOTE: Called when user changes provider config in Settings > Tagger.
+   */
+  async reinitialize(providerConfigs: TaggerProviderConfig[]): Promise<void> {
+    log.info('[TaggerWorkerManager] Re-initializing with new provider config...');
+    await this.shutdown();
+    await this.initialize(providerConfigs);
+  }
+
+  /**
+   * Returns the active provider list in priority order.
+   */
+  getActiveProviders(): ProviderSource[] {
+    return [...this.activeProviders];
   }
 
   /**
@@ -275,7 +308,7 @@ export class TaggerWorkerManager {
 
     const workerInstance = this.workers.get(provider);
     if (!workerInstance) {
-      throw new Error(`Worker for provider ${provider} not found`);
+      throw new Error(`Worker for provider ${provider} not found (provider may be disabled)`);
     }
 
     if (!workerInstance.ready) {
@@ -314,10 +347,10 @@ export class TaggerWorkerManager {
   }
 
   /**
-   * Search for a single track in all providers simultaneously
+   * Search for a single track in all active providers simultaneously
    */
   async searchAll(title: string, artist: string): Promise<Map<ProviderSource, RawTrackData[]>> {
-    const providers: ProviderSource[] = ['beatport', 'traxsource', 'bandcamp'];
+    const providers = this.activeProviders;
 
     const searchPromises = providers.map(async provider => {
       try {
@@ -360,13 +393,13 @@ export class TaggerWorkerManager {
 
     log.info(`[TaggerWorkerManager] Starting batch search for ${total} tracks...`);
 
-    // Create search promises for all tracks x all providers
+    // Create search promises for all tracks x all active providers
     const allPromises = tracks.map(async track => {
       const providerResults = new Map<ProviderSource, RawTrackData[]>();
       const errors = new Map<ProviderSource, string>();
 
-      // Search in all 3 providers in parallel for this track
-      const providers: ProviderSource[] = ['beatport', 'traxsource', 'bandcamp'];
+      // Search in all active providers in parallel for this track
+      const providers = this.activeProviders;
       const providerPromises = providers.map(async provider => {
         try {
           const taskId = this.generateTaskId();

@@ -1,5 +1,7 @@
 export type Maybe<T> = T | null | undefined;
 
+import { TaggerProviderConfig } from './tagger';
+
 export enum PlayerStatus {
   PLAY = 'play',
   PAUSE = 'pause',
@@ -297,6 +299,19 @@ export interface Config {
     durationToleranceSeconds: number;
     /** Similarity threshold for fuzzy matching 0-1 (default: 0.85) */
     similarityThreshold: number;
+  };
+  /**
+   * Tag candidate search provider configuration.
+   * Controls which providers participate in searches, their order (priority for tie-breaking),
+   * and per-provider result limits. Users can configure via Settings > Tagger panel.
+   */
+  taggerConfig: {
+    /**
+     * Ordered list of provider configs.
+     * Array order defines tie-breaking priority: index 0 wins when scores are equal.
+     * At least one provider must remain enabled.
+     */
+    providers: TaggerProviderConfig[];
   };
 }
 

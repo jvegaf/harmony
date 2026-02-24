@@ -50,7 +50,7 @@ async function initModules(window: BrowserWindow): Promise<void> {
     new IPCCoverModule(window),
     new IPCLibraryModule(window),
     new IPCPlaylistModule(window),
-    new IPCTaggerModule(window),
+    new IPCTaggerModule(window, configModule),
     new IPCAudioAnalysisModule(window),
     new IPCTraktorModule(window, configModule),
     new IPCDuplicatesModule(window),

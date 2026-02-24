@@ -15,21 +15,49 @@ import { SearchSimilars } from '../lib/track/similar';
 import ModuleWindow from './BaseWindowModule';
 import { TrackCandidatesResult, TrackSelection, TagCandidatesProgress } from '@preload/types/tagger';
 import { getTaggerWorkerManager } from '../lib/tagger/worker/tagger-worker-manager';
+import ConfigModule from './ConfigModule';
 
 /**
  * Module in charge of returning the track with tags fixed.
  * Manages tagger worker lifecycle and emits progress events during candidate searches.
+ *
+ * AIDEV-NOTE: Accepts ConfigModule to read taggerConfig (enabled providers, priority, maxResults).
+ * Re-initializes workers when the user changes taggerConfig from the Settings > Tagger panel.
  */
 class IPCTaggerModule extends ModuleWindow {
+  private configModule: ConfigModule;
+
+  constructor(window: Electron.BrowserWindow, configModule: ConfigModule) {
+    super(window);
+    this.configModule = configModule;
+  }
+
   async load(): Promise<void> {
-    // Initialize tagger workers on module load
+    // Initialize tagger workers using the configured providers
     try {
+      const taggerConfig = this.configModule.getConfig().get('taggerConfig');
       const taggerManager = getTaggerWorkerManager();
-      await taggerManager.initialize();
+      await taggerManager.initialize(taggerConfig?.providers);
       log.info('[IPCTaggerModule] Tagger workers initialized successfully');
     } catch (error) {
       log.error('[IPCTaggerModule] Failed to initialize tagger workers:', error);
     }
+
+    // AIDEV-NOTE: Listen for CONFIG_SET to detect when the user changes taggerConfig
+    // from Settings > Tagger. Re-initialize workers to reflect the new provider set.
+    ipcMain.on(channels.CONFIG_SET, async (_e, key: string) => {
+      if (key === 'taggerConfig') {
+        try {
+          const taggerConfig = this.configModule.getConfig().get('taggerConfig');
+          log.info('[IPCTaggerModule] taggerConfig changed — re-initializing workers...');
+          const taggerManager = getTaggerWorkerManager();
+          await taggerManager.reinitialize(taggerConfig?.providers ?? []);
+          log.info('[IPCTaggerModule] Tagger workers re-initialized successfully');
+        } catch (error) {
+          log.error('[IPCTaggerModule] Failed to re-initialize tagger workers after config change:', error);
+        }
+      }
+    });
 
     ipcMain.handle(channels.FIX_TAGS, (_e, track: Track): Promise<Track> => {
       return FixTags(track);
@@ -39,6 +67,9 @@ class IPCTaggerModule extends ModuleWindow {
     ipcMain.handle(
       channels.FIND_TAG_CANDIDATES,
       (_e, tracks: Track[], options?: { autoApply?: boolean }): Promise<TrackCandidatesResult[]> => {
+        // Read current taggerConfig for this search
+        const taggerConfig = this.configModule.getConfig().get('taggerConfig');
+
         // Emit search progress to renderer
         const onProgress = (progress: TagCandidatesProgress) => {
           this.window.webContents.send(channels.TAG_CANDIDATES_PROGRESS, progress);
@@ -63,7 +94,14 @@ class IPCTaggerModule extends ModuleWindow {
           });
         };
 
-        return FindCandidates(tracks, onProgress, onAutoApplyProgress, onAutoApplyComplete, options);
+        return FindCandidates(
+          tracks,
+          onProgress,
+          onAutoApplyProgress,
+          onAutoApplyComplete,
+          options,
+          taggerConfig?.providers,
+        );
       },
     );
 

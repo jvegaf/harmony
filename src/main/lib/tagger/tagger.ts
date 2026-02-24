@@ -15,13 +15,14 @@ import {
   TagCandidatesProgress,
   ProviderSource,
   TrackCandidate,
+  TaggerProviderConfig,
 } from '@preload/types/tagger';
 import { TrackCandidateUtils } from '@preload/types/tagger/candidate';
 import { BeatportTrackUtils, BeatportTrack } from '@preload/types/beatport';
 import { TXTrack } from '@preload/types/traxsource';
 import { getTaggerWorkerManager } from './worker/tagger-worker-manager';
 import { getWorkerPool } from '../audio-analysis/worker-pool';
-import type { RawTrackData } from './providers/types';
+import type { RawTrackData, TrackProvider } from './providers/types';
 import { Database } from '../db/database';
 
 export const FixTags = async (track: Track): Promise<Track> => {
@@ -204,6 +205,7 @@ async function applyPerfectMatchesInBackground(
  * @param onAutoApplyProgress Callback opcional para reportar progreso del auto-apply en background
  * @param onAutoApplyComplete Callback opcional para notificar cuando el auto-apply termine
  * @param options Opciones adicionales: autoApply (default: true) controla si se aplican matches perfectos automáticamente
+ * @param providerConfigs Configuración de providers (leída del config store por IPCTaggerModule)
  * @returns Lista de TrackCandidatesResult con top 4 candidatos (excluye matches perfectos ya aplicados)
  */
 export const FindCandidates = async (
@@ -212,15 +214,33 @@ export const FindCandidates = async (
   onAutoApplyProgress?: AutoApplyProgressCallback,
   onAutoApplyComplete?: AutoApplyCompleteCallback,
   options?: { autoApply?: boolean },
+  providerConfigs?: TaggerProviderConfig[],
 ): Promise<TrackCandidatesResult[]> => {
   // AIDEV-NOTE: autoApply defaults to true to maintain backward compatibility
   const autoApply = options?.autoApply ?? true;
+
+  // AIDEV-NOTE: Build provider list from config. Fallback to all providers if no config supplied.
+  // Provider order in config defines tie-breaking priority (index 0 = highest priority).
+  const enabledConfigs = providerConfigs?.filter(c => c.enabled) ?? [
+    { name: 'beatport' as ProviderSource, displayName: 'Beatport', enabled: true, maxResults: 10 },
+    { name: 'traxsource' as ProviderSource, displayName: 'Traxsource', enabled: true, maxResults: 10 },
+    { name: 'bandcamp' as ProviderSource, displayName: 'Bandcamp', enabled: true, maxResults: 10 },
+  ];
+  const providerPriority: ProviderSource[] = enabledConfigs.map(c => c.name);
+
+  const providerFactories: Record<ProviderSource, () => TrackProvider> = {
+    beatport: createBeatportProvider,
+    traxsource: createTraxsourceProvider,
+    bandcamp: createBandcampProvider,
+  };
+
   // Create orchestrator for scoring/ranking (not for searching - workers do that)
   const orchestrator = new ProviderOrchestrator(
-    [createBeatportProvider(), createTraxsourceProvider(), createBandcampProvider()],
+    enabledConfigs.map(c => providerFactories[c.name]()),
     {
       maxCandidates: 4, // Top 4 globales
       minScore: 0.3, // Score mínimo 30%
+      providerPriority,
     },
   );
 
@@ -230,7 +250,7 @@ export const FindCandidates = async (
 
   try {
     // AIDEV-NOTE: Initialize workers once before batch search
-    await taggerManager.initialize();
+    await taggerManager.initialize(providerConfigs);
 
     // Convert Track[] to BatchSearchRequest[]
     const searchRequests = tracks.map(track => ({
@@ -240,7 +260,7 @@ export const FindCandidates = async (
       durationSecs: track.duration,
     }));
 
-    // AIDEV-NOTE: Batch search across all tracks and all providers in parallel
+    // AIDEV-NOTE: Batch search across all tracks and all active providers in parallel
     // Workers process their provider-specific queues internally while running concurrently
     const batchResults = await taggerManager.searchBatch(searchRequests, progress => {
       // Forward worker progress to caller
@@ -271,9 +291,8 @@ export const FindCandidates = async (
       try {
         // Combine all provider results (workers already handle errors -> empty arrays)
         const allRaw: Array<RawTrackData & { source: ProviderSource }> = [];
-        const providers: ProviderSource[] = ['beatport', 'traxsource', 'bandcamp'];
 
-        for (const provider of providers) {
+        for (const provider of providerPriority) {
           const providerData = trackResults.providerResults.get(provider);
 
           if (providerData && providerData.length > 0) {

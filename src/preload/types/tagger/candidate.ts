@@ -4,6 +4,24 @@
 export type ProviderSource = 'beatport' | 'traxsource' | 'bandcamp';
 
 /**
+ * Configuración de un provider de tag candidates.
+ * Persisted in `taggerConfig.providers[]` within the app config.
+ *
+ * AIDEV-NOTE: Order in the array defines tie-breaking priority when two candidates
+ * have equal similarity scores. Index 0 = highest priority.
+ */
+export interface TaggerProviderConfig {
+  /** Provider identifier */
+  name: ProviderSource;
+  /** Human-readable display name */
+  displayName: string;
+  /** Whether this provider participates in searches */
+  enabled: boolean;
+  /** Maximum results to fetch from this provider per search (default: 10) */
+  maxResults: number;
+}
+
+/**
  * Candidato de track desde un provider (Beatport o Traxsource)
  *
  * Este tipo unificado soporta candidatos de múltiples providers,
