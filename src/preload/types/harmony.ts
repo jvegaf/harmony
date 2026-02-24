@@ -331,3 +331,18 @@ export const enum SearchEngine {
   TRAXSOURCE,
   GOOGLE,
 }
+
+/**
+ * Progress event emitted during a full library import operation.
+ * Sent from the main process to the renderer via LIBRARY_IMPORT_PROGRESS IPC channel.
+ */
+export interface LibraryImportProgress {
+  /** Current phase of the import pipeline */
+  step: 'scanning' | 'importing' | 'saving' | 'complete' | 'error';
+  /** Number of items processed so far in the current step */
+  processed: number;
+  /** Total number of items to process in the current step (0 when unknown) */
+  total: number;
+  /** Human-readable description of the current operation */
+  message: string;
+}

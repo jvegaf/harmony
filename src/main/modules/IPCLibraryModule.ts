@@ -305,6 +305,10 @@ class IPCLibraryModule extends ModuleWindow {
 
         this.import.total += pathsToImport.length;
 
+        // AIDEV-NOTE: Throttle progress events — emit every 10 tracks (or every track if total < 50)
+        // to avoid saturating the IPC channel with 32 concurrent workers.
+        const progressThreshold = pathsToImport.length < 50 ? 1 : 10;
+
         // Add all the items to the queue (only new paths)
         pathsToImport.forEach((filePath, index) => {
           scanQueue.push(async callback => {
@@ -315,10 +319,20 @@ class IPCLibraryModule extends ModuleWindow {
               scannedFiles.push(track);
 
               this.import.processed++;
+
+              // Emit per-track progress so the renderer can show a live progress bar
+              if (this.import.processed % progressThreshold === 0 || this.import.processed === this.import.total) {
+                this.window.webContents.send(channels.LIBRARY_IMPORT_PROGRESS, {
+                  step: 'importing',
+                  processed: this.import.processed,
+                  total: this.import.total,
+                  message: 'Reading track metadata...',
+                });
+              }
             } catch (err) {
               log.warn(err);
             } finally {
-              if (index % 50 == 0) {
+              if (index % 50 === 0) {
                 log.debug(`Finished scanning ${index} tracks`);
               }
             }

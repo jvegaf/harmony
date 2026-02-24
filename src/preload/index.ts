@@ -9,6 +9,7 @@ import {
   TrklistCtxMenuPayload,
   UpdateRatingPayload,
   Config,
+  LibraryImportProgress,
 } from './types/harmony';
 import type {
   TraktorConfig,
@@ -115,7 +116,7 @@ const api = {
     scanPaths: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_LOOKUP, paths),
     importTracks: async (trackPaths: string[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, trackPaths),
     importLibraryFull: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_FULL, paths),
-    onImportProgress: (callback: (progress: any) => void) => {
+    onImportProgress: (callback: (progress: LibraryImportProgress) => void) => {
       const listener = (_: any, progress: any) => callback(progress);
       ipcRenderer.on(channels.LIBRARY_IMPORT_PROGRESS, listener);
       return () => ipcRenderer.removeListener(channels.LIBRARY_IMPORT_PROGRESS, listener);

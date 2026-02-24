@@ -9,6 +9,7 @@ import NowPlayingBar from '../components/NowPlayingBar/NowPlayingBar';
 import usePlayingTrack from '../hooks/usePlayingTrack';
 import { useAutoSyncNotification } from '../hooks/useAutoSyncNotification';
 import { useAutoApplyNotification } from '../hooks/useAutoApplyNotification';
+import { useImportNotification } from '../hooks/useImportNotification';
 import { useAppEvents } from '../hooks/useAppEvents';
 import { usePlayerEvents } from '../hooks/usePlayerEvents';
 import { useMediaSessionEvents } from '../hooks/useMediaSessionEvents';
@@ -38,6 +39,9 @@ export default function ViewRoot() {
 
   // Show auto-apply notifications when perfect matches (>= 90%) are applied in background
   useAutoApplyNotification();
+
+  // Show progress toast when importing the music library
+  useImportNotification();
 
   // Initialize event listeners as hooks (ARCH-05: Converted from components to hooks)
   useAppEvents();
