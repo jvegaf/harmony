@@ -53,6 +53,13 @@ export default class ConfigModule extends Module {
       logger.info('[ConfigModule] Migrating config to add theme property');
       this.config.set('theme', defaults.theme);
     }
+
+    // Migrate taggerConfig if missing (added for configurable provider support)
+    const taggerConfig = this.config.get('taggerConfig');
+    if (!taggerConfig) {
+      logger.info('[ConfigModule] Migrating config to add taggerConfig property');
+      this.config.set('taggerConfig', defaults.taggerConfig);
+    }
   }
 
   async load(): Promise<void> {
@@ -152,6 +159,15 @@ export default class ConfigModule extends Module {
         },
         durationToleranceSeconds: 2,
         similarityThreshold: 0.85,
+      },
+      // Tag candidate provider configuration.
+      // Default: all 3 providers enabled, ordered by priority (Beatport first).
+      taggerConfig: {
+        providers: [
+          { name: 'beatport', displayName: 'Beatport', enabled: true, maxResults: 10 },
+          { name: 'traxsource', displayName: 'Traxsource', enabled: true, maxResults: 10 },
+          { name: 'bandcamp', displayName: 'Bandcamp', enabled: true, maxResults: 10 },
+        ],
       },
     };
 
