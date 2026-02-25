@@ -3,14 +3,21 @@ import { useCallback, useEffect, useState } from 'react';
 import * as Setting from '../../components/Setting/Setting';
 import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
 import useLibraryUIStore from '../../stores/useLibraryUIStore';
-import { Button, Stack, Tooltip, Switch } from '@mantine/core';
+import { Button, Stack, Tooltip, Switch, Text } from '@mantine/core';
 import styles from './Settings.module.css';
 import { useNavigate } from 'react-router-dom';
 import router from '../router';
 import LibraryChangesModal from '../../components/Modal/LibraryChangesModal';
 import ProgressModal from '../../components/Modal/ProgressModal/ProgressModal';
 
-const { logger, dialog, config } = window.Main;
+const { logger, dialog, config, library } = window.Main;
+
+const subtextStyle: React.CSSProperties = {
+  fontSize: 'var(--mantine-font-size-xs)',
+  color: 'var(--mantine-color-dimmed)',
+  display: 'block',
+  marginTop: '4px',
+};
 
 export default function SettingsLibrary() {
   const libraryAPI = useLibraryAPI();
@@ -20,11 +27,15 @@ export default function SettingsLibrary() {
   const [importing, setImporting] = useState(false);
   const [libraryPath, setLibraryPath] = useState<string>('');
   const [autoFixMetadata, setAutoFixMetadata] = useState<boolean>(false);
+  const [useCamelotKeys, setUseCamelotKeys] = useState<boolean>(false);
+  const [convertingKeys, setConvertingKeys] = useState(false);
+  const [convertProgress, setConvertProgress] = useState({ processed: 0, total: 0 });
 
-  // Load library path and autoFixMetadata on mount
+  // Load settings on mount
   useEffect(() => {
     config.get('libraryPath').then(path => setLibraryPath(path));
     config.get('autoFixMetadata').then(enabled => setAutoFixMetadata(enabled));
+    config.get('useCamelotKeys').then(enabled => setUseCamelotKeys(enabled));
   }, []);
 
   useEffect(() => {
@@ -57,6 +68,42 @@ export default function SettingsLibrary() {
     [setAutoFixMetadata],
   );
 
+  const toggleUseCamelotKeys = useCallback(
+    async (checked: boolean) => {
+      await config.set('useCamelotKeys', checked);
+      setUseCamelotKeys(checked);
+    },
+    [setUseCamelotKeys],
+  );
+
+  const handleConvertAllKeys = useCallback(async () => {
+    setConvertingKeys(true);
+    setConvertProgress({ processed: 0, total: 0 });
+
+    // Subscribe to progress events emitted during the conversion
+    const unsubscribe = library.onImportProgress(progress => {
+      if (progress.step === 'converting') {
+        setConvertProgress({ processed: progress.processed, total: progress.total });
+      }
+    });
+
+    try {
+      const result = await library.convertKeysToCamelot();
+      logger.info(
+        `[ConvertKeysToCamelot] ${result.succeeded} converted, ${result.failed} failed out of ${result.total}`,
+      );
+
+      // Refresh the library view so updated keys are visible
+      router.revalidate();
+    } catch (err) {
+      logger.error('[ConvertKeysToCamelot] Failed:', err);
+    } finally {
+      unsubscribe();
+      setConvertingKeys(false);
+      setConvertProgress({ processed: 0, total: 0 });
+    }
+  }, []);
+
   return (
     <div className={styles.settingsContainer}>
       <Stack
@@ -66,16 +113,13 @@ export default function SettingsLibrary() {
         <Setting.Element>
           <Setting.Description>
             Music Collection Path
-            <span
-              style={{
-                fontSize: 'var(--mantine-font-size-xs)',
-                color: 'var(--mantine-color-dimmed)',
-                display: 'block',
-                marginTop: '4px',
-              }}
+            <Text
+              size='xs'
+              c='dimmed'
+              mt={4}
             >
               {libraryPath || 'No library path configured'}
-            </span>
+            </Text>
           </Setting.Description>
           <Setting.Action>
             <Button
@@ -108,22 +152,47 @@ export default function SettingsLibrary() {
         <Setting.Element>
           <Setting.Description>
             Auto-Fix Metadata
-            <span
-              style={{
-                fontSize: 'var(--mantine-font-size-xs)',
-                color: 'var(--mantine-color-dimmed)',
-                display: 'block',
-                marginTop: '4px',
-              }}
-            >
-              Automatically search for missing tags when importing new tracks
-            </span>
+            <span style={subtextStyle}>Automatically search for missing tags when importing new tracks</span>
           </Setting.Description>
           <Setting.Action>
             <Switch
               checked={autoFixMetadata}
               onChange={e => toggleAutoFixMetadata(e.currentTarget.checked)}
             />
+          </Setting.Action>
+        </Setting.Element>
+
+        <Setting.Element>
+          <Setting.Description>
+            Save Keys in Camelot Format
+            <span style={subtextStyle}>
+              Automatically convert musical keys to Camelot notation when importing new tracks (e.g., Am → 8A)
+            </span>
+          </Setting.Description>
+          <Setting.Action>
+            <Switch
+              checked={useCamelotKeys}
+              onChange={e => toggleUseCamelotKeys(e.currentTarget.checked)}
+            />
+          </Setting.Action>
+        </Setting.Element>
+
+        <Setting.Element>
+          <Setting.Description>
+            Convert All Keys to Camelot
+            <span style={subtextStyle}>
+              Convert all existing track keys to Camelot notation. Changes are saved to both audio files and the
+              database.
+            </span>
+          </Setting.Description>
+          <Setting.Action>
+            <Button
+              disabled={convertingKeys}
+              loading={convertingKeys}
+              onClick={handleConvertAllKeys}
+            >
+              Convert All Keys
+            </Button>
           </Setting.Action>
         </Setting.Element>
 
@@ -157,6 +226,21 @@ export default function SettingsLibrary() {
           message='Updating your library...'
           processed={applyChangesProgress.processed}
           total={applyChangesProgress.total}
+          type='apply'
+        />
+      )}
+
+      {/* Progress modal while converting keys to Camelot */}
+      {convertingKeys && (
+        <ProgressModal
+          title='Converting Keys to Camelot'
+          message={
+            convertProgress.total > 0
+              ? `Converting ${convertProgress.processed} of ${convertProgress.total} tracks...`
+              : 'Preparing conversion...'
+          }
+          processed={convertProgress.processed}
+          total={convertProgress.total > 0 ? convertProgress.total : 1}
           type='apply'
         />
       )}

@@ -25,7 +25,7 @@ import { getWorkerPool } from '../audio-analysis/worker-pool';
 import type { RawTrackData, TrackProvider } from './providers/types';
 import { Database } from '../db/database';
 
-export const FixTags = async (track: Track): Promise<Track> => {
+export const FixTags = async (track: Track, useCamelotKeys = false): Promise<Track> => {
   const tsClient = new Traxsource();
   try {
     const result = await tsClient.matchTrack(track);
@@ -35,7 +35,7 @@ export const FixTags = async (track: Track): Promise<Track> => {
     }
 
     const txMatch = await tsClient.extendTrack(result[0].track);
-    const fixedTrack = Update(track, txMatch);
+    const fixedTrack = Update(track, txMatch, useCamelotKeys);
 
     log.info(`track ${track.title} fixed`);
     return fixedTrack;
@@ -400,6 +400,7 @@ export const FindCandidates = async (
 export const ApplyTagSelections = async (
   selections: TrackSelection[],
   tracks: Track[],
+  useCamelotKeys = false,
 ): Promise<{ updated: Track[]; errors: Array<{ trackId: string; error: string }> }> => {
   const taggerManager = getTaggerWorkerManager();
   const audioPool = getWorkerPool();
@@ -521,7 +522,7 @@ export const ApplyTagSelections = async (
         }
 
         // Aplicar los tags al track local
-        const updatedTrack = await Update(localTrack, resultTag);
+        const updatedTrack = await Update(localTrack, resultTag, useCamelotKeys);
 
         // AIDEV-NOTE: Accumulate Bandcamp tracks for batch audio analysis
         if (needsAudioAnalysis) {

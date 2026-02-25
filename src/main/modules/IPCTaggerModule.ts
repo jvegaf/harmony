@@ -60,7 +60,8 @@ class IPCTaggerModule extends ModuleWindow {
     });
 
     ipcMain.handle(channels.FIX_TAGS, (_e, track: Track): Promise<Track> => {
-      return FixTags(track);
+      const useCamelotKeys = this.configModule.getConfig().get('useCamelotKeys');
+      return FixTags(track, useCamelotKeys);
     });
 
     // Handler with progress callback to report advances to renderer
@@ -112,7 +113,8 @@ class IPCTaggerModule extends ModuleWindow {
         selections: TrackSelection[],
         tracks: Track[],
       ): Promise<{ updated: Track[]; errors: Array<{ trackId: string; error: string }> }> => {
-        return ApplyTagSelections(selections, tracks);
+        const useCamelotKeys = this.configModule.getConfig().get('useCamelotKeys');
+        return ApplyTagSelections(selections, tracks, useCamelotKeys);
       },
     );
 

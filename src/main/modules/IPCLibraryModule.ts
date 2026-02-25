@@ -19,6 +19,8 @@ import { Database } from '../lib/db/database';
 import UpdateTrackRating from '../lib/track/rating-manager';
 import PersistTrack from '../lib/track/saver';
 import RemoveFile from '../lib/track/remover';
+import ConfigModule from './ConfigModule';
+import { standardToCamelot, isCamelotKey } from '../lib/key/camelot';
 
 interface ScanFile {
   path: string;
@@ -60,8 +62,12 @@ class IPCLibraryModule extends ModuleWindow {
     total: number;
   };
 
-  constructor(window: BrowserWindow) {
+  private configModule: ConfigModule;
+
+  constructor(window: BrowserWindow, configModule: ConfigModule) {
     super(window);
+
+    this.configModule = configModule;
 
     this.import = {
       processed: 0,
@@ -93,6 +99,50 @@ class IPCLibraryModule extends ModuleWindow {
       // Invalidate duplicates cache since library changed
       this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
       emitLibraryChanged('tracks-removed', trackFiles.length);
+    });
+
+    // AIDEV-NOTE: Converts all existing tracks with standard key notation to Camelot format.
+    // Persists changes to both the ID3 tag in the audio file and the database.
+    ipcMain.handle(channels.LIBRARY_CONVERT_KEYS_TO_CAMELOT, async () => {
+      const db = Database.getInstance();
+      const allTracks = await db.getAllTracks();
+
+      const tracksToConvert = allTracks.filter(
+        t => t.initialKey && !isCamelotKey(t.initialKey) && standardToCamelot(t.initialKey) !== undefined,
+      );
+
+      log.info(`[ConvertKeysToCamelot] Found ${tracksToConvert.length} tracks to convert`);
+
+      let succeeded = 0;
+      let failed = 0;
+
+      for (const track of tracksToConvert) {
+        try {
+          const camelotKey = standardToCamelot(track.initialKey!)!;
+          const updatedTrack = { ...track, initialKey: camelotKey };
+
+          // Persist to audio file (ID3 tag)
+          await PersistTrack(updatedTrack);
+          // Persist to database
+          await db.updateTrack(updatedTrack);
+
+          succeeded++;
+
+          this.window.webContents.send(channels.LIBRARY_IMPORT_PROGRESS, {
+            step: 'converting',
+            processed: succeeded + failed,
+            total: tracksToConvert.length,
+            message: `Converting keys to Camelot (${succeeded + failed}/${tracksToConvert.length})...`,
+          });
+        } catch (error) {
+          failed++;
+          log.error('[ConvertKeysToCamelot] Failed to convert key for track:', track.path, error);
+        }
+      }
+
+      log.info(`[ConvertKeysToCamelot] Done: ${succeeded} succeeded, ${failed} failed`);
+
+      return { succeeded, failed, total: tracksToConvert.length };
     });
   }
 
@@ -359,11 +409,18 @@ class IPCLibraryModule extends ModuleWindow {
     const rating = common.rating ? common.rating[0] : undefined;
     const rate = rating ? { ...rating, rating: Math.round(rating.rating * 5) } : undefined;
 
+    // AIDEV-NOTE: If useCamelotKeys is enabled, convert the raw key from the file
+    // to Camelot notation before storing. isCamelotKey() prevents double-conversion
+    // in case the file already stores a Camelot key.
+    const rawKey = common.key;
+    const useCamelotKeys = this.configModule.getConfig().get('useCamelotKeys');
+    const initialKey = rawKey && useCamelotKeys ? (standardToCamelot(rawKey) ?? rawKey) : rawKey;
+
     const metadata = {
       album: common.album,
       artist: (common.artists && common.artists.join(', ')) || common.artist || common.albumartist,
       bpm: common.bpm,
-      initialKey: common.key,
+      initialKey,
       duration: format.duration || 0,
       time: ParseDuration(format.duration || 0),
       genre: common.genre?.join(', '),

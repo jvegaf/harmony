@@ -128,6 +128,7 @@ const api = {
     deleteTracks: async (tracks: Track[]) => ipcRenderer.send(channels.TRACKS_DELETE, tracks),
     replaceFile: async (trackId: string, trackPath: string, newFilePath: string) =>
       ipcRenderer.invoke(channels.TRACK_REPLACE_FILE, trackId, trackPath, newFilePath),
+    convertKeysToCamelot: () => ipcRenderer.invoke(channels.LIBRARY_CONVERT_KEYS_TO_CAMELOT),
     findSimilars: (bpTrackId: number) => ipcRenderer.invoke(channels.TRACK_FIND_SIMILARS, bpTrackId),
   },
   playlists: {

@@ -264,6 +264,8 @@ export interface Config {
   libraryPath: string;
   /** Auto-fix metadata for newly imported tracks with missing tags */
   autoFixMetadata: boolean;
+  /** When enabled, imported tracks will have their initialKey converted to Camelot notation (e.g., Am → 8A) */
+  useCamelotKeys: boolean;
   /** Traktor NML integration configuration */
   traktorConfig: {
     nmlPath: string;
@@ -338,7 +340,7 @@ export const enum SearchEngine {
  */
 export interface LibraryImportProgress {
   /** Current phase of the import pipeline */
-  step: 'scanning' | 'importing' | 'saving' | 'complete' | 'error';
+  step: 'scanning' | 'importing' | 'saving' | 'complete' | 'error' | 'converting';
   /** Number of items processed so far in the current step */
   processed: number;
   /** Total number of items to process in the current step (0 when unknown) */

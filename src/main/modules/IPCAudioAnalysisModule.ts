@@ -19,7 +19,9 @@ import log from 'electron-log';
 import channels from '../../preload/lib/ipc-channels';
 import { getWorkerPool, AudioAnalysisResult, AudioAnalysisOptions } from '../lib/audio-analysis';
 import { Database } from '../lib/db/database';
+import { standardToCamelot } from '../lib/key/camelot';
 
+import ConfigModule from './ConfigModule';
 import ModuleWindow from './BaseWindowModule';
 
 /**
@@ -71,10 +73,12 @@ interface AnalysisProgressEvent {
  */
 export default class IPCAudioAnalysisModule extends ModuleWindow {
   protected db: Database;
+  private configModule: ConfigModule;
 
-  constructor(window: Electron.BrowserWindow) {
+  constructor(window: Electron.BrowserWindow, configModule: ConfigModule) {
     super(window);
     this.db = Database.getInstance();
+    this.configModule = configModule;
   }
 
   async load(): Promise<void> {
@@ -178,8 +182,13 @@ export default class IPCAudioAnalysisModule extends ModuleWindow {
 
       if (result.key && result.scale) {
         // Format key as "C major" or "Am minor"
-        const keyString = result.scale === 'minor' ? `${result.key}m` : result.key;
-        updatedTrack.initialKey = keyString;
+        const computedKey = result.scale === 'minor' ? `${result.key}m` : result.key;
+
+        // Apply Camelot conversion if enabled
+        const useCamelotKeys = this.configModule.getConfig().get('useCamelotKeys');
+        const finalKey = useCamelotKeys ? (standardToCamelot(computedKey) ?? computedKey) : computedKey;
+
+        updatedTrack.initialKey = finalKey;
         hasChanges = true;
         log.info(`[IPCAudioAnalysis] Updated Key: ${track.title} -> ${updatedTrack.initialKey}`);
       }

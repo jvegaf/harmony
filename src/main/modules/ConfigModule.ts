@@ -60,6 +60,13 @@ export default class ConfigModule extends Module {
       logger.info('[ConfigModule] Migrating config to add taggerConfig property');
       this.config.set('taggerConfig', defaults.taggerConfig);
     }
+
+    // Migrate useCamelotKeys if missing (added for Camelot key notation support)
+    const useCamelotKeys = this.config.get('useCamelotKeys');
+    if (useCamelotKeys === undefined) {
+      logger.info('[ConfigModule] Migrating config to add useCamelotKeys property');
+      this.config.set('useCamelotKeys', defaults.useCamelotKeys);
+    }
   }
 
   async load(): Promise<void> {
@@ -133,6 +140,8 @@ export default class ConfigModule extends Module {
       libraryPath: '',
       // Auto-fix metadata for newly imported tracks with missing tags
       autoFixMetadata: false,
+      // When enabled, imported tracks will have their initialKey converted to Camelot notation (e.g., Am → 8A)
+      useCamelotKeys: false,
       // Traktor NML integration configuration, persisted to settings
       traktorConfig: {
         nmlPath: '',

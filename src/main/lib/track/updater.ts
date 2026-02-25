@@ -3,12 +3,17 @@ import log from 'electron-log';
 import PersistTrack from './saver';
 import FetchArtwork from '../artwork/fetcher';
 import PersistArtwork from '../artwork/saver';
+import { standardToCamelot } from '../key/camelot';
 
-const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
+const Update = async (track: Track, tag: ResultTag, useCamelotKeys = false): Promise<Track> => {
   if (!tag) return track;
 
   // AIDEV-NOTE: Apply tag metadata to track, including label field from providers
   // Label is extracted from Beatport, Traxsource, and Bandcamp when applying tag candidates
+  // Apply Camelot conversion if enabled in settings
+  const rawKey = tag.key ?? undefined;
+  const initialKey = rawKey && useCamelotKeys ? (standardToCamelot(rawKey) ?? rawKey) : rawKey;
+
   const newTrack = {
     ...track,
     title: tag.title,
@@ -16,7 +21,7 @@ const Update = async (track: Track, tag: ResultTag): Promise<Track> => {
     album: tag.album ?? undefined,
     year: (tag.year && Number(tag.year)) || track.year,
     bpm: tag.bpm || track.bpm,
-    initialKey: tag.key ?? undefined,
+    initialKey,
     genre: tag.genre || track.genre,
     label: tag.label ?? undefined,
     url: tag.url ?? track.url,
