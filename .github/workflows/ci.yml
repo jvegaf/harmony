@@ -17,23 +17,27 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 22
-        cache: 'npm'
+        cache: 'pnpm'
 
     - name: Install Dependencies
-      run: npm ci
+      run: pnpm install --frozen-lockfile
 
     - name: Lint
-      run: npm run lint
+      run: pnpm run lint
 
     - name: Typecheck
-      run: npm run typecheck
+      run: pnpm run typecheck
 
     - name: Test
-      run: npm run test:run
+      run: pnpm run test:run
 
     - name: Build
-      run: npm run build
+      run: pnpm run build
