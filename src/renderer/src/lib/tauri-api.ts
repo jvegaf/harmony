@@ -489,10 +489,14 @@ export const library = {
  */
 export const dialog = {
   async open(opts: any): Promise<string | string[] | null> {
-    // AIDEV-NOTE: Convert Electron OpenDialogOptions to Tauri format
+    // AIDEV-NOTE: Supports both Electron-style (properties array) and Tauri-native (directory/multiple flags) formats.
+    // Electron-style: { properties: ['openDirectory', 'multiSelections'] }
+    // Tauri-native:   { directory: true, multiple: false }
+    const isElectronStyle = Array.isArray(opts.properties);
+
     const result = await openDialog({
-      multiple: opts.properties?.includes('openFile') && opts.properties?.includes('multiSelections'),
-      directory: opts.properties?.includes('openDirectory'),
+      multiple: isElectronStyle ? opts.properties.includes('multiSelections') : (opts.multiple ?? false),
+      directory: isElectronStyle ? opts.properties.includes('openDirectory') : (opts.directory ?? false),
       title: opts.title,
       filters: opts.filters?.map((f: any) => ({
         name: f.name,
