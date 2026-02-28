@@ -23,8 +23,7 @@ export default defineConfig({
   // Resolve aliases for cleaner imports
   resolve: {
     alias: {
-      '@renderer': resolve(__dirname, 'src/renderer/src'),
-      '@': resolve(__dirname, 'src/renderer/src'),
+      '@': resolve(__dirname, 'src'),
     },
   },
 

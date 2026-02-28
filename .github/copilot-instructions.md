@@ -5,7 +5,7 @@
 
 ## Project Overview
 
-**Harmony** is an Electron-based music manager for old-school DJs, built with TypeScript, React, and Vite. This desktop application manages music libraries, provides DJ tools, and integrates with various music services.
+**Harmony** is a Tauri v2-based music manager for old-school DJs, built with TypeScript, React, Rust, and Vite. This desktop application manages music libraries, provides DJ tools, and integrates with various music services.
 
 ## Technology Stack
 
@@ -19,10 +19,10 @@
 ## Core Development Principles
 
 ### Architecture Standards
-- **Three-Process Model**: Main (Node.js/Electron), Preload (IPC bridge), Renderer (React UI)
-- **Module System**: Base classes in `src/main/modules/` with standardized lifecycle methods
-- **IPC Communication**: Strongly typed channels defined in `src/preload/lib/ipc-channels.ts`
-- **Database Layer**: Drizzle schema in `src/main/lib/db/schema.ts`, Database singleton with better-sqlite3
+- **Two-Process Model**: Backend (Rust/Tauri), Frontend (React UI in WebView)
+- **IPC Communication**: Tauri commands via `invoke()` API from `@tauri-apps/api/core`
+- **Abstraction Layer**: `src/lib/tauri-api.ts` provides unified API for frontend
+- **Database Layer**: rusqlite with Rust structs in `src-tauri/src/libs/database.rs`
 
 ### Code Quality Standards
 - **TypeScript Strict Mode**: All code must be TypeScript with strict type checking
@@ -32,18 +32,16 @@
 
 ### Project File Organization
 ```
-src/
-├── main/           # Electron main process (Node.js backend)
-├── preload/        # IPC bridge and type definitions
-└── renderer/       # React frontend (browser context)
+src/              # React frontend (WebView context)
+src-tauri/        # Rust backend (Tauri commands, database, file I/O)
 ```
 
 ## Key Guidelines
 
 ### Import Organization
-1. **Node/Electron built-ins**: `import { app, BrowserWindow } from 'electron';`
-2. **External packages**: `import log from 'electron-log';`
-3. **Internal modules by alias**: `@main/*`, `@renderer/*`, `@preload/*`
+1. **Tauri API imports first**: `import { invoke } from '@tauri-apps/api/core';`
+2. **External packages**: `import { Button } from '@mantine/core';`
+3. **Internal modules by alias**: `@/*` → `src/*`
 4. **Relative imports**: `import './styles.css';`
 5. **No blank lines** within categories; **one blank line** between categories
 
@@ -55,10 +53,10 @@ src/
 - **Types/Interfaces**: PascalCase (`Track`, `PlayerStatus`)
 
 ### Error Handling & Logging
-- **Main/Preload**: Always use `electron-log` (never `console.*`)
-- **Renderer**: `console.*` acceptable, but prefer IPC logging for critical errors
+- **Backend (Rust)**: Use `log` crate macros (`info!`, `error!`, `warn!`, `debug!`)
+- **Frontend (TypeScript)**: Use Tauri's logger plugin from `@tauri-apps/plugin-log`
 - **Async Operations**: Always wrap in try-catch with structured error handling
-- **IPC Handlers**: Return error info to renderer rather than throwing
+- **Tauri Commands**: Return `Result<T, E>` in Rust for proper error propagation
 
 ### Package Manager
 - **pnpm**: This project uses pnpm as its package manager
@@ -72,11 +70,10 @@ src/
 3. Understand the Tauri architecture and command system
 
 ### Implementation Standards
-- **Module Creation**: Extend `BaseModule` or `BaseWindowModule` for main process modules
-- **IPC Channels**: Define typed channels in `preload/lib/ipc-channels.ts`
-- **Database**: Use Drizzle ORM with schema-defined tables, better-sqlite3 for queries
+- **Tauri Commands**: Define commands in `src-tauri/src/libs/` with `#[tauri::command]` macro
+- **Database**: Use rusqlite with Rust structs for schema and queries
 - **UI Components**: Use Mantine UI components with CSS Modules for custom styling
-- **State Management**: Zustand stores in `src/renderer/src/stores/`
+- **State Management**: Zustand stores in `src/stores/`
 
 ### Testing & Validation
 - Run `pnpm run build` to verify build process
@@ -85,15 +82,15 @@ src/
 - Test audio processing and metadata extraction
 
 ## Security Considerations
-- **IPC Security**: Validate all data passing between main and renderer processes
+- **Tauri Security**: All commands validated, CSP configured in `tauri.conf.json`
 - **File System Access**: Sanitize file paths to prevent directory traversal
-- **Database Security**: Use parameterized queries through TypeORM
+- **Database Security**: Use parameterized queries through rusqlite
 - **External APIs**: Validate and sanitize all external music service integrations
 
 ## Performance Guidelines
 - **Database**: Use proper indexes and avoid N+1 queries
 - **React**: Use React.memo, useMemo, useCallback for optimization
-- **Electron**: Minimize main process blocking operations
+- **Tauri**: Minimize blocking operations, use async Rust functions
 - **Build**: Leverage Vite's bundling optimizations and code splitting
 
 ## Documentation Standards
@@ -104,30 +101,36 @@ src/
 
 ## Common Patterns
 
-### Module Template (Main Process)
-```typescript
-import { BaseModule } from './BaseModule';
-import log from 'electron-log';
-
-export default class ExampleModule extends BaseModule {
-  async load(): Promise<void> {
-    log.info('ExampleModule loaded');
-    // Initialization logic
-  }
+### Tauri Command Template (Rust)
+```rust
+#[tauri::command]
+async fn example_action(data: ExampleType) -> Result<ExampleResult, String> {
+    info!("Processing example action");
+    
+    match process_data(data).await {
+        Ok(result) => Ok(result),
+        Err(e) => {
+            error!("Example action failed: {}", e);
+            Err(e.to_string())
+        }
+    }
 }
 ```
 
-### IPC Handler Template
+### Frontend API Call Template
 ```typescript
-ipcMain.handle(channels.EXAMPLE_ACTION, async (_, data: ExampleType) => {
+import { invoke } from '@tauri-apps/api/core';
+import { logger } from '@/lib/tauri-api';
+
+async function exampleAction(data: ExampleType): Promise<ExampleResult> {
   try {
-    const result = await exampleService.process(data);
-    return { success: true, data: result };
+    const result = await invoke<ExampleResult>('example_action', { data });
+    return result;
   } catch (error) {
-    log.error('Example action failed:', error);
-    return { success: false, error: String(error) };
+    logger.error('Example action failed:', error);
+    throw error;
   }
-});
+}
 ```
 
 ### React Component Template
@@ -156,8 +159,8 @@ ExampleComponent.displayName = 'ExampleComponent';
 ```
 
 ## References
-- [Harmony AGENTS.md](./AGENTS.md) - Detailed development guidelines
-- [Electron Documentation](https://www.electronjs.org/docs/)
+- [Harmony AGENTS.md](../AGENTS.md) - Detailed development guidelines
+- [Tauri Documentation](https://tauri.app/v2/)
 - [React 18 Documentation](https://react.dev/)
 - [Mantine UI Components](https://mantine.dev/)
-- [TypeORM Documentation](https://typeorm.io/)
+- [rusqlite Documentation](https://docs.rs/rusqlite/)

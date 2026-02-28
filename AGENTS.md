@@ -38,9 +38,7 @@ pnpm run release         # Create production release
 ```bash
 pnpm run lint            # ESLint with auto-fix
 pnpm run format          # Prettier auto-format all files
-pnpm run typecheck       # Run both node + web type checks
-pnpm run typecheck:node  # TypeCheck main/preload (tsconfig.node.json)
-pnpm run typecheck:web   # TypeCheck renderer (tsconfig.web.json)
+pnpm run typecheck       # Run TypeScript type checking
 ```
 
 ### Testing
@@ -75,8 +73,7 @@ make build/linux        # Clean + build Linux
 1. **Tauri API imports first**: `import { invoke } from '@tauri-apps/api/core';`
 2. **External packages**: `import { Button } from '@mantine/core';`
 3. **Internal modules by alias**:
-   - `@renderer/*` → `src/renderer/src/*`
-   - `@` → `src/renderer/src/*`
+   - `@/*` → `src/*`
 4. **Relative imports last**: `import styles from './Root.module.css';`
 5. **No blank lines** between imports of the same category; **one blank line** between categories
 
@@ -89,8 +86,8 @@ import { listen } from '@tauri-apps/api/event';
 import { Button, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 
-import { Track } from '@renderer/types/harmony';
-import { db } from '@renderer/lib/tauri-api';
+import { Track } from '@/types/harmony';
+import { db } from '@/lib/tauri-api';
 
 import styles from './Root.module.css';
 ```
@@ -202,10 +199,10 @@ import styles from './Root.module.css';
 ### React/JSX Patterns
 
 - **Functional components only** (no class components)
-- **Hooks**: Use built-in hooks + custom hooks from `src/renderer/src/hooks/`
-- **State management**: Zustand stores in `src/renderer/src/stores/`
+- **Hooks**: Use built-in hooks + custom hooks from `src/hooks/`
+- **State management**: Zustand stores in `src/stores/`
 - **Styling**: CSS Modules (`.module.css`) for component styles, Mantine components for UI
-- **IPC calls**: Access via `window.Main.*` in renderer (defined in preload)
+- **IPC calls**: Use Tauri's `invoke()` API via abstraction layer in `src/lib/tauri-api.ts`
 
 ---
 
@@ -214,13 +211,13 @@ import styles from './Root.module.css';
 ### Two-Process Model (Tauri)
 
 1. **Backend** (`src-tauri/src/`): Rust backend with rusqlite (SQLite), lofty (audio metadata), Tauri commands
-2. **Frontend** (`src/renderer/`): React UI running in WebView, communicates via Tauri's `invoke()` API
+2. **Frontend** (`src/`): React UI running in WebView, communicates via Tauri's `invoke()` API
 
 ### Tauri Command System
 
 - **Commands** registered in `src-tauri/src/lib.rs` with `#[tauri::command]` macro
 - **Frontend**: Call via `invoke('command_name', { args })` from `@tauri-apps/api/core`
-- **Abstraction Layer**: `src/renderer/src/lib/tauri-api.ts` provides drop-in replacement for old Electron API
+- **Abstraction Layer**: `src/lib/tauri-api.ts` provides drop-in replacement for old Electron API
 
 ### Database (rusqlite + SQLite)
 
@@ -346,7 +343,7 @@ Skills are **automatically activated** based on context:
 ## When Unsure, Ask!
 
 - **Architecture decisions**: Consult before adding new modules or dependencies
-- **Breaking changes**: Confirm before modifying shared types (`src/renderer/src/types/`)
+- **Breaking changes**: Confirm before modifying shared types (`src/types/`)
 - **Database schema**: Migrations are auto-sync'd but check with team for production
 - **Large refactors**: >300 LOC or >3 files requires human review
 - **Skill selection**: If uncertain which skill applies, ask for guidance
@@ -369,8 +366,8 @@ Skills are **automatically activated** based on context:
    - All IPC handlers → Tauri commands
 
 2. **Frontend Updates**: Minimal changes required
-   - Added `src/renderer/src/lib/tauri-api.ts` abstraction layer
-   - Moved types from `src/preload/types/` → `src/renderer/src/types/`
+   - Added `src/lib/tauri-api.ts` abstraction layer
+   - Moved types from `src/preload/types/` → `src/types/`
    - All `window.Main.*` calls work unchanged via abstraction
 
 3. **Build System**: electron-vite → Tauri CLI + Vite
@@ -381,6 +378,7 @@ Skills are **automatically activated** based on context:
 4. **Deleted Directories**:
    - `src/main/` (Electron backend)
    - `src/preload/` (IPC bridge)
+   - `src/renderer/` (moved to `src/` during Feb 2026 refactor)
 
 5. **Performance Gains**:
    - ~60% faster startup time

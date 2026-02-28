@@ -17,14 +17,13 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@renderer/*": ["src/renderer/src/*"],
-      "@/*": ["src/renderer/src/*"]
+      "@/*": ["src/*"]
     },
     "types": ["vitest/globals", "@testing-library/jest-dom"]
   },
   "include": [
-    "src/renderer/src/**/*",
-    "src/renderer/src/**/*.tsx",
+    "src/**/*",
+    "src/**/*.tsx",
     "vite.config.ts"
   ],
   "exclude": [
