@@ -2,13 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useRouteLoaderData } from 'react-router-dom';
 import Keybinding from 'react-keybinding-component';
 
-import { Playlist, Track } from '../../../../preload/types/harmony';
+import { Playlist, Track } from '@renderer/types/harmony';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import usePlayerStore from '../../stores/usePlayerStore';
 import { RootLoaderData } from '../Root';
 import styles from './PruneView.module.css';
-
-const { db } = window.Main;
+import { db } from '@renderer/lib/tauri-api';
 
 export default function PruneView() {
   const navigate = useNavigate();

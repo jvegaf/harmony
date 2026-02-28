@@ -2,7 +2,7 @@ import { useRouteLoaderData } from 'react-router-dom';
 import { useMemo } from 'react';
 
 import { RootLoaderData } from '../views/Root';
-import { Track } from '@preload/types/harmony';
+import { Track } from '@renderer/types/harmony';
 import { PlaylistLoaderData } from '@renderer/views/Playlist/Playlist';
 
 type Maybe<T> = T | undefined;
@@ -24,7 +24,7 @@ export default function useCurrentViewTracks(): Track[] {
 
   const tracks = useMemo(() => {
     if (playlistData) {
-      return playlistData.playlistTracks;
+      return playlistData.playlistTracks ?? [];
     }
 
     if (rootData) {

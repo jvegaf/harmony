@@ -49,12 +49,15 @@ Get track recommendations from Beatport
 
 ## Tech Stack
 
-- **Desktop Framework**: Electron with TypeScript
+- **Desktop Framework**: Tauri v2 with Rust backend
 - **Frontend**: React 18 + Vite + Mantine UI
 - **State Management**: Zustand
-- **Database**: Drizzle ORM + SQLite (better-sqlite3)
-- **Build Tools**: electron-vite, electron-builder
-- **Package Manager**: npm
+- **Database**: rusqlite + SQLite
+- **Audio**: lofty (metadata), symphonia (analysis)
+- **Build Tools**: Tauri CLI, cargo, Vite
+- **Package Manager**: npm (frontend), cargo (backend)
+
+> **Note**: Migrated from Electron to Tauri v2 in February 2026 for better performance and smaller binaries.
 
 ## Recommended IDE Setup
 
@@ -72,6 +75,7 @@ npm install
 
 ```bash
 npm run dev             # Start development mode with hot reload
+npm run tauri:dev       # Alternative: Start Tauri dev mode directly
 npm start               # Preview built app
 ```
 
@@ -79,16 +83,17 @@ npm start               # Preview built app
 
 ```bash
 # For windows
-npm run build:win
+npm run build:win       # (Coming soon)
 
 # For macOS
-npm run build:mac
+npm run build:mac       # (Coming soon)
 
 # For Linux
-npm run build:linux
+npm run build:linux     # (Coming soon)
 
 # Current platform
-npm run build
+npm run build           # TypeCheck + build
+npm run tauri:build     # Build Tauri app
 
 # Production release
 npm run release
@@ -114,7 +119,7 @@ npm run test:coverage   # Run tests with coverage report
 ## Documentation
 
 - **[AGENTS.md](AGENTS.md)** - Complete project documentation, code style, architecture, available skills
-- **[.agents/skills/](,agents/skills/)** - Specialized AI skills for Electron, React, Mantine, Zustand, code review, and more
+- **[.agents/skills/](.agents/skills/)** - Specialized AI skills for Electron, React, Mantine, Zustand, code review, and more
 
 ## Contributing
 
@@ -131,11 +136,11 @@ If you would like to contribute to Harmony, please follow these steps:
 
 ### Code Style
 
-- **Import organization**: Node/Electron built-ins → External packages → Internal modules → Relative imports
-- **Formatting**: Run `yarn format` (Prettier with single quotes, 120 line width)
+- **Import organization**: Tauri API imports → External packages → Internal modules → Relative imports
+- **Formatting**: Run `npm run format` (Prettier with single quotes, 120 line width)
 - **TypeScript**: Use interfaces for objects, type aliases for unions, avoid `any`
-- **Logging**: Use `electron-log` in main/preload (never `console.*`)
-- **Error handling**: Always log errors, use try-catch for async operations
+- **Logging**: Use Tauri logger plugin in frontend, `log` crate macros in Rust backend
+- **Error handling**: Always log errors, use try-catch for async operations, return `Result<T, E>` in Rust
 
 See [AGENTS.md](AGENTS.md) for complete guidelines.
 

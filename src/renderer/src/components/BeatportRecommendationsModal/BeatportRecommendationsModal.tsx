@@ -8,10 +8,9 @@ import {
   IconPlayerSkipBack,
   IconPlayerSkipForward,
 } from '@tabler/icons-react';
-import { BeatportRecommendation } from '../../../../preload/types/harmony';
+import { BeatportRecommendation } from '@renderer/types/harmony';
 import styles from './BeatportRecommendationsModal.module.css';
-
-const { shell } = window.Main;
+import { shell } from '@renderer/lib/tauri-api';
 
 interface BeatportRecommendationsModalProps {
   opened: boolean;

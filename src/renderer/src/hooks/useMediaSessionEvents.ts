@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import { usePlayerAPI } from '../stores/usePlayerStore';
 import player from '../lib/player';
+import { covers } from '@renderer/lib/tauri-api';
 
 /**
  * Integration for MediaSession (mpris, macOS player controls etc)
@@ -40,7 +41,7 @@ async function syncArtwork() {
   const track = player.getTrack();
 
   if (track) {
-    const cover = await window.Main.covers.getCoverAsBase64(track);
+    const cover = await covers.getCoverAsBase64(track);
 
     navigator.mediaSession.metadata = new MediaMetadata({
       title: track.title,

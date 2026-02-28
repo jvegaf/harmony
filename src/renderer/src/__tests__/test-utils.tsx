@@ -1,6 +1,6 @@
 import { render, RenderOptions } from '@testing-library/react';
 import { ReactElement } from 'react';
-import type { Track, Playlist } from '@preload/types/harmony';
+import type { Track, Playlist } from '@renderer/types/harmony';
 
 // AIDEV-NOTE: Factory para crear tracks de prueba
 export const createMockTrack = (overrides?: Partial<Track>): Track => ({

@@ -8,7 +8,7 @@
 import { useState, useMemo } from 'react';
 import { X, Music, Clock, Check, AlertCircle, Disc, Calendar, FileAudio } from 'lucide-react';
 import styles from './TagCandidateSelection.module.css';
-import { TrackCandidate, TrackCandidatesResult, TrackSelection } from '@preload/types/tagger';
+import { TrackCandidate, TrackCandidatesResult, TrackSelection } from '@renderer/types/tagger';
 
 /**
  * Helper para combinar clases CSS

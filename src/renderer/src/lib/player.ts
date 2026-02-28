@@ -1,4 +1,5 @@
-import { Track } from '../../../preload/types/harmony';
+import { Track } from '@renderer/types/harmony';
+import { library, config } from './tauri-api';
 
 interface PlayerOptions {
   playbackRate?: number;
@@ -26,9 +27,12 @@ class Player {
     this.track = null;
 
     this.audio.defaultPlaybackRate = mergedOptions.playbackRate;
-    // eslint-disable-next-line
-    // @ts-ignore
-    this.audio.setSinkId(mergedOptions.audioOutputDevice);
+    // AIDEV-NOTE: setSinkId() selects the audio output device. It exists in
+    // Chromium (Electron) but NOT in WebKitGTK (Tauri on Linux). Guard with
+    // a feature check so the app doesn't crash on unsupported WebViews.
+    if (typeof (this.audio as any).setSinkId === 'function') {
+      (this.audio as any).setSinkId(mergedOptions.audioOutputDevice);
+    }
     this.audio.playbackRate = mergedOptions.playbackRate;
     this.audio.volume = mergedOptions.volume;
     this.audio.muted = mergedOptions.muted;
@@ -81,9 +85,11 @@ class Player {
   }
 
   async setOutputDevice(deviceID: string) {
-    // eslint-disable-next-line
-    // @ts-ignore
-    await this.audio.setSinkId(deviceID);
+    // AIDEV-NOTE: setSinkId() is not available in WebKitGTK (Tauri on Linux).
+    // Silently skip when unsupported — audio will use the system default device.
+    if (typeof (this.audio as any).setSinkId === 'function') {
+      await (this.audio as any).setSinkId(deviceID);
+    }
   }
 
   getTrack() {
@@ -92,7 +98,7 @@ class Player {
 
   setTrack(track: Track) {
     this.track = track;
-    this.audio.src = window.Main.library.parseUri(track.path);
+    this.audio.src = library.parseUri(track.path);
 
     // When we change song, need to update the thresholdReached indicator.
     this.durationThresholdReached = false;
@@ -122,12 +128,14 @@ class Player {
 /**
  * Export a singleton by default, for the sake of simplicity (and we only need
  * one anyway)
+ *
+ * AIDEV-NOTE: Uses optional chaining + defaults because __initialConfig may be
+ * null if loadConfig() hasn't completed yet (should not happen since main.tsx
+ * awaits loadConfig before importing the app, but this is a safety net).
  */
 
-const { config } = window.Main;
-
 export default new Player({
-  volume: config.__initialConfig['audioVolume'],
-  audioOutputDevice: config.__initialConfig['audioOutputDevice'],
-  muted: config.__initialConfig['audioMuted'],
+  volume: config.__initialConfig?.audioVolume ?? 1,
+  audioOutputDevice: config.__initialConfig?.audioOutputDevice ?? 'default',
+  muted: config.__initialConfig?.audioMuted ?? false,
 });

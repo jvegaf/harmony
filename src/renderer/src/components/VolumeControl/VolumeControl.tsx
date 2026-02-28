@@ -5,8 +5,7 @@ import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
 import { Slider } from '@mantine/core';
 import { IconVolume, IconVolume2, IconVolumeOff } from '@tabler/icons-react';
 import player from '../../lib/player';
-
-const { logger } = window.Main;
+import { logger } from '@renderer/lib/tauri-api';
 
 export default function VolumeControl() {
   const audio = player.getAudio();

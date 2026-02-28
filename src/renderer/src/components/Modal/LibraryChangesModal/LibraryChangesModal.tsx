@@ -8,7 +8,7 @@
 import { FolderPlus, FolderMinus, Check } from 'lucide-react';
 import { Collapse, Button } from '@mantine/core';
 import { useState } from 'react';
-import type { LibraryChanges } from '@preload/types/harmony';
+import type { LibraryChanges } from '@renderer/types/harmony';
 import styles from './LibraryChangesModal.module.css';
 
 interface LibraryChangesModalProps {

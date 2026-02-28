@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { TrackId } from '../../../preload/types/harmony';
+import { TrackId } from '@renderer/types/harmony';
 
 /**
  * Store for managing track navigation context in Details view.

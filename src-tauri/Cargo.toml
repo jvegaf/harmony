@@ -1,0 +1,76 @@
+[package]
+name = "harmony"
+version = "0.29.0"
+description = "Music manager for old-school DJs"
+authors = ["jvegaf"]
+license = "MIT"
+repository = "https://github.com/jvegaf/harmony"
+edition = "2021"
+rust-version = "1.77.2"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "harmony_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# Tauri core and plugins
+tauri = { version = "2", features = ["devtools", "protocol-asset", "image-png"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-log = { version = "2", features = ["colored"] }
+tauri-plugin-opener = "2"
+tauri-plugin-os = "2"
+tauri-plugin-process = "2"
+tauri-plugin-shell = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-window-state = "2"
+tauri-plugin-store = "2"
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-notification = "2"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Database
+rusqlite = { version = "0.31", features = ["bundled"] }
+
+# Audio metadata
+lofty = "0.21"
+base64 = "0.22"
+mime_guess = "2"
+
+# File system utilities
+walkdir = "2"
+
+# Parallelism and async
+rayon = "1.10"
+tokio = { version = "1", features = ["full"] }
+
+# Utilities
+uuid = { version = "1", features = ["v4", "serde"] }
+log = "0.4"
+sha2 = "0.10"
+dirs = "5"
+thiserror = "1"
+chrono = "0.4"
+
+# HTTP and web scraping
+reqwest = { version = "0.12", features = ["json"] }
+scraper = "0.20"
+
+# XML processing
+quick-xml = { version = "0.36", features = ["serialize"] }
+
+# Sleep blocker (power management)
+nosleep = "0.2"
+
+# Temporary file handling (used in audio analysis)
+tempfile = "3"
+
+[dev-dependencies]

@@ -29,10 +29,9 @@ import { useTaggerAPI } from '../../stores/useTaggerStore';
 import { useDetailsNavigationAPI, useDetailsNavigationStore } from '../../stores/useDetailsNavigationStore';
 import { GetFilenameWithoutExtension } from '../../lib/utils-library';
 import { parseDuration } from '../../lib/utils';
-import { BeatportRecommendation, SearchEngine } from '../../../../preload/types/harmony';
-import { SanitizedTitle } from '../../../../preload/utils';
-
-const { menu, shell } = window.Main;
+import { BeatportRecommendation, SearchEngine, TrackEditableFields } from '@renderer/types/harmony';
+import { SanitizedTitle } from '@renderer/lib/utils/utils';
+import { menu, shell, dialog, library, db } from '@renderer/lib/tauri-api';
 
 // AIDEV-NOTE: Utility to extract Beatport track ID from URL
 // Beatport URLs format: https://www.beatport.com/track/{slug}/{id}
@@ -80,15 +79,35 @@ export default function DetailsView() {
   });
 
   useEffect(() => {
-    form.setValues(track);
-    form.resetDirty(track);
+    // AIDEV-NOTE: Convert Track fields to form-compatible types
+    // Track.year is number|undefined but form expects string
+    const formValues = {
+      title: track.title ?? '',
+      artist: track.artist ?? '',
+      album: track.album ?? '',
+      genre: track.genre ?? '',
+      year: track.year != null ? String(track.year) : '',
+      bpm: track.bpm != null ? String(track.bpm) : '',
+      initialKey: track.initialKey ?? '',
+      comment: track.comment ?? '',
+      label: track.label ?? '',
+      url: track.url ?? '',
+      rating: {
+        source: track.rating?.source ?? '',
+        rating: track.rating?.rating != null ? String(track.rating.rating) : '',
+      },
+    };
+    form.setValues(formValues);
+    form.resetDirty(formValues);
   }, [track]);
 
+  // AIDEV-NOTE: Form values are all strings (year, bpm, etc.) but TrackEditableFields
+  // uses number types from Track. Cast is safe because updateTrackMetadata serializes to JSON.
   const handleSubmit = useCallback(
-    async values => {
+    async (values: typeof form.values) => {
       // Changed behavior - Save no longer navigates away
       // User can continue editing or navigate manually with Cancel or Prev/Next buttons
-      await libraryAPI.updateTrackMetadata(track.id, values);
+      await libraryAPI.updateTrackMetadata(track.id, values as unknown as TrackEditableFields);
       form.resetDirty(values);
       revalidator.revalidate();
 
@@ -194,7 +213,7 @@ export default function DetailsView() {
       const currentExt = track.path.split('.').pop()?.toLowerCase() || 'mp3';
 
       // Open file picker restricted to the same extension
-      const result = await window.Main.dialog.open({
+      const result = await dialog.open({
         title: 'Select replacement audio file',
         filters: [
           { name: `Audio Files (.${currentExt})`, extensions: [currentExt] },
@@ -203,15 +222,15 @@ export default function DetailsView() {
         properties: ['openFile'],
       });
 
-      // User cancelled
-      if (!result || result.canceled || result.filePaths.length === 0) {
+      // AIDEV-NOTE: Tauri dialog.open() returns string | string[] | null (not Electron's {canceled, filePaths})
+      if (!result) {
         return;
       }
 
-      const newFilePath = result.filePaths[0];
+      const newFilePath = typeof result === 'string' ? result : result[0];
 
       // Call the IPC method to replace the file
-      await window.Main.library.replaceFile(track.id, track.path, newFilePath);
+      await library.replaceFile(track.id, track.path, newFilePath);
 
       // Show success notification
       notifications.show({
@@ -252,7 +271,7 @@ export default function DetailsView() {
           break;
       }
     },
-    [shell, track],
+    [track],
   );
 
   const handleContextMenu = useCallback((event: React.MouseEvent) => {
@@ -262,7 +281,7 @@ export default function DetailsView() {
 
   // AIDEV-NOTE: Fetch Beatport recommendations for the current track
   const fetchBeatportRecommendations = useCallback(async () => {
-    const bpTrackId = extractBeatportTrackId(track.url);
+    const bpTrackId = extractBeatportTrackId(track.url ?? '');
     if (!bpTrackId) {
       notifications.show({
         title: 'Invalid Beatport URL',
@@ -275,7 +294,7 @@ export default function DetailsView() {
     try {
       setLoadingRecommendations(true);
       setRecommendationsModalOpened(true);
-      const results = await window.Main.library.findSimilars(bpTrackId);
+      const results = await library.findSimilars(bpTrackId);
       setRecommendations(results);
     } catch (error) {
       notifications.show({
@@ -396,7 +415,7 @@ export default function DetailsView() {
           <div className={styles.rating}>
             <TrackRatingComponent
               trackSrc={track.path}
-              rating={track.rating}
+              rating={track.rating ?? { source: '', rating: 0 }}
               size='xl'
             />
           </div>
@@ -561,7 +580,11 @@ DetailsView.loader = async ({ params }: LoaderFunctionArgs) => {
     throw new Error(`Track ID should not be null`);
   }
 
-  const track = await window.Main.db.tracks.findOnlyByID(trackID);
+  const track = await db.tracks.findOnlyByID(trackID);
+
+  if (!track) {
+    throw new Error(`Track not found: ${trackID}`);
+  }
 
   return { track };
 };

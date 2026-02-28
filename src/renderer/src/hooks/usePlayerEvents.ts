@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 
 import { usePlayerAPI } from '../stores/usePlayerStore';
-import { useLibraryAPI } from '../stores/useLibraryStore';
 import player from '../lib/player';
+import { logger } from '@renderer/lib/tauri-api';
 
 const AUDIO_ERRORS = {
   aborted: 'The video playback was aborted.',
@@ -16,8 +16,6 @@ const AUDIO_ERRORS = {
  */
 export function usePlayerEvents() {
   const playerAPI = usePlayerAPI();
-  const libraryAPI = useLibraryAPI();
-  const { logger } = window.Main;
 
   useEffect(() => {
     function handleAudioError(e: ErrorEvent) {
@@ -55,5 +53,5 @@ export function usePlayerEvents() {
       player.getAudio().removeEventListener('ended', playerAPI.next);
       player.getAudio().removeEventListener('error', handleAudioError);
     };
-  }, [libraryAPI, playerAPI, logger]);
+  }, [playerAPI]);
 }

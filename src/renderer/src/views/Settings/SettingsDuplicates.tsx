@@ -5,8 +5,7 @@ import { Button, Checkbox, Slider, Stack, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 
 import styles from './Settings.module.css';
-
-const { config, duplicates } = window.Main;
+import { config, duplicates } from '@renderer/lib/tauri-api';
 
 /**
  * Settings panel for configuring duplicate finder detection criteria.

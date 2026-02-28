@@ -20,12 +20,11 @@ import { useLibraryAPI } from '../stores/useLibraryStore';
 import useTaggerStore from '../stores/useTaggerStore';
 import styles from './Root.module.css';
 import { LoaderData } from './router';
-import { Track } from '../../../preload/types/harmony';
-import { TrackSelection } from '../../../preload/types/tagger';
+import { Track } from '@renderer/types/harmony';
+import { TrackSelection } from '@renderer/types/tagger';
 import ProgressModal from '../components/Modal/ProgressModal';
 import TagCandidatesSelectionModal from '../components/Modal/TagCandidateSelection/TagCandidatesSelection';
-
-const { db, config, library } = window.Main;
+import { db, config, library, app } from '@renderer/lib/tauri-api';
 
 export default function ViewRoot() {
   const trackPlaying = usePlayingTrack();
@@ -75,7 +74,7 @@ export default function ViewRoot() {
     location.pathname.startsWith('/playlists');
 
   useEffect(() => {
-    window.Main.app.ready();
+    app.ready();
   }, []);
 
   const handleSearch = (query: string) => {

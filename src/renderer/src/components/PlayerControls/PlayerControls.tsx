@@ -5,7 +5,7 @@ import {
   IconSettings,
   IconHeadphones,
 } from '@tabler/icons-react';
-import { PlayerStatus } from '../../../../preload/types/harmony';
+import { PlayerStatus } from '@renderer/types/harmony';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
 import styles from './PlayerControls.module.css';
 import ControlButton from '../../elements/Button/ControlButton';

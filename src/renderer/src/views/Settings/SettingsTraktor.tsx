@@ -43,10 +43,9 @@ import type {
   TraktorSyncProgress,
   TraktorSyncPlan,
   AutoSyncStatus,
-} from '../../../../preload/types/traktor';
+} from '@renderer/types/traktor';
 import { useRevalidator } from 'react-router-dom';
-
-const { traktor, logger } = window.Main;
+import { traktor, logger } from '@renderer/lib/tauri-api';
 
 type SyncState = 'idle' | 'loading' | 'previewing' | 'syncing' | 'exporting' | 'complete' | 'error';
 

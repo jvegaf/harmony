@@ -1,4 +1,4 @@
-import { Track } from '../../../preload/types/harmony';
+import { Track } from '@renderer/types/harmony';
 import usePlayerStore from '../stores/usePlayerStore';
 
 export default function usePlayingTrack(): Track | null {

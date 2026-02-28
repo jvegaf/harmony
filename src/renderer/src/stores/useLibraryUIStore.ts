@@ -1,7 +1,6 @@
-import { Track } from '../../../preload/types/harmony';
+import { Track } from '@renderer/types/harmony';
 import { createStore } from './store-helpers';
-
-const { config, logger } = window.Main;
+import { config, logger } from '@renderer/lib/tauri-api';
 
 type LibraryUIState = {
   search: string;
@@ -47,7 +46,8 @@ type LibraryUIState = {
 };
 
 // See docs/aidev-notes/tracklist-sorting.md for details on sort persistence
-const initialTracklistSort = config.__initialConfig.tracklistSort || { colId: 'path', mode: 'desc' };
+// AIDEV-NOTE: Handle case where config is not yet loaded (will be loaded async on app start)
+const initialTracklistSort = config.__initialConfig?.tracklistSort || { colId: 'path', mode: 'desc' };
 
 const useLibraryUIStore = createStore<LibraryUIState>(set => ({
   search: '',

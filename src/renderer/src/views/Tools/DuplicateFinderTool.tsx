@@ -3,14 +3,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button, Modal, Progress, Text } from '@mantine/core';
 import { IconAlertTriangle, IconCopy, IconSearch, IconTrash } from '@tabler/icons-react';
 
-import type { DuplicateScanProgress, DuplicateScanResult } from '../../../../preload/types/duplicates';
-import type { TrackId, Track } from '../../../../preload/types/harmony';
+import type { DuplicateScanProgress, DuplicateScanResult } from '@renderer/types/duplicates';
+import type { TrackId, Track } from '@renderer/types/harmony';
 
 import DuplicateGroup from './DuplicateGroup';
 import styles from './DuplicateFinderTool.module.css';
 import { useLibraryAPI } from '@renderer/stores/useLibraryStore';
-
-const { config, duplicates, db, library, logger } = window.Main;
+import { config, duplicates, db, library, logger } from '@renderer/lib/tauri-api';
 
 /**
  * DuplicateFinderTool - Main component for finding and managing duplicate tracks

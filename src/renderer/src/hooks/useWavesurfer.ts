@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import WaveSurfer, { WaveSurferOptions } from 'wavesurfer.js';
-import { Track } from '../../../preload/types/harmony';
+import { Track } from '@renderer/types/harmony';
 
 /**
  * Enhanced useWavesurfer hook with database-backed waveform peaks

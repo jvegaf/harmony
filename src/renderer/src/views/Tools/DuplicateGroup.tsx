@@ -1,6 +1,6 @@
-import { ParseDuration } from '../../../../preload/utils';
-import type { DuplicateGroup as DuplicateGroupType, DuplicateTrackInfo } from '../../../../preload/types/duplicates';
-import type { TrackId } from '../../../../preload/types/harmony';
+import { ParseDuration } from '@renderer/lib/utils/utils';
+import type { DuplicateGroup as DuplicateGroupType, DuplicateTrackInfo } from '@renderer/types/duplicates';
+import type { TrackId } from '@renderer/types/harmony';
 
 import DuplicateWavePlayer from './DuplicateWavePlayer';
 import styles from './DuplicateFinderTool.module.css';

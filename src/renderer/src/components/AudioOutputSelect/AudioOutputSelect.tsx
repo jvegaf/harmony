@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
 import * as Setting from '../Setting/Setting';
+import { logger } from '@renderer/lib/tauri-api';
 
 type Props = {
   defaultValue: string;
   onChange: (deviceID: string) => void;
 };
-
-const { logger } = window.Main;
 
 export default function AudioOutputSelect(props: Props) {
   const [devices, setDevices] = useState<MediaDeviceInfo[] | null>(null);

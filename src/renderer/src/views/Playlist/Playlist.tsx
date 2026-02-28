@@ -5,8 +5,7 @@ import { RootLoaderData } from '../Root';
 import * as ViewMessage from '../../elements/ViewMessage/ViewMessage';
 import TrackList from '@renderer/components/TrackList/TrackList';
 import { perfLogger } from '../../lib/performance-logger';
-
-const { db } = window.Main;
+import { db } from '@renderer/lib/tauri-api';
 
 export default function PlaylistView() {
   const { playlistTracks } = useLoaderData() as PlaylistLoaderData;
@@ -16,7 +15,7 @@ export default function PlaylistView() {
   // OPTIMIZATION: Get playlists from parent loader (RootView) instead of reloading
   const { playlists } = useRouteLoaderData('root') as RootLoaderData;
 
-  if (playlistTracks.length === 0) {
+  if (playlistTracks === undefined || playlistTracks.length === 0) {
     return (
       <ViewMessage.Notice>
         <p>Empty playlist</p>
@@ -37,7 +36,7 @@ export default function PlaylistView() {
     <TrackList
       type='playlist'
       reorderable={true}
-      tracks={playlistTracks}
+      tracks={playlistTracks ?? []}
       trackPlayingID={trackPlayingID}
       playlists={playlists}
       currentPlaylist={playlistID}
@@ -58,8 +57,12 @@ PlaylistView.loader = async ({ params }: LoaderFunctionArgs) => {
 
   const playlist = await db.playlists.findOnlyByID(params.playlistID);
 
+  if (!playlist) {
+    throw new Error(`Playlist not found: ${params.playlistID}`);
+  }
+
   perfLogger.measure('After db.playlists.findOnlyByID', {
-    tracksCount: playlist.tracks?.length || 0,
+    tracksCount: playlist.tracks?.length ?? 0,
   });
 
   // OPTIMIZATION: Removed db.playlists.getAll() - use parent loader data instead

@@ -2,8 +2,9 @@ import { useWavesurfer } from '../../hooks/useWavesurfer';
 import { useRef, useEffect, useState, useMemo } from 'react';
 import { useMantineColorScheme } from '@mantine/core';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
-import { Config, PlayerStatus } from '../../../../preload/types/harmony';
+import { Config, PlayerStatus } from '@renderer/types/harmony';
 import { WaveSurferOptions } from 'wavesurfer.js';
+import { library } from '@renderer/lib/tauri-api';
 import './WavePlayer.css';
 
 const formatTime = (seconds: number) => {
@@ -105,7 +106,7 @@ function WavePlayer({ config }: WavePlayerProps) {
 
   useEffect(() => {
     if (playingTrack !== null) {
-      const audioUri = window.Main.library.parseUri(playingTrack.path);
+      const audioUri = library.parseUri(playingTrack.path);
       setAudioUrl(audioUri);
     }
   }, [playingTrack]);

@@ -12,8 +12,7 @@ import PruneView from './Prune/PruneView';
 import PreparationView from './Preparation/PreparationView';
 import ToolsView from './Tools/ToolsView';
 import PlaylistView from './Playlist/Playlist';
-
-const { logger } = window.Main;
+import { logger } from '@renderer/lib/tauri-api';
 
 const router = createHashRouter([
   {

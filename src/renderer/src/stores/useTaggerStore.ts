@@ -1,10 +1,9 @@
-import { Track } from '../../../preload/types/harmony';
-import { TrackCandidatesResult, TrackSelection } from '../../../preload/types/tagger';
+import { Track } from '@renderer/types/harmony';
+import { TrackCandidatesResult, TrackSelection } from '@renderer/types/tagger';
 import { GetFilenameWithoutExtension } from '@renderer/lib/utils-library';
 import { createStore } from './store-helpers';
 import router from '../views/router';
-
-const { db, library, logger } = window.Main;
+import { db, library, logger } from '@renderer/lib/tauri-api';
 
 type TaggerState = {
   trackTagsCandidates: TrackCandidatesResult[] | null;
@@ -139,7 +138,7 @@ const useTaggerStore = createStore<TaggerState>((set, get) => ({
 
         if (result.errors.length > 0) {
           logger.error(`Tag application errors: ${result.errors.length}`);
-          result.errors.forEach(err => {
+          result.errors.forEach((err: { trackId: string; error: string }) => {
             logger.error(`  - Track ${err.trackId}: ${err.error}`);
           });
         }
@@ -184,19 +183,24 @@ const useTaggerStore = createStore<TaggerState>((set, get) => ({
       }
     },
     fixTrack: async (trackID: string): Promise<void> => {
-      let track = await db.tracks.findOnlyByID(trackID);
+      const track = await db.tracks.findOnlyByID(trackID);
+      if (!track) {
+        logger.warn(`Track ${trackID} not found`);
+        return;
+      }
+
       const fixedTrack = await library.fixTags(track);
-      track = {
+      const updatedTrack = {
         ...track,
         ...fixedTrack,
       };
-      await db.tracks.update(track);
+      await db.tracks.update(updatedTrack);
       const fixed = get().fix.processed + 1;
       const totalToFix = get().fix.total;
 
       set({
         fix: { processed: fixed, total: totalToFix },
-        updated: track,
+        updated: updatedTrack,
         fixing: fixed < totalToFix,
       });
     },

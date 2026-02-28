@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Track } from '../../../../preload/types/harmony';
+import { Track } from '@renderer/types/harmony';
 import styles from './PlayerInfo.module.css';
 
 type Props = {

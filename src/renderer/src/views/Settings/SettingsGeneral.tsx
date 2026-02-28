@@ -4,11 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 import * as Setting from '../../components/Setting/Setting';
 import { ActionIcon, Button, Group, Stack, Text, TextInput, Tooltip } from '@mantine/core';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
-import { SearchEngineConfig } from '@preload/types/harmony';
+import { SearchEngineConfig } from '@renderer/types/harmony';
 
 import styles from './Settings.module.css';
-
-const { config, shell } = window.Main;
+import { config, shell } from '@renderer/lib/tauri-api';
 
 /**
  * Settings panel for managing custom search engines.

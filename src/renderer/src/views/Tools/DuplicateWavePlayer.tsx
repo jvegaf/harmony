@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useMantineColorScheme } from '@mantine/core';
 import WaveSurfer from 'wavesurfer.js';
-import type { Track } from '../../../../preload/types/harmony';
+import type { Track } from '@renderer/types/harmony';
 import styles from './DuplicateWavePlayer.module.css';
-
-const { db } = window.Main;
+import { db, library } from '@renderer/lib/tauri-api';
 
 /**
  * DuplicateWavePlayer - Simplified independent waveform player
@@ -44,7 +43,7 @@ export default function DuplicateWavePlayer({
     isActiveTrackRef.current = isActiveTrack;
   }, [isActiveTrack]);
 
-  const audioUrl = window.Main.library.parseUri(track.path);
+  const audioUrl = library.parseUri(track.path);
   const hasPreComputedPeaks = track.waveformPeaks && track.waveformPeaks.length > 0;
 
   // Generate deterministic placeholder peaks for tracks without waveform data

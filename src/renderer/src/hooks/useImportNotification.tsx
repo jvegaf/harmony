@@ -12,9 +12,8 @@ import { useEffect, useRef } from 'react';
 import { notifications } from '@mantine/notifications';
 import { Progress, Text } from '@mantine/core';
 
-import type { LibraryImportProgress } from '../../../preload/types/harmony';
-
-const { library } = window.Main;
+import type { LibraryImportProgress } from '@renderer/types/harmony';
+import { library } from '@renderer/lib/tauri-api';
 
 const NOTIFICATION_ID = 'library-import-notification';
 

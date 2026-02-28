@@ -4,8 +4,7 @@ import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
 import { useEffect, useState } from 'react';
-
-const { config } = window.Main;
+import { config } from '@renderer/lib/tauri-api';
 
 export default function Providers({ children }: any) {
   const [colorScheme, setColorScheme] = useState<MantineColorScheme>('auto');

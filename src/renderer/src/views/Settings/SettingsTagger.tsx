@@ -20,11 +20,10 @@ import { CSS } from '@dnd-kit/utilities';
 import { ActionIcon, Badge, NumberInput, Stack, Switch, Text, Tooltip } from '@mantine/core';
 import { IconGripVertical } from '@tabler/icons-react';
 
-import { TaggerProviderConfig } from '@preload/types/tagger';
+import { TaggerProviderConfig } from '@renderer/types/tagger';
 import * as Setting from '../../components/Setting/Setting';
 import styles from './Settings.module.css';
-
-const { config } = window.Main;
+import { config } from '@renderer/lib/tauri-api';
 
 // AIDEV-NOTE: Display badge colours per provider for quick visual identification
 const PROVIDER_COLORS: Record<string, string> = {

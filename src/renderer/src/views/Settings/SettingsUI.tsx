@@ -6,8 +6,7 @@ import * as Setting from '../../components/Setting/Setting';
 import { SegmentedControl } from '@mantine/core';
 
 import styles from './Settings.module.css';
-
-const { config } = window.Main;
+import { config } from '@renderer/lib/tauri-api';
 
 /**
  * Settings panel for UI appearance (theme selection).

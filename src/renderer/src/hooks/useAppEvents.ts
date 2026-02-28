@@ -2,8 +2,7 @@ import { useEffect } from 'react';
 
 import player from '../lib/player';
 import { preventNativeDefault } from '../lib/utils-events';
-
-const { logger } = window.Main;
+import { logger } from '@renderer/lib/tauri-api';
 
 /**
  * Handle app-level events: drag/drop prevention, audio output device changes

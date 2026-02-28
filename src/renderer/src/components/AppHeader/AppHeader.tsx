@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './AppHeader.module.css';
 import { IconMinus, IconSquare, IconX } from '@tabler/icons-react';
+import { app } from '@renderer/lib/tauri-api';
 
 type Tab = {
   id: string;
@@ -11,8 +12,6 @@ type Tab = {
 type AppHeaderProps = {
   analysisProgress?: { current: number; total: number } | null;
 };
-
-const { app } = window.Main;
 
 export default function AppHeader({ analysisProgress }: AppHeaderProps) {
   const navigate = useNavigate();

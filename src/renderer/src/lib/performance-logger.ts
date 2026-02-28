@@ -3,6 +3,8 @@
  * Logs detailed timestamps and exports to CSV for analysis
  */
 
+import { logger } from './tauri-api';
+
 export interface PerfMeasurement {
   timestamp: number;
   label: string;
@@ -34,7 +36,6 @@ class PerformanceLogger {
     this.enabled = enabled;
     localStorage.setItem('drag-perf-enabled', enabled ? 'true' : 'false');
 
-    const { logger } = window.Main;
     logger.info(`[DRAG-PERF] Performance logging ${enabled ? 'enabled' : 'disabled'}`);
   }
 
@@ -49,7 +50,6 @@ class PerformanceLogger {
     this.sessionStart = performance.now();
     this.measurements = [];
 
-    const { logger } = window.Main;
     logger.info(`[DRAG-PERF] ========== SESSION START: ${id} ==========`);
   }
 
@@ -73,7 +73,6 @@ class PerformanceLogger {
 
     this.measurements.push(measurement);
 
-    const { logger } = window.Main;
     const metaStr = metadata ? ` | ${JSON.stringify(metadata)}` : '';
     logger.info(`[DRAG-PERF] ${label} | +${duration.toFixed(2)}ms | Total: ${cumulative.toFixed(2)}ms${metaStr}`);
   }
@@ -82,7 +81,6 @@ class PerformanceLogger {
     if (!this.enabled) return;
 
     const totalDuration = performance.now() - this.sessionStart;
-    const { logger } = window.Main;
 
     logger.info(
       `[DRAG-PERF] ========== SESSION END: ${this.sessionId} | TOTAL: ${totalDuration.toFixed(2)}ms ==========`,
@@ -110,7 +108,6 @@ class PerformanceLogger {
     const csv = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
 
     // Log CSV to console for easy copy-paste
-    const { logger } = window.Main;
     logger.info('[DRAG-PERF] CSV Export (single session):');
     logger.info(csv);
   }
@@ -134,7 +131,6 @@ class PerformanceLogger {
 
       localStorage.setItem('drag-perf-history', JSON.stringify(history));
     } catch (error) {
-      const { logger } = window.Main;
       logger.warn('[DRAG-PERF] Failed to save to localStorage:', error);
     }
   }
@@ -143,7 +139,6 @@ class PerformanceLogger {
   exportAllHistory(): string {
     const existingData = localStorage.getItem('drag-perf-history');
     if (!existingData) {
-      const { logger } = window.Main;
       logger.info('[DRAG-PERF] No history available');
       return '';
     }
@@ -168,7 +163,6 @@ class PerformanceLogger {
 
     const csv = [headers.join(','), ...allRows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
 
-    const { logger } = window.Main;
     logger.info(`[DRAG-PERF] Exporting ${history.length} sessions with ${allRows.length} measurements`);
     logger.info('[DRAG-PERF] CSV Export (all history):');
     logger.info(csv);
@@ -179,13 +173,11 @@ class PerformanceLogger {
   getHistorySummary(): void {
     const existingData = localStorage.getItem('drag-perf-history');
     if (!existingData) {
-      const { logger } = window.Main;
       logger.info('[DRAG-PERF] No history available');
       return;
     }
 
     const history: PerformanceSession[] = JSON.parse(existingData);
-    const { logger } = window.Main;
 
     logger.info(`[DRAG-PERF] ========== HISTORY SUMMARY ==========`);
     logger.info(`Total sessions: ${history.length}`);
@@ -203,7 +195,6 @@ class PerformanceLogger {
 
   clearHistory(): void {
     localStorage.removeItem('drag-perf-history');
-    const { logger } = window.Main;
     logger.info('[DRAG-PERF] History cleared');
   }
 
@@ -211,7 +202,6 @@ class PerformanceLogger {
   async downloadCSV(filename: string = `drag-perf-${new Date().toISOString().split('T')[0]}.csv`): Promise<void> {
     const csv = this.exportAllHistory();
     if (!csv) {
-      const { logger } = window.Main;
       logger.warn('[DRAG-PERF] No data to download');
       return;
     }
@@ -226,7 +216,6 @@ class PerformanceLogger {
 
     URL.revokeObjectURL(url);
 
-    const { logger } = window.Main;
     logger.info(`[DRAG-PERF] Downloaded CSV file: ${filename}`);
   }
 }
@@ -261,7 +250,6 @@ export const perfLogger = new PerformanceLogger();
 };
 
 // Log available commands on load
-const { logger } = window.Main;
 logger.info('[DRAG-PERF] Performance logger initialized. Console commands available:');
 logger.info('[DRAG-PERF]   __exportDragPerfHistory() - Export all history to CSV (console)');
 logger.info('[DRAG-PERF]   __dragPerfDownload(filename?) - Download CSV file');

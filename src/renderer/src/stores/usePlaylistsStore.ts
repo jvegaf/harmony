@@ -1,16 +1,13 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-import channels from '../../../preload/lib/ipc-channels';
 import router from '../views/router';
-import makeID from '../../../preload/lib/id-provider';
+import makeID from '@renderer/lib/utils/id-provider';
 import usePlayerStore from './usePlayerStore';
 import useLibraryUIStore from './useLibraryUIStore';
-import { Playlist, Track } from '../../../preload/types/harmony';
+import { Playlist, Track } from '@renderer/types/harmony';
 import { perfLogger } from '../lib/performance-logger';
-
-const { db, logger } = window.Main;
-const { ipcRenderer } = window.ElectronAPI;
+import { db, logger } from '@renderer/lib/tauri-api';
 
 interface PlaylistsState {
   api: {
@@ -40,7 +37,11 @@ const usePlaylistsStore = create<PlaylistsState>()(
          */
         play: async (playlistID: string): Promise<void> => {
           try {
-            const playlist: Playlist = await db.playlists.findOnlyByID(playlistID);
+            const playlist = await db.playlists.findOnlyByID(playlistID);
+            if (!playlist) {
+              logger.warn(`Playlist ${playlistID} not found`);
+              return;
+            }
             const queue = playlist.tracks!.map(track => track.id);
             const index = 0;
             usePlayerStore.getState().api.start(queue, index).catch(logger.warn);
@@ -117,7 +118,11 @@ const usePlaylistsStore = create<PlaylistsState>()(
 
           try {
             const playlist = await db.playlists.findOnlyByID(playlistID);
-            const playlistTracks = [...playlist.tracks, ...tracks.filter(track => !playlist.tracks.includes(track))];
+            if (!playlist || !playlist.tracks) {
+              logger.warn(`Playlist ${playlistID} not found or has no tracks`);
+              return;
+            }
+            const playlistTracks = [...playlist.tracks, ...tracks.filter(track => !playlist.tracks!.includes(track))];
             await db.playlists.setTracks(playlistID, playlistTracks);
             router.revalidate();
           } catch (err: any) {
@@ -131,6 +136,10 @@ const usePlaylistsStore = create<PlaylistsState>()(
         removeTracks: async (playlistID: string, tracks: Track[]): Promise<void> => {
           try {
             const playlist = await db.playlists.findOnlyByID(playlistID);
+            if (!playlist || !playlist.tracks) {
+              logger.warn(`Playlist ${playlistID} not found or has no tracks`);
+              return;
+            }
             const playlistTracks = playlist.tracks.filter((elem: Track) => !tracks.includes(elem));
             await db.playlists.setTracks(playlistID, playlistTracks);
             router.revalidate();
@@ -145,6 +154,10 @@ const usePlaylistsStore = create<PlaylistsState>()(
         duplicate: async (playlistID: string): Promise<void> => {
           try {
             const playlist = await db.playlists.findOnlyByID(playlistID);
+            if (!playlist) {
+              logger.warn(`Playlist ${playlistID} not found`);
+              return;
+            }
             const { tracks } = playlist;
 
             const newPlaylist: Playlist = {
@@ -207,15 +220,22 @@ const usePlaylistsStore = create<PlaylistsState>()(
          * - Current approach matches standard DJ software behavior (Traktor, Rekordbox)
          *
          * Future enhancement: Add option in settings to choose absolute vs relative paths
+         *
+         * AIDEV-NOTE: Phase 5 - Playlist export not yet implemented in Tauri backend
          */
         exportToM3u: async (playlistID: string): Promise<void> => {
-          const playlist: Playlist = await db.playlists.findOnlyByID(playlistID);
+          const playlist = await db.playlists.findOnlyByID(playlistID);
+          if (!playlist) {
+            logger.warn(`Playlist ${playlistID} not found`);
+            return;
+          }
 
-          ipcRenderer.send(
-            channels.PLAYLIST_EXPORT,
-            playlist.name,
-            playlist.tracks?.map(track => track.path),
-          );
+          // TODO: Implement export_playlist_to_m3u command in backend
+          logger.warn('[Phase 5] Playlist export to M3U not yet implemented in Tauri backend');
+          console.warn('[Phase 5] exportToM3u needs backend implementation', {
+            playlistName: playlist.name,
+            trackCount: playlist.tracks?.length || 0,
+          });
         },
       },
     }),

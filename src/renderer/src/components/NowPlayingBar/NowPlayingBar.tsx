@@ -7,7 +7,7 @@ import {
   IconHeadphones,
   IconX,
 } from '@tabler/icons-react';
-import { Track, PlayerStatus, Config } from '../../../../preload/types/harmony';
+import { Track, PlayerStatus, Config } from '@renderer/types/harmony';
 import Cover from '../Cover/Cover';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
 import styles from './NowPlayingBar.module.css';

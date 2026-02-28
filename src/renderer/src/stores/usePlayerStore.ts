@@ -1,7 +1,8 @@
-import { PlayerStatus, Track, TrackId } from '../../../preload/types/harmony';
+import { PlayerStatus, Track, TrackId } from '@renderer/types/harmony';
 import { debounce } from 'lodash';
 import { createStore } from './store-helpers';
 import createSelectors from './selectors';
+import { db, config, logger } from '@renderer/lib/tauri-api';
 
 type PlayerState = {
   playerStatus: PlayerStatus;
@@ -30,8 +31,6 @@ type PlayerState = {
     setPruneMode: (enabled: boolean) => void;
   };
 };
-
-const { db, config, logger } = window.Main;
 
 const playerStore = createStore<PlayerState>((set, get) => ({
   playerStatus: PlayerStatus.STOP,

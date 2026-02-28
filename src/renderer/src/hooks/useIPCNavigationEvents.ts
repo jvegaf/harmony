@@ -1,17 +1,17 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import channels from '../../../preload/lib/ipc-channels';
-
-const { ipcRenderer } = window.ElectronAPI;
+import { listen } from '@tauri-apps/api/event';
 
 /**
- * Handle IPC navigation events from main process (app menu shortcuts)
+ * Handle navigation events from Tauri backend (app menu shortcuts)
+ * AIDEV-NOTE: Phase 5 - Menu system not yet fully implemented, events should be emitted from Rust
  */
 export function useIPCNavigationEvents() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const unlisteners: Array<() => void> = [];
+
     function goToLibrary() {
       navigate('/');
     }
@@ -28,17 +28,18 @@ export function useIPCNavigationEvents() {
       navigate(`/details/${trackID}`);
     }
 
-    // Shortcuts from the application menu
-    ipcRenderer.on(channels.MENU_GO_TO_LIBRARY, goToLibrary);
-    ipcRenderer.on(channels.MENU_GO_TO_PLAYLISTS, goToPlaylists);
-    ipcRenderer.on(channels.MENU_GO_TO_SETTINGS, goToSettings);
-    ipcRenderer.on(channels.CMD_TRACK_DETAIL, (_, trackID) => goToTrackDetail(trackID));
+    // Shortcuts from the application menu (Phase 5 - needs menu implementation in Rust)
+    listen('menu:go-to-library', () => goToLibrary()).then(unlisten => unlisteners.push(unlisten));
+    listen('menu:go-to-playlists', () => goToPlaylists()).then(unlisten => unlisteners.push(unlisten));
+    listen('menu:go-to-settings', () => goToSettings()).then(unlisten => unlisteners.push(unlisten));
+    listen('cmd:track:detail', event => goToTrackDetail(event.payload as string)).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
 
     return function cleanup() {
-      ipcRenderer.removeAllListeners(channels.MENU_GO_TO_LIBRARY);
-      ipcRenderer.removeAllListeners(channels.MENU_GO_TO_PLAYLISTS);
-      ipcRenderer.removeAllListeners(channels.MENU_GO_TO_SETTINGS);
-      ipcRenderer.removeAllListeners(channels.CMD_TRACK_DETAIL);
+      for (const unlisten of unlisteners) {
+        unlisten();
+      }
     };
   }, [navigate]);
 }

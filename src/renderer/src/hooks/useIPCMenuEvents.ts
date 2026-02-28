@@ -1,17 +1,18 @@
 import { useEffect, useRef } from 'react';
 
-import channels from '../../../preload/lib/ipc-channels';
 import { usePlaylistsAPI } from '../stores/usePlaylistsStore';
-import { CommandPayload, Track } from '../../../preload/types/harmony';
+import { Track } from '@renderer/types/harmony';
 import useTaggerStore, { useTaggerAPI } from '../stores/useTaggerStore';
 import { useLibraryAPI } from '../stores/useLibraryStore';
 import useLibraryUIStore from '../stores/useLibraryUIStore';
 import { notifications } from '@mantine/notifications';
-
-const { ipcRenderer } = window.ElectronAPI;
+import { listen } from '@tauri-apps/api/event';
+import { audioAnalysis } from '@renderer/lib/tauri-api';
 
 /**
- * Handle IPC menu events from main process (context menus, app menu commands)
+ * Handle menu events from Tauri backend (context menus, app menu commands)
+ * AIDEV-NOTE: Phase 5 - Menu system not yet fully implemented in Tauri backend
+ * This hook listens for Tauri custom events instead of Electron IPC
  */
 export function useIPCMenuEvents() {
   const libraryAPI = useLibraryAPI();
@@ -23,16 +24,18 @@ export function useIPCMenuEvents() {
   const analysisUnsubscribesRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
+    const unlisteners: Array<() => void> = [];
+
     async function playlistNew(selected: Track[]) {
       await playlistsAPI.create('New playlist', selected);
     }
 
-    async function addTracksToPlaylist(payload: CommandPayload) {
+    async function addTracksToPlaylist(payload: { playlistId: string; selected: Track[] }) {
       const { playlistId, selected } = payload;
       await playlistsAPI.addTracks(playlistId, selected);
     }
 
-    async function removeTracksToPlaylist(payload: CommandPayload) {
+    async function removeTracksToPlaylist(payload: { playlistId: string; selected: Track[] }) {
       const { playlistId, selected } = payload;
       await playlistsAPI.removeTracks(playlistId, selected);
     }
@@ -61,7 +64,7 @@ export function useIPCMenuEvents() {
       });
 
       // Listen to progress events and update notification
-      const unsubscribeProgress = window.Main.audioAnalysis.onProgress(progress => {
+      const unsubscribeProgress = audioAnalysis.onProgress(progress => {
         const { completed, total, percentage } = progress;
         notifications.update({
           id: notificationId,
@@ -74,7 +77,7 @@ export function useIPCMenuEvents() {
 
       // Listen for track completion events to update TrackList in real-time
       // This triggers the store's `updated` state which AG Grid watches for row updates
-      const unsubscribeTrackComplete = window.Main.audioAnalysis.onTrackComplete(track => {
+      const unsubscribeTrackComplete = audioAnalysis.onTrackComplete(track => {
         useTaggerStore.setState({ updated: track });
       });
 
@@ -85,7 +88,7 @@ export function useIPCMenuEvents() {
 
       // Fire-and-forget pattern - don't await the batch analysis
       // This prevents UI blocking while analysis runs in the background
-      window.Main.audioAnalysis
+      audioAnalysis
         .analyzeBatch(filePaths)
         .then(() => {
           // Cleanup listeners
@@ -141,32 +144,51 @@ export function useIPCMenuEvents() {
       await playlistsAPI.exportToM3u(playlistId);
     }
 
-    ipcRenderer.on(channels.CMD_PLAYLIST_NEW, (_, selected) => playlistNew(selected));
-    ipcRenderer.on(channels.CMD_TRACKS_PLAYLIST_ADD, (_, payload) => addTracksToPlaylist(payload));
-    ipcRenderer.on(channels.CMD_TRACKS_PLAYLIST_REMOVE, (_, payload) => removeTracksToPlaylist(payload));
-    ipcRenderer.on(channels.CMD_TRACK_ARTIST_FIND, (_, artist) => artistFind(artist));
-    ipcRenderer.on(channels.CMD_FILENAME_TAGS, (_, selected) => filenameToTags(selected));
-    ipcRenderer.on(channels.CMD_FIND_CANDIDATES, (_, selected) => findCandidates(selected));
-    ipcRenderer.on(channels.CMD_ANALYZE_AUDIO, (_, selected) => analyzeAudio(selected));
-    ipcRenderer.on(channels.CMD_TRACKS_DELETE, (_, selected) => deleteTracks(selected));
-    ipcRenderer.on(channels.CMD_PLAYLIST_RENAME, (_, playlistId) => renamePlaylist(playlistId));
-    ipcRenderer.on(channels.CMD_PLAYLIST_DUPLICATE, (_, playlistId) => duplicatePlaylist(playlistId));
-    ipcRenderer.on(channels.CMD_PLAYLIST_EXPORT, (_, playlistId) => exportPlaylist(playlistId));
-    ipcRenderer.on(channels.CMD_PLAYLIST_REMOVE, (_, playlistId) => removePlaylist(playlistId));
+    // AIDEV-NOTE: Tauri event listeners (Phase 5 - Menu events need backend implementation)
+    // When menu system is implemented, emit these events from Rust with:
+    // app.emit("cmd:playlist:new", payload)
+    listen('cmd:playlist:new', event => playlistNew(event.payload as Track[])).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
+    listen('cmd:tracks:playlist:add', event => addTracksToPlaylist(event.payload as any)).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
+    listen('cmd:tracks:playlist:remove', event => removeTracksToPlaylist(event.payload as any)).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
+    listen('cmd:track:artist:find', event => artistFind(event.payload as string)).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
+    listen('cmd:filename:tags', event => filenameToTags(event.payload as Track[])).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
+    listen('cmd:find:candidates', event => findCandidates(event.payload as Track[])).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
+    listen('cmd:analyze:audio', event => analyzeAudio(event.payload as Track[])).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
+    listen('cmd:tracks:delete', event => deleteTracks(event.payload as Track[])).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
+    listen('cmd:playlist:rename', event => renamePlaylist(event.payload as string)).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
+    listen('cmd:playlist:duplicate', event => duplicatePlaylist(event.payload as string)).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
+    listen('cmd:playlist:export', event => exportPlaylist(event.payload as string)).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
+    listen('cmd:playlist:remove', event => removePlaylist(event.payload as string)).then(unlisten =>
+      unlisteners.push(unlisten),
+    );
 
     return function cleanup() {
-      ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_NEW);
-      ipcRenderer.removeAllListeners(channels.CMD_TRACKS_PLAYLIST_ADD);
-      ipcRenderer.removeAllListeners(channels.CMD_TRACKS_PLAYLIST_REMOVE);
-      ipcRenderer.removeAllListeners(channels.CMD_TRACK_ARTIST_FIND);
-      ipcRenderer.removeAllListeners(channels.CMD_FILENAME_TAGS);
-      ipcRenderer.removeAllListeners(channels.CMD_FIND_CANDIDATES);
-      ipcRenderer.removeAllListeners(channels.CMD_ANALYZE_AUDIO);
-      ipcRenderer.removeAllListeners(channels.CMD_TRACKS_DELETE);
-      ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_RENAME);
-      ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_DUPLICATE);
-      ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_EXPORT);
-      ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_REMOVE);
+      // Cleanup all event listeners
+      for (const unlisten of unlisteners) {
+        unlisten();
+      }
 
       // Cleanup any active audio analysis listeners on unmount
       for (const unsub of analysisUnsubscribesRef.current) {
@@ -174,5 +196,5 @@ export function useIPCMenuEvents() {
       }
       analysisUnsubscribesRef.current = [];
     };
-  }, [libraryAPI, playlistsAPI]);
+  }, [libraryAPI, playlistsAPI, taggerAPI, uiAPI]);
 }

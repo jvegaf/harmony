@@ -1,7 +1,7 @@
-import type { MessageBoxReturnValue } from 'electron';
-import { TrackEditableFields, Track, TrackId, TrackSrc, LibraryChanges } from '../../../preload/types/harmony';
-import { stripAccents } from '../../../preload/lib/utils-id3';
-import { chunk } from '../../../preload/lib/utils';
+import { TrackEditableFields, Track, TrackId, TrackSrc, LibraryChanges } from '@renderer/types/harmony';
+import { OpenDialogOptions, MessageBoxOptions, MessageBoxReturnValue } from '@renderer/types/tauri-compat';
+import { stripAccents } from '@renderer/lib/utils/utils-id3';
+import { chunk } from 'lodash';
 
 import { createStore } from './store-helpers';
 import usePlayerStore from './usePlayerStore';
@@ -9,14 +9,13 @@ import useTaggerStore from './useTaggerStore';
 import useLibraryUIStore from './useLibraryUIStore';
 import router from '../views/router';
 import { GetFilenameWithoutExtension } from '@renderer/lib/utils-library';
-
-const { db, config, covers, logger, library, dialog } = window.Main;
+import { db, config, covers, logger, library, dialog } from '@renderer/lib/tauri-api';
 
 type LibraryState = {
   librarySourceRoot: string;
   libraryChanges: LibraryChanges | null;
   api: {
-    openHandler: (opts: Electron.OpenDialogOptions) => Promise<void>;
+    openHandler: (opts: OpenDialogOptions) => Promise<void>;
     search: (value: string) => void;
     setSearched: (trackSearched: Track | null) => void;
     setLibrarySourceRoot: (pathsToScan: string[]) => Promise<void>;
@@ -45,10 +44,12 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
   librarySourceRoot: '',
   libraryChanges: null,
   api: {
-    openHandler: async (opts: Electron.OpenDialogOptions) => {
+    openHandler: async (opts: OpenDialogOptions) => {
       const paths = await dialog.open(opts);
-      if (paths.length) {
+      if (paths && Array.isArray(paths) && paths.length > 0) {
         get().api.setLibrarySourceRoot(paths);
+      } else if (paths && typeof paths === 'string') {
+        get().api.setLibrarySourceRoot([paths]);
       }
     },
     search: (search): void => {
@@ -105,7 +106,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       }
     },
     remove: async trackIDs => {
-      const options: Electron.MessageBoxOptions = {
+      const options: MessageBoxOptions = {
         buttons: ['Cancel', 'Remove'],
         title: 'Remove tracks from library?',
         message: `Are you sure you want to remove ${trackIDs.length} element(s) from your library?`,
@@ -121,7 +122,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
     reset: async (): Promise<void> => {
       usePlayerStore.getState().api.stop();
       try {
-        const options: Electron.MessageBoxOptions = {
+        const options: MessageBoxOptions = {
           buttons: ['Cancel', 'Reset'],
           title: 'Reset library?',
           message: 'Are you sure you want to reset your library? All your tracks and playlists will be cleared.',
@@ -145,36 +146,41 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       router.revalidate();
     },
     updateTrackMetadata: async (trackID: string, newFields: TrackEditableFields): Promise<void> => {
-      let track = await db.tracks.findOnlyByID(trackID);
-
-      track = {
-        ...track,
-        ...newFields,
-      };
+      const track = await db.tracks.findOnlyByID(trackID);
 
       if (!track) {
         throw new Error('No track found while trying to update track metadata');
       }
 
-      await library.updateMetadata(track);
-      await db.tracks.update(track);
-      useTaggerStore.getState().api.setUpdated(track);
+      const updatedTrack = {
+        ...track,
+        ...newFields,
+      };
+
+      await library.updateMetadata(updatedTrack);
+      await db.tracks.update(updatedTrack);
+      useTaggerStore.getState().api.setUpdated(updatedTrack);
     },
     getCover: async (track: Track): Promise<string | null> => {
       return await covers.getCoverAsBase64(track);
     },
     updateTrackRating: async (trackSrc: TrackSrc, newRating: number): Promise<void> => {
       const track = await db.tracks.findOnlyByPath(trackSrc);
+
+      if (!track) {
+        throw new Error('No track found while trying to update rating');
+      }
+
       const rate = { source: 'traktor@native-instruments.de', rating: newRating };
       const updatedTrack = { ...track, rating: rate };
-      window.Main.library.updateRating({ trackSrc, rating: newRating });
-      window.Main.db.tracks.update(updatedTrack);
+      library.updateRating({ trackSrc, rating: newRating });
+      db.tracks.update(updatedTrack);
       useTaggerStore.getState().api.setUpdated(updatedTrack);
     },
     deleteTracks: async (tracks: Track[]) => {
       usePlayerStore.getState().api.stop();
       try {
-        const options: Electron.MessageBoxOptions = {
+        const options: MessageBoxOptions = {
           buttons: ['Cancel', 'Delete'],
           title: 'Delete tracks from disk?',
           message: 'Are you sure you want to delete tracks from disk? ',
@@ -200,7 +206,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
 
         if (!libraryPath) {
           logger.warn('No library path configured, cannot check for changes');
-          const options: Electron.MessageBoxOptions = {
+          const options: MessageBoxOptions = {
             buttons: ['OK'],
             title: 'No Library Path',
             message: 'Please import a music collection first before checking for changes.',

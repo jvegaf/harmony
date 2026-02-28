@@ -9,9 +9,8 @@ import { LoaderData } from '../router';
 import appStyles from '../Root.module.css';
 import styles from './RecentlyAdded.module.css';
 import TrackList from '../../components/TrackList/TrackList';
-import type { Track } from '../../../../preload/types/harmony';
-
-const { db } = window.Main;
+import type { Track } from '@renderer/types/harmony';
+import { db } from '@renderer/lib/tauri-api';
 
 export default function RecentlyAddedView() {
   const trackPlayingID = usePlayingTrackID();

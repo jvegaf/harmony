@@ -1,20 +1,19 @@
 import { useEffect } from 'react';
 
 import { usePlayerAPI } from '../stores/usePlayerStore';
-import useCurrentViewTracks from './useCurrentViewTracks';
 import player from '../lib/player';
-import channels from '../../../preload/lib/ipc-channels';
-
-const { ipcRenderer } = window.ElectronAPI;
+import { listen, emit } from '@tauri-apps/api/event';
 
 /**
- * Handle IPC player events from main process (global media keys, app menu)
+ * Handle player events from Tauri backend (global media keys, app menu)
+ * AIDEV-NOTE: Phase 5 - Media key handling needs implementation in Rust
  */
 export function useIPCPlayerEvents() {
   const playerAPI = usePlayerAPI();
-  const tracks = useCurrentViewTracks();
 
   useEffect(() => {
+    const unlisteners: Array<() => void> = [];
+
     function play() {
       if (player.getTrack()) {
         playerAPI.play();
@@ -26,34 +25,34 @@ export function useIPCPlayerEvents() {
 
       if (!track) throw new Error('Track is undefined');
 
-      ipcRenderer.send(channels.PLAYBACK_PLAY, track ?? null);
-      ipcRenderer.send(channels.PLAYBACK_TRACK_CHANGE, track);
+      // Emit events to backend (for media keys, Discord RPC, etc.)
+      emit('playback:play', track ?? null);
+      emit('playback:track-change', track);
     }
 
     function onPause() {
-      ipcRenderer.send(channels.PLAYBACK_PAUSE);
+      emit('playback:pause', null);
     }
 
-    ipcRenderer.on(channels.PLAYBACK_PLAY, play);
-    ipcRenderer.on(channels.PLAYBACK_PAUSE, playerAPI.pause);
-    ipcRenderer.on(channels.PLAYBACK_PLAYPAUSE, playerAPI.togglePlayPause);
-    ipcRenderer.on(channels.PLAYBACK_PREVIOUS, playerAPI.previous);
-    ipcRenderer.on(channels.PLAYBACK_NEXT, playerAPI.next);
-    ipcRenderer.on(channels.PLAYBACK_STOP, playerAPI.stop);
+    // Listen for playback control events from backend
+    listen('playback:play', () => play()).then(unlisten => unlisteners.push(unlisten));
+    listen('playback:pause', () => playerAPI.pause()).then(unlisten => unlisteners.push(unlisten));
+    listen('playback:playpause', () => playerAPI.togglePlayPause()).then(unlisten => unlisteners.push(unlisten));
+    listen('playback:previous', () => playerAPI.previous()).then(unlisten => unlisteners.push(unlisten));
+    listen('playback:next', () => playerAPI.next()).then(unlisten => unlisteners.push(unlisten));
+    listen('playback:stop', () => playerAPI.stop()).then(unlisten => unlisteners.push(unlisten));
 
+    // Listen to audio element events and emit to backend
     player.getAudio().addEventListener('play', onPlay);
     player.getAudio().addEventListener('pause', onPause);
 
     return function cleanup() {
-      ipcRenderer.removeAllListeners(channels.PLAYBACK_PLAY);
-      ipcRenderer.removeAllListeners(channels.PLAYBACK_PAUSE);
-      ipcRenderer.removeAllListeners(channels.PLAYBACK_PLAYPAUSE);
-      ipcRenderer.removeAllListeners(channels.PLAYBACK_PREVIOUS);
-      ipcRenderer.removeAllListeners(channels.PLAYBACK_NEXT);
-      ipcRenderer.removeAllListeners(channels.PLAYBACK_STOP);
+      for (const unlisten of unlisteners) {
+        unlisten();
+      }
 
       player.getAudio().removeEventListener('play', onPlay);
       player.getAudio().removeEventListener('pause', onPause);
     };
-  }, [playerAPI, tracks]);
+  }, [playerAPI]);
 }

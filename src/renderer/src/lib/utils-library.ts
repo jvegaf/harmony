@@ -1,4 +1,4 @@
-import { Track, TrackRating } from '../../../preload/types/harmony';
+import { Track, TrackRating } from '@renderer/types/harmony';
 import * as utils from './utils';
 
 /**

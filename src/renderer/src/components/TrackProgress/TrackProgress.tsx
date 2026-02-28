@@ -3,8 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import styles from './TrackProgress.module.css';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import usePlayingTrackCurrentTime from '../../hooks/usePlayingTrackCurrentTime';
-import { Track } from '../../../../preload/types/harmony';
-import { ParseDuration } from '../../../../preload/utils';
+import { Track } from '@renderer/types/harmony';
+import { ParseDuration } from '@renderer/lib/utils/utils';
 import { Slider } from '@mantine/core';
 
 type Props = {

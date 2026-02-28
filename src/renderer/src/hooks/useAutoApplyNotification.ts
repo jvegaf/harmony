@@ -11,8 +11,7 @@ import { useEffect, useRef } from 'react';
 import { notifications } from '@mantine/notifications';
 import router from '../views/router';
 import useTaggerStore from '../stores/useTaggerStore';
-
-const { library, db } = window.Main;
+import { library, db } from '@renderer/lib/tauri-api';
 
 const NOTIFICATION_ID = 'auto-apply-notification';
 

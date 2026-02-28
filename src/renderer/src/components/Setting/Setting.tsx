@@ -25,8 +25,9 @@ export function Section(props: Props) {
 export function Description(props: Props) {
   return (
     <Text
+      component='span'
       size='md'
-      style={{ minWidth: '300px', marginTop: '0.4rem' }}
+      style={{ minWidth: '300px', marginTop: '0.4rem', display: 'block' }}
     >
       {props.children}
     </Text>

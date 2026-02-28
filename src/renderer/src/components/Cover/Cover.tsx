@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
 import * as AspectRatio from '@radix-ui/react-aspect-ratio';
-import { Track } from '../../../../preload/types/harmony';
+import { Track } from '@renderer/types/harmony';
 import Placeholder from '../../assets/placeholder.png';
 
 import styles from './Cover.module.css';
 import { Image } from '@mantine/core';
+import { covers } from '@renderer/lib/tauri-api';
 
 type Props = {
   track: Track | null;
 };
-
-const { getCoverAsBase64 } = window.Main.covers;
 
 export default function Cover(props: Props) {
   const [coverPath, setCoverPath] = useState<string | null>(null);
@@ -18,7 +17,7 @@ export default function Cover(props: Props) {
   useEffect(() => {
     if (props.track) {
       const refreshCover = async () => {
-        const coverPath = await getCoverAsBase64(props.track!);
+        const coverPath = await covers.getCoverAsBase64(props.track!);
         setCoverPath(coverPath);
       };
 

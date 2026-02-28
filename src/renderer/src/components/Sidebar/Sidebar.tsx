@@ -2,19 +2,18 @@ import { type ReactNode, useCallback, useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { IconSearch, IconPlus, IconMusic, IconVinyl, IconClock } from '@tabler/icons-react';
 
-import { Playlist } from '../../../../preload/types/harmony';
+import { Playlist } from '@renderer/types/harmony';
 import { usePlaylistsAPI } from '@renderer/stores/usePlaylistsStore';
 import { useLibraryAPI } from '@renderer/stores/useLibraryStore';
 import useLibraryUIStore from '@renderer/stores/useLibraryUIStore';
 
 import styles from './Sidebar.module.css';
+import { menu, logger } from '@renderer/lib/tauri-api';
 
 type SidebarProps = {
   playlists: Playlist[];
   onSearch: (query: string) => void;
 };
-
-const { menu, logger } = window.Main;
 
 /**
  * Sidebar navigation with Collection, Recently Added, and Playlists.

@@ -3,9 +3,10 @@ import AudioOutputSelect from '../../components/AudioOutputSelect/AudioOutputSel
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import styles from './Settings.module.css';
 
-import { Config } from '@preload/types/harmony';
+import { Config } from '@renderer/types/harmony';
 import { NumberInput, Stack } from '@mantine/core';
 import { useEffect, useState } from 'react';
+import { config as tauriConfig } from '@renderer/lib/tauri-api';
 
 type Props = {
   config: Config;
@@ -72,7 +73,7 @@ function SettingsAudio({ config }: Props) {
                   // Clamp between 1 and 16
                   const clampedValue = Math.max(1, Math.min(16, value));
                   setWorkersValue(clampedValue);
-                  window.Main.config.set('audioAnalysisWorkers', clampedValue);
+                  tauriConfig.set('audioAnalysisWorkers', clampedValue);
                 }
               }}
             />

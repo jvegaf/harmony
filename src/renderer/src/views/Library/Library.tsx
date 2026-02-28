@@ -10,8 +10,7 @@ import { LoaderData } from '../router';
 import appStyles from '../Root.module.css';
 import styles from './Library.module.css';
 import TrackList from '../../components/TrackList/TrackList';
-
-const { db } = window.Main;
+import { db } from '@renderer/lib/tauri-api';
 
 export default function LibraryView() {
   const trackPlayingID = usePlayingTrackID();

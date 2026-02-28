@@ -9,9 +9,8 @@
 
 import { useEffect, useRef } from 'react';
 import { notifications } from '@mantine/notifications';
-import type { AutoSyncStatus } from '../../../preload/types/traktor';
-
-const { traktor } = window.Main;
+import type { AutoSyncStatus } from '@renderer/types/traktor';
+import { traktor } from '@renderer/lib/tauri-api';
 
 const NOTIFICATION_ID = 'auto-sync-notification';
 

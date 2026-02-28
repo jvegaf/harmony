@@ -1,8 +1,7 @@
 import React, { useCallback } from 'react';
 
 import styles from './ExternalLink.module.css';
-
-const { shell } = window.Main;
+import { shell } from '@renderer/lib/tauri-api';
 
 type Props = {
   children: string;

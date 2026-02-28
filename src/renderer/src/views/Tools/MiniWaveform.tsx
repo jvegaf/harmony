@@ -1,7 +1,7 @@
 import { useEffect, useRef, useMemo, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
-import { Track } from '../../../../preload/types/harmony';
+import { Track } from '@renderer/types/harmony';
 
 import styles from './DuplicateFinderTool.module.css';
 

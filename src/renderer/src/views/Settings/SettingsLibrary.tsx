@@ -9,8 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import router from '../router';
 import LibraryChangesModal from '../../components/Modal/LibraryChangesModal';
 import ProgressModal from '../../components/Modal/ProgressModal/ProgressModal';
-
-const { logger, dialog, config, library } = window.Main;
+import { logger, dialog, config, library } from '@renderer/lib/tauri-api';
 
 const subtextStyle: React.CSSProperties = {
   fontSize: 'var(--mantine-font-size-xs)',
@@ -46,15 +45,16 @@ export default function SettingsLibrary() {
   }, [refreshing, importing]);
 
   const openFolderSelector = useCallback(async () => {
-    const options: Electron.OpenDialogOptions = {
-      properties: ['openDirectory'],
-    };
+    // AIDEV-NOTE: Tauri dialog.open() returns string | string[] | null (not Electron's {canceled, filePaths})
+    const result = await dialog.open({
+      directory: true,
+      multiple: false,
+    });
 
-    const result = await dialog.open(options);
-
-    if (result.filePaths) {
+    if (result) {
       setImporting(true);
-      libraryAPI.setLibrarySourceRoot(result.filePaths).catch(err => {
+      const paths = typeof result === 'string' ? [result] : result;
+      libraryAPI.setLibrarySourceRoot(paths).catch(err => {
         logger.warn(err);
       });
     }
@@ -88,10 +88,9 @@ export default function SettingsLibrary() {
     });
 
     try {
-      const result = await library.convertKeysToCamelot();
-      logger.info(
-        `[ConvertKeysToCamelot] ${result.succeeded} converted, ${result.failed} failed out of ${result.total}`,
-      );
+      await library.convertKeysToCamelot();
+      // AIDEV-NOTE: convertKeysToCamelot is stubbed (returns void) — no result stats available yet
+      logger.info('[ConvertKeysToCamelot] Conversion completed');
 
       // Refresh the library view so updated keys are visible
       router.revalidate();

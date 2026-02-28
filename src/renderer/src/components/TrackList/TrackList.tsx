@@ -19,7 +19,7 @@ import { AgGridReact } from 'ag-grid-react';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-import { TrklistCtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '../../../../preload/types/harmony';
+import { TrklistCtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '@renderer/types/harmony';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useMantineColorScheme } from '@mantine/core';
@@ -27,13 +27,14 @@ import { usePlayerAPI } from '../../stores/usePlayerStore';
 import useLibraryUIStore from '../../stores/useLibraryUIStore';
 import useTaggerStore from '../../stores/useTaggerStore';
 import { useDetailsNavigationAPI } from '../../stores/useDetailsNavigationStore';
-import { ParseDuration } from '../../../../preload/utils';
+import { ParseDuration } from '@renderer/lib/utils/utils';
 import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
 import { GetParentFolderName, ratingComparator } from '../../lib/utils-library';
 import { usePlaylistsAPI } from '../../stores/usePlaylistsStore';
 import { perfLogger } from '../../lib/performance-logger';
 import { themeQuartz, iconSetMaterial } from 'ag-grid-community';
 import styles from './TrackList.module.css';
+import { menu, logger } from '@renderer/lib/tauri-api';
 
 // AG Grid theme configurations for light and dark modes
 // These themes use hardcoded color values because AG Grid's theming API doesn't support CSS variables
@@ -88,8 +89,6 @@ type Props = {
   playlists: Playlist[];
   currentPlaylist?: string;
 };
-
-const { menu, logger } = window.Main;
 
 const TrackList = (props: Props) => {
   const { tracks, trackPlayingID, playlists, currentPlaylist, type } = props;
