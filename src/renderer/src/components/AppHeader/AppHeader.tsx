@@ -1,4 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+
 import styles from './AppHeader.module.css';
 import { IconMinus, IconSquare, IconX } from '@tabler/icons-react';
 import { app } from '@renderer/lib/tauri-api';
@@ -16,6 +19,7 @@ type AppHeaderProps = {
 export default function AppHeader({ analysisProgress }: AppHeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const headerRef = useRef<HTMLElement>(null);
 
   const tabs: Tab[] = [
     { id: 'library', label: 'Library', path: '/library' },
@@ -24,6 +28,43 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
     { id: 'prune', label: 'Prune', path: '/prune' },
     { id: 'tools', label: 'Tools', path: '/tools' },
   ];
+
+  // AIDEV-NOTE: Setup window dragging for custom titlebar
+  // Uses Tauri's startDragging() API for manual drag region control
+  useEffect(() => {
+    const headerElement = headerRef.current;
+    if (!headerElement) return;
+
+    const handleMouseDown = async (e: MouseEvent) => {
+      // Only handle left mouse button
+      if (e.button !== 0) return;
+
+      // Check if the click is on the draggable region (not on buttons/tabs)
+      const target = e.target as HTMLElement;
+      const isInteractive =
+        target.closest('button') ||
+        target.closest('[data-no-drag]') ||
+        target.closest(`.${styles.tabGroup}`) ||
+        target.closest(`.${styles.windowControls}`) ||
+        target.closest(`.${styles.progressBar}`);
+
+      if (isInteractive) return;
+
+      // Double-click to maximize/restore
+      if (e.detail === 2) {
+        await getCurrentWindow().toggleMaximize();
+      } else {
+        // Start dragging
+        await getCurrentWindow().startDragging();
+      }
+    };
+
+    headerElement.addEventListener('mousedown', handleMouseDown);
+
+    return () => {
+      headerElement.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, []);
 
   const isActiveTab = (tab: Tab) => {
     if (tab.path === '/') {
@@ -47,7 +88,11 @@ export default function AppHeader({ analysisProgress }: AppHeaderProps) {
   };
 
   return (
-    <header className={styles.header}>
+    <header
+      ref={headerRef}
+      className={styles.header}
+      data-tauri-drag-region
+    >
       {/* Left section - Analysis progress */}
       <div className={styles.leftSection}>
         {analysisProgress && (

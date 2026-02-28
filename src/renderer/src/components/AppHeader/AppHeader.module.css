@@ -1,3 +1,12 @@
+/* AIDEV-NOTE: Tauri drag region support */
+/* This enables window dragging on Windows using the app-region CSS property */
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+  app-region: drag;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 .header {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
@@ -6,7 +15,6 @@
   border-bottom: 1px solid var(--hm-border);
   font-size: 0.75rem;
   color: var(--hm-text-muted);
-  -webkit-app-region: drag;
   min-height: 40px;
 }
 
@@ -15,11 +23,12 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .analysisText {
   color: var(--hm-text-muted);
-  -webkit-app-region: no-drag;
 }
 
 .separator {
@@ -32,11 +41,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .tabGroup {
   display: flex;
-  -webkit-app-region: no-drag;
 }
 
 .tab {
@@ -72,11 +82,12 @@
   align-items: center;
   justify-content: flex-end;
   gap: 0.5rem;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .progressBar {
   width: 6rem;
-  -webkit-app-region: no-drag;
 }
 
 .progressTrack {
@@ -95,7 +106,6 @@
 .windowControls {
   display: flex;
   gap: 0.25rem;
-  -webkit-app-region: no-drag;
 }
 
 .windowControl {
@@ -108,7 +118,6 @@
   align-items: center;
   justify-content: center;
   transition: color 0.15s ease;
-  -webkit-app-region: no-drag;
 }
 
 .windowControl:hover {

@@ -15,8 +15,11 @@
 
 import { invoke } from '@tauri-apps/api/core';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { open as openDialog, message as messageDialog } from '@tauri-apps/plugin-dialog';
 import { open as openUrl } from '@tauri-apps/plugin-shell';
+import { relaunch } from '@tauri-apps/plugin-process';
+import { appDataDir } from '@tauri-apps/api/path';
 import { info as logInfo, warn as logWarn, error as logError, debug as logDebug } from '@tauri-apps/plugin-log';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Store } from '@tauri-apps/plugin-store';
@@ -185,22 +188,18 @@ export const app = {
 
   restart: async () => {
     // AIDEV-NOTE: Tauri uses plugin-process for restart/exit — no custom Rust command needed
-    const { relaunch } = await import('@tauri-apps/plugin-process');
     await relaunch();
   },
 
   maximize: async () => {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
     await getCurrentWindow().toggleMaximize();
   },
 
   minimize: async () => {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
     await getCurrentWindow().minimize();
   },
 
   close: async () => {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
     await getCurrentWindow().close();
   },
 
@@ -576,7 +575,6 @@ export const shell = {
     await openUrl(url);
   },
   openUserDataDirectory: async (): Promise<void> => {
-    const { appDataDir } = await import('@tauri-apps/api/path');
     const dataDir = await appDataDir();
     await openUrl(dataDir);
   },
