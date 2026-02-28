@@ -10,10 +10,10 @@
 ## Technology Stack
 
 - **Frontend**: React 18 with Mantine UI components and React Router
-- **Backend**: Electron with TypeScript, Drizzle ORM (SQLite), and IPC-based architecture
-- **Build**: electron-vite, Vite, electron-builder
-- **Package Manager**: npm
-- **Database**: SQLite with Drizzle ORM (better-sqlite3)
+- **Backend**: Tauri v2 with Rust, rusqlite (SQLite), and Tauri command system
+- **Build**: Tauri CLI, Vite, cargo
+- **Package Manager**: pnpm
+- **Database**: SQLite with rusqlite
 - **Styling**: CSS Modules + Mantine UI components
 
 ## Core Development Principles
@@ -61,15 +61,15 @@ src/
 - **IPC Handlers**: Return error info to renderer rather than throwing
 
 ### Package Manager
-- **npm**: This project uses npm as its package manager
-- **Scripts**: Use `npm run dev`, `npm run build`, `npm run lint`, `npm run typecheck`
+- **pnpm**: This project uses pnpm as its package manager
+- **Scripts**: Use `pnpm run dev`, `pnpm run build`, `pnpm run lint`, `pnpm run typecheck`
 
 ## Development Workflow
 
 ### Before Code Changes
-1. Run `npm run typecheck` to verify type safety
-2. Run `npm run lint` to check code style
-3. Understand the three-process architecture and IPC flow
+1. Run `pnpm run typecheck` to verify type safety
+2. Run `pnpm run lint` to check code style
+3. Understand the Tauri architecture and command system
 
 ### Implementation Standards
 - **Module Creation**: Extend `BaseModule` or `BaseWindowModule` for main process modules
@@ -79,10 +79,10 @@ src/
 - **State Management**: Zustand stores in `src/renderer/src/stores/`
 
 ### Testing & Validation
-- Run `npm run build` to verify build process
-- Test all three processes (main, preload, renderer) integration
-- Validate IPC communication between processes
-- Test database operations and migrations
+- Run `pnpm run build` to verify build process
+- Test Tauri commands and frontend integration
+- Validate database operations
+- Test audio processing and metadata extraction
 
 ## Security Considerations
 - **IPC Security**: Validate all data passing between main and renderer processes

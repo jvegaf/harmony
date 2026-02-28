@@ -55,7 +55,7 @@ Get track recommendations from Beatport
 - **Database**: rusqlite + SQLite
 - **Audio**: lofty (metadata), symphonia (analysis)
 - **Build Tools**: Tauri CLI, cargo, Vite
-- **Package Manager**: npm (frontend), cargo (backend)
+- **Package Manager**: pnpm (frontend), cargo (backend)
 
 > **Note**: Migrated from Electron to Tauri v2 in February 2026 for better performance and smaller binaries.
 
@@ -68,52 +68,52 @@ Get track recommendations from Beatport
 ### Install
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### Development
 
 ```bash
-npm run dev             # Start development mode with hot reload
-npm run tauri:dev       # Alternative: Start Tauri dev mode directly
-npm start               # Preview built app
+pnpm run dev             # Start development mode with hot reload
+pnpm run tauri:dev       # Alternative: Start Tauri dev mode directly
+pnpm start               # Preview built app
 ```
 
 ### Build
 
 ```bash
 # For windows
-npm run build:win       # (Coming soon)
+pnpm run build:win       # (Coming soon)
 
 # For macOS
-npm run build:mac       # (Coming soon)
+pnpm run build:mac       # (Coming soon)
 
 # For Linux
-npm run build:linux     # (Coming soon)
+pnpm run build:linux     # (Coming soon)
 
 # Current platform
-npm run build           # TypeCheck + build
-npm run tauri:build     # Build Tauri app
+pnpm run build           # TypeCheck + build
+pnpm run tauri:build     # Build Tauri app
 
 # Production release
-npm run release
+pnpm run release
 ```
 
 ### Code Quality
 
 ```bash
-npm run lint            # ESLint with auto-fix
-npm run format          # Prettier auto-format all files
-npm run typecheck       # Run both node + web type checks
+pnpm run lint            # ESLint with auto-fix
+pnpm run format          # Prettier auto-format all files
+pnpm run typecheck       # Run both node + web type checks
 ```
 
 ### Testing
 
 ```bash
-npm test                # Run tests in watch mode
-npm run test:run        # Run all tests once (CI mode)
-npm run test:ui         # Open Vitest UI
-npm run test:coverage   # Run tests with coverage report
+pnpm test                # Run tests in watch mode
+pnpm run test:run        # Run all tests once (CI mode)
+pnpm run test:ui         # Open Vitest UI
+pnpm run test:coverage   # Run tests with coverage report
 ```
 
 ## Documentation
@@ -129,7 +129,7 @@ If you would like to contribute to Harmony, please follow these steps:
 2. Create a new branch (`git checkout -b feature-branch`)
 3. Read [AGENTS.md](AGENTS.md) for code style guidelines, architecture notes, and best practices
 4. Make your changes following the project conventions
-5. Run `yarn lint` and `yarn typecheck` before committing
+5. Run `pnpm lint` and `pnpm typecheck` before committing
 6. Commit your changes (`git commit -m 'Add new feature'`)
 7. Push to the branch (`git push origin feature-branch`)
 8. Open a pull request
@@ -137,7 +137,7 @@ If you would like to contribute to Harmony, please follow these steps:
 ### Code Style
 
 - **Import organization**: Tauri API imports → External packages → Internal modules → Relative imports
-- **Formatting**: Run `npm run format` (Prettier with single quotes, 120 line width)
+- **Formatting**: Run `pnpm run format` (Prettier with single quotes, 120 line width)
 - **TypeScript**: Use interfaces for objects, type aliases for unions, avoid `any`
 - **Logging**: Use Tauri logger plugin in frontend, `log` crate macros in Rust backend
 - **Error handling**: Always log errors, use try-catch for async operations, return `Result<T, E>` in Rust

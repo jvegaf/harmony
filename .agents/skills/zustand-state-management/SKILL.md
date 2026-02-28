@@ -16,7 +16,7 @@ user-invocable: true
 ## Quick Start
 
 ```bash
-npm install zustand
+pnpm install zustand
 ```
 
 **TypeScript Store** (CRITICAL: use `create<T>()()` double parentheses):
@@ -297,7 +297,7 @@ const useStore = create<BearSlice & FishSlice>()((...a) => ({
 **Prevention**: Upgrade to Zustand v5.0.10 or later. No code changes needed - the fix is internal to the persist middleware.
 
 ```bash
-npm install zustand@latest  # Ensure v5.0.10+
+pnpm install zustand@latest  # Ensure v5.0.10+
 ```
 
 **Note**: This was fixed in v5.0.10 (January 2026). If you're using v5.0.9 or earlier and experiencing state inconsistencies with persist middleware, upgrade immediately.

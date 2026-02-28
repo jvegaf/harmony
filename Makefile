@@ -1,13 +1,13 @@
 .PHONY: all install clean clean/deps clean/data dev run lint check build/linux build/win build/mac
 
-NPM_CMD = npm
+PM_CMD = pnpm
 CONFIG_DIR = ~/.config/harmony
 
 all: clean install
 
 install: clean clean/deps
 	@echo "Installing dependencies..."
-	@$(NPM_CMD) install
+	@$(PM_CMD) install
 
 clean:
 	@echo "Cleaning up..."
@@ -23,28 +23,28 @@ clean/deps:
 
 dev:
 	@echo "Running development environment..."
-	@$(NPM_CMD) run dev
+	@$(PM_CMD) run dev
 
 run:
 	@echo "Running application..."
-	@$(NPM_CMD) start
+	@$(PM_CMD) start
 
 lint:
 	@echo "Linting code..."
-	@$(NPM_CMD) run lint
+	@$(PM_CMD) run lint
 
 check: lint
 	@echo "Linting code..."
-	@$(NPM_CMD) run typecheck
+	@$(PM_CMD) run typecheck
 
 build/linux: clean
 	@echo "Building Linux application..."
-	@$(NPM_CMD) run build:linux
+	@$(PM_CMD) run build:linux
 
 build/win: clean
 	@echo "Building Windows application..."
-	@$(NPM_CMD) run build:win
+	@$(PM_CMD) run build:win
 
 build/mac: clean
 	@echo "Building Mac application..."
-	@$(NPM_CMD) run build:mac
+	@$(PM_CMD) run build:mac

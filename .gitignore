@@ -5,13 +5,6 @@ out
 .DS_Store
 *.log*
 .vscode
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
 .opencode/plugin
 opencode.json
 tsconfig.web.tsbuildinfo

@@ -7,7 +7,7 @@
 - **Frontend**: React 18 with Mantine UI components and React Router
 - **Backend**: Rust (Tauri v2) with rusqlite (SQLite), lofty (audio metadata), and Tauri command system
 - **Build**: Tauri CLI, Vite, cargo
-- **Package Manager**: npm (frontend), cargo (backend)
+- **Package Manager**: pnpm (frontend), cargo (backend)
 - **Migration**: Fully migrated from Electron to Tauri v2 (Feb 2026)
 
 ---
@@ -17,39 +17,39 @@
 ### Development
 
 ```bash
-npm run dev             # Start development mode with hot reload
-npm run tauri:dev       # Alternative: Start Tauri dev mode directly
-npm start               # Preview built app
+pnpm run dev             # Start development mode with hot reload
+pnpm run tauri:dev       # Alternative: Start Tauri dev mode directly
+pnpm start               # Preview built app
 ```
 
 ### Build
 
 ```bash
-npm run build           # TypeCheck + build for current platform
-npm run tauri:build     # Build Tauri app for current platform
-npm run tauri:build:debug  # Build debug version with sourcemaps
-npm run build:win       # Build Windows installer (future)
-npm run build:linux     # Build Linux AppImage/deb (future)
-npm run release         # Create production release
+pnpm run build           # TypeCheck + build for current platform
+pnpm run tauri:build     # Build Tauri app for current platform
+pnpm run tauri:build:debug  # Build debug version with sourcemaps
+pnpm run build:win       # Build Windows installer (future)
+pnpm run build:linux     # Build Linux AppImage/deb (future)
+pnpm run release         # Create production release
 ```
 
 ### Code Quality
 
 ```bash
-npm run lint            # ESLint with auto-fix
-npm run format          # Prettier auto-format all files
-npm run typecheck       # Run both node + web type checks
-npm run typecheck:node  # TypeCheck main/preload (tsconfig.node.json)
-npm run typecheck:web   # TypeCheck renderer (tsconfig.web.json)
+pnpm run lint            # ESLint with auto-fix
+pnpm run format          # Prettier auto-format all files
+pnpm run typecheck       # Run both node + web type checks
+pnpm run typecheck:node  # TypeCheck main/preload (tsconfig.node.json)
+pnpm run typecheck:web   # TypeCheck renderer (tsconfig.web.json)
 ```
 
 ### Testing
 
 ```bash
-npm test                # Run tests in watch mode (development)
-npm run test:run        # Run all tests once (CI mode)
-npm run test:ui         # Open Vitest UI (visual test runner)
-npm run test:coverage   # Run tests with coverage report
+pnpm test                # Run tests in watch mode (development)
+pnpm run test:run        # Run all tests once (CI mode)
+pnpm run test:ui         # Open Vitest UI (visual test runner)
+pnpm run test:coverage   # Run tests with coverage report
 ```
 
 **Test Framework**: Vitest (preferred over Jest for performance)  
@@ -232,13 +232,12 @@ import styles from './Root.module.css';
 
 ## Common Pitfalls to Avoid
 
-1. **Don't modify `package.json` scripts without checking dependencies**—npm scripts are orchestrated
-2. **Don't use `pnpm` or `yarn`**—this is an npm project (see `package-lock.json`)
-3. **Don't skip type checking**—always run `npm run typecheck` before committing
-4. **Don't mix console.log and Tauri logger** in backend—use `log` crate macros only
-5. **Don't use `any` as a crutch**—ESLint allows it but prefer proper typing
-6. **Don't hardcode paths**—use Tauri's path API for user data
-7. **Don't commit without running `npm run lint`**—auto-fix is enabled
+1. **Don't modify `package.json` scripts without checking dependencies**—pnpm scripts are orchestrated
+2. **Don't skip type checking**—always run `pnpm run typecheck` before committing
+3. **Don't mix console.log and Tauri logger** in backend—use `log` crate macros only
+4. **Don't use `any` as a crutch**—ESLint allows it but prefer proper typing
+5. **Don't hardcode paths**—use Tauri's path API for user data
+6. **Don't commit without running `pnpm run lint`**—auto-fix is enabled
 
 ---
 
