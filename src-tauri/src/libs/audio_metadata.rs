@@ -5,7 +5,7 @@
 use lofty::config::WriteOptions;
 use lofty::file::{AudioFile, TaggedFileExt};
 use lofty::prelude::{Accessor, ItemKey};
-use lofty::tag::TagExt;
+use lofty::tag::{ItemValue, TagExt, TagItem};
 use log::info;
 use std::path::Path;
 
@@ -70,21 +70,24 @@ pub fn extract_metadata(file_path: &str) -> Result<Track> {
   let duration_seconds = properties.duration().as_secs_f64();
   let duration_ms = (duration_seconds * 1000.0) as i64;
 
-  // Bitrate in kbps
+  // AIDEV-NOTE: audio_bitrate() already returns kbps, no conversion needed
   let bitrate = properties
     .audio_bitrate()
     .or_else(|| properties.overall_bitrate())
-    .map(|b| (b / 1000) as i32);
+    .map(|b| b as i32);
 
   // Comment
   let comment = tag.and_then(|t| t.comment()).map(|s| s.to_string());
 
   // BPM, initial key, label, URL, rating - these are in extended metadata
   // For lofty 0.21, we need to access items directly
+  // AIDEV-NOTE: ID3v2 uses TBPM (IntegerBpm), other formats may use Bpm (decimal)
   let bpm = tag.and_then(|t| {
     t.items()
-      .find(|item| matches!(item.key(), &ItemKey::Bpm))
-      .and_then(|item| item.value().text().and_then(|s| s.parse::<i32>().ok()))
+      .find(|item| matches!(item.key(), &ItemKey::IntegerBpm))
+      .or_else(|| t.items().find(|item| matches!(item.key(), &ItemKey::Bpm)))
+      .and_then(|item| item.value().text().and_then(|s| s.parse::<f64>().ok()))
+      .map(|v| v.round() as i32)
   });
 
   let initial_key = tag.and_then(|t| {
@@ -99,19 +102,34 @@ pub fn extract_metadata(file_path: &str) -> Result<Track> {
       .and_then(|item| item.value().text().map(|s| s.to_string()))
   });
 
-  // AIDEV-NOTE: URL field - lofty doesn't have a generic Url key
-  // Using AudioFileUrl as the most appropriate variant for DJ music files
+  // AIDEV-NOTE: WOAR frame (Official artist/performer webpage) stores track URL
+  // TrackArtistUrl maps to ID3v2.4 WOAR frame
   let url = tag.and_then(|t| {
     t.items()
-      .find(|item| matches!(item.key(), &ItemKey::AudioFileUrl))
+      .find(|item| matches!(item.key(), &ItemKey::TrackArtistUrl))
       .and_then(|item| item.value().text().map(|s| s.to_string()))
   });
 
-  // Rating - try POPM (Popularimeter) for MP3
+  // AIDEV-NOTE: POPM (Popularimeter) frame has binary structure:
+  // - Email (null-terminated string)
+  // - Rating (1 byte: 0-255)
+  // - Counter (4+ bytes, optional)
   let rating = tag.and_then(|t| {
     t.items()
       .find(|item| matches!(item.key(), &ItemKey::Popularimeter))
-      .and_then(|item| item.value().text().and_then(|s| s.parse::<i32>().ok()))
+      .and_then(|item| {
+        // POPM is stored as binary data, not text
+        item.value().binary().and_then(|data| {
+          // Find null terminator (end of email)
+          let null_pos = data.iter().position(|&b| b == 0)?;
+          // Rating byte is right after null terminator
+          if data.len() > null_pos + 1 {
+            Some(data[null_pos + 1])
+          } else {
+            None
+          }
+        })
+      })
       .map(|rating_value| {
         // Convert POPM (0-255) to 0-5 scale
         let normalized = (rating_value as f64 / 255.0 * 5.0).round() as i32;
@@ -190,8 +208,9 @@ pub fn write_metadata(file_path: &str, track: &Track) -> Result<()> {
   }
 
   // Set extended metadata
+  // AIDEV-NOTE: Use IntegerBpm for ID3v2 compatibility (TBPM frame)
   if let Some(bpm) = track.bpm {
-    tag.insert_text(ItemKey::Bpm, bpm.to_string());
+    tag.insert_text(ItemKey::IntegerBpm, bpm.to_string());
   }
 
   if let Some(key) = &track.initial_key {
@@ -202,14 +221,28 @@ pub fn write_metadata(file_path: &str, track: &Track) -> Result<()> {
     tag.insert_text(ItemKey::Label, label.clone());
   }
 
+  // AIDEV-NOTE: TrackArtistUrl maps to WOAR frame (artist/performer webpage)
   if let Some(url) = &track.url {
-    tag.insert_text(ItemKey::AudioFileUrl, url.clone());
+    tag.insert_text(ItemKey::TrackArtistUrl, url.clone());
   }
 
-  // Set rating (convert 0-5 to 0-255 for POPM)
+  // AIDEV-NOTE: Set rating as POPM binary frame structure:
+  // - Email (null-terminated, use empty string for compatibility)
+  // - Rating byte (0-255)
+  // - Counter (optional, omitted here)
   if let Some(rating) = &track.rating {
-    let popm_value = ((rating.rating as f64 / 5.0) * 255.0).round() as i32;
-    tag.insert_text(ItemKey::Popularimeter, popm_value.to_string());
+    let popm_value = ((rating.rating as f64 / 5.0) * 255.0).round() as u8;
+    // Create POPM binary data: empty email + null + rating byte
+    let mut popm_data = vec![0u8]; // Empty email with null terminator
+    popm_data.push(popm_value); // Rating byte
+
+    // Remove existing Popularimeter items first
+    tag.remove_key(&ItemKey::Popularimeter);
+    // Insert new POPM item
+    tag.push_unchecked(TagItem::new(
+      ItemKey::Popularimeter,
+      ItemValue::Binary(popm_data),
+    ));
   }
 
   // Save changes to file with default write options
