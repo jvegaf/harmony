@@ -1,11 +1,13 @@
 /**
  * Parse an int to a more readable string
+ * AIDEV-NOTE: duration comes from Rust backend in milliseconds, convert to seconds first
  */
-export const ParseDuration = (duration: number | null): string => {
+export const parseDuration = (duration: number | null): string => {
   if (duration !== null) {
-    const hours = Math.trunc(duration / 3600);
-    const minutes = Math.trunc(duration / 60) % 60;
-    const seconds = Math.trunc(duration) % 60;
+    const totalSeconds = Math.trunc(duration / 1000); // Convert ms to seconds
+    const hours = Math.trunc(totalSeconds / 3600);
+    const minutes = Math.trunc(totalSeconds / 60) % 60;
+    const seconds = totalSeconds % 60;
 
     const hoursStringified = hours < 10 ? `0${hours}` : hours;
     const minutesStringified = minutes < 10 ? `0${minutes}` : minutes;
@@ -20,7 +22,7 @@ export const ParseDuration = (duration: number | null): string => {
   return '00:00';
 };
 
-export const Sanitize = (str: string): string => {
+export const sanitize = (str: string): string => {
   const accents = 'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËèéêëðÇçÐÌÍÎÏìíîïÙÚÛÜùúûüÑñŠšŸÿýŽž';
   const fixes = 'AAAAAAaaaaaaOOOOOOOooooooEEEEeeeeeCcDIIIIiiiiUUUUuuuuNnSsYyyZz';
   const split = accents.split('').join('|');
@@ -33,15 +35,15 @@ export const Sanitize = (str: string): string => {
   return str.replace(reg, replacement).toLowerCase();
 };
 
-const GetTokens = (strVal: string): string[] => {
+const getTokens = (strVal: string): string[] => {
   return strVal.toLowerCase().split(' ');
 };
 
-export const GetStringTokens = (values: string[]): string[] => {
-  return values.reduce<string[]>((acc, curr) => acc.concat(GetTokens(curr)), []);
+export const getStringTokens = (values: string[]): string[] => {
+  return values.reduce<string[]>((acc, curr) => acc.concat(getTokens(curr)), []);
 };
 
-export const SanitizedTitle = (str: string): string => {
+export const sanitizedTitle = (str: string): string => {
   // Remove content in parentheses that contains remix-related terms
   let result = str.replace(/\s*\([^)]*\)/gi, '');
 
@@ -52,4 +54,27 @@ export const SanitizedTitle = (str: string): string => {
   result = result.trim().replace(/\s+/g, ' ');
 
   return result;
+};
+
+/**
+ * Remove duplicates (realpath) and useless children folders
+ * AIDEV-NOTE: Consolidated from src/lib/utils.ts - filters out duplicate paths and nested folders
+ */
+export const removeUselessFolders = (folders: string[]): string[] => {
+  // Remove duplicates
+  let filteredFolders = folders.filter((elem, index) => folders.indexOf(elem) === index);
+
+  const foldersToBeRemoved: string[] = [];
+
+  filteredFolders.forEach((folder, i) => {
+    filteredFolders.forEach((subfolder, j) => {
+      if (subfolder.includes(folder) && i !== j && !foldersToBeRemoved.includes(folder)) {
+        foldersToBeRemoved.push(subfolder);
+      }
+    });
+  });
+
+  filteredFolders = filteredFolders.filter(elem => !foldersToBeRemoved.includes(elem));
+
+  return filteredFolders;
 };

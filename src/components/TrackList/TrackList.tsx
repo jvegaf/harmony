@@ -27,7 +27,7 @@ import { usePlayerAPI } from '../../stores/usePlayerStore';
 import useLibraryUIStore from '../../stores/useLibraryUIStore';
 import useTaggerStore from '../../stores/useTaggerStore';
 import { useDetailsNavigationAPI } from '../../stores/useDetailsNavigationStore';
-import { ParseDuration } from '@/lib/utils/utils';
+import { parseDuration } from '@/lib/utils/utils';
 import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
 import { GetParentFolderName, ratingComparator } from '../../lib/utils-library';
 import { usePlaylistsAPI } from '../../stores/usePlaylistsStore';
@@ -151,7 +151,7 @@ const TrackList = (props: Props) => {
         field: 'duration',
         maxWidth: 80,
         headerName: 'Time',
-        valueFormatter: (p: { value: number | null }) => ParseDuration(p.value),
+        valueFormatter: (p: { value: number | null }) => parseDuration(p.value),
       },
       {
         field: 'path',

@@ -4,7 +4,7 @@ import styles from './TrackProgress.module.css';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import usePlayingTrackCurrentTime from '../../hooks/usePlayingTrackCurrentTime';
 import { Track } from '@/types/harmony';
-import { ParseDuration } from '@/lib/utils/utils';
+import { parseDuration } from '@/lib/utils/utils';
 import { Slider } from '@mantine/core';
 
 type Props = {
@@ -40,7 +40,7 @@ export default function TrackProgress(props: Props) {
 
   return (
     <div className={styles.trackProgress}>
-      <div className={styles.timeText}>{ParseDuration(elapsed)}</div>
+      <div className={styles.timeText}>{parseDuration(elapsed)}</div>
       <div className={styles.trackSlider}>
         <Slider
           min={0}
@@ -48,11 +48,11 @@ export default function TrackProgress(props: Props) {
           step={1}
           value={elapsed}
           onChange={jumpAudioTo}
-          label={value => ParseDuration(value)}
+          label={value => parseDuration(value)}
           thumbSize={20}
         />
       </div>
-      <div className={styles.timeText}>{ParseDuration(duration)}</div>
+      <div className={styles.timeText}>{parseDuration(duration)}</div>
     </div>
   );
 }

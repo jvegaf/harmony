@@ -1,4 +1,4 @@
-import { ParseDuration } from '@/lib/utils/utils';
+import { parseDuration } from '@/lib/utils/utils';
 import type { DuplicateGroup as DuplicateGroupType, DuplicateTrackInfo } from '@/types/duplicates';
 import type { TrackId } from '@/types/harmony';
 
@@ -205,7 +205,7 @@ function TrackRow({ trackInfo, isFirst, isKeeper, isActiveTrack, onKeepChange, o
       <div className={`${styles.cell} ${styles.cellSize}`}>{formatSize(fileSize)}</div>
 
       {/* Duration */}
-      <div className={`${styles.cell} ${styles.cellTime}`}>{ParseDuration(track.duration)}</div>
+      <div className={`${styles.cell} ${styles.cellTime}`}>{parseDuration(track.duration)}</div>
 
       {/* Cue Points */}
       <div className={`${styles.cell} ${styles.cellCues}`}>{cueCount > 0 ? cueCount : '—'}</div>

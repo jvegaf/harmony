@@ -1,5 +1,5 @@
 import { Track, TrackRating } from '@/types/harmony';
-import * as utils from './utils';
+import * as utils from './utils/utils';
 
 /**
  * Format a list of tracks to a nice status

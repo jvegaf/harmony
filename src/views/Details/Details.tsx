@@ -28,9 +28,8 @@ import { useLibraryAPI } from '../../stores/useLibraryStore';
 import { useTaggerAPI } from '../../stores/useTaggerStore';
 import { useDetailsNavigationAPI, useDetailsNavigationStore } from '../../stores/useDetailsNavigationStore';
 import { GetFilenameWithoutExtension } from '../../lib/utils-library';
-import { parseDuration } from '../../lib/utils';
+import { parseDuration, sanitizedTitle } from '@/lib/utils/utils';
 import { BeatportRecommendation, SearchEngine, TrackEditableFields } from '@/types/harmony';
-import { SanitizedTitle } from '@/lib/utils/utils';
 import { shell, dialog, library, db } from '@/lib/tauri-api';
 
 // AIDEV-NOTE: Utility to extract Beatport track ID from URL
@@ -254,7 +253,7 @@ export default function DetailsView() {
 
   const searchOn = useCallback(
     (engine: SearchEngine) => {
-      const sanitizedQuery = encodeURIComponent(`${track.artist} ${SanitizedTitle(track.title)}`);
+      const sanitizedQuery = encodeURIComponent(`${track.artist} ${sanitizedTitle(track.title)}`);
       const query = encodeURIComponent(`${track.artist} ${track.title}`);
 
       switch (engine) {
