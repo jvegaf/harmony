@@ -1,6 +1,7 @@
 // AIDEV-NOTE: Tagger module for metadata tagging from multiple providers
 // Phase 5 implementation - TDD approach with unit tests and live integration tests
 
+pub mod bandcamp;
 pub mod beatport;
 pub mod orchestrator;
 pub mod scoring;
