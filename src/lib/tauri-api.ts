@@ -9,6 +9,18 @@
  * 2. Event listeners change from ipcRenderer.on() to Tauri's listen()
  * 3. All command names must match the #[tauri::command] names in Rust
  *
+ * IMPORTANT - Tauri v2 Parameter Name Convention:
+ * Tauri v2 automatically converts Rust snake_case parameters to JavaScript camelCase.
+ * - Rust: track_id → JavaScript: trackId
+ * - Rust: playlist_id → JavaScript: playlistId
+ * - Rust: track_ids → JavaScript: trackIds
+ * - Rust: ordered_track_ids → JavaScript: orderedTrackIds
+ * - Rust: library_paths → JavaScript: libraryPaths
+ * - Rust: ignore_tags → JavaScript: ignoreTags
+ * - Rust: nml_path → JavaScript: nmlPath
+ * - Rust: new_file_path → JavaScript: newFilePath
+ * - Rust: track_path → JavaScript: trackPath
+ *
  * @see src-tauri/src/lib.rs for registered commands
  * @see src/preload/index.ts for original Electron interface
  */
@@ -241,12 +253,13 @@ export const tracks = {
     return Promise.all(tracks.map(t => invoke('update_track', { track: t }))).then(() => {});
   },
 
-  remove: (trackIDs: TrackId[]): Promise<void> => invoke('delete_tracks', { track_ids: trackIDs }),
+  remove: (trackIDs: TrackId[]): Promise<void> => invoke('delete_tracks', { trackIds: trackIDs }),
 
   findByID: (tracksIDs: string[]): Promise<Track[]> => {
     // AIDEV-NOTE: No get_tracks_by_ids command in Rust. Fetch individually.
+    // Tauri v2 auto-converts snake_case to camelCase (track_id → trackId)
     console.warn('[tauri-api] findByID not implemented — fetching one by one');
-    return Promise.all(tracksIDs.map(id => invoke<Track | null>('get_track_by_id', { track_id: id }))).then(results =>
+    return Promise.all(tracksIDs.map(id => invoke<Track | null>('get_track_by_id', { trackId: id }))).then(results =>
       results.filter((t): t is Track => t !== null),
     );
   },
@@ -257,7 +270,7 @@ export const tracks = {
     return Promise.resolve([]);
   },
 
-  findOnlyByID: (trackID: string): Promise<Track | null> => invoke('get_track_by_id', { track_id: trackID }),
+  findOnlyByID: (trackID: string): Promise<Track | null> => invoke('get_track_by_id', { trackId: trackID }),
 
   findOnlyByPath: (_path: string): Promise<Track | null> => {
     // AIDEV-NOTE: No get_track_by_path command in Rust. Return null.
@@ -285,30 +298,33 @@ export const playlists = {
   rename: async (playlistID: string, name: string): Promise<void> => {
     // AIDEV-NOTE: Backend has update_playlist which takes full playlist object
     // We need to fetch, modify, and update
-    const playlist = await invoke<Playlist | null>('get_playlist_by_id', { playlist_id: playlistID });
+    // Tauri v2 auto-converts snake_case to camelCase (playlist_id → playlistId)
+    const playlist = await invoke<Playlist | null>('get_playlist_by_id', { playlistId: playlistID });
     if (playlist) {
       playlist.name = name;
       await invoke('update_playlist', { playlist });
     }
   },
 
-  remove: (playlistID: string): Promise<void> => invoke('delete_playlist', { playlist_id: playlistID }),
+  remove: (playlistID: string): Promise<void> => invoke('delete_playlist', { playlistId: playlistID }),
 
   findByID: async (playlistIDs: string[]): Promise<Playlist[]> => {
     // AIDEV-NOTE: Backend doesn't have get_playlists_by_ids, fetch individually
+    // Tauri v2 auto-converts snake_case to camelCase (playlist_id → playlistId)
     const results = await Promise.all(
-      playlistIDs.map(id => invoke<Playlist | null>('get_playlist_by_id', { playlist_id: id })),
+      playlistIDs.map(id => invoke<Playlist | null>('get_playlist_by_id', { playlistId: id })),
     );
     return results.filter((p): p is Playlist => p !== null);
   },
 
   findOnlyByID: (playlistID: string): Promise<Playlist | null> =>
-    invoke('get_playlist_by_id', { playlist_id: playlistID }),
+    invoke('get_playlist_by_id', { playlistId: playlistID }),
 
   setTracks: (playlistID: string, tracks: Track[]): Promise<void> => {
     // AIDEV-NOTE: Backend expects track IDs, not full Track objects
+    // Tauri v2 auto-converts snake_case to camelCase (playlist_id → playlistId, track_ids → trackIds)
     const trackIds = tracks.map(t => t.id);
-    return invoke('set_playlist_tracks', { playlist_id: playlistID, track_ids: trackIds });
+    return invoke('set_playlist_tracks', { playlistId: playlistID, trackIds: trackIds });
   },
 
   reorderTracks: (
@@ -319,9 +335,10 @@ export const playlists = {
   ): Promise<void> => {
     // AIDEV-NOTE: Backend expects ordered_track_ids array, not tracks and position
     // This needs to be implemented properly based on the backend signature
+    // Tauri v2 auto-converts snake_case to camelCase (playlist_id → playlistId, ordered_track_ids → orderedTrackIds)
     console.warn('[tauri-api] reorderTracks implementation needs backend signature verification');
     const orderedIds = tracksToMove.map(t => t.id);
-    return invoke('reorder_playlist_tracks', { playlist_id: playlistID, ordered_track_ids: orderedIds });
+    return invoke('reorder_playlist_tracks', { playlistId: playlistID, orderedTrackIds: orderedIds });
   },
 
   // AIDEV-NOTE: Prune Mode - To Delete Playlist API
@@ -449,7 +466,7 @@ export const library = {
   },
 
   checkChanges: async (libraryPath: string): Promise<any> =>
-    invoke('check_library_changes_cmd', { library_paths: [libraryPath] }),
+    invoke('check_library_changes_cmd', { libraryPaths: [libraryPath] }),
 
   updateRating: (_payload: UpdateRatingPayload): void => {
     // AIDEV-NOTE: No update_track_rating command in Rust backend. Stub.
@@ -464,11 +481,11 @@ export const library = {
 
   deleteTracks: async (tracks: Track[]): Promise<void> => {
     const trackIds = tracks.map(t => t.id);
-    await invoke('delete_tracks', { track_ids: trackIds });
+    await invoke('delete_tracks', { trackIds: trackIds });
   },
 
   replaceFile: async (trackId: string, trackPath: string, newFilePath: string): Promise<void> =>
-    invoke('replace_track_file', { track_id: trackId, track_path: trackPath, new_file_path: newFilePath }),
+    invoke('replace_track_file', { trackId: trackId, trackPath: trackPath, newFilePath: newFilePath }),
 
   convertKeysToCamelot: (): Promise<void> => {
     // AIDEV-NOTE: No convert_keys_to_camelot command in Rust backend. Stub.
@@ -528,7 +545,7 @@ export const dialog = {
 export const covers = {
   getCoverAsBase64: (trackPathOrTrack: string | Track): Promise<string | null> => {
     const path = typeof trackPathOrTrack === 'string' ? trackPathOrTrack : trackPathOrTrack.path;
-    return invoke('get_track_cover', { path, ignore_tags: false });
+    return invoke('get_track_cover', { path, ignoreTags: false });
   },
 };
 
@@ -552,21 +569,22 @@ export const logger = {
 };
 
 /**
- * Context menus
- * AIDEV-NOTE: In Tauri, context menus can be handled via commands or frontend-only
- * For now, we emit events that the Rust side can listen to
+ * Context menus (Legacy API - now implemented in React components)
+ * AIDEV-NOTE: Context menus are now fully implemented as React components:
+ * - TrackContextMenu (src/components/ContextMenu/TrackContextMenu.tsx)
+ * - PlaylistContextMenu (src/components/ContextMenu/PlaylistContextMenu.tsx)
+ * These stubs remain for backwards compatibility only - they are no longer called
+ * Menu actions call store APIs directly instead of emitting Tauri events
  */
 export const menu = {
   tracklist: (payload: TrklistCtxMenuPayload): void => {
-    // AIDEV-NOTE: Context menus are better handled in React for flexibility
-    // This is a placeholder - actual menu should be rendered in frontend
-    console.log('[tauri-api] tracklist menu:', payload);
+    console.log('[tauri-api] DEPRECATED: tracklist menu called, use TrackContextMenu component instead:', payload);
   },
   common: (): void => {
-    console.log('[tauri-api] common menu');
+    console.log('[tauri-api] DEPRECATED: common menu removed, native browser context menu is used in Details view');
   },
   playlist: (playlistId: string): void => {
-    console.log('[tauri-api] playlist menu:', playlistId);
+    console.log('[tauri-api] DEPRECATED: playlist menu called, use PlaylistContextMenu component instead:', playlistId);
   },
 };
 
@@ -660,7 +678,7 @@ export const traktor = {
     return null;
   },
 
-  parseNml: (nmlPath?: string): Promise<TraktorNMLInfo> => invoke('parse_traktor_nml', { nml_path: nmlPath }),
+  parseNml: (nmlPath?: string): Promise<TraktorNMLInfo> => invoke('parse_traktor_nml', { nmlPath: nmlPath }),
 
   getSyncPreview: (_nmlPath?: string, _options?: Partial<SyncOptions>): Promise<SyncPlan> => {
     // AIDEV-NOTE: No get_traktor_sync_preview command in Rust backend. Stub.
@@ -669,7 +687,7 @@ export const traktor = {
   },
 
   executeSync: (nmlPath?: string, options?: Partial<SyncOptions>): Promise<TraktorSyncResult> =>
-    invoke('sync_traktor_nml', { nml_path: nmlPath, strategy: options?.strategy }),
+    invoke('sync_traktor_nml', { nmlPath: nmlPath, strategy: options?.strategy }),
 
   exportToNml: (_nmlPath?: string): Promise<{ success: boolean }> => {
     // AIDEV-NOTE: No export_to_traktor_nml command in Rust backend. Stub.
