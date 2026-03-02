@@ -335,6 +335,19 @@ export const enum SearchEngine {
 }
 
 /**
+ * Result returned from a full library import operation.
+ * AIDEV-NOTE: Matches ImportResult struct in src-tauri/src/commands/audio.rs
+ */
+export interface ImportResult {
+  /** Total audio files found during scan */
+  total: number;
+  /** Number of tracks successfully processed and imported */
+  processed: number;
+  /** Number of files that failed to import */
+  failed: number;
+}
+
+/**
  * Progress event emitted during a full library import operation.
  * Sent from the main process to the renderer via LIBRARY_IMPORT_PROGRESS IPC channel.
  */

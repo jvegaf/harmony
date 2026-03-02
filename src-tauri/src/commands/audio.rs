@@ -1,9 +1,10 @@
 // AIDEV-NOTE: Audio metadata commands
 // Exposes audio file scanning and metadata operations to the frontend
 
-use tauri::State;
+use tauri::{AppHandle, Emitter, State};
 use walkdir::WalkDir;
 use std::path::Path;
+use serde::Serialize;
 
 use crate::libs::{Database, Track, Result, extract_metadata, write_metadata, is_supported_extension};
 
@@ -122,16 +123,30 @@ pub async fn write_tracks_metadata_batch(tracks: Vec<Track>) -> Result<BatchResu
 }
 
 /// Full library import: scan paths, extract metadata, insert into database
+/// AIDEV-NOTE: Now emits progress events to frontend for real-time toast notifications
 #[tauri::command]
 pub async fn import_library(
+    app: AppHandle,
     db: State<'_, Database>,
     paths: Vec<String>,
 ) -> Result<ImportResult> {
     use rayon::prelude::*;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::sync::Arc;
     
     log::info!("Starting library import for {} paths", paths.len());
 
-    // Step 1: Scan all paths to get audio file list
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Phase 1: Scanning filesystem
+    // ═══════════════════════════════════════════════════════════════════════════
+    emit_import_progress(
+        &app,
+        "scanning",
+        0,
+        0,
+        format!("Scanning {} path(s)...", paths.len()),
+    );
+
     let mut all_files = Vec::new();
     for path_str in paths {
         let path = Path::new(&path_str);
@@ -157,17 +172,61 @@ pub async fn import_library(
     let total_files = all_files.len();
     log::info!("Found {} audio files to import", total_files);
 
-    // Step 2: Extract metadata in parallel
+    if total_files == 0 {
+        emit_import_progress(
+            &app,
+            "complete",
+            0,
+            0,
+            "No audio files found".to_string(),
+        );
+        return Ok(ImportResult {
+            total: 0,
+            processed: 0,
+            failed: 0,
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Phase 2: Extracting metadata (parallel with progress updates)
+    // ═══════════════════════════════════════════════════════════════════════════
+    emit_import_progress(
+        &app,
+        "importing",
+        0,
+        total_files,
+        "Extracting metadata...".to_string(),
+    );
+
+    let processed_count = Arc::new(AtomicUsize::new(0));
+    let app_clone = app.clone();
+
     let tracks: Vec<Track> = all_files
         .par_iter()
         .filter_map(|path| {
-            match extract_metadata(path) {
+            let result = match extract_metadata(path) {
                 Ok(track) => Some(track),
                 Err(e) => {
                     log::warn!("Failed to extract metadata from {}: {}", path, e);
                     None
                 }
+            };
+
+            // Update progress every track (Rayon handles parallelism, atomic ensures thread safety)
+            let count = processed_count.fetch_add(1, Ordering::Relaxed) + 1;
+            
+            // Emit progress every 10 tracks to avoid overwhelming the event system
+            if count % 10 == 0 || count == total_files {
+                emit_import_progress(
+                    &app_clone,
+                    "importing",
+                    count,
+                    total_files,
+                    format!("Processing track {} of {}", count, total_files),
+                );
             }
+
+            result
         })
         .collect();
 
@@ -176,10 +235,31 @@ pub async fn import_library(
 
     log::info!("Extracted metadata for {} tracks ({} failed)", processed, failed);
 
-    // Step 3: Insert into database
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Phase 3: Saving to database
+    // ═══════════════════════════════════════════════════════════════════════════
+    emit_import_progress(
+        &app,
+        "saving",
+        0,
+        processed,
+        "Saving tracks to database...".to_string(),
+    );
+
     db.insert_tracks(&tracks)?;
 
     log::info!("Library import complete: {} tracks imported", processed);
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Phase 4: Complete
+    // ═══════════════════════════════════════════════════════════════════════════
+    emit_import_progress(
+        &app,
+        "complete",
+        processed,
+        total_files,
+        format!("Successfully imported {} tracks", processed),
+    );
 
     Ok(ImportResult {
         total: total_files,
@@ -201,4 +281,40 @@ pub struct ImportResult {
     pub total: usize,
     pub processed: usize,
     pub failed: usize,
+}
+
+/// Progress event payload for library import
+/// AIDEV-NOTE: Matches LibraryImportProgress type in src/types/harmony.ts
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ImportProgress {
+    /// Current phase: 'scanning' | 'importing' | 'saving' | 'complete' | 'error'
+    pub step: String,
+    /// Number of items processed in current step
+    pub processed: usize,
+    /// Total items in current step (0 = unknown)
+    pub total: usize,
+    /// Human-readable status message
+    pub message: String,
+}
+
+/// Emit library import progress event to frontend
+/// AIDEV-NOTE: Frontend hook useImportNotification listens to "library-import-progress"
+fn emit_import_progress(
+    app: &AppHandle,
+    step: &str,
+    processed: usize,
+    total: usize,
+    message: String,
+) {
+    let payload = ImportProgress {
+        step: step.to_string(),
+        processed,
+        total,
+        message,
+    };
+
+    if let Err(e) = app.emit("library-import-progress", &payload) {
+        log::warn!("Failed to emit import progress event: {}", e);
+    }
 }

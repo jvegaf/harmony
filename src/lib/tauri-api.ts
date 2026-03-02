@@ -40,6 +40,7 @@ import type {
   Playlist,
   TrackId,
   Config,
+  ImportResult,
   LibraryImportProgress,
   UpdateRatingPayload,
   TrklistCtxMenuPayload,
@@ -53,6 +54,7 @@ import type {
   SyncPlan,
   SyncOptions,
 } from '@/types/traktor';
+import type { TaggerProviderConfig } from '@/types/tagger';
 import type { DuplicateScanProgress, DuplicateScanResult, TrackFileInfo } from '@/types/duplicates';
 
 /**
@@ -110,7 +112,31 @@ const defaultConfig: Config = {
     similarityThreshold: 0.85,
   },
   taggerConfig: {
-    providers: [],
+    // AIDEV-NOTE: Seed 3 default providers for tagger (Phase 5)
+    // Priority: lower = higher priority (used for tie-breaking in scoring)
+    providers: [
+      {
+        name: 'beatport',
+        displayName: 'Beatport',
+        enabled: true,
+        priority: 1,
+        maxResults: 10,
+      },
+      {
+        name: 'traxsource',
+        displayName: 'Traxsource',
+        enabled: true,
+        priority: 2,
+        maxResults: 10,
+      },
+      {
+        name: 'bandcamp',
+        displayName: 'Bandcamp',
+        enabled: true,
+        priority: 3,
+        maxResults: 8,
+      },
+    ] as TaggerProviderConfig[],
   },
 };
 
@@ -447,11 +473,12 @@ export const library = {
 
   scanPaths: async (paths: string[]): Promise<string[]> => invoke('scan_paths', { paths }),
 
+  // AIDEV-NOTE: Fixed param name from 'paths' to 'filePaths' to match Rust command signature
   importTracks: async (trackPaths: string[]): Promise<Track[]> =>
-    invoke('scan_audio_files_batch', { paths: trackPaths }),
+    invoke('scan_audio_files_batch', { filePaths: trackPaths }),
 
-  importLibraryFull: async (paths: string[]): Promise<{ success: boolean; tracksAdded: number; error?: string }> =>
-    invoke('import_library', { paths }),
+  // AIDEV-NOTE: Fixed return type to match Rust ImportResult struct (total/processed/failed)
+  importLibraryFull: async (paths: string[]): Promise<ImportResult> => invoke('import_library', { paths }),
 
   onImportProgress: (callback: (progress: LibraryImportProgress) => void): (() => void) => {
     let unlisten: UnlistenFn | null = null;

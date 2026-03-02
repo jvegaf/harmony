@@ -5,16 +5,28 @@
  * AIDEV-NOTE: These types must match the field names used by:
  *   - TagCandidatesSelection.tsx (UI component)
  *   - useTaggerStore.ts (state management)
+ *   - SettingsTagger.tsx (provider configuration UI)
  * The component uses snake_case field names (local_track_id, etc.)
  * because they originate from the backend provider APIs.
  */
 
+export type ProviderSource = 'beatport' | 'traxsource' | 'bandcamp';
+
 export interface TaggerProviderConfig {
-  name: string;
+  /** Provider identifier (beatport, traxsource, bandcamp) */
+  name: ProviderSource;
+  /** Human-readable display name for UI */
+  displayName: string;
+  /** Whether this provider participates in searches */
   enabled: boolean;
+  /** Search priority (lower = higher priority, used for tie-breaking) */
   priority: number;
+  /** Maximum results to fetch from this provider per search */
+  maxResults: number;
+  /** Optional API key for authenticated providers */
   apiKey?: string;
-  [key: string]: any; // Allow additional provider-specific config
+  /** Allow additional provider-specific config */
+  [key: string]: any;
 }
 
 export interface TrackCandidate {

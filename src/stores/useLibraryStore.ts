@@ -1,6 +1,6 @@
 import { TrackEditableFields, Track, TrackId, TrackSrc, LibraryChanges } from '@/types/harmony';
 import { OpenDialogOptions, MessageBoxOptions, MessageBoxReturnValue } from '@/types/tauri-compat';
-import { stripAccents } from '@/lib/utils/utils-id3';
+import { sanitize } from '@/lib/utils/utils';
 import { chunk } from 'lodash';
 
 import { createStore } from './store-helpers';
@@ -53,7 +53,7 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       }
     },
     search: (search): void => {
-      useLibraryUIStore.getState().api.setSearch(stripAccents(search));
+      useLibraryUIStore.getState().api.setSearch(sanitize(search));
     },
     setSearched: (trackSearched: Track | null) => {
       useLibraryUIStore.getState().api.setSearched(trackSearched);
@@ -82,12 +82,14 @@ const useLibraryStore = createStore<LibraryState>((set, get) => ({
       try {
         const result = await library.importLibraryFull(pathsToScan);
 
-        if (!result.success) {
-          logger.error('Library import failed:', result.error);
+        // AIDEV-NOTE: Fixed to use ImportResult struct (total/processed/failed)
+        // Previously incorrectly checked result.success which doesn't exist
+        if (result.failed === result.total && result.total > 0) {
+          logger.error(`Library import failed: all ${result.total} tracks failed to import`);
           return;
         }
 
-        logger.info(`Import complete: ${result.tracksAdded} tracks added`);
+        logger.info(`Import complete: ${result.processed} tracks added (${result.failed} failed)`);
 
         if (pathsToScan.length > 0) {
           await config.set('libraryPath', pathsToScan[0]);

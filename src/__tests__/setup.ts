@@ -48,7 +48,8 @@ global.window.Main = {
     onTagAutoApplyComplete: vi.fn().mockReturnValue(() => {}),
     scanPaths: vi.fn(),
     importTracks: vi.fn(),
-    importLibraryFull: vi.fn().mockResolvedValue({ success: true, tracksAdded: 0 }),
+    // AIDEV-NOTE: Updated to match new ImportResult type (total/processed/failed)
+    importLibraryFull: vi.fn().mockResolvedValue({ total: 0, processed: 0, failed: 0 }),
     onImportProgress: vi.fn().mockReturnValue(() => {}),
     checkChanges: vi.fn(),
     updateRating: vi.fn(),
