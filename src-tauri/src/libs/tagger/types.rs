@@ -25,7 +25,7 @@ impl ProviderSource {
 
 /// Raw track data from a provider search result
 /// AIDEV-NOTE: Matches old-electron RawTrackData interface
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct RawTrackData {
   /// Provider-specific track ID
   pub id: String,
