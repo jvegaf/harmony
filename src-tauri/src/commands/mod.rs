@@ -7,6 +7,7 @@ pub mod cue_points;
 pub mod files;
 pub mod folders;
 pub mod playlists;
+pub mod tagger;
 pub mod tracks;
 pub mod traktor;
 
@@ -17,5 +18,6 @@ pub use cue_points::*;
 pub use files::*;
 pub use folders::*;
 pub use playlists::*;
+pub use tagger::*;
 pub use tracks::*;
 pub use traktor::*;

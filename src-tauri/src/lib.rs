@@ -56,6 +56,11 @@ pub fn run() {
       // Register database as managed state
       app.manage(database);
 
+      // Initialize tagger providers
+      info!("Initializing tagger providers...");
+      let tagger_state = commands::tagger::TaggerState::new().expect("Failed to initialize tagger state");
+      app.manage(tagger_state);
+
       info!("Harmony initialized successfully!");
       Ok(())
     })
@@ -113,6 +118,9 @@ pub fn run() {
       // Traktor sync commands
       commands::parse_traktor_nml,
       commands::sync_traktor_nml,
+      // Tagger commands
+      commands::search_track_candidates,
+      commands::get_tagger_providers,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
