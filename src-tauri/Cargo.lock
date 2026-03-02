@@ -1806,6 +1806,7 @@ dependencies = [
  "nosleep",
  "quick-xml 0.36.2",
  "rayon",
+ "regex",
  "reqwest 0.12.28",
  "rusqlite",
  "scraper",

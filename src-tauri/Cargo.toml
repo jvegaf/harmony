@@ -74,6 +74,7 @@ nosleep = "0.2"
 
 # Temporary file handling (used in audio analysis)
 tempfile = "3"
+regex = "1.12.3"
 
 [dev-dependencies]
 tokio-test = "0.4"  # Utilities for async tests

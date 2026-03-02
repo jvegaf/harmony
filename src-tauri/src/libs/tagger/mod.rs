@@ -4,6 +4,7 @@
 pub mod beatport;
 pub mod orchestrator;
 pub mod scoring;
+pub mod traxsource;
 pub mod types;
 
 // Re-export core types
