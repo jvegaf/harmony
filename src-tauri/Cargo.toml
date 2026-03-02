@@ -64,6 +64,7 @@ strsim = "0.11"  # Levenshtein distance for tagger scoring
 # HTTP and web scraping
 reqwest = { version = "0.12", features = ["json"] }
 scraper = "0.20"
+urlencoding = "2"
 
 # XML processing
 quick-xml = { version = "0.36", features = ["serialize"] }
