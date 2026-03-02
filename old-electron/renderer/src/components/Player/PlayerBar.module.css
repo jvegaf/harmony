@@ -1,0 +1,36 @@
+.playerRoot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  width: 100%;
+  background-color: var(--hm-bg-main);
+  gap: 0.5rem;
+}
+
+.playerCover {
+  min-width: 100px;
+  min-height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.playerControls {
+  height: 100%;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.playerWaveform {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  background-color: var(--hm-bg-elevated);
+  justify-content: center;
+  align-items: center;
+}

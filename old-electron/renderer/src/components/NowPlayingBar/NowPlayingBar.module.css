@@ -1,0 +1,131 @@
+.nowPlayingBar {
+  padding: 1rem 1rem 0rem 1rem;
+  border-bottom: 1px solid var(--hm-border);
+  background-color: var(--hm-bg-main);
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  color: var(--hm-text-muted);
+}
+
+/* Track Info Section */
+.trackInfoSection {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.coverContainer {
+  width: 64px;
+  height: 64px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.trackDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.trackTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--hm-text);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trackArtist {
+  font-size: 0.875rem;
+  color: var(--hm-text-muted);
+  margin: 0;
+}
+
+.trackActions {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  color: var(--hm-text-muted);
+  cursor: pointer;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.actionButton:hover {
+  background-color: var(--hm-bg-hover);
+  color: var(--hm-text-secondary);
+}
+
+/* AIDEV-NOTE: Theme-aware active state for pre-cue headphones icon */
+.actionButton.active {
+  color: var(--hm-primary);
+}
+
+/* Tags Section */
+.tagsSection {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tag {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  background-color: var(--hm-bg-elevated);
+  color: var(--hm-text-secondary);
+}
+
+.tagPrimary {
+  background-color: var(--hm-primary-light);
+  color: var(--hm-primary);
+  border: 1px solid light-dark(rgba(250, 137, 5, 0.6), rgba(250, 137, 5, 0.5));
+}
+
+/* Waveform Section */
+.waveformSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.playIndicator {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playIcon {
+  color: var(--hm-primary);
+}
+
+.waveformContainer {
+  flex: 1;
+  height: 64px;
+  position: relative;
+  overflow: hidden;
+}

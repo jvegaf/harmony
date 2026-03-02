@@ -1,0 +1,22 @@
+.playerInfo {
+  width: 100%;
+  height: 100%;
+
+  & > p {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: start;
+  }
+}
+
+.infoTitle {
+  font-weight: bold;
+}
+
+.infoArtist {
+  font-size: 0.8rem;
+}

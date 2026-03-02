@@ -1,0 +1,32 @@
+.volumeControl {
+  width: 150px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.volumeSlider {
+  width: 100%;
+  min-width: 100px;
+}
+
+.muteBtn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 0.25rem;
+  background-color: transparent;
+  color: var(--hm-text-secondary);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background-color: var(--hm-bg-hover);
+    color: var(--hm-text);
+  }
+}

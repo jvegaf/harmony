@@ -1,0 +1,26 @@
+.ctrlBtn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--hm-bg-button);
+  cursor: pointer;
+  outline: none;
+  color: var(--hm-text-secondary);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background-color: var(--hm-bg-hover);
+    color: var(--hm-text);
+  }
+
+  &:only-child {
+    color: var(--hm-text-secondary);
+  }
+}

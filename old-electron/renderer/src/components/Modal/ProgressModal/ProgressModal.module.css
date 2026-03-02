@@ -1,0 +1,131 @@
+/**
+ * Estilos para el modal de progreso
+ * AIDEV-NOTE: Now uses Harmony theme system with light/dark support
+ */
+
+/* Overlay oscuro de fondo */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--hm-bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+/* Contenedor del modal */
+.modal {
+  background-color: var(--hm-bg-modal);
+  border-radius: 16px;
+  padding: 32px;
+  min-width: 400px;
+  max-width: 500px;
+  box-shadow: light-dark(0 20px 60px rgba(0, 0, 0, 0.2), 0 20px 60px rgba(0, 0, 0, 0.5));
+  border: 1px solid var(--hm-border);
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.iconContainer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  /* AIDEV-NOTE: Theme-aware gradient using primary colors */
+  background: linear-gradient(135deg, var(--hm-primary) 0%, light-dark(#5856d6, #7c3aed) 100%);
+  margin-bottom: 16px;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  color: var(--hm-text-on-primary);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--hm-text);
+  margin: 0 0 8px 0;
+}
+
+.message {
+  font-size: 0.95rem;
+  color: var(--hm-text-secondary);
+  margin: 0;
+}
+
+/* Sección de progreso */
+.progressSection {
+  margin-bottom: 24px;
+}
+
+.progressBar {
+  width: 100%;
+  height: 12px;
+  background-color: var(--hm-progress-bg);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progressFill {
+  height: 100%;
+  /* AIDEV-NOTE: Theme-aware gradient using primary colors */
+  background: linear-gradient(90deg, var(--hm-primary) 0%, light-dark(#5856d6, #7c3aed) 100%);
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+/* Estadísticas */
+.stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.percentage {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--hm-primary);
+}
+
+.count {
+  font-size: 1rem;
+  color: var(--hm-text-secondary);
+  font-weight: 500;
+}
+
+/* Spinner */
+.spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinnerIcon {
+  width: 32px;
+  height: 32px;
+  color: var(--hm-primary);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -8,6 +8,11 @@ pub mod scoring;
 pub mod traxsource;
 pub mod types;
 
-// Re-export core types
+// Re-export core types and orchestrator
 pub use orchestrator::{Orchestrator, OrchestratorConfig};
 pub use types::{ProviderSource, RawTrackData, SearchQuery, TrackCandidate, TrackCandidatesResult};
+
+// Re-export providers for use in Tauri commands
+pub use bandcamp::BandcampProvider;
+pub use beatport::BeatportProvider;
+pub use traxsource::TraxsourceProvider;

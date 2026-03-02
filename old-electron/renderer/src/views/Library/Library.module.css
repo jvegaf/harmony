@@ -1,0 +1,22 @@
+.viewLibrary {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: transparent;
+}
+
+.viewMessage {
+  display: flex;
+  height: 100%;
+  padding-top: 200px;
+  justify-content: center;
+  align-items: flex-start;
+  color: var(--hm-text-muted);
+}
+
+.footerStyles {
+  width: 100%;
+  height: 36px;
+  flex-shrink: 0;
+}
