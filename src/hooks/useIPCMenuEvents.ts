@@ -1,27 +1,24 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 import { usePlaylistsAPI } from '../stores/usePlaylistsStore';
 import { Track } from '@/types/harmony';
-import useTaggerStore, { useTaggerAPI } from '../stores/useTaggerStore';
+import { useTaggerAPI } from '../stores/useTaggerStore';
 import { useLibraryAPI } from '../stores/useLibraryStore';
 import useLibraryUIStore from '../stores/useLibraryUIStore';
-import { notifications } from '@mantine/notifications';
 import { listen } from '@tauri-apps/api/event';
-import { audioAnalysis } from '@/lib/tauri-api';
+import { analyzeAudioTracks } from '@/lib/audio-analysis-helper';
 
 /**
  * Handle menu events from Tauri backend (context menus, app menu commands)
- * AIDEV-NOTE: Phase 5 - Menu system not yet fully implemented in Tauri backend
- * This hook listens for Tauri custom events instead of Electron IPC
+ * AIDEV-NOTE: Phase 5 - Context menus now implemented in React components (TrackContextMenu, PlaylistContextMenu)
+ * This hook remains for potential future backend-triggered menu commands via Tauri events
+ * Most menu actions are now called directly from context menu components
  */
 export function useIPCMenuEvents() {
   const libraryAPI = useLibraryAPI();
   const playlistsAPI = usePlaylistsAPI();
   const taggerAPI = useTaggerAPI();
   const uiAPI = useLibraryUIStore(state => state.api);
-  // Use refs to store unsubscribe functions for audio analysis listeners
-  // This allows cleanup when analysis completes or component unmounts
-  const analysisUnsubscribesRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
     const unlisteners: Array<() => void> = [];
@@ -53,75 +50,7 @@ export function useIPCMenuEvents() {
     }
 
     function analyzeAudio(selected: Track[]) {
-      const notificationId = `audio-analysis-${Date.now()}`;
-
-      notifications.show({
-        id: notificationId,
-        title: 'Audio Analysis',
-        message: `Analyzing ${selected.length} track(s)...`,
-        loading: true,
-        autoClose: false,
-      });
-
-      // Listen to progress events and update notification
-      const unsubscribeProgress = audioAnalysis.onProgress(progress => {
-        const { completed, total, percentage } = progress;
-        notifications.update({
-          id: notificationId,
-          title: 'Audio Analysis',
-          message: `Analyzing... ${completed}/${total} (${percentage.toFixed(0)}%)`,
-          loading: true,
-          autoClose: false,
-        });
-      });
-
-      // Listen for track completion events to update TrackList in real-time
-      // This triggers the store's `updated` state which AG Grid watches for row updates
-      const unsubscribeTrackComplete = audioAnalysis.onTrackComplete(track => {
-        useTaggerStore.setState({ updated: track });
-      });
-
-      // Store unsubscribe functions for cleanup
-      analysisUnsubscribesRef.current = [unsubscribeProgress, unsubscribeTrackComplete];
-
-      const filePaths = selected.map(track => track.path);
-
-      // Fire-and-forget pattern - don't await the batch analysis
-      // This prevents UI blocking while analysis runs in the background
-      audioAnalysis
-        .analyzeBatch(filePaths)
-        .then(() => {
-          // Cleanup listeners
-          for (const unsub of analysisUnsubscribesRef.current) {
-            unsub();
-          }
-          analysisUnsubscribesRef.current = [];
-
-          notifications.update({
-            id: notificationId,
-            title: 'Audio Analysis Complete',
-            message: `Successfully analyzed ${selected.length} track(s)`,
-            loading: false,
-            autoClose: 3000,
-            color: 'green',
-          });
-        })
-        .catch(error => {
-          // Cleanup listeners
-          for (const unsub of analysisUnsubscribesRef.current) {
-            unsub();
-          }
-          analysisUnsubscribesRef.current = [];
-
-          notifications.update({
-            id: notificationId,
-            title: 'Audio Analysis Failed',
-            message: String(error),
-            loading: false,
-            autoClose: 5000,
-            color: 'red',
-          });
-        });
+      analyzeAudioTracks(selected);
     }
 
     function deleteTracks(selected: Track[]) {
@@ -189,12 +118,6 @@ export function useIPCMenuEvents() {
       for (const unlisten of unlisteners) {
         unlisten();
       }
-
-      // Cleanup any active audio analysis listeners on unmount
-      for (const unsub of analysisUnsubscribesRef.current) {
-        unsub();
-      }
-      analysisUnsubscribesRef.current = [];
     };
   }, [libraryAPI, playlistsAPI, taggerAPI, uiAPI]);
 }

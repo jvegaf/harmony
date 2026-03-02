@@ -23,7 +23,7 @@ clean/deps:
 
 dev:
 	@echo "Running development environment..."
-	@$(PM_CMD) run dev
+	@$(PM_CMD) run tauri dev
 
 run:
 	@echo "Running application..."
