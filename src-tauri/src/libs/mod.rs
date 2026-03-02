@@ -11,6 +11,7 @@ pub mod file_ops;
 pub mod folder;
 pub mod library_changes;
 pub mod playlist;
+pub mod tagger;
 pub mod track;
 pub mod traktor;
 

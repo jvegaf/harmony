@@ -284,7 +284,9 @@ pub fn convert_to_harmony_playlist(imported: &ImportedPlaylist) -> Playlist {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::libs::traktor::nml_types::{TraktorPlaylistData, TraktorSubnodes};
+  use crate::libs::traktor::nml_types::{
+    TraktorPlaylistData, TraktorPlaylistEntry, TraktorPrimaryKey, TraktorSubnodes,
+  };
 
   #[test]
   fn test_map_traktor_playlist_key_to_path_windows() {
@@ -335,13 +337,13 @@ mod tests {
         entry: vec![
           TraktorPlaylistEntry {
             primarykey: TraktorPrimaryKey {
-              key_type: "TRACK".to_string(),
+              key_type: Some("TRACK".to_string()),
               key: Some("/:music/:track1.mp3".to_string()),
             },
           },
           TraktorPlaylistEntry {
             primarykey: TraktorPrimaryKey {
-              key_type: "TRACK".to_string(),
+              key_type: Some("TRACK".to_string()),
               key: Some("/:music/:track2.mp3".to_string()),
             },
           },

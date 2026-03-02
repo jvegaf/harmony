@@ -59,6 +59,7 @@ sha2 = "0.10"
 dirs = "5"
 thiserror = "1"
 chrono = "0.4"
+strsim = "0.11"  # Levenshtein distance for tagger scoring
 
 # HTTP and web scraping
 reqwest = { version = "0.12", features = ["json"] }
@@ -74,3 +75,4 @@ nosleep = "0.2"
 tempfile = "3"
 
 [dev-dependencies]
+tokio-test = "0.4"  # Utilities for async tests
