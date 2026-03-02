@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { LoaderFunctionArgs, useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
 import { Button, Grid, GridCol, Group, Stack, Textarea, TextInput } from '@mantine/core';
 import { hasLength, useForm } from '@mantine/form';
@@ -31,7 +31,7 @@ import { GetFilenameWithoutExtension } from '../../lib/utils-library';
 import { parseDuration } from '../../lib/utils';
 import { BeatportRecommendation, SearchEngine, TrackEditableFields } from '@/types/harmony';
 import { SanitizedTitle } from '@/lib/utils/utils';
-import { menu, shell, dialog, library, db } from '@/lib/tauri-api';
+import { shell, dialog, library, db } from '@/lib/tauri-api';
 
 // AIDEV-NOTE: Utility to extract Beatport track ID from URL
 // Beatport URLs format: https://www.beatport.com/track/{slug}/{id}
@@ -274,10 +274,8 @@ export default function DetailsView() {
     [track],
   );
 
-  const handleContextMenu = useCallback((event: React.MouseEvent) => {
-    event.preventDefault();
-    menu.common();
-  }, []);
+  // AIDEV-NOTE: Context menu removed - allow native browser context menu for text inputs
+  // Users can now right-click text fields to cut/copy/paste using the native WebView menu
 
   // AIDEV-NOTE: Fetch Beatport recommendations for the current track
   const fetchBeatportRecommendations = useCallback(async () => {
@@ -433,13 +431,11 @@ export default function DetailsView() {
             label='Title'
             {...form.getInputProps('title')}
             key={form.key('title')}
-            onContextMenu={handleContextMenu}
           />
           <TextInput
             label='Artist'
             {...form.getInputProps('artist')}
             key={form.key('artist')}
-            onContextMenu={handleContextMenu}
           />
           <Grid
             justify='center'
@@ -450,7 +446,6 @@ export default function DetailsView() {
                 label='Album'
                 {...form.getInputProps('album')}
                 key={form.key('album')}
-                onContextMenu={handleContextMenu}
               />
             </GridCol>
             <GridCol span={3}>
@@ -458,7 +453,6 @@ export default function DetailsView() {
                 label='Genre'
                 {...form.getInputProps('genre')}
                 key={form.key('genre')}
-                onContextMenu={handleContextMenu}
               />
             </GridCol>
             <GridCol span={3}>
@@ -466,7 +460,6 @@ export default function DetailsView() {
                 label='Label'
                 {...form.getInputProps('label')}
                 key={form.key('label')}
-                onContextMenu={handleContextMenu}
               />
             </GridCol>
             <GridCol span={2}>
@@ -485,19 +478,16 @@ export default function DetailsView() {
               label='BPM'
               {...form.getInputProps('bpm')}
               key={form.key('bpm')}
-              onContextMenu={handleContextMenu}
             />
             <TextInput
               label='Year'
               {...form.getInputProps('year')}
               key={form.key('year')}
-              onContextMenu={handleContextMenu}
             />
             <TextInput
               label='Key'
               {...form.getInputProps('initialKey')}
               key={form.key('initialKey')}
-              onContextMenu={handleContextMenu}
             />
             <TextInput
               readOnly
@@ -511,14 +501,12 @@ export default function DetailsView() {
             label='Comments'
             {...form.getInputProps('comment')}
             key={form.key('comment')}
-            onContextMenu={handleContextMenu}
           />
           <TextInput
             label='Website / Track URL'
             placeholder='https://...'
             {...form.getInputProps('url')}
             key={form.key('url')}
-            onContextMenu={handleContextMenu}
           />
           <Group
             mt='md'

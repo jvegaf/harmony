@@ -34,7 +34,9 @@ import { usePlaylistsAPI } from '../../stores/usePlaylistsStore';
 import { perfLogger } from '../../lib/performance-logger';
 import { themeQuartz, iconSetMaterial } from 'ag-grid-community';
 import styles from './TrackList.module.css';
-import { menu, logger } from '@/lib/tauri-api';
+import { logger } from '@/lib/tauri-api';
+import { useContextMenu } from '@/hooks/useContextMenu';
+import { TrackContextMenu } from '@/components/ContextMenu';
 
 // AG Grid theme configurations for light and dark modes
 // These themes use hardcoded color values because AG Grid's theming API doesn't support CSS variables
@@ -104,6 +106,9 @@ const TrackList = (props: Props) => {
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [rowData, setRowData] = useState<Track[]>([]);
   const [isDragEnabled, setIsDragEnabled] = useState<boolean>(false);
+
+  // AIDEV-NOTE: Context menu state for track list right-click
+  const contextMenu = useContextMenu<TrklistCtxMenuPayload>();
 
   const gridStyle = useMemo(() => ({ height: '100%', width: '100%' }), []);
 
@@ -192,7 +197,7 @@ const TrackList = (props: Props) => {
     }
 
     return baseColumns;
-  }, [type, isDragEnabled]);
+  }, [type]);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -297,7 +302,8 @@ const TrackList = (props: Props) => {
 
   const onShowCtxtMenu = useCallback(
     (event: CellContextMenuEvent) => {
-      event.event?.preventDefault();
+      if (!event.event) return;
+
       if (!event.node.isSelected()) {
         event.node.setSelected(true, true);
       }
@@ -323,9 +329,12 @@ const TrackList = (props: Props) => {
         currentPlaylist: currentPlaylist || null,
       };
 
-      menu.tracklist(payload);
+      // AIDEV-NOTE: Open context menu at click position with payload
+      // The hook's open() method will call preventDefault() to block native menu
+      // AG Grid's event.event is typed as Event, but it's actually a MouseEvent for right-clicks
+      contextMenu.open(event.event as MouseEvent, payload);
     },
-    [playlists, currentPlaylist, gridApi, detailsNavAPI, location.pathname],
+    [playlists, currentPlaylist, gridApi, detailsNavAPI, location.pathname, contextMenu],
   );
 
   const onKeyPress = useCallback((event: { ctrlKey: boolean; key: string; preventDefault: () => void }) => {
@@ -578,6 +587,7 @@ const TrackList = (props: Props) => {
             onSortChanged={onSortChanged}
             onRowDoubleClicked={e => onDoubleClick(e)}
             onCellContextMenu={e => onShowCtxtMenu(e)}
+            preventDefaultOnContextMenu
             suppressCellFocus
             quickFilterText={search}
             rowDragText={rowDragText}
@@ -590,6 +600,12 @@ const TrackList = (props: Props) => {
           />
         </div>
       </div>
+
+      {/* AIDEV-NOTE: Context menu rendered at right-click coordinates */}
+      <TrackContextMenu
+        menuState={contextMenu}
+        onClose={contextMenu.close}
+      />
     </section>
   );
 };

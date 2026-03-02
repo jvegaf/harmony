@@ -8,7 +8,9 @@ import { useLibraryAPI } from '@/stores/useLibraryStore';
 import useLibraryUIStore from '@/stores/useLibraryUIStore';
 
 import styles from './Sidebar.module.css';
-import { menu, logger } from '@/lib/tauri-api';
+import { logger } from '@/lib/tauri-api';
+import { useContextMenu } from '@/hooks/useContextMenu';
+import { PlaylistContextMenu } from '@/components/ContextMenu';
 
 type SidebarProps = {
   playlists: Playlist[];
@@ -31,6 +33,9 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
   const playlistsAPI = usePlaylistsAPI();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+
+  // AIDEV-NOTE: Context menu state for playlist right-click
+  const contextMenu = useContextMenu<string>();
 
   // Determine active nav item based on current route
   const isLibraryRoute = location.pathname === '/library' || location.pathname === '/';
@@ -109,9 +114,12 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
     e.currentTarget.select();
   }, []);
 
-  const onShowCtxtMenu = useCallback((playlistId: string) => {
-    menu.playlist(playlistId);
-  }, []);
+  const onShowCtxtMenu = useCallback(
+    (event: React.MouseEvent, playlistId: string) => {
+      contextMenu.open(event, playlistId);
+    },
+    [contextMenu],
+  );
 
   const handlePlaylistClick = useCallback(
     (playlistId: string) => {
@@ -147,7 +155,9 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
             e.preventDefault();
             handlePlaylistClick(elem.id);
           }}
-          onContextMenu={() => onShowCtxtMenu(elem.id)}
+          onContextMenu={e => {
+            onShowCtxtMenu(e, elem.id);
+          }}
         >
           <span className={styles.navLabel}>
             <IconMusic
@@ -239,6 +249,12 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
           <p className={styles.noPlaylists}></p>
         )}
       </div>
+
+      {/* AIDEV-NOTE: Context menu rendered at right-click coordinates */}
+      <PlaylistContextMenu
+        menuState={contextMenu}
+        onClose={contextMenu.close}
+      />
     </aside>
   );
 }

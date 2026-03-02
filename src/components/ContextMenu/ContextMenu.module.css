@@ -1,0 +1,11 @@
+/* AIDEV-NOTE: Context menu positioning
+ * The menuTarget is an invisible anchor point positioned at the right-click coordinates
+ * Mantine Menu uses this as a reference point for the dropdown
+ */
+.menuTarget {
+  position: fixed;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 1000;
+}
