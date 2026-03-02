@@ -54,7 +54,7 @@ import type {
   SyncPlan,
   SyncOptions,
 } from '@/types/traktor';
-import type { TaggerProviderConfig } from '@/types/tagger';
+import type { TaggerProviderConfig, TrackCandidatesResult } from '@/types/tagger';
 import type { DuplicateScanProgress, DuplicateScanResult, TrackFileInfo } from '@/types/duplicates';
 
 /**
@@ -449,10 +449,18 @@ export const library = {
     return track;
   },
 
-  findTagCandidates: async (_tracks: Track[], _options?: { autoApply?: boolean }): Promise<any[]> => {
-    // AIDEV-NOTE: Tagger not yet implemented in Phase 5
-    console.warn('[tauri-api] findTagCandidates not implemented yet');
-    return [];
+  findTagCandidates: async (tracks: Track[], _options?: { autoApply?: boolean }): Promise<TrackCandidatesResult[]> => {
+    // AIDEV-NOTE: Tagger fully implemented - calls Rust backend with Beatport/Traxsource/Bandcamp providers
+    // Maps Track objects to SearchTrackInput format expected by the Rust command
+    const searchInputs = tracks.map(track => ({
+      localTrackId: track.id, // Tauri auto-converts to local_track_id in Rust
+      title: track.title,
+      artist: Array.isArray(track.artist) ? track.artist.join(', ') : track.artist || '',
+      duration: track.duration ? Math.floor(track.duration) : undefined,
+      filename: track.path?.split('/').pop() || track.path?.split('\\').pop(),
+    }));
+
+    return invoke<TrackCandidatesResult[]>('search_track_candidates', { tracks: searchInputs });
   },
 
   applyTagSelections: async (_selections: any[], _tracks: Track[]): Promise<any> => {
