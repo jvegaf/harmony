@@ -28,7 +28,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { open as openDialog, message as messageDialog } from '@tauri-apps/plugin-dialog';
+import { open as openDialog, message as messageDialog, ask } from '@tauri-apps/plugin-dialog';
 import { open as openUrl } from '@tauri-apps/plugin-shell';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { appDataDir } from '@tauri-apps/api/path';
@@ -594,10 +594,23 @@ export const dialog = {
 
   async msgbox(opts: any): Promise<any> {
     // AIDEV-NOTE: Convert Electron MessageBoxOptions to Tauri format
+    // If 2 buttons requested, use ask() for Yes/No dialog
+    if (opts.buttons && opts.buttons.length === 2) {
+      const confirmed = await ask(opts.message, {
+        title: opts.title,
+        kind: opts.type === 'error' ? 'error' : opts.type === 'warning' ? 'warning' : 'info',
+        okLabel: opts.buttons[1], // Destructive action (e.g., "Reset")
+        cancelLabel: opts.buttons[0], // Safe action (e.g., "Cancel")
+      });
+      // Return 1 for confirmed (second button), 0 for cancelled (first button)
+      return { response: confirmed ? 1 : 0 };
+    }
+
+    // Fallback to single-button message dialog
     const confirmed = await messageDialog(opts.message, {
       title: opts.title,
       kind: opts.type === 'error' ? 'error' : opts.type === 'warning' ? 'warning' : 'info',
-      okLabel: opts.buttons?.[0],
+      okLabel: opts.buttons?.[0] || 'OK',
     });
 
     return { response: confirmed ? 0 : 1 };
