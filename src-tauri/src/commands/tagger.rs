@@ -178,3 +178,169 @@ pub struct TaggerProviderInfo {
   pub priority: u8,
   pub max_results: usize,
 }
+
+/// AIDEV-NOTE: Input for applying tag selections from tagger UI
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TrackSelection {
+  /// ID of the local track in the library
+  pub local_track_id: String,
+  /// Formatted candidate ID (provider:id) or null if skipped
+  pub selected_candidate_id: Option<String>,
+}
+
+/// Result of applying a single tag selection
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ApplyTagResult {
+  /// ID of the track that was updated (or failed)
+  pub track_id: String,
+  /// Error message if the update failed
+  pub error: Option<String>,
+}
+
+/// Summary of apply tag selections operation
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ApplyTagSelectionsResult {
+  /// List of successfully updated tracks
+  pub updated: Vec<crate::libs::track::Track>,
+  /// List of errors (track_id + error message)
+  pub errors: Vec<ApplyTagResult>,
+}
+
+/// Apply selected metadata candidates to local tracks
+///
+/// # Arguments
+/// * `selections` - Array of user selections (track_id + candidate_id)
+/// * `candidates_results` - Full search results with all candidates (for looking up selected metadata)
+/// * `db` - Database handle
+/// * `state` - Tagger state (unused currently, for future enhancement)
+///
+/// # Returns
+/// Summary with updated tracks and any errors
+#[tauri::command]
+pub async fn apply_tag_selections(
+  selections: Vec<TrackSelection>,
+  candidates_results: Vec<TrackCandidatesResult>,
+  db: tauri::State<'_, crate::libs::Database>,
+  _state: tauri::State<'_, TaggerState>,
+) -> Result<ApplyTagSelectionsResult, String> {
+  use crate::libs::artwork::fetch_and_embed_artwork;
+  use crate::libs::track::Track;
+
+  let mut updated_tracks = Vec::new();
+  let mut errors = Vec::new();
+
+  for selection in selections {
+    // Skip selections without a candidate
+    if selection.selected_candidate_id.is_none() {
+      log::info!("Skipping track {} - no candidate selected", selection.local_track_id);
+      continue;
+    }
+
+    let candidate_id = selection.selected_candidate_id.unwrap();
+
+    // Find the track in the database
+    let local_track = match db.get_track_by_id(&selection.local_track_id) {
+      Ok(Some(track)) => track,
+      Ok(None) => {
+        log::error!("Track {} not found in database", selection.local_track_id);
+        errors.push(ApplyTagResult {
+          track_id: selection.local_track_id.clone(),
+          error: Some("Track not found".to_string()),
+        });
+        continue;
+      }
+      Err(e) => {
+        log::error!("Database error fetching track {}: {}", selection.local_track_id, e);
+        errors.push(ApplyTagResult {
+          track_id: selection.local_track_id.clone(),
+          error: Some(format!("Database error: {}", e)),
+        });
+        continue;
+      }
+    };
+
+    // Find the selected candidate in the results
+    let candidate = candidates_results
+      .iter()
+      .find(|r| r.local_track_id == selection.local_track_id)
+      .and_then(|r| {
+        r.candidates
+          .iter()
+          .find(|c| format!("{}:{}", c.source.as_str(), c.id) == candidate_id)
+      });
+
+    if candidate.is_none() {
+      log::error!("Candidate {} not found for track {}", candidate_id, selection.local_track_id);
+      errors.push(ApplyTagResult {
+        track_id: selection.local_track_id.clone(),
+        error: Some("Candidate not found".to_string()),
+      });
+      continue;
+    }
+
+    let candidate = candidate.unwrap();
+
+    log::info!(
+      "Applying tags from {} for track: {}",
+      candidate.source.as_str(),
+      local_track.title
+    );
+
+    // Build updated track with new metadata
+    let mut updated_track = local_track.clone();
+    updated_track.title = candidate.title.clone();
+    updated_track.artist = Some(candidate.artists.clone());
+    updated_track.album = candidate.album.clone();
+    updated_track.bpm = candidate.bpm.map(|bpm| bpm.round() as i32);
+    updated_track.initial_key = candidate.key.clone();
+    updated_track.genre = candidate.genre.clone();
+    updated_track.label = candidate.label.clone();
+    updated_track.url = candidate.url.clone();
+
+    // Parse year from release_date (YYYY-MM-DD)
+    if let Some(ref release_date) = candidate.release_date {
+      if let Some(year_str) = release_date.split('-').next() {
+        if let Ok(year) = year_str.parse::<i32>() {
+          updated_track.year = Some(year);
+        }
+      }
+    }
+
+    // Update duration if available (convert seconds to milliseconds)
+    if let Some(duration_secs) = candidate.duration_secs {
+      updated_track.duration = (duration_secs as i64) * 1000;
+    }
+
+    // Save track to database
+    if let Err(e) = db.update_track(&updated_track) {
+      log::error!("Failed to update track {} in database: {}", updated_track.id, e);
+      errors.push(ApplyTagResult {
+        track_id: selection.local_track_id.clone(),
+        error: Some(format!("Database update failed: {}", e)),
+      });
+      continue;
+    }
+
+    // Fetch and embed artwork (if available)
+    if let Some(ref artwork_url) = candidate.artwork_url {
+      log::info!("Fetching artwork from: {}", artwork_url);
+      match fetch_and_embed_artwork(&local_track.path, artwork_url).await {
+        Ok(_) => {
+          log::info!("Artwork embedded successfully for {}", updated_track.title);
+        }
+        Err(e) => {
+          log::warn!("Failed to embed artwork for {}: {}", updated_track.title, e);
+          // Don't fail the whole operation, just log the warning
+        }
+      }
+    }
+
+    updated_tracks.push(updated_track);
+    log::info!("Tags applied successfully for {}", selection.local_track_id);
+  }
+
+  Ok(ApplyTagSelectionsResult {
+    updated: updated_tracks,
+    errors,
+  })
+}

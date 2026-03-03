@@ -1,6 +1,7 @@
 // AIDEV-NOTE: Library modules for Harmony backend
 // Contains all domain models and database logic
 
+pub mod artwork;
 pub mod audio_analysis;
 pub mod audio_metadata;
 pub mod cover;

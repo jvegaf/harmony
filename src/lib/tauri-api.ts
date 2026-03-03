@@ -463,10 +463,42 @@ export const library = {
     return invoke<TrackCandidatesResult[]>('search_track_candidates', { tracks: searchInputs });
   },
 
-  applyTagSelections: async (_selections: any[], _tracks: Track[]): Promise<any> => {
-    // AIDEV-NOTE: Tagger not yet implemented in Phase 5
-    console.warn('[tauri-api] applyTagSelections not implemented yet');
-    return { updated: [], errors: [] };
+  applyTagSelections: async (
+    selections: any[], // TrackSelection[]
+    _tracks: Track[], // Unused, kept for backward compat
+    candidatesResults: TrackCandidatesResult[],
+  ): Promise<{ updated: Track[]; errors: Array<{ trackId: string; error: string }> }> => {
+    // AIDEV-NOTE: Apply selected metadata candidates to local tracks
+    // Maps UI selections to Rust command format and includes full candidate data for lookup
+    const rustSelections = selections.map(sel => ({
+      localTrackId: sel.local_track_id || sel.trackId,
+      selectedCandidateId: sel.selected_candidate_id,
+    }));
+
+    const result = await invoke<{
+      updated: Track[];
+      errors: Array<{ track_id: string; error: string }>;
+    }>('apply_tag_selections', {
+      selections: rustSelections,
+      candidatesResults: candidatesResults.map(cr => ({
+        localTrackId: cr.local_track_id,
+        localTitle: cr.local_title,
+        localArtist: cr.local_artist,
+        localDuration: cr.local_duration,
+        localFilename: cr.local_filename,
+        error: cr.error,
+        candidates: cr.candidates,
+      })),
+    });
+
+    // Convert snake_case response to camelCase
+    return {
+      updated: result.updated,
+      errors: result.errors.map(e => ({
+        trackId: e.track_id,
+        error: e.error || 'Unknown error',
+      })),
+    };
   },
 
   onTagCandidatesProgress: (_callback: (progress: any) => void): (() => void) => {

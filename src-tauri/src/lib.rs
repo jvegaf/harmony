@@ -121,6 +121,7 @@ pub fn run() {
       // Tagger commands
       commands::search_track_candidates,
       commands::get_tagger_providers,
+      commands::apply_tag_selections,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

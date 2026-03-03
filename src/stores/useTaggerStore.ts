@@ -115,6 +115,14 @@ const useTaggerStore = createStore<TaggerState>((set, get) => ({
 
         logger.info(`Processing ${validSelections.length} valid selections`);
 
+        // Get candidates from store state
+        const candidatesResults = get().trackTagsCandidates;
+
+        if (!candidatesResults || candidatesResults.length === 0) {
+          logger.error('No candidates results available in store');
+          return;
+        }
+
         set({
           trackTagsCandidates: null,
           tagsApplying: true,
@@ -124,7 +132,8 @@ const useTaggerStore = createStore<TaggerState>((set, get) => ({
         const trackIds = validSelections.map(s => s.local_track_id);
         const tracks = await db.tracks.findByID(trackIds);
 
-        const result = await library.applyTagSelections(validSelections, tracks);
+        // AIDEV-NOTE: Pass candidates results to backend for metadata lookup
+        const result = await library.applyTagSelections(validSelections, tracks, candidatesResults);
 
         set({
           tagsApplyProgress: { processed: validSelections.length, total: validSelections.length },
