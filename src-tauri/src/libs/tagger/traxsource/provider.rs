@@ -29,6 +29,7 @@ impl TraxsourceProvider {
   }
 
   /// Get provider source identifier
+  #[allow(dead_code)]
   pub fn source(&self) -> ProviderSource {
     ProviderSource::Traxsource
   }

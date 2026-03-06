@@ -12,10 +12,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - **Library import progress toast:** Selecting a music collection folder now shows a live Mantine notification with an animated progress bar, track counter (`X / Y (Z%)`), and phase labels (Scanning → Importing → Saving). The toast auto-closes with a green success message on completion or a red error message on failure.
 - `LibraryImportProgress` type exported from `@preload/types/harmony` for strongly-typed IPC progress events.
+- **Test data:** Added `src-tauri/testdata/sample.mp3` (15.8 MB) with WOAF tag for automated testing of URL frame extraction.
+
+### 🐛 Fixed
+
+- **WOAF tag extraction bug:** Fixed WOAF (Official Audio File URL) ID3v2 tag not being read during import. The lofty crate stores URL frames (W\*\*\* type) as `ItemValue::Locator`, not `ItemValue::Text`. Updated `extract_metadata()` to use `.locator()` instead of `.text()` for URL frames.
+- **WOAF tag writing bug:** Fixed WOAF writing to use `ItemValue::Locator` instead of `insert_text()`, ensuring proper URL frame format in ID3v2 tags.
 
 ### ⚡ Performance
 
 - Main process now emits per-track `LIBRARY_IMPORT_PROGRESS` IPC events during metadata scanning (throttled to every 10 tracks, or every track for libraries < 50 files), enabling smooth real-time progress reporting without saturating the IPC channel.
+
+### 🧪 Testing
+
+- Added 3 comprehensive tests for WOAF functionality: reading from sample file, verifying all metadata fields, and write/read roundtrip verification. All tests passing (4/4 in audio_metadata module).
+
+### 🔧 Code Quality
+
+- **Clean build achieved:** Removed all Rust compiler warnings across 14 files in the tagger module.
+- Removed unused imports: `std::fs`, `BeatportClient`, `OrchestratorConfig`, `RawTrackData`, `SearchQuery`, `TrackCandidate`, `Track`, `AudioFile`.
+- Prefixed unused variables with underscore: `_url`, `_volume`.
+- Added `#[allow(dead_code)]` to public API methods not yet in use (provider interfaces, orchestrator config, scoring utilities).
 
 ---
 

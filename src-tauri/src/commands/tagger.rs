@@ -224,7 +224,6 @@ pub async fn apply_tag_selections(
   _state: tauri::State<'_, TaggerState>,
 ) -> Result<ApplyTagSelectionsResult, String> {
   use crate::libs::artwork::fetch_and_embed_artwork;
-  use crate::libs::track::Track;
 
   let mut updated_tracks = Vec::new();
   let mut errors = Vec::new();

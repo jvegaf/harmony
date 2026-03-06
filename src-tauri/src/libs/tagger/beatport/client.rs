@@ -24,6 +24,7 @@ pub enum BeatportError {
   #[error("Rate limited (retry after {0}s)")]
   RateLimit(u64),
 
+  #[allow(dead_code)]
   #[error("Track not found: {0} - {1}")]
   TrackNotFound(String, String),
 }
@@ -32,6 +33,7 @@ pub enum BeatportError {
 #[derive(Debug, Clone)]
 pub struct OAuthToken {
   pub access_token: String,
+  #[allow(dead_code)]
   pub token_type: String,
   pub expires_in: i64,
   pub obtained_at: DateTime<Utc>,

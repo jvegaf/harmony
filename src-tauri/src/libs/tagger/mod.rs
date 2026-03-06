@@ -9,8 +9,8 @@ pub mod traxsource;
 pub mod types;
 
 // Re-export core types and orchestrator
-pub use orchestrator::{Orchestrator, OrchestratorConfig};
-pub use types::{ProviderSource, RawTrackData, SearchQuery, TrackCandidate, TrackCandidatesResult};
+pub use orchestrator::Orchestrator;
+pub use types::{ProviderSource, TrackCandidatesResult};
 
 // Re-export providers for use in Tauri commands
 pub use bandcamp::BandcampProvider;

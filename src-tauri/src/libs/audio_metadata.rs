@@ -102,12 +102,18 @@ pub fn extract_metadata(file_path: &str) -> Result<Track> {
             .and_then(|item| item.value().text().map(|s| s.to_string()))
     });
 
-    // AIDEV-NOTE: WOAF frame (Official audio file webpage) stores track URL
+    // AIDEV-NOTE: WOAF is a URL frame (W*** type), lofty stores it as ItemValue::Locator, not Text
     // AudioFileUrl maps to ID3v2.4 WOAF frame
     let url = tag.and_then(|t| {
         t.items()
             .find(|item| matches!(item.key(), &ItemKey::AudioFileUrl))
-            .and_then(|item| item.value().text().map(|s| s.to_string()))
+            .and_then(|item| {
+                // URL frames are ItemValue::Locator, not Text
+                item.value()
+                    .locator()
+                    .or_else(|| item.value().text())
+                    .map(|s| s.to_string())
+            })
     });
 
     // AIDEV-NOTE: POPM (Popularimeter) frame has binary structure:
@@ -221,9 +227,15 @@ pub fn write_metadata(file_path: &str, track: &Track) -> Result<()> {
         tag.insert_text(ItemKey::Label, label.clone());
     }
 
-    // AIDEV-NOTE: AudioFileUrl maps to WOAF frame (official audio file webpage)
+    // AIDEV-NOTE: WOAF is a URL frame - must use ItemValue::Locator, not Text
+    // insert_text creates ItemValue::Text which maps to T-type frames
+    // URL frames (W*** type) require ItemValue::Locator
     if let Some(url) = &track.url {
-        tag.insert_text(ItemKey::AudioFileUrl, url.clone());
+        tag.remove_key(&ItemKey::AudioFileUrl);
+        tag.push_unchecked(TagItem::new(
+            ItemKey::AudioFileUrl,
+            ItemValue::Locator(url.clone()),
+        ));
     }
 
     // AIDEV-NOTE: Set rating as POPM binary frame structure:
@@ -264,5 +276,104 @@ mod tests {
         assert!(is_supported_extension("/path/to/song.flac"));
         assert!(!is_supported_extension("/path/to/song.txt"));
         assert!(!is_supported_extension("/path/to/song"));
+    }
+
+    #[test]
+    fn test_extract_metadata_reads_woaf_url() {
+        // Test that WOAF (Official Audio File URL) is correctly read from ID3v2 tags
+        let test_file = "testdata/sample.mp3";
+        let track = extract_metadata(test_file).expect("Failed to extract metadata");
+
+        // Verify WOAF URL is read correctly
+        assert_eq!(
+            track.url,
+            Some("https://www.beatport.com/track/cant-stop/23100405".to_string()),
+            "WOAF tag should be read as track.url"
+        );
+
+        // Also verify other basic fields to ensure extraction works
+        assert!(!track.title.is_empty(), "Title should be present");
+        assert!(track.duration > 0, "Duration should be positive");
+    }
+
+    #[test]
+    fn test_extract_metadata_basic_fields() {
+        // Test that all basic metadata fields are correctly extracted
+        let test_file = "testdata/sample.mp3";
+        let track = extract_metadata(test_file).expect("Failed to extract metadata");
+
+        // Basic text fields
+        assert!(!track.title.is_empty(), "Title should be present");
+        assert!(track.artist.is_some(), "Artist should be present");
+        assert!(track.album.is_some(), "Album should be present");
+        assert!(track.genre.is_some(), "Genre should be present");
+
+        // Extended metadata
+        assert!(track.bpm.is_some(), "BPM should be present");
+        assert_eq!(track.bpm, Some(127), "BPM should be 127");
+        assert!(track.initial_key.is_some(), "Initial key should be present");
+        assert_eq!(
+            track.initial_key,
+            Some("11d".to_string()),
+            "Initial key should be 11d"
+        );
+
+        // Audio properties
+        assert!(track.duration > 0, "Duration should be positive");
+        assert!(track.bitrate.is_some(), "Bitrate should be present");
+
+        // WOAF URL
+        assert!(track.url.is_some(), "URL (WOAF) should be present");
+        assert!(
+            track
+                .url
+                .as_ref()
+                .unwrap()
+                .contains("beatport.com/track/cant-stop"),
+            "URL should point to Beatport track"
+        );
+    }
+
+    #[test]
+    fn test_write_and_read_url_roundtrip() {
+        use std::fs;
+
+        // Create a temp copy of the test file
+        let test_file = "testdata/sample.mp3";
+        let temp_file = "testdata/sample_temp.mp3";
+
+        // Copy test file to temp
+        fs::copy(test_file, temp_file).expect("Failed to copy test file");
+
+        // Read original metadata
+        let mut track = extract_metadata(temp_file).expect("Failed to extract metadata");
+
+        // Modify URL
+        let new_url = "https://example.com/test-track-12345";
+        track.url = Some(new_url.to_string());
+
+        // Write metadata back
+        write_metadata(temp_file, &track).expect("Failed to write metadata");
+
+        // Read again and verify URL roundtrip
+        let track_after =
+            extract_metadata(temp_file).expect("Failed to extract metadata after write");
+
+        assert_eq!(
+            track_after.url,
+            Some(new_url.to_string()),
+            "URL should roundtrip correctly through write/read cycle"
+        );
+
+        // Verify other fields are preserved
+        assert_eq!(track_after.title, track.title, "Title should be preserved");
+        assert_eq!(
+            track_after.artist, track.artist,
+            "Artist should be preserved"
+        );
+        assert_eq!(track_after.bpm, track.bpm, "BPM should be preserved");
+
+        // Clean up temp file
+        fs::remove_file(temp_file).expect("Failed to remove temp file");
     }
 }

@@ -5,5 +5,4 @@ pub mod client;
 pub mod parser;
 pub mod provider;
 
-pub use client::BeatportClient;
 pub use provider::BeatportProvider;

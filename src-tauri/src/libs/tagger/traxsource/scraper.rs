@@ -56,6 +56,7 @@ impl TraxsourceScraper {
 
   /// Extend track with album metadata (high-res artwork)
   /// AIDEV-NOTE: This fetches track page, then optionally album page for better artwork
+  #[allow(dead_code)]
   pub async fn extend_track(&self, track_url: &str) -> Result<(Option<String>, Option<String>), TraxsourceError> {
     let html = self.client.get(track_url).send().await?.text().await?;
     extract_album_data(&html, &self.client).await
@@ -156,7 +157,7 @@ fn parse_track_row(row: &scraper::ElementRef) -> Result<RawTrackData, Traxsource
   let link = title_elem.select(&link_selector).next();
 
   let href = link.and_then(|a| a.value().attr("href")).unwrap_or("");
-  let url = if href.starts_with("http") {
+  let _url = if href.starts_with("http") {
     href.to_string()
   } else {
     format!("{}{}", BASE_URL, href)
@@ -299,6 +300,7 @@ fn parse_release_date(text: &str) -> Option<String> {
 }
 
 /// Extract album name and artwork URL from track page HTML
+#[allow(dead_code)]
 async fn extract_album_data(
   html: &str,
   client: &Client,

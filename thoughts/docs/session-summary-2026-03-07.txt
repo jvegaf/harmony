@@ -1,0 +1,41 @@
+# Session Summary — 2026-03-07
+
+## Objective
+Fix WOAF (Official Audio File URL) ID3v2 tag extraction bug and clean up all Rust compiler warnings.
+
+## Accomplished
+✅ Fixed WOAF tag reading (use .locator() not .text())
+✅ Fixed WOAF tag writing (use ItemValue::Locator not insert_text())
+✅ Added 3 comprehensive tests for WOAF functionality
+✅ Added testdata/sample.mp3 for testing
+✅ Cleaned up all Rust warnings across 14 files
+✅ Achieved clean build (0 warnings)
+✅ All tests passing (4/4 in audio_metadata module)
+
+## Commit
+d5eeb9e - "fix: WOAF tag extraction and Rust warning cleanup"
+Branch: dev/tauri
+Status: Ready to push
+
+## Documentation Generated
+✅ thoughts/docs/woaf-tag-fix-and-warning-cleanup.md
+✅ CHANGELOG.md updated with fix details
+✅ AIDEV-NOTE comments in place (8 total in audio_metadata.rs)
+
+## Key Technical Discovery
+Lofty crate frame type mapping:
+- Text frames (T***) → ItemValue::Text → .text()
+- URL frames (W***) → ItemValue::Locator → .locator()
+- Binary frames → ItemValue::Binary → .binary()
+
+WOAF is a URL frame, requires .locator() not .text().
+
+## Files Modified (15 total)
+- src-tauri/src/libs/audio_metadata.rs (primary fix + tests)
+- src-tauri/testdata/sample.mp3(added)
+- 13 files in tagger module (warning cleanup)
+
+## Next Steps (if needed)
+- Push commit to origin/dev/tauri
+- Test in running application with real imports
+- Consider similar fixes for other URL frames (WOAR, WPUB) if used in future

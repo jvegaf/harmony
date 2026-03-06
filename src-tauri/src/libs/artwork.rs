@@ -9,7 +9,6 @@ use lofty::picture::{MimeType, Picture, PictureType};
 use lofty::prelude::*;
 use log::{info, warn};
 use reqwest::Client;
-use std::fs;
 use std::path::Path;
 use std::time::Duration;
 
@@ -155,7 +154,6 @@ pub async fn fetch_and_embed_artwork(file_path: &str, artwork_url: &str) -> Resu
 #[cfg(test)]
 mod tests {
   use super::*;
-  use lofty::file::AudioFile;
   use std::fs;
   use tempfile::TempDir;
 
