@@ -54,7 +54,7 @@ Get track recommendations from Beatport
 - **State Management**: Zustand
 - **Database**: Drizzle ORM + SQLite (better-sqlite3)
 - **Build Tools**: electron-vite, electron-builder
-- **Package Manager**: npm
+- **Package Manager**: pnpm
 
 ## Recommended IDE Setup
 
@@ -65,50 +65,50 @@ Get track recommendations from Beatport
 ### Install
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### Development
 
 ```bash
-npm run dev             # Start development mode with hot reload
-npm start               # Preview built app
+pnpm run dev             # Start development mode with hot reload
+pnpm start               # Preview built app
 ```
 
 ### Build
 
 ```bash
 # For windows
-npm run build:win
+pnpm run build:win
 
 # For macOS
-npm run build:mac
+pnpm run build:mac
 
 # For Linux
-npm run build:linux
+pnpm run build:linux
 
 # Current platform
-npm run build
+pnpm run build
 
 # Production release
-npm run release
+pnpm run release
 ```
 
 ### Code Quality
 
 ```bash
-npm run lint            # ESLint with auto-fix
-npm run format          # Prettier auto-format all files
-npm run typecheck       # Run both node + web type checks
+pnpm run lint            # ESLint with auto-fix
+pnpm run format          # Prettier auto-format all files
+pnpm run typecheck       # Run both node + web type checks
 ```
 
 ### Testing
 
 ```bash
-npm test                # Run tests in watch mode
-npm run test:run        # Run all tests once (CI mode)
-npm run test:ui         # Open Vitest UI
-npm run test:coverage   # Run tests with coverage report
+pnpm test                # Run tests in watch mode
+pnpm run test:run        # Run all tests once (CI mode)
+pnpm run test:ui         # Open Vitest UI
+pnpm run test:coverage   # Run tests with coverage report
 ```
 
 ## Documentation
@@ -124,7 +124,7 @@ If you would like to contribute to Harmony, please follow these steps:
 2. Create a new branch (`git checkout -b feature-branch`)
 3. Read [AGENTS.md](AGENTS.md) for code style guidelines, architecture notes, and best practices
 4. Make your changes following the project conventions
-5. Run `yarn lint` and `yarn typecheck` before committing
+5. Run `pnpm run lint` and `pnpm run typecheck` before committing
 6. Commit your changes (`git commit -m 'Add new feature'`)
 7. Push to the branch (`git push origin feature-branch`)
 8. Open a pull request
@@ -132,7 +132,7 @@ If you would like to contribute to Harmony, please follow these steps:
 ### Code Style
 
 - **Import organization**: Node/Electron built-ins → External packages → Internal modules → Relative imports
-- **Formatting**: Run `yarn format` (Prettier with single quotes, 120 line width)
+- **Formatting**: Run `pnpm run format` (Prettier with single quotes, 120 line width)
 - **TypeScript**: Use interfaces for objects, type aliases for unions, avoid `any`
 - **Logging**: Use `electron-log` in main/preload (never `console.*`)
 - **Error handling**: Always log errors, use try-catch for async operations

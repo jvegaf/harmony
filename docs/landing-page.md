@@ -48,8 +48,8 @@ page/
 
 ```bash
 cd page
-npm run dev       # desarrollo local
-npm run build     # build estático
+pnpm run dev       # desarrollo local
+pnpm run build     # build estático
 ```
 
 ## Assets

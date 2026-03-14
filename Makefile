@@ -1,6 +1,6 @@
 .PHONY: all install clean clean/deps clean/data dev run lint check build/linux build/win build/mac
 
-NPM_CMD = npm
+NPM_CMD = pnpm
 CONFIG_DIR = ~/.config/harmony
 
 all: clean install
