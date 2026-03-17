@@ -16,19 +16,29 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
-          node-version: 22
-          cache: 'npm'
+          node-version: 24
+          cache: 'pnpm'
 
-      - name: Electron Builder Action (Maintened)
-        uses: imyanice/action-electron-builder@v1.7.0
-        with:
-          github_token: ${{ secrets.GH_TOKEN }}
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          package_root: '.'
-          build_script_name: build
-          args: --config electron-builder.yml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build app
+        run: pnpm run build
+
+      # AIDEV-NOTE: Replaced imyanice/action-electron-builder@v1.7.0 which has zero pnpm support
+      # (it checks for package-lock.json to decide npm vs yarn). Manual steps give us full control.
+      - name: Package & Release (electron-builder)
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: >-
+          pnpm exec electron-builder
+          --config electron-builder.yml
+          ${{ startsWith(github.ref, 'refs/tags/v') && '--publish always' || '--publish never' }}

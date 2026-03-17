@@ -16,7 +16,7 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['**/node_modules', '**/dist', '**/out', '**/.gitignore'],
+    ignores: ['**/node_modules', '**/dist', '**/out', '**/.gitignore', '**/.astro'],
   },
   ...compat.extends('eslint:recommended', 'plugin:react/recommended', 'plugin:react/jsx-runtime').map(config => ({
     ...config,

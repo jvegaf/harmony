@@ -252,7 +252,7 @@ Track B: [Playing 🎵] [█▌▌██▌███▌] ← Reproduciendo inmed
 1. **Probar el fix**:
 
    ```bash
-   npm run dev
+   pnpm run dev
    ```
 
 2. **Verificar comportamiento**:

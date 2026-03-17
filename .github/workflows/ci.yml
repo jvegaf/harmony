@@ -16,24 +16,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+
     - name: Use Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
-        node-version: 22
-        cache: 'npm'
+        node-version: 24
+        cache: 'pnpm'
 
     - name: Install Dependencies
-      run: npm ci
+      run: pnpm install --frozen-lockfile
 
     - name: Lint
-      run: npm run lint
+      run: pnpm run lint
 
     - name: Typecheck
-      run: npm run typecheck
+      run: pnpm run typecheck
 
     - name: Test
-      run: npm run test:run
+      run: pnpm run test:run
 
     - name: Build
-      run: npm run build
+      run: pnpm run build

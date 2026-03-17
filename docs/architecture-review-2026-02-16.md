@@ -45,12 +45,12 @@
 
 ```bash
 # TypeScript Type Check — ✅ PASS
-npm run typecheck
+pnpm run typecheck
 # 0 errors across main, preload, renderer
 # Fix: tsconfig.node.json ignoreDeprecations "6.0" → "5.0"
 
 # ESLint Linting — ✅ PASS
-npm run lint
+pnpm run lint
 # 0 errors, 0 warnings
 
 # Performance Impact
@@ -447,7 +447,7 @@ Ver detalles en: [`docs/technical-debt-backlog.md`](./technical-debt-backlog.md)
 **Debilidades**:
 
 - macOS build deshabilitado
-- `drizzle.config.ts` presente pero no integrado con npm scripts
+- `drizzle.config.ts` presente pero no integrado con pnpm scripts
 
 ---
 
