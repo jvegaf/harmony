@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-05-05
+
+### ✨ Added
+
+- **Preparation Mode Improvements**: Added the ability to choose the source of tracks for Preparation Mode (Entire Library or a specific playlist).
+- **Dynamic Preparation Playlists**: Preparation Mode now creates playlists with unique dynamic identifiers (`preparation_<iso_date_time>`). This prevents overwriting previous preparation sets if the user renames the playlist.
+- **Justfile Support**: Added a `justfile` for Windows compatibility, providing the same automation targets as the existing Linux `Makefile`.
+
 ### ✨ Added
 
 - **Library import progress toast:** Selecting a music collection folder now shows a live Mantine notification with an animated progress bar, track counter (`X / Y (Z%)`), and phase labels (Scanning → Importing → Saving). The toast auto-closes with a green success message on completion or a red error message on failure.

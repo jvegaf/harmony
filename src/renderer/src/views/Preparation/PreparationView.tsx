@@ -158,7 +158,11 @@ export default function PreparationView() {
       navigate('/');
     } else {
       // Navigate to Preparation playlist
-      navigate(`/playlists/__PREPARATION__`);
+      if (preparationPlaylist && preparationPlaylist.id) {
+        navigate(`/playlists/${preparationPlaylist.id}`);
+      } else {
+        navigate('/');
+      }
     }
   }, [preparationPlaylist, navigate]);
 

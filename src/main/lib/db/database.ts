@@ -633,13 +633,16 @@ export class Database {
   // Special internal playlist with ID '__PREPARATION__' for tracks selected for a set
   // ═══════════════════════════════════════════════════════════════════════════
 
-  private readonly PREPARATION_PLAYLIST_ID = '__PREPARATION__';
   private readonly PREPARATION_PLAYLIST_NAME = 'Set Preparation';
 
   public async getOrCreatePreparationPlaylist(): Promise<Playlist> {
     let playlist = this.db.query.playlists
       .findFirst({
-        where: (playlists, { eq }) => eq(playlists.id, this.PREPARATION_PLAYLIST_ID),
+        where: (playlists, { and, like, eq }) => and(
+          like(playlists.id, 'preparation_%'),
+          eq(playlists.name, this.PREPARATION_PLAYLIST_NAME)
+        ),
+        orderBy: (playlists, { desc }) => [desc(playlists.id)],
         with: {
           playlistTracks: {
             with: { track: true },
@@ -650,11 +653,12 @@ export class Database {
       .sync();
 
     if (!playlist) {
+      const newId = `preparation_${new Date().toISOString()}`;
       // Create the playlist if it doesn't exist
       this.db
         .insert(schema.playlists)
         .values({
-          id: this.PREPARATION_PLAYLIST_ID,
+          id: newId,
           name: this.PREPARATION_PLAYLIST_NAME,
           folderId: null,
         })
@@ -663,7 +667,7 @@ export class Database {
       // Load with relations after creation
       playlist = this.db.query.playlists
         .findFirst({
-          where: (playlists, { eq }) => eq(playlists.id, this.PREPARATION_PLAYLIST_ID),
+          where: (playlists, { eq }) => eq(playlists.id, newId),
           with: {
             playlistTracks: {
               with: { track: true },
@@ -679,7 +683,7 @@ export class Database {
 
   public async addTrackToPreparationPlaylist(trackId: TrackId): Promise<void> {
     // Ensure playlist exists
-    await this.getOrCreatePreparationPlaylist();
+    const currentPlaylist = await this.getOrCreatePreparationPlaylist();
 
     // Check if track already exists in playlist
     const existing = this.db
@@ -687,7 +691,7 @@ export class Database {
       .from(schema.playlistTracks)
       .where(
         and(
-          eq(schema.playlistTracks.playlistId, this.PREPARATION_PLAYLIST_ID),
+          eq(schema.playlistTracks.playlistId, currentPlaylist.id),
           eq(schema.playlistTracks.trackId, trackId),
         ),
       )
@@ -702,7 +706,7 @@ export class Database {
     const result = this.db
       .select({ max: max(schema.playlistTracks.order) })
       .from(schema.playlistTracks)
-      .where(eq(schema.playlistTracks.playlistId, this.PREPARATION_PLAYLIST_ID))
+      .where(eq(schema.playlistTracks.playlistId, currentPlaylist.id))
       .get();
 
     const nextOrder = (result?.max ?? -1) + 1;
@@ -712,7 +716,7 @@ export class Database {
       .insert(schema.playlistTracks)
       .values({
         id: makeID(),
-        playlistId: this.PREPARATION_PLAYLIST_ID,
+        playlistId: currentPlaylist.id,
         trackId,
         order: nextOrder,
       })
@@ -722,11 +726,13 @@ export class Database {
   }
 
   public async removeTrackFromPreparationPlaylist(trackId: TrackId): Promise<void> {
+    const currentPlaylist = await this.getOrCreatePreparationPlaylist();
+
     this.db
       .delete(schema.playlistTracks)
       .where(
         and(
-          eq(schema.playlistTracks.playlistId, this.PREPARATION_PLAYLIST_ID),
+          eq(schema.playlistTracks.playlistId, currentPlaylist.id),
           eq(schema.playlistTracks.trackId, trackId),
         ),
       )
@@ -736,9 +742,11 @@ export class Database {
   }
 
   public async clearPreparationPlaylist(): Promise<void> {
+    const currentPlaylist = await this.getOrCreatePreparationPlaylist();
+
     this.db
       .delete(schema.playlistTracks)
-      .where(eq(schema.playlistTracks.playlistId, this.PREPARATION_PLAYLIST_ID))
+      .where(eq(schema.playlistTracks.playlistId, currentPlaylist.id))
       .run();
 
     log.info('[db] Preparation playlist cleared');
