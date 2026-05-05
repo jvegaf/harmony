@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useRouteLoaderData } from 'react-router-dom';
+import { Select } from '@mantine/core';
 import Keybinding from 'react-keybinding-component';
-
 import { Playlist, Track } from '../../../../preload/types/harmony';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import usePlayerStore from '../../stores/usePlayerStore';
@@ -15,13 +15,33 @@ export default function PreparationView() {
   const playerAPI = usePlayerAPI();
   const { playingTrack, queue, queueCursor } = usePlayerStore();
 
-  const { tracks } = useRouteLoaderData('root') as RootLoaderData;
+  const { tracks, playlists } = useRouteLoaderData('root') as RootLoaderData;
 
   const [preparationPlaylist, setPreparationPlaylist] = useState<Playlist | null>(null);
+  const [sourcePlaylistId, setSourcePlaylistId] = useState<string>('library');
   const [pressedK, setPressedK] = useState(false);
   const [pressedD, setPressedD] = useState(false);
   const [isAtEnd, setIsAtEnd] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
+  const [sourceTracksCount, setSourceTracksCount] = useState(tracks.length);
+
+  // Update source tracks count when source changes
+  useEffect(() => {
+    const fetchCount = async () => {
+      if (sourcePlaylistId === 'library') {
+        setSourceTracksCount(tracks.length);
+      } else {
+        try {
+          const playlist = await db.playlists.findOnlyByID(sourcePlaylistId);
+          setSourceTracksCount(playlist.tracks?.length || 0);
+        } catch (error) {
+          console.error('Failed to load playlist:', error);
+          setSourceTracksCount(0);
+        }
+      }
+    };
+    fetchCount();
+  }, [sourcePlaylistId, tracks.length]);
 
   // Load Preparation playlist on mount
   useEffect(() => {
@@ -47,9 +67,22 @@ export default function PreparationView() {
       // Enable Prune Mode in player store (reuses same 50% start feature)
       playerAPI.setPruneMode(true);
 
-      // Start playing from the beginning
-      const trackIds = tracks.map((t: Track) => t.id);
-      await playerAPI.start(trackIds, 0);
+      let trackIds: string[] = [];
+      if (sourcePlaylistId === 'library') {
+        trackIds = tracks.map((t: Track) => t.id);
+      } else {
+        try {
+          const playlist = await db.playlists.findOnlyByID(sourcePlaylistId);
+          trackIds = (playlist.tracks || []).map((t: Track) => t.id);
+        } catch (error) {
+          console.error('Failed to load playlist for preparation:', error);
+          trackIds = tracks.map((t: Track) => t.id); // fallback
+        }
+      }
+
+      if (trackIds.length > 0) {
+        await playerAPI.start(trackIds, 0);
+      }
     };
 
     startPreparationMode();
@@ -59,7 +92,7 @@ export default function PreparationView() {
       playerAPI.setPruneMode(false);
     };
     // Run when isStarted changes or on mount
-  }, [isStarted, tracks, playerAPI]);
+  }, [isStarted, tracks, playerAPI, sourcePlaylistId]);
 
   // Check if we're at the end of the queue
   useEffect(() => {
@@ -184,8 +217,27 @@ export default function PreparationView() {
           <h2>Preparation Mode</h2>
           <p className={styles.subtitle}>Listen to tracks and select the ones you want for your set</p>
 
+          <div style={{ margin: '20px 0', width: '300px', maxWidth: '100%' }}>
+            <Select
+              label="Source"
+              description="Choose where to get tracks from"
+              value={sourcePlaylistId}
+              onChange={(value) => setSourcePlaylistId(value || 'library')}
+              data={[
+                { value: 'library', label: 'Entire Library' },
+                ...(playlists || []).map(p => ({ value: p.id, label: p.name }))
+              ]}
+              searchable
+              styles={{
+                input: { backgroundColor: 'var(--mantine-color-dark-6)', borderColor: 'var(--mantine-color-dark-4)' },
+                label: { color: 'var(--mantine-color-gray-4)' },
+                description: { color: 'var(--mantine-color-gray-6)' }
+              }}
+            />
+          </div>
+
           <div className={styles.trackCount}>
-            <p>{tracks.length} tracks in your library</p>
+            <p>{sourceTracksCount} tracks available</p>
           </div>
 
           <div className={styles.confirmationButtons}>
