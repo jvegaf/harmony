@@ -117,7 +117,8 @@ const usePlaylistsStore = create<PlaylistsState>()(
 
           try {
             const playlist = await db.playlists.findOnlyByID(playlistID);
-            const playlistTracks = [...playlist.tracks, ...tracks.filter(track => !playlist.tracks.includes(track))];
+            const existingIds = playlist.tracks.map((t: Track) => t.id);
+            const playlistTracks = [...playlist.tracks, ...tracks.filter(track => !existingIds.includes(track.id))];
             await db.playlists.setTracks(playlistID, playlistTracks);
             router.revalidate();
           } catch (err: any) {
@@ -131,7 +132,8 @@ const usePlaylistsStore = create<PlaylistsState>()(
         removeTracks: async (playlistID: string, tracks: Track[]): Promise<void> => {
           try {
             const playlist = await db.playlists.findOnlyByID(playlistID);
-            const playlistTracks = playlist.tracks.filter((elem: Track) => !tracks.includes(elem));
+            const removeIds = tracks.map(t => t.id);
+            const playlistTracks = playlist.tracks.filter((elem: Track) => !removeIds.includes(elem.id));
             await db.playlists.setTracks(playlistID, playlistTracks);
             router.revalidate();
           } catch (err: any) {
@@ -172,7 +174,7 @@ const usePlaylistsStore = create<PlaylistsState>()(
           targetTrack: Track,
           position: 'above' | 'below',
         ): Promise<void> => {
-          if (tracks.includes(targetTrack)) return;
+          if (tracks.some(t => t.id === targetTrack.id)) return;
 
           try {
             perfLogger.measure('usePlaylistsStore.reorderTracks entered');
