@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-05-05
+
+### 🐛 Fixed
+
+- **Playlist Track Removal/Reordering**: Fixed a bug where removing or reordering tracks from a playlist wouldn't work correctly because tracks were being compared by object reference instead of their unique IDs. Removing tracks from the context menu now updates the playlist instantly.
+
 ## [0.30.0] - 2026-05-05
 
 ### ✨ Added
