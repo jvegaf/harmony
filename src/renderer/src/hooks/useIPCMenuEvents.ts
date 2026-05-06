@@ -141,6 +141,10 @@ export function useIPCMenuEvents() {
       await playlistsAPI.exportToM3u(playlistId);
     }
 
+    async function autoOrderPlaylist(playlistId: string) {
+      await playlistsAPI.autoOrder(playlistId);
+    }
+
     ipcRenderer.on(channels.CMD_PLAYLIST_NEW, (_, selected) => playlistNew(selected));
     ipcRenderer.on(channels.CMD_TRACKS_PLAYLIST_ADD, (_, payload) => addTracksToPlaylist(payload));
     ipcRenderer.on(channels.CMD_TRACKS_PLAYLIST_REMOVE, (_, payload) => removeTracksToPlaylist(payload));
@@ -153,6 +157,7 @@ export function useIPCMenuEvents() {
     ipcRenderer.on(channels.CMD_PLAYLIST_DUPLICATE, (_, playlistId) => duplicatePlaylist(playlistId));
     ipcRenderer.on(channels.CMD_PLAYLIST_EXPORT, (_, playlistId) => exportPlaylist(playlistId));
     ipcRenderer.on(channels.CMD_PLAYLIST_REMOVE, (_, playlistId) => removePlaylist(playlistId));
+    ipcRenderer.on(channels.CMD_PLAYLIST_AUTO_ORDER, (_, playlistId) => autoOrderPlaylist(playlistId));
 
     return function cleanup() {
       ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_NEW);
@@ -167,6 +172,7 @@ export function useIPCMenuEvents() {
       ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_DUPLICATE);
       ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_EXPORT);
       ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_REMOVE);
+      ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_AUTO_ORDER);
 
       // Cleanup any active audio analysis listeners on unmount
       for (const unsub of analysisUnsubscribesRef.current) {

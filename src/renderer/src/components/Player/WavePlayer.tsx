@@ -20,7 +20,8 @@ type WavePlayerProps = {
 function WavePlayer({ config }: WavePlayerProps) {
   const containerRef = useRef<HTMLInputElement>(null);
   const hoverRef = useRef<HTMLInputElement>(null);
-  const { position, playingTrack, playerStatus, isPreCueing, isPruneMode, volume, isMuted, audioPreCuePosition } = usePlayerStore();
+  const { position, playingTrack, playerStatus, isPreCueing, isPruneMode, volume, isMuted, audioPreCuePosition } =
+    usePlayerStore();
   const playerAPI = usePlayerAPI();
   const { colorScheme } = useMantineColorScheme();
   const [audioUrl, setAudioUrl] = useState('');

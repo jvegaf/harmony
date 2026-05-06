@@ -144,13 +144,13 @@ const TrackList = (props: Props) => {
         dndSourceOnRowDrag: (params: any) => {
           const selected = params.api.getSelectedRows() as Track[];
           const draggedTrack = params.rowNode.data as Track;
-          
+
           const isSelected = selected.some((t: Track) => t.id === draggedTrack.id);
           const tracksToDrag = isSelected ? selected : [draggedTrack];
-          
+
           params.dragEvent.dataTransfer.setData('application/harmony-tracks', JSON.stringify(tracksToDrag));
           params.dragEvent.dataTransfer.effectAllowed = 'copy';
-        }
+        },
       },
       { field: 'artist', minWidth: 90 },
       {
@@ -185,18 +185,18 @@ const TrackList = (props: Props) => {
         minWidth: 80,
         maxWidth: 90,
       },
-      { 
-        field: 'initialKey', 
-        headerName: 'Key', 
+      {
+        field: 'initialKey',
+        headerName: 'Key',
         maxWidth: 70,
         valueFormatter: (p: { value: string | null | undefined }) => formatOpenKey(p.value),
-        cellStyle: (params) => {
+        cellStyle: params => {
           const color = getOpenKeyColor(params.value);
           if (color !== 'transparent') {
             return { color: color, fontWeight: 'bold' };
           }
           return null;
-        }
+        },
       },
     ];
 

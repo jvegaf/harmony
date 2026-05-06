@@ -9,18 +9,18 @@ import { useWavesurfer } from '../../hooks/useWavesurfer';
 vi.mock('../../stores/usePlayerStore');
 vi.mock('../../hooks/useWavesurfer');
 vi.mock('@mantine/core', () => ({
-  useMantineColorScheme: () => ({ colorScheme: 'dark' })
+  useMantineColorScheme: () => ({ colorScheme: 'dark' }),
 }));
 
 // Mock canvas for happy-dom
 HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
   createLinearGradient: vi.fn(() => ({
-    addColorStop: vi.fn()
+    addColorStop: vi.fn(),
   })),
   beginPath: vi.fn(),
   rect: vi.fn(),
   fill: vi.fn(),
-  closePath: vi.fn()
+  closePath: vi.fn(),
 })) as any;
 
 describe('WavePlayer - PreCuePosition', () => {
@@ -52,12 +52,12 @@ describe('WavePlayer - PreCuePosition', () => {
       isPruneMode: false,
       volume: 1,
       isMuted: false,
-      audioPreCuePosition: 120
+      audioPreCuePosition: 120,
     });
 
     // Mock window API
     (window as any).Main = {
-      library: { parseUri: (path: string) => `file://${path}` }
+      library: { parseUri: (path: string) => `file://${path}` },
     };
   });
 
@@ -68,10 +68,10 @@ describe('WavePlayer - PreCuePosition', () => {
     // Trigger ready event
     const readyCall = mockWavesurfer.on.mock.calls.find((call: any) => call[0] === 'ready');
     expect(readyCall).toBeDefined();
-    
+
     // Call the ready handler
     readyCall[1]();
-    
+
     // setTime should NOT have been called
     expect(mockWavesurfer.setTime).not.toHaveBeenCalled();
   });
@@ -85,7 +85,7 @@ describe('WavePlayer - PreCuePosition', () => {
       isPruneMode: false,
       volume: 1,
       isMuted: false,
-      audioPreCuePosition: 90
+      audioPreCuePosition: 90,
     });
 
     const config = { audioPreCuePosition: 90 } as any;
@@ -94,10 +94,10 @@ describe('WavePlayer - PreCuePosition', () => {
     // Trigger ready event
     const readyCall = mockWavesurfer.on.mock.calls.find((call: any) => call[0] === 'ready');
     expect(readyCall).toBeDefined();
-    
+
     // Call the ready handler
     readyCall[1]();
-    
+
     // It should seek exactly to the pre-cue position
     expect(mockWavesurfer.setTime).toHaveBeenCalledWith(90);
     // It should NOT use skip
@@ -107,9 +107,9 @@ describe('WavePlayer - PreCuePosition', () => {
   it('unsubscribes from ready event on unmount', () => {
     const config = { audioPreCuePosition: 90 } as any;
     const { unmount } = render(<WavePlayer config={config} />);
-    
+
     unmount();
-    
+
     const unCall = mockWavesurfer.un.mock.calls.find((call: any) => call[0] === 'ready');
     expect(unCall).toBeDefined();
   });

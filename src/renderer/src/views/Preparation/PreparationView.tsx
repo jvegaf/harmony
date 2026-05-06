@@ -223,19 +223,19 @@ export default function PreparationView() {
 
           <div style={{ margin: '20px 0', width: '300px', maxWidth: '100%' }}>
             <Select
-              label="Source"
-              description="Choose where to get tracks from"
+              label='Source'
+              description='Choose where to get tracks from'
               value={sourcePlaylistId}
-              onChange={(value) => setSourcePlaylistId(value || 'library')}
+              onChange={value => setSourcePlaylistId(value || 'library')}
               data={[
                 { value: 'library', label: 'Entire Library' },
-                ...(playlists || []).map(p => ({ value: p.id, label: p.name }))
+                ...(playlists || []).map(p => ({ value: p.id, label: p.name })),
               ]}
               searchable
               styles={{
                 input: { backgroundColor: 'var(--mantine-color-dark-6)', borderColor: 'var(--mantine-color-dark-4)' },
                 label: { color: 'var(--mantine-color-gray-4)' },
-                description: { color: 'var(--mantine-color-gray-6)' }
+                description: { color: 'var(--mantine-color-gray-6)' },
               }}
             />
           </div>

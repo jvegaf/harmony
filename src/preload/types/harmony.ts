@@ -250,6 +250,8 @@ export interface Config {
   sleepBlocker: boolean;
   displayNotifications: boolean;
   audioPreCuePosition: number;
+  /** Playlist auto-order priority setting: 'harmony' or 'energy' */
+  playlistAutoSortPriority: 'harmony' | 'energy';
   /** Number of parallel workers for audio analysis (1-16). Default: CPU cores - 1 */
   audioAnalysisWorkers: number;
   tracklistSort: {

@@ -638,10 +638,8 @@ export class Database {
   public async getOrCreatePreparationPlaylist(): Promise<Playlist> {
     let playlist = this.db.query.playlists
       .findFirst({
-        where: (playlists, { and, like, eq }) => and(
-          like(playlists.id, 'preparation_%'),
-          eq(playlists.name, this.PREPARATION_PLAYLIST_NAME)
-        ),
+        where: (playlists, { and, like, eq }) =>
+          and(like(playlists.id, 'preparation_%'), eq(playlists.name, this.PREPARATION_PLAYLIST_NAME)),
         orderBy: (playlists, { desc }) => [desc(playlists.id)],
         with: {
           playlistTracks: {
@@ -689,12 +687,7 @@ export class Database {
     const existing = this.db
       .select()
       .from(schema.playlistTracks)
-      .where(
-        and(
-          eq(schema.playlistTracks.playlistId, currentPlaylist.id),
-          eq(schema.playlistTracks.trackId, trackId),
-        ),
-      )
+      .where(and(eq(schema.playlistTracks.playlistId, currentPlaylist.id), eq(schema.playlistTracks.trackId, trackId)))
       .get();
 
     if (existing) {
@@ -730,12 +723,7 @@ export class Database {
 
     this.db
       .delete(schema.playlistTracks)
-      .where(
-        and(
-          eq(schema.playlistTracks.playlistId, currentPlaylist.id),
-          eq(schema.playlistTracks.trackId, trackId),
-        ),
-      )
+      .where(and(eq(schema.playlistTracks.playlistId, currentPlaylist.id), eq(schema.playlistTracks.trackId, trackId)))
       .run();
 
     log.info(`[db] Track ${trackId} removed from Preparation playlist`);
@@ -744,10 +732,7 @@ export class Database {
   public async clearPreparationPlaylist(): Promise<void> {
     const currentPlaylist = await this.getOrCreatePreparationPlaylist();
 
-    this.db
-      .delete(schema.playlistTracks)
-      .where(eq(schema.playlistTracks.playlistId, currentPlaylist.id))
-      .run();
+    this.db.delete(schema.playlistTracks).where(eq(schema.playlistTracks.playlistId, currentPlaylist.id)).run();
 
     log.info('[db] Preparation playlist cleared');
   }

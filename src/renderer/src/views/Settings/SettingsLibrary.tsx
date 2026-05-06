@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import * as Setting from '../../components/Setting/Setting';
 import useLibraryStore, { useLibraryAPI } from '../../stores/useLibraryStore';
 import useLibraryUIStore from '../../stores/useLibraryUIStore';
-import { Button, Stack, Tooltip, Switch, Text } from '@mantine/core';
+import { Button, Stack, Tooltip, Switch, Text, Select } from '@mantine/core';
 import styles from './Settings.module.css';
 import { useNavigate } from 'react-router-dom';
 import router from '../router';
@@ -30,12 +30,16 @@ export default function SettingsLibrary() {
   const [useCamelotKeys, setUseCamelotKeys] = useState<boolean>(false);
   const [convertingKeys, setConvertingKeys] = useState(false);
   const [convertProgress, setConvertProgress] = useState({ processed: 0, total: 0 });
+  const [playlistAutoSortPriority, setPlaylistAutoSortPriority] = useState<'harmony' | 'energy'>('harmony');
 
   // Load settings on mount
   useEffect(() => {
     config.get('libraryPath').then(path => setLibraryPath(path));
     config.get('autoFixMetadata').then(enabled => setAutoFixMetadata(enabled));
     config.get('useCamelotKeys').then(enabled => setUseCamelotKeys(enabled));
+    config
+      .get('playlistAutoSortPriority')
+      .then(priority => setPlaylistAutoSortPriority((priority as 'harmony' | 'energy') || 'harmony'));
   }, []);
 
   useEffect(() => {
@@ -74,6 +78,14 @@ export default function SettingsLibrary() {
       setUseCamelotKeys(checked);
     },
     [setUseCamelotKeys],
+  );
+
+  const toggleAutoSortPriority = useCallback(
+    async (val: 'harmony' | 'energy') => {
+      await config.set('playlistAutoSortPriority', val);
+      setPlaylistAutoSortPriority(val);
+    },
+    [setPlaylistAutoSortPriority],
   );
 
   const handleConvertAllKeys = useCallback(async () => {
@@ -193,6 +205,25 @@ export default function SettingsLibrary() {
             >
               Convert All Keys
             </Button>
+          </Setting.Action>
+        </Setting.Element>
+
+        <Setting.Element>
+          <Setting.Description>
+            Auto-Order Playlist Priority
+            <span style={subtextStyle}>Choose the primary metric when using the "Auto-Order Playlist" action.</span>
+          </Setting.Description>
+          <Setting.Action>
+            <Select
+              data={[
+                { value: 'harmony', label: 'Harmonic Affinity' },
+                { value: 'energy', label: 'Energy Rating' },
+              ]}
+              value={playlistAutoSortPriority}
+              onChange={val => toggleAutoSortPriority(val as 'harmony' | 'energy')}
+              allowDeselect={false}
+              w={180}
+            />
           </Setting.Action>
         </Setting.Element>
 

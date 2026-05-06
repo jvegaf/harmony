@@ -8,6 +8,7 @@ import usePlayerStore from './usePlayerStore';
 import useLibraryUIStore from './useLibraryUIStore';
 import { Playlist, Track } from '../../../preload/types/harmony';
 import { perfLogger } from '../lib/performance-logger';
+import { autoOrderTracks } from '../lib/utils-library';
 
 const { db, logger } = window.Main;
 const { ipcRenderer } = window.ElectronAPI;
@@ -27,6 +28,7 @@ interface PlaylistsState {
       targetTrack: Track,
       position: 'above' | 'below',
     ) => Promise<void>;
+    autoOrder: (playlistID: string) => Promise<void>;
     exportToM3u: (playlistID: string) => Promise<void>;
   };
 }
@@ -197,6 +199,25 @@ const usePlaylistsStore = create<PlaylistsState>()(
             logger.warn(err);
             perfLogger.measure('Error in reorderTracks', { error: String(err) });
             throw err; // Re-throw so optimistic UI can handle error with router.revalidate()
+          }
+        },
+
+        /**
+         * Automatically order tracks based on global settings
+         */
+        autoOrder: async (playlistID: string): Promise<void> => {
+          try {
+            const playlist = await db.playlists.findOnlyByID(playlistID);
+            if (!playlist.tracks || playlist.tracks.length === 0) return;
+
+            const priority = (await window.Main.config.get('playlistAutoSortPriority')) as 'harmony' | 'energy';
+            const orderedTracks = autoOrderTracks(playlist.tracks, priority);
+
+            await db.playlists.setTracks(playlistID, orderedTracks);
+            router.revalidate();
+            logger.info(`[PlaylistsStore] Auto-ordered playlist ${playlistID} with priority: ${priority}`);
+          } catch (err: any) {
+            logger.warn(err);
           }
         },
 

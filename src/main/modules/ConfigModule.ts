@@ -108,6 +108,7 @@ export default class ConfigModule extends Module {
       sleepBlocker: false,
       displayNotifications: true,
       audioPreCuePosition: 120,
+      playlistAutoSortPriority: 'harmony',
       audioAnalysisWorkers: Math.max(1, cpus().length - 1),
       tracklistSort: {
         colId: 'path',

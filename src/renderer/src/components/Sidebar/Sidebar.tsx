@@ -48,38 +48,44 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
     setDragOverPlaylistId(null);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent<HTMLAnchorElement>, playlistId: string) => {
-    e.preventDefault();
-    setDragOverPlaylistId(null);
-    
-    try {
-      const data = e.dataTransfer.getData('application/harmony-tracks');
-      if (data) {
-        const tracks = JSON.parse(data);
-        if (tracks && tracks.length > 0) {
-          logger.info(`[Sidebar] Dropped ${tracks.length} tracks onto playlist ${playlistId}`);
-          playlistsAPI.addTracks(playlistId, tracks).then(() => {
-            const playlistName = playlists.find(p => p.id === playlistId)?.name || 'la playlist';
-            notifications.show({
-              title: 'Pistas agregadas',
-              message: `Se agregaron ${tracks.length} pistas a "${playlistName}"`,
-              color: 'green',
-              autoClose: 3000,
-            });
-          }).catch((err: any) => {
-            logger.error('[Sidebar] Failed to add tracks:', err);
-            notifications.show({
-              title: 'Error',
-              message: 'No se pudieron agregar las pistas',
-              color: 'red',
-            });
-          });
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLAnchorElement>, playlistId: string) => {
+      e.preventDefault();
+      setDragOverPlaylistId(null);
+
+      try {
+        const data = e.dataTransfer.getData('application/harmony-tracks');
+        if (data) {
+          const tracks = JSON.parse(data);
+          if (tracks && tracks.length > 0) {
+            logger.info(`[Sidebar] Dropped ${tracks.length} tracks onto playlist ${playlistId}`);
+            playlistsAPI
+              .addTracks(playlistId, tracks)
+              .then(() => {
+                const playlistName = playlists.find(p => p.id === playlistId)?.name || 'la playlist';
+                notifications.show({
+                  title: 'Pistas agregadas',
+                  message: `Se agregaron ${tracks.length} pistas a "${playlistName}"`,
+                  color: 'green',
+                  autoClose: 3000,
+                });
+              })
+              .catch((err: any) => {
+                logger.error('[Sidebar] Failed to add tracks:', err);
+                notifications.show({
+                  title: 'Error',
+                  message: 'No se pudieron agregar las pistas',
+                  color: 'red',
+                });
+              });
+          }
         }
+      } catch (err) {
+        logger.error('[Sidebar] Error parsing dropped tracks:', err);
       }
-    } catch (err) {
-      logger.error('[Sidebar] Error parsing dropped tracks:', err);
-    }
-  }, [playlistsAPI, playlists]);
+    },
+    [playlistsAPI, playlists],
+  );
 
   // Determine active nav item based on current route
   const isLibraryRoute = location.pathname === '/library' || location.pathname === '/';

@@ -209,6 +209,7 @@ class ContextMenuModule extends ModuleWindow {
         },
         { label: 'Duplicate', click: () => event.sender.send(channels.CMD_PLAYLIST_DUPLICATE, playlistId) },
         { label: 'Export', click: () => event.sender.send(channels.CMD_PLAYLIST_EXPORT, playlistId) },
+        { label: 'Auto-Order Playlist', click: () => event.sender.send(channels.CMD_PLAYLIST_AUTO_ORDER, playlistId) },
         {
           type: 'separator',
         },
