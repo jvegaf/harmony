@@ -17,6 +17,9 @@ Harmony is a music manager designed specifically for old-school DJs. It allows y
 - 🎧 Intuitive interface designed for DJs
 - 🎹 **OpenKey Harmonic Mixing** - Track keys are automatically formatted and visually color-coded according to the OpenKey standard for seamless harmonic mixing
 
+## Recent Updates (v0.32.1)
+- 🐛 **Pre-Cue Playback Fix** - Resolved an issue where playback would skip incorrectly by properly applying the pre-cue position dynamically and cleaning up event listeners to prevent memory leaks.
+
 ## Screenshots
 
 <details>
