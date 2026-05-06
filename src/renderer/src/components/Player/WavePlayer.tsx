@@ -18,10 +18,9 @@ type WavePlayerProps = {
 };
 
 function WavePlayer({ config }: WavePlayerProps) {
-  const { audioPreCuePosition } = config;
   const containerRef = useRef<HTMLInputElement>(null);
   const hoverRef = useRef<HTMLInputElement>(null);
-  const { position, playingTrack, playerStatus, isPreCueing, isPruneMode, volume, isMuted } = usePlayerStore();
+  const { position, playingTrack, playerStatus, isPreCueing, isPruneMode, volume, isMuted, audioPreCuePosition } = usePlayerStore();
   const playerAPI = usePlayerAPI();
   const { colorScheme } = useMantineColorScheme();
   const [audioUrl, setAudioUrl] = useState('');
@@ -129,10 +128,19 @@ function WavePlayer({ config }: WavePlayerProps) {
 
   useEffect(() => {
     if (!wavesurfer) return;
-    if (isPreCueing || isPruneMode) {
-      wavesurfer.on('play', () => wavesurfer.skip(audioPreCuePosition));
-    }
-  }, [wavesurfer, isPreCueing, isPruneMode]);
+
+    const handleReady = () => {
+      if (isPreCueing || isPruneMode) {
+        wavesurfer.setTime(audioPreCuePosition);
+      }
+    };
+
+    wavesurfer.on('ready', handleReady);
+
+    return () => {
+      wavesurfer.un('ready', handleReady);
+    };
+  }, [wavesurfer, isPreCueing, isPruneMode, audioPreCuePosition]);
 
   useEffect(() => {
     if (!wavesurfer) return;

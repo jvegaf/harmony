@@ -13,6 +13,7 @@ type PlayerState = {
   isPruneMode: boolean;
   isMuted: boolean;
   volume: number;
+  audioPreCuePosition: number;
   api: {
     setAudioPreCuePosition(value: number): unknown;
     start: (queue: TrackId[], index: number) => Promise<void>;
@@ -41,12 +42,13 @@ const playerStore = createStore<PlayerState>((set, get) => ({
   queueCursor: 0,
   isPreCueing: false,
   isPruneMode: false,
-  isMuted: false,
-  volume: 1,
+  isMuted: config.__initialConfig?.audioMuted ?? false,
+  volume: config.__initialConfig?.audioVolume ?? 1,
+  audioPreCuePosition: config.__initialConfig?.audioPreCuePosition ?? 120,
 
   api: {
     setAudioPreCuePosition: async (value: number) => {
-      // player.setAudioPreCuePosition(value);
+      set({ audioPreCuePosition: value });
       await config.set('audioPreCuePosition', value);
     },
     start: async (queue: TrackId[], index: number): Promise<void> => {
