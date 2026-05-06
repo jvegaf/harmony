@@ -1,6 +1,7 @@
 import { type ReactNode, useCallback, useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { IconSearch, IconPlus, IconMusic, IconVinyl, IconClock } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 
 import { Playlist } from '../../../../preload/types/harmony';
 import { usePlaylistsAPI } from '@renderer/stores/usePlaylistsStore';
@@ -32,6 +33,53 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
   const playlistsAPI = usePlaylistsAPI();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [dragOverPlaylistId, setDragOverPlaylistId] = useState<string | null>(null);
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLAnchorElement>, playlistId: string) => {
+    e.preventDefault(); // Necessary to allow dropping
+    if (e.dataTransfer.types.includes('application/harmony-tracks')) {
+      e.dataTransfer.dropEffect = 'copy';
+      setDragOverPlaylistId(playlistId);
+    }
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setDragOverPlaylistId(null);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLAnchorElement>, playlistId: string) => {
+    e.preventDefault();
+    setDragOverPlaylistId(null);
+    
+    try {
+      const data = e.dataTransfer.getData('application/harmony-tracks');
+      if (data) {
+        const tracks = JSON.parse(data);
+        if (tracks && tracks.length > 0) {
+          logger.info(`[Sidebar] Dropped ${tracks.length} tracks onto playlist ${playlistId}`);
+          playlistsAPI.addTracks(playlistId, tracks).then(() => {
+            const playlistName = playlists.find(p => p.id === playlistId)?.name || 'la playlist';
+            notifications.show({
+              title: 'Pistas agregadas',
+              message: `Se agregaron ${tracks.length} pistas a "${playlistName}"`,
+              color: 'green',
+              autoClose: 3000,
+            });
+          }).catch((err: any) => {
+            logger.error('[Sidebar] Failed to add tracks:', err);
+            notifications.show({
+              title: 'Error',
+              message: 'No se pudieron agregar las pistas',
+              color: 'red',
+            });
+          });
+        }
+      }
+    } catch (err) {
+      logger.error('[Sidebar] Error parsing dropped tracks:', err);
+    }
+  }, [playlistsAPI, playlists]);
 
   // Determine active nav item based on current route
   const isLibraryRoute = location.pathname === '/library' || location.pathname === '/';
@@ -143,12 +191,15 @@ export default function Sidebar({ playlists, onSearch }: SidebarProps) {
       content = (
         <a
           href='#'
-          className={`${styles.navItem} ${isPlaylistActive ? styles.navItemActive : ''}`}
+          className={`${styles.navItem} ${isPlaylistActive ? styles.navItemActive : ''} ${dragOverPlaylistId === elem.id ? styles.navItemDragOver : ''}`}
           onClick={e => {
             e.preventDefault();
             handlePlaylistClick(elem.id);
           }}
           onContextMenu={() => onShowCtxtMenu(elem.id)}
+          onDragOver={e => handleDragOver(e, elem.id)}
+          onDragLeave={handleDragLeave}
+          onDrop={e => handleDrop(e, elem.id)}
         >
           <span className={styles.navLabel}>
             <IconMusic

@@ -12,6 +12,7 @@ import Cover from '../Cover/Cover';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
 import styles from './NowPlayingBar.module.css';
 import WavePlayer from '../Player/WavePlayer';
+import { formatOpenKey } from '../../lib/utils-library';
 
 type NowPlayingBarProps = {
   track: Track | null;
@@ -36,7 +37,7 @@ export default function NowPlayingBar({ track, config }: NowPlayingBarProps) {
     const result: { label: string; variant: 'default' | 'primary' }[] = [];
 
     if (track.bpm) result.push({ label: `${Math.round(track.bpm)}BPM`, variant: 'default' });
-    if (track.initialKey) result.push({ label: track.initialKey, variant: 'primary' });
+    if (track.initialKey) result.push({ label: formatOpenKey(track.initialKey), variant: 'primary' });
     if (track.year) result.push({ label: String(track.year), variant: 'default' });
     if (track.genre) result.push({ label: track.genre, variant: 'default' });
 

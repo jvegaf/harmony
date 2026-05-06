@@ -29,7 +29,7 @@ import useTaggerStore from '../../stores/useTaggerStore';
 import { useDetailsNavigationAPI } from '../../stores/useDetailsNavigationStore';
 import { ParseDuration } from '../../../../preload/utils';
 import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
-import { GetParentFolderName, ratingComparator } from '../../lib/utils-library';
+import { GetParentFolderName, ratingComparator, formatOpenKey, getOpenKeyColor } from '../../lib/utils-library';
 import { usePlaylistsAPI } from '../../stores/usePlaylistsStore';
 import { perfLogger } from '../../lib/performance-logger';
 import { themeQuartz, iconSetMaterial } from 'ag-grid-community';
@@ -140,7 +140,17 @@ const TrackList = (props: Props) => {
       {
         field: 'title',
         minWidth: 150,
-        // rowDrag: isDragEnabled, // Enable drag handle in this column
+        dndSource: true,
+        dndSourceOnRowDrag: (params: any) => {
+          const selected = params.api.getSelectedRows() as Track[];
+          const draggedTrack = params.rowNode.data as Track;
+          
+          const isSelected = selected.some((t: Track) => t.id === draggedTrack.id);
+          const tracksToDrag = isSelected ? selected : [draggedTrack];
+          
+          params.dragEvent.dataTransfer.setData('application/harmony-tracks', JSON.stringify(tracksToDrag));
+          params.dragEvent.dataTransfer.effectAllowed = 'copy';
+        }
       },
       { field: 'artist', minWidth: 90 },
       {
@@ -175,7 +185,19 @@ const TrackList = (props: Props) => {
         minWidth: 80,
         maxWidth: 90,
       },
-      { field: 'initialKey', headerName: 'Key', maxWidth: 70 },
+      { 
+        field: 'initialKey', 
+        headerName: 'Key', 
+        maxWidth: 70,
+        valueFormatter: (p: { value: string | null | undefined }) => formatOpenKey(p.value),
+        cellStyle: (params) => {
+          const color = getOpenKeyColor(params.value);
+          if (color !== 'transparent') {
+            return { color: color, fontWeight: 'bold' };
+          }
+          return null;
+        }
+      },
     ];
 
     // Add order column at the beginning for playlists with drag handle
@@ -186,6 +208,7 @@ const TrackList = (props: Props) => {
           headerName: '#',
           maxWidth: 60,
           sortable: true,
+          rowDrag: isDragEnabled,
           comparator: (valueA: number, valueB: number) => valueA - valueB,
         },
         ...baseColumns,
@@ -582,7 +605,7 @@ const TrackList = (props: Props) => {
             suppressCellFocus
             quickFilterText={search}
             rowDragText={rowDragText}
-            rowDragEntireRow={isDragEnabled}
+            rowDragEntireRow={false}
             suppressRowDrag={!isDragEnabled}
             onRowDragMove={onRowDragMove}
             onRowDragEnd={onRowDragEnd}

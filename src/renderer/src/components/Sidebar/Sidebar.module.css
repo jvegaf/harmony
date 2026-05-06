@@ -85,6 +85,12 @@
   color: var(--hm-primary);
 }
 
+.navItemDragOver {
+  background-color: var(--hm-primary-subtle);
+  outline: 1px dashed var(--hm-primary);
+  outline-offset: -1px;
+}
+
 .navLabel {
   display: flex;
   align-items: center;

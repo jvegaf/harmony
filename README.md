@@ -10,11 +10,12 @@ Harmony is a music manager designed specifically for old-school DJs. It allows y
 
 - 🎵 Easy music management with automated tasks
 - 📋 Playlist creation and organization
-- ⚡ **High-performance drag & drop** - Instant track reordering (< 10ms)
+- ⚡ **High-performance drag & drop** - Instant track reordering (< 10ms) and adding tracks to sidebar playlists
 - 🎨 Custom drag ghost showing track information
 - 🔄 Automatic background synchronization
 - 🔗 **Track URLs** - Store and access track pages from Beatport, Traxsource, and Bandcamp
 - 🎧 Intuitive interface designed for DJs
+- 🎹 **OpenKey Harmonic Mixing** - Track keys are automatically formatted and visually color-coded according to the OpenKey standard for seamless harmonic mixing
 
 ## Screenshots
 
