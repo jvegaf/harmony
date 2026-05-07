@@ -62,11 +62,6 @@ export const translations = {
           description:
             'Native desktop app for Windows, Linux, and macOS. Runs fast and offline — no cloud, no subscriptions.',
         },
-        {
-          title: 'Auto-Order Playlists',
-          description:
-            'Automatically sort your playlists by Harmonic Affinity (Camelot Wheel) or Energy Rating with a single click.',
-        },
       ],
     },
     // Screenshots
@@ -184,11 +179,6 @@ export const translations = {
           title: 'Multiplataforma',
           description:
             'App de escritorio nativa para Windows, Linux y macOS. Rápida y sin conexión — sin nube ni suscripciones.',
-        },
-        {
-          title: 'Auto-Ordenamiento de Playlists',
-          description:
-            'Ordena automáticamente tus listas de reproducción por Afinidad Armónica (Rueda de Camelot) o por Nivel de Energía con un solo clic.',
         },
       ],
     },

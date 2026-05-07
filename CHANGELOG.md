@@ -8,20 +8,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-05-07
-
-### ✨ Added
-
-- **Auto-Order Playlists**: Automatically sort your playlists by Harmonic Affinity (Camelot Wheel) or Energy Rating with a single click. Configurable via Library Settings.
-- **Preparation Mode from Specific Playlists**: You can now select a specific playlist as the source for your Preparation Mode sets, rather than relying on the entire library.
-- **Dynamic Preparation Playlists**: Preparation Mode now creates playlists with unique identifiers to prevent overwriting.
-
-### 🐛 Fixed
-
-- **Pre-Cue Playback**: Fixed pre-cue position and playback behavior when selecting tracks.
-
----
-
 ## [0.31.0] - 2026-05-05
 
 ### 🐛 Fixed
