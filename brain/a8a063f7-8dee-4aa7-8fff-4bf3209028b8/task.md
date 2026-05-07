@@ -1,0 +1,16 @@
+- [ ] Fix NowPlayingBar key usage and import order (src/renderer/src/components/NowPlayingBar/NowPlayingBar.tsx)
+- [ ] Fix WavePlayer: type issues, missing effect deps, non‑null assertions, unused vars, import sorting
+- [ ] Fix Sidebar: remove autoFocus, replace <a> with <button>, resolve any, import sorting
+- [ ] Fix useIPCMenuEvents: add missing deps, import sorting
+- [ ] Fix SettingsLibrary: add missing deps, trim unnecessary deps, import sorting
+- [/ ] Fix ConfigModule: use node: protocol, import sorting
+- [ ] Fix ContextMenuModule: import sorting
+- [ ] Fix preload/types/harmony.ts: remove const enum, replace any, import sorting
+- [ ] Fix TrackList component: import sorting, replace non‑null, any, arrow functions, template literals
+- [ ] Fix utils-library.ts: import sorting, optional chaining
+- [ ] Fix usePlayerStore.ts: import sorting
+- [ ] Fix usePlaylistsStore.ts: import sorting, replace any, non‑null
+- [ ] Fix WavePlayer.test.tsx: remove unused imports, replace any
+- [ ] Fix Sidebar.module.css specificity
+- [ ] Fix page/tsconfig.json missing astro config
+- [ ] Run lint, typecheck, tests and verify no errors

@@ -55,11 +55,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
   padding: 0.375rem 0.75rem;
+  background: transparent;
+  border: none;
   border-radius: 0.5rem;
   color: var(--hm-text-secondary);
   text-decoration: none;
   font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
   transition:
     background-color 0.15s ease,
     color 0.15s ease;

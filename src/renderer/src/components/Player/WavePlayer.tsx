@@ -1,9 +1,13 @@
-import { useWavesurfer } from '../../hooks/useWavesurfer';
-import { useRef, useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+
 import { useMantineColorScheme } from '@mantine/core';
+import type { WaveSurferOptions } from 'wavesurfer.js';
+
+import type { Config } from '../../../../preload/types/harmony';
+import { PlayerStatus } from '../../../../preload/types/harmony';
+import { useWavesurfer } from '../../hooks/useWavesurfer';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
-import { Config, PlayerStatus } from '../../../../preload/types/harmony';
-import { WaveSurferOptions } from 'wavesurfer.js';
+
 import './WavePlayer.css';
 
 const formatTime = (seconds: number) => {
@@ -17,7 +21,7 @@ type WavePlayerProps = {
   config: Config;
 };
 
-function WavePlayer({ config }: WavePlayerProps) {
+function WavePlayer({ config: _config }: WavePlayerProps) { // _config currently unused
   const containerRef = useRef<HTMLInputElement>(null);
   const hoverRef = useRef<HTMLInputElement>(null);
   const { position, playingTrack, playerStatus, isPreCueing, isPruneMode, volume, isMuted, audioPreCuePosition } =
@@ -30,33 +34,36 @@ function WavePlayer({ config }: WavePlayerProps) {
 
   // Create theme-aware waveform gradients
   const optionsMemo = useMemo((): Omit<WaveSurferOptions, 'container'> => {
-    let gradient, progressGradient;
+    let gradient: string | CanvasGradient | undefined;
+    let progressGradient: string | CanvasGradient | undefined;
     if (typeof window !== 'undefined') {
       const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext('2d');
+      
+      if (ctx) {
+        // Waveform gradient colors - adapt to theme
+        const isDark = colorScheme === 'dark';
+        const waveColors = isDark
+          ? { top: '#4b5563', mid: '#6b7280', bottom: '#374151' }
+          : { top: '#9ca3af', mid: '#d1d5db', bottom: '#e5e7eb' };
 
-      // Waveform gradient colors - adapt to theme
-      const isDark = colorScheme === 'dark';
-      const waveColors = isDark
-        ? { top: '#4b5563', mid: '#6b7280', bottom: '#374151' }
-        : { top: '#9ca3af', mid: '#d1d5db', bottom: '#e5e7eb' };
+        gradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 1.35);
+        gradient.addColorStop(0, waveColors.top);
+        gradient.addColorStop((canvas.height * 0.7) / canvas.height, waveColors.top);
+        gradient.addColorStop((canvas.height * 0.7 + 1) / canvas.height, waveColors.mid);
+        gradient.addColorStop((canvas.height * 0.7 + 2) / canvas.height, waveColors.mid);
+        gradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, waveColors.bottom);
+        gradient.addColorStop(1, waveColors.bottom);
 
-      gradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 1.35);
-      gradient.addColorStop(0, waveColors.top);
-      gradient.addColorStop((canvas.height * 0.7) / canvas.height, waveColors.top);
-      gradient.addColorStop((canvas.height * 0.7 + 1) / canvas.height, waveColors.mid);
-      gradient.addColorStop((canvas.height * 0.7 + 2) / canvas.height, waveColors.mid);
-      gradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, waveColors.bottom);
-      gradient.addColorStop(1, waveColors.bottom);
-
-      // Orange progress gradient - same for both themes (primary color)
-      progressGradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 1.35);
-      progressGradient.addColorStop(0, '#fa8905');
-      progressGradient.addColorStop((canvas.height * 0.7) / canvas.height, '#f76707');
-      progressGradient.addColorStop((canvas.height * 0.7 + 1) / canvas.height, '#ffd8a8');
-      progressGradient.addColorStop((canvas.height * 0.7 + 2) / canvas.height, '#ffd8a8');
-      progressGradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, '#ffc078');
-      progressGradient.addColorStop(1, '#ffc078');
+        // Orange progress gradient - same for both themes (primary color)
+        progressGradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 1.35);
+        progressGradient.addColorStop(0, '#fa8905');
+        progressGradient.addColorStop((canvas.height * 0.7) / canvas.height, '#f76707');
+        progressGradient.addColorStop((canvas.height * 0.7 + 1) / canvas.height, '#ffd8a8');
+        progressGradient.addColorStop((canvas.height * 0.7 + 2) / canvas.height, '#ffd8a8');
+        progressGradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, '#ffc078');
+        progressGradient.addColorStop(1, '#ffc078');
+      }
     }
     return {
       waveColor: gradient,
@@ -75,8 +82,9 @@ function WavePlayer({ config }: WavePlayerProps) {
   useEffect(() => {
     if (!wavesurfer) return;
 
-    const hover = hoverRef.current!;
-    const waveform = containerRef.current!;
+    const hover = hoverRef.current;
+    const waveform = containerRef.current;
+    if (!hover || !waveform) return;
     waveform.addEventListener('pointermove', e => (hover.style.width = `${e.offsetX}px`));
 
     const subscriptions = [
@@ -92,7 +100,9 @@ function WavePlayer({ config }: WavePlayerProps) {
     ];
 
     return () => {
-      subscriptions.forEach(unsub => unsub());
+      subscriptions.forEach(unsub => {
+        unsub();
+      });
     };
   }, [wavesurfer]);
 
@@ -101,7 +111,7 @@ function WavePlayer({ config }: WavePlayerProps) {
     if (position === 0) return;
     wavesurfer.skip(position);
     playerAPI.jumpTo(0);
-  }, [wavesurfer, position]);
+  }, [wavesurfer, position, playerAPI]);
 
   useEffect(() => {
     if (playingTrack !== null) {
@@ -116,16 +126,16 @@ function WavePlayer({ config }: WavePlayerProps) {
         playerAPI.next();
       });
     }
-  }, [wavesurfer]);
+  }, [wavesurfer, playerAPI]);
 
   useEffect(() => {
     if (playerStatus === PlayerStatus.PLAY) {
-      wavesurfer && wavesurfer.play();
+      wavesurfer?.play();
     }
     if (playerStatus === PlayerStatus.PAUSE) {
-      wavesurfer && wavesurfer.pause();
+      wavesurfer?.pause();
     }
-  }, [playerStatus]);
+  }, [playerStatus, wavesurfer]);
 
   useEffect(() => {
     if (!wavesurfer) return;
@@ -150,7 +160,7 @@ function WavePlayer({ config }: WavePlayerProps) {
     } else {
       wavesurfer.setVolume(volume);
     }
-  }, [wavesurfer, isMuted]);
+  }, [wavesurfer, isMuted, volume]);
 
   useEffect(() => {
     if (!wavesurfer) return;

@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react';
 
+import { notifications } from '@mantine/notifications';
+
 import channels from '../../../preload/lib/ipc-channels';
 import { usePlaylistsAPI } from '../stores/usePlaylistsStore';
-import { CommandPayload, Track } from '../../../preload/types/harmony';
-import useTaggerStore, { useTaggerAPI } from '../stores/useTaggerStore';
 import { useLibraryAPI } from '../stores/useLibraryStore';
 import useLibraryUIStore from '../stores/useLibraryUIStore';
-import { notifications } from '@mantine/notifications';
+import useTaggerStore, { useTaggerAPI } from '../stores/useTaggerStore';
+import type { CommandPayload, Track } from '../../../preload/types/harmony';
 
 const { ipcRenderer } = window.ElectronAPI;
 
@@ -180,5 +181,5 @@ export function useIPCMenuEvents() {
       }
       analysisUnsubscribesRef.current = [];
     };
-  }, [libraryAPI, playlistsAPI]);
+  }, [libraryAPI, playlistsAPI, taggerAPI, uiAPI]);
 }

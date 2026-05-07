@@ -1,6 +1,6 @@
 export type Maybe<T> = T | null | undefined;
 
-import { TaggerProviderConfig } from './tagger';
+import type { TaggerProviderConfig } from './tagger';
 
 export enum PlayerStatus {
   PLAY = 'play',
@@ -193,7 +193,7 @@ export interface ArtsTrackDTO extends ArtTrack {
   artsUrls: string[];
 }
 
-export const enum LogLevel {
+export enum LogLevel {
   INFO,
   WARN,
   DEBUG,
@@ -208,7 +208,7 @@ export type TrackEditableFields = Pick<
 
 export type LogProps = {
   level: LogLevel;
-  params: any[];
+  params: unknown[];
 };
 
 export type TrklistCtxMenuPayload = {
@@ -330,7 +330,7 @@ export interface LibraryChanges {
   removed: { id: TrackId; path: string; title: string; artist?: string }[];
 }
 
-export const enum SearchEngine {
+export enum SearchEngine {
   BEATPORT,
   TRAXSOURCE,
   GOOGLE,

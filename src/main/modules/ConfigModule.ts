@@ -3,13 +3,14 @@
  */
 
 import { app, ipcMain } from 'electron';
+import { cpus } from 'node:os';
+
 import Store from 'electron-store';
-import { cpus } from 'os';
 
 import channels from '../../preload/lib/ipc-channels';
 
 import Module from './BaseModule';
-import { Config } from '@preload/types/harmony';
+import type { Config } from '@preload/types/harmony';
 import { logger } from '../lib/log/logger';
 
 export default class ConfigModule extends Module {

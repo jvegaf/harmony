@@ -1,18 +1,15 @@
 import { useMemo } from 'react';
-import {
-  IconPlayerPauseFilled,
-  IconPlayerPlayFilled,
-  IconRewindBackward10,
-  IconRewindForward10,
-  IconHeadphones,
-  IconX,
-} from '@tabler/icons-react';
-import { Track, PlayerStatus, Config } from '../../../../preload/types/harmony';
-import Cover from '../Cover/Cover';
-import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
-import styles from './NowPlayingBar.module.css';
-import WavePlayer from '../Player/WavePlayer';
+
+import { IconHeadphones, IconPlayerPauseFilled, IconPlayerPlayFilled, IconRewindBackward10, IconRewindForward10, IconX } from '@tabler/icons-react';
+
+import { PlayerStatus } from '@preload/types/harmony';
+import type { Config, Track } from '@preload/types/harmony';
+
 import { formatOpenKey } from '../../lib/utils-library';
+import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
+import Cover from '../Cover/Cover';
+import WavePlayer from '../Player/WavePlayer';
+import styles from './NowPlayingBar.module.css';
 
 type NowPlayingBarProps = {
   track: Track | null;
@@ -108,9 +105,9 @@ export default function NowPlayingBar({ track, config }: NowPlayingBarProps) {
           </div>
           {/* Tags Section */}
           <div className={styles.tagsSection}>
-            {tags.map((tag, index) => (
+            {tags.map((tag) => (
               <Tag
-                key={`${tag.label}-${tag.variant}-${index}`}
+                key={`${tag.label}-${tag.variant}`}
                 label={tag.label}
                 variant={tag.variant}
               />
