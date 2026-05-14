@@ -21,9 +21,11 @@ import { Worker as NodeWorker } from 'worker_threads';
 import { join } from 'path';
 import log from 'electron-log';
 
-import { ProviderSource, TaggerProviderConfig } from '@preload/types/tagger';
+import { ProviderSource, TaggerProviderConfig, ProviderHealthStatus, ProviderHealthCheckResult } from '@preload/types/tagger';
 import { RawTrackData } from '../providers/types';
 import { TagCandidatesProgress } from '@preload/types/tagger';
+import { BeatportClient } from '../beatport/client/client';
+import { Traxsource } from '../traxsource/traxsource';
 
 import {
   TaggerWorkerMessage,
@@ -484,6 +486,58 @@ export class TaggerWorkerManager {
       initialized: this.initialized,
       workers,
       pendingTasks: this.pendingTasks.size,
+    };
+  }
+
+  /**
+   * Health check for all tag providers
+   * Verifies connectivity to each provider by making a minimal request
+   */
+  async healthCheckAll(): Promise<ProviderHealthCheckResult> {
+    const results: ProviderHealthStatus[] = [];
+    const now = new Date().toISOString();
+
+    // Check Beatport
+    try {
+      const client = BeatportClient.new();
+      const health = await client.healthCheck();
+      results.push({
+        provider: 'beatport',
+        status: health.status,
+        error: health.error,
+        lastChecked: now,
+      });
+    } catch (error) {
+      results.push({
+        provider: 'beatport',
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : String(error),
+        lastChecked: now,
+      });
+    }
+
+    // Check Traxsource
+    try {
+      const client = new Traxsource();
+      const health = await client.healthCheck();
+      results.push({
+        provider: 'traxsource',
+        status: health.status,
+        error: health.error,
+        lastChecked: now,
+      });
+    } catch (error) {
+      results.push({
+        provider: 'traxsource',
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : String(error),
+        lastChecked: now,
+      });
+    }
+
+    return {
+      providers: results,
+      timestamp: now,
     };
   }
 

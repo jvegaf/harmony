@@ -64,6 +64,7 @@ const channels = {
   APPLY_TAG_SELECTIONS: 'APPLY_TAG_SELECTIONS',
   TAG_CANDIDATES_PROGRESS: 'TAG_CANDIDATES_PROGRESS', // Progress updates during candidate search
   TAG_AUTO_APPLY_COMPLETE: 'TAG_AUTO_APPLY_COMPLETE', // Emitted when background auto-apply of 100% matches completes
+  TAGGER_HEALTH_CHECK: 'TAGGER_HEALTH_CHECK', // Health check for tag providers
 
   LOGGER: 'LOGGER',
 

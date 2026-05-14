@@ -1,27 +1,26 @@
-import { AxiosInstance } from 'axios';
+import cloudscraper from 'cloudscraper';
 import log from '../worker/worker-logger';
 import * as cheerio from 'cheerio';
-import { createHttpClient, minifyHtml, parseDurationToSeconds, parseDateIso } from './utils';
+import { minifyHtml, parseDurationToSeconds, parseDateIso } from './utils';
 import { SanitizedTitle } from '../../../../preload/utils';
 import { Track } from '@preload/types/harmony';
 import { TXTrack, TraxSourceMatch } from '../../../../preload/types/traxsource';
 
 export class Traxsource {
-  client: AxiosInstance;
   baseUrl = 'https://www.traxsource.com';
 
-  constructor(client?: AxiosInstance) {
-    this.client = client ?? createHttpClient();
-  }
-
   async searchTracks(title: string, artist: string): Promise<TXTrack[]> {
+    // Agregar delay para evitar detección de bots
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     const query = encodeURIComponent(`${artist} ${SanitizedTitle(title)}`);
 
     try {
       const url = `${this.baseUrl}/search?term=${query}`;
-      const res = await this.client.get(url);
-      const html = await minifyHtml(res.data as string);
-      const $ = cheerio.load(html);
+      // Usar cloudscraper para resolver Cloudflare Challenge
+      const html = await cloudscraper({ url, timeout: 30000 });
+      const minifiedHtml = await minifyHtml(html as string);
+      const $ = cheerio.load(minifiedHtml);
 
       const list = $('#searchTrackList');
       if (!list || list.length === 0) {
@@ -149,9 +148,10 @@ export class Traxsource {
   async extendTrack(track: TXTrack, albumMeta = true): Promise<TXTrack> {
     if (!track.url) throw new Error('track.url is required for extendTrack');
     try {
-      const res = await this.client.get(track.url);
-      const html = await minifyHtml(res.data as string);
-      const $ = cheerio.load(html);
+      // Usar cloudscraper para resolver Cloudflare Challenge
+      const html = await cloudscraper({ url: track.url, timeout: 30000 });
+      const minifiedHtml = await minifyHtml(html as string);
+      const $ = cheerio.load(minifiedHtml);
 
       const albumElem = $('div.ttl-info.ellip a').first();
       const albumHref = albumElem.attr('href');
@@ -164,10 +164,10 @@ export class Traxsource {
 
       if (!albumMeta || !albumHref) return track;
 
-      // Fetch album page
+      // Fetch album page usando cloudscraper
       const albumUrl = albumHref.startsWith('http') ? albumHref : `${this.baseUrl}${albumHref}`;
-      const albumRes = await this.client.get(albumUrl);
-      const albumHtml = await minifyHtml(albumRes.data as string);
+      const albumHtmlResponse = await cloudscraper({ url: albumUrl, timeout: 30000 });
+      const albumHtml = await minifyHtml(albumHtmlResponse as string);
       const $$ = cheerio.load(albumHtml);
 
       // catalog number and release date block: "cat | 2021-08-..."
@@ -213,4 +213,24 @@ export class Traxsource {
       return [];
     }
   }
+
+/**
+   * Verifica la conectividad con Traxsource
+   * Usa el endpoint de búsqueda que es el mismo que usa searchTracks
+   */
+  async healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; error?: string }> {
+    try {
+      // Usar cloudscraper para resolver Cloudflare Challenge
+      const query = encodeURIComponent('test');
+      const url = `${this.baseUrl}/search?term=${query}`;
+      await cloudscraper({ url, timeout: 30000 });
+      return { status: 'healthy' };
+    } catch (error: any) {
+      // Error de red (timeout, DNS, etc.)
+      if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED' || error.message?.includes('timeout')) {
+        return { status: 'unhealthy', error: 'Connection timeout after 10000ms' };
+      }
+      return { status: 'unhealthy', error: error.message || String(error) };
+    }
+}
 }

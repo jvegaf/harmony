@@ -1,6 +1,6 @@
 {
   "name": "harmony",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "packageManager": "pnpm@10.32.1",
   "description": "Music manager for old-school DJs",
   "main": "./out/main/index.js",
@@ -55,6 +55,7 @@
     "bandcamp-fetch": "^3.0.0",
     "better-sqlite3": "^12.6.2",
     "cheerio": "^1.1.2",
+    "cloudscraper": "^4.6.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.10",
     "drizzle-orm": "^0.45.1",

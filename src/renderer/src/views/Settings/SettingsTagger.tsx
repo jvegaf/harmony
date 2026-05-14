@@ -17,10 +17,10 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ActionIcon, Badge, NumberInput, Stack, Switch, Text, Tooltip } from '@mantine/core';
-import { IconGripVertical } from '@tabler/icons-react';
+import { ActionIcon, Badge, Group, NumberInput, Stack, Switch, Text, Tooltip } from '@mantine/core';
+import { IconGripVertical, IconRefresh, IconCheck, IconX } from '@tabler/icons-react';
 
-import { TaggerProviderConfig } from '@preload/types/tagger';
+import { TaggerProviderConfig, ProviderHealthStatus } from '@preload/types/tagger';
 import * as Setting from '../../components/Setting/Setting';
 import styles from './Settings.module.css';
 
@@ -147,6 +147,8 @@ function SortableProviderCard({ providerConfig, isLast, onToggle, onMaxResultsCh
  */
 export default function SettingsTagger() {
   const [providers, setProviders] = useState<TaggerProviderConfig[]>([]);
+  const [healthStatus, setHealthStatus] = useState<ProviderHealthStatus[]>([]);
+  const [isCheckingHealth, setIsCheckingHealth] = useState(false);
 
   // Load config on mount
   useEffect(() => {
@@ -158,6 +160,32 @@ export default function SettingsTagger() {
     };
     load();
   }, []);
+
+  // Health check for providers
+  const runHealthCheck = useCallback(async () => {
+    setIsCheckingHealth(true);
+    try {
+      const result = await window.Main.library.healthCheck();
+      setHealthStatus(result.providers);
+    } catch (error) {
+      console.error('Health check failed:', error);
+    } finally {
+      setIsCheckingHealth(false);
+    }
+  }, []);
+
+  // Run health check on mount
+  useEffect(() => {
+    runHealthCheck();
+  }, [runHealthCheck]);
+
+  // Auto-refresh health status every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      runHealthCheck();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [runHealthCheck]);
 
   const saveProviders = useCallback((updated: TaggerProviderConfig[]) => {
     setProviders(updated);
@@ -256,6 +284,84 @@ export default function SettingsTagger() {
         When two candidates from different providers score within 1% of each other, the provider higher in the list wins
         the tie. Drag the cards above to set your preferred order.
       </Text>
+
+      <Setting.Section>
+        <Group justify='space-between'>
+          <Setting.Description>Provider Status</Setting.Description>
+          <Tooltip label='Refresh status'>
+            <ActionIcon
+              variant='subtle'
+              onClick={runHealthCheck}
+              loading={isCheckingHealth}
+            >
+              <IconRefresh size={16} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
+      </Setting.Section>
+
+      <Text
+        size='xs'
+        c='dimmed'
+        mb='md'
+      >
+        Shows the connection status of each tag provider. Green indicates healthy, red indicates connection issues.
+      </Text>
+
+      <Stack gap='xs'>
+        {healthStatus.map(status => (
+          <div
+            key={status.provider}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '10px 14px',
+              borderRadius: '6px',
+              background: 'var(--mantine-color-dark-6)',
+              border: `1px solid ${status.status === 'healthy' ? 'var(--mantine-color-green-8)' : status.status === 'unhealthy' ? 'var(--mantine-color-red-8)' : 'var(--mantine-color-dark-4)'}`,
+            }}
+          >
+            {/* Status indicator */}
+            {status.status === 'healthy' && <IconCheck size={18} color='var(--mantine-color-green-5)' />}
+            {status.status === 'unhealthy' && <IconX size={18} color='var(--mantine-color-red-5)' />}
+            {status.status === 'checking' && <IconRefresh size={18} color='var(--mantine-color-yellow-5)' className='spin' />}
+
+            {/* Provider name */}
+            <Text size='sm' fw={500} style={{ minWidth: '100px' }}>
+              {status.provider === 'beatport' ? 'Beatport' : status.provider === 'traxsource' ? 'Traxsource' : status.provider}
+            </Text>
+
+            {/* Status text */}
+            <Badge
+              size='sm'
+              color={status.status === 'healthy' ? 'green' : status.status === 'unhealthy' ? 'red' : 'yellow'}
+            >
+              {status.status === 'healthy' ? 'Healthy' : status.status === 'unhealthy' ? 'Unhealthy' : 'Checking...'}
+            </Badge>
+
+            {/* Error message */}
+            {status.status === 'unhealthy' && status.error && (
+              <Text size='xs' c='red' style={{ flex: 1 }}>
+                {status.error}
+              </Text>
+            )}
+
+            {/* Last checked */}
+            {status.lastChecked && (
+              <Text size='xs' c='dimmed'>
+                Last checked: {new Date(status.lastChecked).toLocaleTimeString()}
+              </Text>
+            )}
+          </div>
+        ))}
+      </Stack>
+
+      {healthStatus.length === 0 && !isCheckingHealth && (
+        <Text size='xs' c='dimmed'>
+          Click the refresh button to check provider status.
+        </Text>
+      )}
     </div>
   );
 }

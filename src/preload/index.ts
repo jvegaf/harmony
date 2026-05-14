@@ -113,6 +113,8 @@ const api = {
       ipcRenderer.on(channels.TAG_AUTO_APPLY_COMPLETE, listener);
       return () => ipcRenderer.removeListener(channels.TAG_AUTO_APPLY_COMPLETE, listener);
     },
+    // Health check for tag providers
+    healthCheck: async () => ipcRenderer.invoke(channels.TAGGER_HEALTH_CHECK),
     scanPaths: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_LOOKUP, paths),
     importTracks: async (trackPaths: string[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_TRACKS, trackPaths),
     importLibraryFull: async (paths: string[]) => ipcRenderer.invoke(channels.LIBRARY_IMPORT_FULL, paths),

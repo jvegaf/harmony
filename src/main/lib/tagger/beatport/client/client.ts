@@ -10,6 +10,7 @@
  */
 
 import * as cheerio from 'cheerio';
+import cloudscraper from 'cloudscraper';
 import { BeatportError } from '../error';
 import { RateLimitState } from './concurrent';
 import {
@@ -23,19 +24,28 @@ import {
 } from '../../../../../preload/types/beatport';
 
 const USER_AGENT =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';
 
 /**
  * Cliente HTTP para interactuar con Beatport
+ * Usa cloudscraper para resolver Cloudflare Challenge
  */
 export class BeatportClient {
   private httpClient: typeof fetch;
   private oauth: BeatportOAuth | null = null;
   private rateLimitState: RateLimitState;
 
-  constructor(httpClient: typeof fetch = fetch) {
-    this.httpClient = httpClient;
+  constructor() {
+    // Cliente HTTP para descargas binarias (artwork)
+    this.httpClient = fetch;
     this.rateLimitState = new RateLimitState();
+  }
+
+  /**
+   *Hace una request usando cloudscraper para resolver Cloudflare Challenge
+   */
+  private async cloudflareGet(url: string): Promise<string> {
+    return cloudscraper({ url, timeout: 30000 }) as Promise<string>;
   }
 
   /**
@@ -64,8 +74,7 @@ export class BeatportClient {
    */
   async search(title: string, artist: string): Promise<BeatportSearchResult> {
     try {
-      const token = await this.getToken();
-      const results = await this.searchWithToken(title, artist, token);
+      const results = await this.searchWithToken(title, artist);
       return results;
     } catch (error) {
       if (error instanceof BeatportError) {
@@ -95,18 +104,12 @@ export class BeatportClient {
    * Obtiene un token OAuth desde el HTML de Beatport
    */
   private async fetchTokenFromHtml(): Promise<string> {
-    const response = await this.httpClient('https://www.beatport.com/search/tracks?q=test', {
-      method: 'GET',
-      headers: {
-        'User-Agent': USER_AGENT,
-      },
-    });
+    // Agregar delay para evitar detección de bots
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-    if (!response.ok) {
-      throw BeatportError.networkError(`HTTP ${response.status}: ${response.statusText}`);
-    }
+    // Usar cloudscraper para resolver Cloudflare Challenge
+    const html = await this.cloudflareGet('https://www.beatport.com/search/tracks?q=test');
 
-    const html = await response.text();
     const token = this.extractTokenFromHtml(html);
 
     // Cachear el token
@@ -210,6 +213,44 @@ export class BeatportClient {
   }
 
   /**
+   * Verifica la conectividad con Beatport
+   * Usa el endpoint de búsqueda que es el mismo que usa fetchTokenFromHtml
+   */
+  async healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; error?: string }> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      // Usar el mismo endpoint que fetchTokenFromHtml
+      const response = await this.httpClient('https://www.beatport.com/search/tracks?q=test', {
+        method: 'GET',
+        headers: {
+          'User-Agent': USER_AGENT,
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      // El servidor responde - cualquier código de estado HTTP válido indica que el servicio está accesible
+      // 200 = OK, 401 = sin token válido, 403 = bloqueado pero el servidor responde
+      // Solo marcamos como unhealthy si hay error de red o timeout
+      if (response.status >= 200 && response.status < 500) {
+        return { status: 'healthy' };
+      }
+      return { status: 'unhealthy', error: `HTTP ${response.status}: ${response.statusText}` };
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          return { status: 'unhealthy', error: 'Connection timeout after 10000ms' };
+        }
+        return { status: 'unhealthy', error: error.message };
+      }
+      return { status: 'unhealthy', error: String(error) };
+    }
+  }
+
+  /**
    * Extrae el token OAuth desde el script __NEXT_DATA__ del HTML
    */
   private extractTokenFromHtml(html: string): string {
@@ -253,33 +294,20 @@ export class BeatportClient {
   }
 
   /**
-   * Busca tracks usando un token OAuth válido
+   * Busca tracks en Beatport
    */
-  private async searchWithToken(title: string, artist: string, token: string): Promise<BeatportSearchResult> {
+  private async searchWithToken(title: string, artist: string): Promise<BeatportSearchResult> {
+    // Agregar delay para evitar detección de bots
+    await new Promise(resolve => setTimeout(resolve, 300));
+
     // Construir query: "artist title"
     const query = `${artist} ${title}`.trim();
     const encodedQuery = encodeURIComponent(query);
 
     const url = `https://www.beatport.com/search/tracks?q=${encodedQuery}`;
 
-    const response = await this.httpClient(url, {
-      method: 'GET',
-      headers: {
-        'User-Agent': USER_AGENT,
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    // Manejar rate limiting
-    if (response.status === 429) {
-      throw BeatportError.rateLimited(60); // Reintentar en 60 segundos
-    }
-
-    if (!response.ok) {
-      throw BeatportError.networkError(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const html = await response.text();
+    // Usar cloudscraper para resolver Cloudflare Challenge
+    const html = await this.cloudflareGet(url);
     const results = this.parseSearchResults(html);
 
     return results;

@@ -8,6 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-14
+
+### ✨ Added
+
+- **Tag Provider Health Check**: Added a new "Provider Status" section in Settings → Tagger that shows the connection status of each tag provider (Beatport, Traxsource). Displays green for healthy, red for unhealthy, with error details when available. Auto-refreshes every 60 seconds with manual refresh button.
+
+### 🐛 Fixed
+
+- **Tag Provider Connectivity**: Fixed Beatport and Traxsource tag providers that were being blocked by Cloudflare's anti-bot protection. Integrated `cloudscraper` library to automatically resolve Cloudflare Challenge ("Just a moment...") pages, restoring full functionality to both providers.
+
+### 📦 Dependencies
+
+- Added `cloudscraper@^4.6.0` for Cloudflare Challenge bypass
+
+---
+
 ## [0.31.0] - 2026-05-05
 
 ### 🐛 Fixed

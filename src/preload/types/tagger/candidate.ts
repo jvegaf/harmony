@@ -109,3 +109,27 @@ export class TrackCandidateUtils {
     return candidate.title;
   }
 }
+
+/**
+ * Estado de salud de un provider
+ */
+export type ProviderHealthStatus = {
+  /** Identificador del provider */
+  provider: ProviderSource;
+  /** Estado del provider */
+  status: 'healthy' | 'unhealthy' | 'checking';
+  /** Mensaje de error si está unhealthy */
+  error?: string;
+  /** Última vez que se verificó */
+  lastChecked?: string;
+};
+
+/**
+ * Resultado del health check de todos los providers
+ */
+export type ProviderHealthCheckResult = {
+  /** Lista de estados de cada provider */
+  providers: ProviderHealthStatus[];
+  /** Timestamp del check */
+  timestamp: string;
+};

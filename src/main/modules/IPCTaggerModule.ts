@@ -13,7 +13,7 @@ import {
 import { SearchSimilars } from '../lib/track/similar';
 
 import ModuleWindow from './BaseWindowModule';
-import { TrackCandidatesResult, TrackSelection, TagCandidatesProgress } from '@preload/types/tagger';
+import { TrackCandidatesResult, TrackSelection, TagCandidatesProgress, ProviderHealthCheckResult } from '@preload/types/tagger';
 import { getTaggerWorkerManager } from '../lib/tagger/worker/tagger-worker-manager';
 import ConfigModule from './ConfigModule';
 
@@ -127,6 +127,19 @@ class IPCTaggerModule extends ModuleWindow {
         return results;
       } catch (error) {
         log.error('[IPCTaggerModule] Error finding similar tracks:', error);
+        throw error;
+      }
+    });
+
+    // AIDEV-NOTE: Handler for health check of tag providers
+    ipcMain.handle(channels.TAGGER_HEALTH_CHECK, async (): Promise<ProviderHealthCheckResult> => {
+      try {
+        const taggerManager = getTaggerWorkerManager();
+        const result = await taggerManager.healthCheckAll();
+        log.info('[IPCTaggerModule] Health check completed');
+        return result;
+      } catch (error) {
+        log.error('[IPCTaggerModule] Health check failed:', error);
         throw error;
       }
     });
