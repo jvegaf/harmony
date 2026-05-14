@@ -211,7 +211,7 @@ export default function SettingsLibrary() {
         <Setting.Element>
           <Setting.Description>
             Auto-Order Playlist Priority
-            <span style={subtextStyle}>Choose the primary metric when using the "Auto-Order Playlist" action.</span>
+            <span style={subtextStyle}>Choose the primary metric when using the &quot;Auto-Order&quot; action.</span>
           </Setting.Description>
           <Setting.Action>
             <Select

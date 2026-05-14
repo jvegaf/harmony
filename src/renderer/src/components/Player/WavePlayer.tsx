@@ -21,7 +21,8 @@ type WavePlayerProps = {
   config: Config;
 };
 
-function WavePlayer({ config: _config }: WavePlayerProps) { // _config currently unused
+function WavePlayer({ config: _config }: WavePlayerProps) {
+  // _config currently unused
   const containerRef = useRef<HTMLInputElement>(null);
   const hoverRef = useRef<HTMLInputElement>(null);
   const { position, playingTrack, playerStatus, isPreCueing, isPruneMode, volume, isMuted, audioPreCuePosition } =
@@ -39,7 +40,7 @@ function WavePlayer({ config: _config }: WavePlayerProps) { // _config currently
     if (typeof window !== 'undefined') {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      
+
       if (ctx) {
         // Waveform gradient colors - adapt to theme
         const isDark = colorScheme === 'dark';

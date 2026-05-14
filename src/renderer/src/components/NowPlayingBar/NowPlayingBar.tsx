@@ -1,6 +1,13 @@
 import { useMemo } from 'react';
 
-import { IconHeadphones, IconPlayerPauseFilled, IconPlayerPlayFilled, IconRewindBackward10, IconRewindForward10, IconX } from '@tabler/icons-react';
+import {
+  IconHeadphones,
+  IconPlayerPauseFilled,
+  IconPlayerPlayFilled,
+  IconRewindBackward10,
+  IconRewindForward10,
+  IconX,
+} from '@tabler/icons-react';
 
 import { PlayerStatus } from '@preload/types/harmony';
 import type { Config, Track } from '@preload/types/harmony';
@@ -105,7 +112,7 @@ export default function NowPlayingBar({ track, config }: NowPlayingBarProps) {
           </div>
           {/* Tags Section */}
           <div className={styles.tagsSection}>
-            {tags.map((tag) => (
+            {tags.map(tag => (
               <Tag
                 key={`${tag.label}-${tag.variant}`}
                 label={tag.label}
