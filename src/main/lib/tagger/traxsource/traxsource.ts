@@ -214,7 +214,7 @@ export class Traxsource {
     }
   }
 
-/**
+  /**
    * Verifica la conectividad con Traxsource
    * Usa el endpoint de búsqueda que es el mismo que usa searchTracks
    */
@@ -232,5 +232,5 @@ export class Traxsource {
       }
       return { status: 'unhealthy', error: error.message || String(error) };
     }
-}
+  }
 }

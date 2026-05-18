@@ -1,26 +1,26 @@
-import fs from 'fs';
-import path from 'path';
-import log from 'electron-log';
+/** biome-ignore-all assist/source/organizeImports: <explanation> */
+import fs from 'node:fs';
+import path from 'node:path';
 
-import { BrowserWindow, ipcMain, IpcMainEvent, IpcMainInvokeEvent } from 'electron';
+import { ipcMain, type BrowserWindow, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron';
+import log from 'electron-log';
 import { globby } from 'globby';
 import * as mmd from 'music-metadata';
 import queue from 'queue';
 
-import { Track, UpdateRatingPayload, LibraryChanges } from '../../preload/types/harmony';
-
-import ModuleWindow from './BaseWindowModule';
 import channels from '../../preload/lib/ipc-channels';
-import { makeTrackID } from '../lib/track-id';
+import type { LibraryChanges, Track, UpdateRatingPayload } from '../../preload/types/harmony';
 import { ParseDuration } from '../../preload/utils';
-import { loggerExtras } from '../lib/log/logger';
-import { emitLibraryChanged } from '../lib/library-events';
 import { Database } from '../lib/db/database';
+import { isCamelotKey, standardToCamelot } from '../lib/key/camelot';
+import { emitLibraryChanged } from '../lib/library-events';
+import { loggerExtras } from '../lib/log/logger';
+import { makeTrackID } from '../lib/track-id';
 import UpdateTrackRating from '../lib/track/rating-manager';
-import PersistTrack from '../lib/track/saver';
 import RemoveFile from '../lib/track/remover';
-import ConfigModule from './ConfigModule';
-import { standardToCamelot, isCamelotKey } from '../lib/key/camelot';
+import PersistTrack from '../lib/track/saver';
+import ModuleWindow from './BaseWindowModule';
+import type ConfigModule from './ConfigModule';
 
 interface ScanFile {
   path: string;
@@ -94,7 +94,9 @@ class IPCLibraryModule extends ModuleWindow {
       return { succeeded, failed };
     });
     ipcMain.on(channels.TRACKS_DELETE, (_: IpcMainEvent, trackFiles: Track[]) => {
-      trackFiles.forEach(t => RemoveFile(t.path));
+      trackFiles.forEach(t => {
+        RemoveFile(t.path);
+      });
 
       // Invalidate duplicates cache since library changed
       this.window.webContents.send(channels.DUPLICATES_INVALIDATE_CACHE);
@@ -118,7 +120,10 @@ class IPCLibraryModule extends ModuleWindow {
 
       for (const track of tracksToConvert) {
         try {
-          const camelotKey = standardToCamelot(track.initialKey!)!;
+          if (!track.initialKey) continue;
+          const camelotKey = standardToCamelot(track.initialKey);
+          if (!camelotKey) continue;
+
           const updatedTrack = { ...track, initialKey: camelotKey };
 
           // Persist to audio file (ID3 tag)
@@ -171,11 +176,7 @@ class IPCLibraryModule extends ModuleWindow {
     // 3. Scan all the directories with globby
     const globbies = folders.map(folder => {
       // Normalize slashes and escape regex special characters
-      const pattern = `${folder
-        .replace(/\\/g, '/')
-        // I'm not sure about this eslint-ignore
-        // eslint-disable-next-line no-useless-escape
-        .replace(/([$^*+?()\[\]])/g, '\\$1')}/**/*.*`;
+      const pattern = `${folder.replace(/\\/g, '/').replace(/([$^*+?()[\]])/g, '\\$1')}/**/*.*`;
 
       return globby(pattern, { followSymbolicLinks: true });
     });
@@ -418,14 +419,14 @@ class IPCLibraryModule extends ModuleWindow {
 
     const metadata = {
       album: common.album,
-      artist: (common.artists && common.artists.join(', ')) || common.artist || common.albumartist,
+      artist: common.artists?.join(', ') || common.artist || common.albumartist,
       bpm: common.bpm,
       initialKey,
       duration: format.duration || 0,
       time: ParseDuration(format.duration || 0),
       genre: common.genre?.join(', '),
       comment: common.comment?.join(', '),
-      bitrate: Math.round(format.bitrate! / 1000),
+      bitrate: format.bitrate ? Math.round(format.bitrate / 1000) : 0,
       title: title,
       label: common.label?.join(', '),
       year: common.year,
@@ -497,9 +498,18 @@ class IPCLibraryModule extends ModuleWindow {
         throw new Error(error);
       }
 
-      // 2. Copy new file over old path (overwrites old file)
-      await fs.promises.copyFile(newFilePath, trackPath);
-      log.info(`[File Replacement] File copied successfully`);
+      // 2. Move new file over old path (overwrites old file)
+      try {
+        await fs.promises.rename(newFilePath, trackPath);
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code === 'EXDEV') {
+          await fs.promises.copyFile(newFilePath, trackPath);
+          await fs.promises.unlink(newFilePath);
+        } else {
+          throw err;
+        }
+      }
+      log.info(`[File Replacement] File moved successfully`);
 
       // 3. Re-read metadata from the new file
       const freshMetadata = await this.getMetadata(trackPath);

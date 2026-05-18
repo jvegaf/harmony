@@ -13,7 +13,12 @@ import {
 import { SearchSimilars } from '../lib/track/similar';
 
 import ModuleWindow from './BaseWindowModule';
-import { TrackCandidatesResult, TrackSelection, TagCandidatesProgress, ProviderHealthCheckResult } from '@preload/types/tagger';
+import {
+  TrackCandidatesResult,
+  TrackSelection,
+  TagCandidatesProgress,
+  ProviderHealthCheckResult,
+} from '@preload/types/tagger';
 import { getTaggerWorkerManager } from '../lib/tagger/worker/tagger-worker-manager';
 import ConfigModule from './ConfigModule';
 

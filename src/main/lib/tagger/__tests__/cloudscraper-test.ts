@@ -7,14 +7,14 @@ import cloudscraper from 'cloudscraper';
 
 async function testTraxsourceWithCloudscraper() {
   console.log('\n🧪 Testing Traxsource with Cloudscraper...');
-  
+
   try {
     const response = await cloudscraper.get('https://www.traxsource.com/search?term=test', {
       timeout: 30000,
     });
-    
+
     console.log('   Response length:', response.length);
-    
+
     // Verificar si contiene la página de búsqueda real o el challenge
     if (response.includes('searchTrackList') || response.includes('trk-row')) {
       console.log('   ✅ Traxsource: PASSED - Got real search page');
@@ -36,14 +36,14 @@ async function testTraxsourceWithCloudscraper() {
 
 async function testBeatportWithCloudscraper() {
   console.log('\n🧪 Testing Beatport with Cloudscraper...');
-  
+
   try {
     const response = await cloudscraper.get('https://www.beatport.com/search/tracks?q=test', {
       timeout: 30000,
     });
-    
+
     console.log('   Response length:', response.length);
-    
+
     // Verificar si contiene datos reales o el challenge
     if (response.includes('__NEXT_DATA__') || response.includes('track')) {
       console.log('   ✅ Beatport: PASSED - Got real page');
@@ -66,16 +66,16 @@ async function main() {
   console.log('========================================');
   console.log('Cloudscraper Test - Bypass Cloudflare');
   console.log('========================================');
-  
+
   const traxsourceResult = await testTraxsourceWithCloudscraper();
   const beatportResult = await testBeatportWithCloudscraper();
-  
+
   console.log('\n========================================');
   console.log('Results:');
   console.log(`   Traxsource: ${traxsourceResult ? '✅ PASSED' : '❌ FAILED'}`);
   console.log(`   Beatport: ${beatportResult ? '✅ PASSED' : '❌ FAILED'}`);
   console.log('========================================\n');
-  
+
   process.exit(traxsourceResult && beatportResult ? 0 : 1);
 }
 

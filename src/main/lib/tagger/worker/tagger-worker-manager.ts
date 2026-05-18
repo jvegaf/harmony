@@ -21,7 +21,12 @@ import { Worker as NodeWorker } from 'worker_threads';
 import { join } from 'path';
 import log from 'electron-log';
 
-import { ProviderSource, TaggerProviderConfig, ProviderHealthStatus, ProviderHealthCheckResult } from '@preload/types/tagger';
+import {
+  ProviderSource,
+  TaggerProviderConfig,
+  ProviderHealthStatus,
+  ProviderHealthCheckResult,
+} from '@preload/types/tagger';
 import { RawTrackData } from '../providers/types';
 import { TagCandidatesProgress } from '@preload/types/tagger';
 import { BeatportClient } from '../beatport/client/client';

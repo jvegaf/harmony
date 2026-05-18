@@ -8,6 +8,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-05-18
+
+### ⚡ Improved
+
+- **File Replacement Behavior**: Changed the file replacement mechanism from copying to moving (utilizing `fs.promises.rename` with automatic fallback to `copyFile` + `unlink` on `EXDEV` cross-device errors), preventing duplicate files from remaining in the original location.
+
+### 🔧 Code Quality & Refactoring
+
+- Cleaned up and resolved multiple IDE/Typescript warnings in `IPCLibraryModule.ts`:
+  - Enforced explicit `type` imports for `BrowserWindow`, Harmony types, and `ConfigModule`.
+  - Migrated to standard `node:` protocol imports for native modules (`node:fs`, `node:path`).
+  - Replaced unsafe non-null assertions (`!`) with conditional validation checks.
+  - Integrated optional chaining (`?.`) in place of logical `&&` checks for parsing metadata.
+  - Grouped and ordered imports cleanly to comply with project styling rules.
+  - Suppressed side-effect return value warnings inside array `forEach` iterations.
+  - Normalized regular expression characters to bypass redundant escaping errors.
+
 ## [1.2.0] - 2026-05-14
 
 ### ✨ Added

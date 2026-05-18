@@ -323,13 +323,37 @@ export default function SettingsTagger() {
             }}
           >
             {/* Status indicator */}
-            {status.status === 'healthy' && <IconCheck size={18} color='var(--mantine-color-green-5)' />}
-            {status.status === 'unhealthy' && <IconX size={18} color='var(--mantine-color-red-5)' />}
-            {status.status === 'checking' && <IconRefresh size={18} color='var(--mantine-color-yellow-5)' className='spin' />}
+            {status.status === 'healthy' && (
+              <IconCheck
+                size={18}
+                color='var(--mantine-color-green-5)'
+              />
+            )}
+            {status.status === 'unhealthy' && (
+              <IconX
+                size={18}
+                color='var(--mantine-color-red-5)'
+              />
+            )}
+            {status.status === 'checking' && (
+              <IconRefresh
+                size={18}
+                color='var(--mantine-color-yellow-5)'
+                className='spin'
+              />
+            )}
 
             {/* Provider name */}
-            <Text size='sm' fw={500} style={{ minWidth: '100px' }}>
-              {status.provider === 'beatport' ? 'Beatport' : status.provider === 'traxsource' ? 'Traxsource' : status.provider}
+            <Text
+              size='sm'
+              fw={500}
+              style={{ minWidth: '100px' }}
+            >
+              {status.provider === 'beatport'
+                ? 'Beatport'
+                : status.provider === 'traxsource'
+                  ? 'Traxsource'
+                  : status.provider}
             </Text>
 
             {/* Status text */}
@@ -342,14 +366,21 @@ export default function SettingsTagger() {
 
             {/* Error message */}
             {status.status === 'unhealthy' && status.error && (
-              <Text size='xs' c='red' style={{ flex: 1 }}>
+              <Text
+                size='xs'
+                c='red'
+                style={{ flex: 1 }}
+              >
                 {status.error}
               </Text>
             )}
 
             {/* Last checked */}
             {status.lastChecked && (
-              <Text size='xs' c='dimmed'>
+              <Text
+                size='xs'
+                c='dimmed'
+              >
                 Last checked: {new Date(status.lastChecked).toLocaleTimeString()}
               </Text>
             )}
@@ -358,7 +389,10 @@ export default function SettingsTagger() {
       </Stack>
 
       {healthStatus.length === 0 && !isCheckingHealth && (
-        <Text size='xs' c='dimmed'>
+        <Text
+          size='xs'
+          c='dimmed'
+        >
           Click the refresh button to check provider status.
         </Text>
       )}
