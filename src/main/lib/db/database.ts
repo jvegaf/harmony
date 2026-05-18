@@ -221,6 +221,7 @@ export class Database {
             label: track.label,
             waveformPeaks: track.waveformPeaks,
             url: track.url,
+            color: track.color,
           })
           .where(eq(schema.tracks.id, existingId))
           .run();
@@ -248,6 +249,7 @@ export class Database {
               waveformPeaks: sql`excluded.waveformPeaks`,
               addedAt: sql`excluded.addedAt`,
               url: sql`excluded.url`,
+              color: sql`excluded.color`,
             },
           })
           .run();
@@ -275,6 +277,7 @@ export class Database {
         waveformPeaks: track.waveformPeaks,
         addedAt: track.addedAt,
         url: track.url,
+        color: track.color,
       })
       .where(eq(schema.tracks.id, track.id))
       .run();

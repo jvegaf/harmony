@@ -80,6 +80,34 @@ const RatingCellRenderer = (props: { data: { path: string }; value: TrackRating 
   );
 };
 
+const TRAKTOR_COLORS: Record<number, string> = {
+  0: '#fa5252', // Red
+  1: '#fd7e14', // Orange
+  2: '#fcc419', // Yellow
+  3: '#40c057', // Green
+  4: '#22b8cf', // Cyan
+  5: '#7950f2', // Violet
+};
+
+const TitleCellRenderer = (props: { value: string; data: Track }) => {
+  const color = props.data.color !== undefined ? TRAKTOR_COLORS[props.data.color] : 'transparent';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+      <div 
+        style={{ 
+          width: '4px', 
+          height: '24px', 
+          backgroundColor: color, 
+          marginRight: '8px',
+          borderRadius: '2px',
+          flexShrink: 0
+        }} 
+      />
+      <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{props.value}</span>
+    </div>
+  );
+};
+
 type Props = {
   type: string;
   reorderable?: boolean;
@@ -141,6 +169,7 @@ const TrackList = (props: Props) => {
         field: 'title',
         minWidth: 150,
         dndSource: true,
+        cellRenderer: TitleCellRenderer,
         dndSourceOnRowDrag: (params: any) => {
           const selected = params.api.getSelectedRows() as Track[];
           const draggedTrack = params.rowNode.data as Track;

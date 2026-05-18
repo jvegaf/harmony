@@ -159,6 +159,22 @@ class ContextMenuModule extends ModuleWindow {
           type: 'separator',
         },
         {
+          label: 'Set Color',
+          submenu: [
+            { label: 'None', click: () => event.sender.send(channels.CMD_TRACKS_SET_COLOR, { selected, color: undefined }) },
+            { type: 'separator' },
+            { label: 'Red', click: () => event.sender.send(channels.CMD_TRACKS_SET_COLOR, { selected, color: 0 }) },
+            { label: 'Orange', click: () => event.sender.send(channels.CMD_TRACKS_SET_COLOR, { selected, color: 1 }) },
+            { label: 'Yellow', click: () => event.sender.send(channels.CMD_TRACKS_SET_COLOR, { selected, color: 2 }) },
+            { label: 'Green', click: () => event.sender.send(channels.CMD_TRACKS_SET_COLOR, { selected, color: 3 }) },
+            { label: 'Cyan', click: () => event.sender.send(channels.CMD_TRACKS_SET_COLOR, { selected, color: 4 }) },
+            { label: 'Violet', click: () => event.sender.send(channels.CMD_TRACKS_SET_COLOR, { selected, color: 5 }) },
+          ],
+        },
+        {
+          type: 'separator',
+        },
+        {
           label: 'Filename->Tag',
           click: () => {
             event.sender.send(channels.CMD_FILENAME_TAGS, selected);

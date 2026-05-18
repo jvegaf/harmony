@@ -36,6 +36,8 @@ export const tracks = sqliteTable(
     // AIDEV-NOTE: URL of the track page from the tag provider (Beatport, Traxsource, Bandcamp)
     // Persisted as WOAR frame (artistUrl in node-id3) / common.website in music-metadata
     url: text('url'),
+    // AIDEV-NOTE: Traktor track color attribute (0-5)
+    color: integer('color'),
   },
   table => [
     // Performance indexes for frequently queried columns

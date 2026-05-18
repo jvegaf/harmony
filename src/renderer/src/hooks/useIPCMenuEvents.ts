@@ -146,6 +146,13 @@ export function useIPCMenuEvents() {
       await playlistsAPI.autoOrder(playlistId);
     }
 
+    async function setTracksColor(payload: { selected: Track[]; color: number | undefined }) {
+      const { selected, color } = payload;
+      for (const track of selected) {
+        await libraryAPI.updateTrackMetadata(track.id, { color });
+      }
+    }
+
     ipcRenderer.on(channels.CMD_PLAYLIST_NEW, (_, selected) => playlistNew(selected));
     ipcRenderer.on(channels.CMD_TRACKS_PLAYLIST_ADD, (_, payload) => addTracksToPlaylist(payload));
     ipcRenderer.on(channels.CMD_TRACKS_PLAYLIST_REMOVE, (_, payload) => removeTracksToPlaylist(payload));
@@ -159,6 +166,7 @@ export function useIPCMenuEvents() {
     ipcRenderer.on(channels.CMD_PLAYLIST_EXPORT, (_, playlistId) => exportPlaylist(playlistId));
     ipcRenderer.on(channels.CMD_PLAYLIST_REMOVE, (_, playlistId) => removePlaylist(playlistId));
     ipcRenderer.on(channels.CMD_PLAYLIST_AUTO_ORDER, (_, playlistId) => autoOrderPlaylist(playlistId));
+    ipcRenderer.on(channels.CMD_TRACKS_SET_COLOR, (_, payload) => setTracksColor(payload));
 
     return function cleanup() {
       ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_NEW);
@@ -174,6 +182,7 @@ export function useIPCMenuEvents() {
       ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_EXPORT);
       ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_REMOVE);
       ipcRenderer.removeAllListeners(channels.CMD_PLAYLIST_AUTO_ORDER);
+      ipcRenderer.removeAllListeners(channels.CMD_TRACKS_SET_COLOR);
 
       // Cleanup any active audio analysis listeners on unmount
       for (const unsub of analysisUnsubscribesRef.current) {

@@ -62,6 +62,8 @@ export interface Track {
   addedAt?: number;
   /** URL of the track page from the tag provider (Beatport, Traxsource, Bandcamp). Persisted as WOAR frame (artistUrl in node-id3) */
   url?: string;
+  /** Traktor track color attribute (0-5) */
+  color?: number;
 }
 
 // AIDEV-NOTE: Beatport recommendations response structure
@@ -203,7 +205,7 @@ export enum LogLevel {
 
 export type TrackEditableFields = Pick<
   Track,
-  'title' | 'artist' | 'album' | 'genre' | 'year' | 'comment' | 'bpm' | 'initialKey' | 'label'
+  'title' | 'artist' | 'album' | 'genre' | 'year' | 'comment' | 'bpm' | 'initialKey' | 'label' | 'color'
 >;
 
 export type LogProps = {

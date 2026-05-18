@@ -244,6 +244,9 @@ export class TraktorNMLWriter {
     } else if (track.year) {
       entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
     }
+    if (track.color !== undefined) {
+      entry.INFO.COLOR = String(track.color);
+    }
 
     // Build TEMPO - Use bpmPrecise for full precision when available
     const bpmValue = track.bpmPrecise || (track.bpm ? String(track.bpm) : undefined);
@@ -297,6 +300,9 @@ export class TraktorNMLWriter {
       entry.INFO.RELEASE_DATE = track.releaseDate;
     } else if (track.year) {
       entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
+    }
+    if (track.color !== undefined) {
+      entry.INFO.COLOR = String(track.color);
     }
 
     // Update TEMPO - Use bpmPrecise for full precision when available
