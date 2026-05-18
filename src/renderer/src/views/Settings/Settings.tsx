@@ -1,28 +1,30 @@
-import { useNavigate, useRevalidator, useRouteLoaderData } from 'react-router-dom';
-
-import { LoaderData } from '../router';
-import styles from './Settings.module.css';
 import { Tabs } from '@mantine/core';
-import Keybinding from 'react-keybinding-component';
-import SettingsLibrary from './SettingsLibrary';
-import SettingsAudio from './SettingsAudio';
-import SettingsTraktor from './SettingsTraktor';
-import SettingsGeneral from './SettingsGeneral';
-import SettingsUI from './SettingsUI';
 import {
   IconDeviceSpeaker,
-  IconPencilCog,
-  IconVinyl,
   IconDisc,
-  IconSettings,
+  IconKeyboard,
   IconLayersIntersect,
   IconPalette,
+  IconPencilCog,
+  IconSettings,
   IconTag,
+  IconVinyl,
 } from '@tabler/icons-react';
-import SettingsLog from './SettingsLog';
+import Keybinding from 'react-keybinding-component';
+import { useNavigate, useRevalidator, useRouteLoaderData } from 'react-router-dom';
+
+import type { RootLoaderData } from '../Root';
+import type { LoaderData } from '../router';
+import styles from './Settings.module.css';
+import SettingsAudio from './SettingsAudio';
 import SettingsDuplicates from './SettingsDuplicates';
+import SettingsGeneral from './SettingsGeneral';
+import SettingsLibrary from './SettingsLibrary';
+import SettingsLog from './SettingsLog';
+import SettingsShortcuts from './SettingsShortcuts';
 import SettingsTagger from './SettingsTagger';
-import { RootLoaderData } from '../Root';
+import SettingsTraktor from './SettingsTraktor';
+import SettingsUI from './SettingsUI';
 
 export default function SettingsView() {
   const revalidator = useRevalidator();
@@ -96,6 +98,12 @@ export default function SettingsView() {
               Tagger
             </Tabs.Tab>
             <Tabs.Tab
+              value='shortcuts'
+              leftSection={<IconKeyboard size={14} />}
+            >
+              Shortcuts
+            </Tabs.Tab>
+            <Tabs.Tab
               value='logs'
               leftSection={<IconPencilCog size={14} />}
             >
@@ -126,6 +134,9 @@ export default function SettingsView() {
           </Tabs.Panel>
           <Tabs.Panel value='tagger'>
             <SettingsTagger />
+          </Tabs.Panel>
+          <Tabs.Panel value='shortcuts'>
+            <SettingsShortcuts appConfig={appConfig} />
           </Tabs.Panel>
           <Tabs.Panel value='logs'>
             <SettingsLog />

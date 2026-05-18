@@ -1,13 +1,12 @@
+import { notifications } from '@mantine/notifications';
 import { useEffect, useRef } from 'react';
 
-import { notifications } from '@mantine/notifications';
-
 import channels from '../../../preload/lib/ipc-channels';
-import { usePlaylistsAPI } from '../stores/usePlaylistsStore';
+import type { CommandPayload, Track, TrackEditableFields } from '../../../preload/types/harmony';
 import { useLibraryAPI } from '../stores/useLibraryStore';
 import useLibraryUIStore from '../stores/useLibraryUIStore';
+import { usePlaylistsAPI } from '../stores/usePlaylistsStore';
 import useTaggerStore, { useTaggerAPI } from '../stores/useTaggerStore';
-import type { CommandPayload, Track } from '../../../preload/types/harmony';
 
 const { ipcRenderer } = window.ElectronAPI;
 
@@ -149,7 +148,7 @@ export function useIPCMenuEvents() {
     async function setTracksColor(payload: { selected: Track[]; color: number | undefined }) {
       const { selected, color } = payload;
       for (const track of selected) {
-        await libraryAPI.updateTrackMetadata(track.id, { color });
+        await libraryAPI.updateTrackMetadata(track.id, { color } as TrackEditableFields);
       }
     }
 

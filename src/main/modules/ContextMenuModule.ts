@@ -161,7 +161,10 @@ class ContextMenuModule extends ModuleWindow {
         {
           label: 'Set Color',
           submenu: [
-            { label: 'None', click: () => event.sender.send(channels.CMD_TRACKS_SET_COLOR, { selected, color: undefined }) },
+            {
+              label: 'None',
+              click: () => event.sender.send(channels.CMD_TRACKS_SET_COLOR, { selected, color: undefined }),
+            },
             { type: 'separator' },
             { label: 'Red', click: () => event.sender.send(channels.CMD_TRACKS_SET_COLOR, { selected, color: 0 }) },
             { label: 'Orange', click: () => event.sender.send(channels.CMD_TRACKS_SET_COLOR, { selected, color: 1 }) },

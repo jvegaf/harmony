@@ -8,7 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-## [1.3.0] - 2026-05-18
+## [1.4.0] - 2026-05-18
+
+### ✨ Added
+
+- **Configurable Keyboard Shortcuts**: Implemented a fully customizable keybinding system for both global and tracklist-specific actions, managed via a new "Shortcuts" settings panel.
+- **Preparation Mode Enhancements**: Added the ability to select specific playlists as sources for Preparation Mode, rather than always utilizing the entire library.
+- **Auto-Order Playlist**: New context menu command to automatically order a playlist by Harmonic Affinity (OpenKey/Camelot) or Energy (Star rating), with a global configuration setting to define the primary sorting priority.
+
+### 🔧 Code Quality & Refactoring
+
+- **Strict Type Checking & Linting**: Conducted a comprehensive codebase cleanup, eliminating all TypeScript errors and ESLint warnings.
+- **Import Normalization**: Standardized import sorting across modules according to the project's exact TypeScript language service specifications.
 
 ### ⚡ Improved
 

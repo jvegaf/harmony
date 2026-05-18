@@ -7,11 +7,11 @@ import { cpus } from 'node:os';
 
 import Store from 'electron-store';
 
-import channels from '../../preload/lib/ipc-channels';
-
-import Module from './BaseModule';
 import type { Config } from '@preload/types/harmony';
+
+import channels from '../../preload/lib/ipc-channels';
 import { logger } from '../lib/log/logger';
+import Module from './BaseModule';
 
 export default class ConfigModule extends Module {
   private config: Store<Config>;
@@ -67,6 +67,13 @@ export default class ConfigModule extends Module {
     if (useCamelotKeys === undefined) {
       logger.info('[ConfigModule] Migrating config to add useCamelotKeys property');
       this.config.set('useCamelotKeys', defaults.useCamelotKeys);
+    }
+
+    // Migrate shortcuts if missing (added for configurable keyboard shortcuts)
+    const shortcuts = this.config.get('shortcuts');
+    if (!shortcuts) {
+      logger.info('[ConfigModule] Migrating config to add shortcuts property');
+      this.config.set('shortcuts', defaults.shortcuts);
     }
   }
 
@@ -179,6 +186,27 @@ export default class ConfigModule extends Module {
           { name: 'traxsource', displayName: 'Traxsource', enabled: true, maxResults: 10 },
           { name: 'bandcamp', displayName: 'Bandcamp', enabled: true, maxResults: 10 },
         ],
+      },
+      shortcuts: {
+        global: {
+          playPause: ' ',
+          openSettings: 'ctrl+,',
+          focusSearch: 'ctrl+k',
+          seekBackward: 'arrowleft',
+          seekForward: 'arrowright',
+          previousTrack: 'a',
+          nextTrack: 'd',
+        },
+        tracklist: {
+          rate0: '0',
+          rate1: '1',
+          rate2: '2',
+          rate3: '3',
+          rate4: '4',
+          rate5: '5',
+          showDetails: 'i',
+          addToPreparation: 'p',
+        },
       },
     };
 

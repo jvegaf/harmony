@@ -245,6 +245,28 @@ export interface SearchEngineConfig {
   isDefault: boolean;
 }
 
+export interface ShortcutsConfig {
+  global: {
+    playPause: string;
+    openSettings: string;
+    focusSearch: string;
+    seekBackward: string;
+    seekForward: string;
+    previousTrack: string;
+    nextTrack: string;
+  };
+  tracklist: {
+    rate0: string;
+    rate1: string;
+    rate2: string;
+    rate3: string;
+    rate4: string;
+    rate5: string;
+    showDetails: string;
+    addToPreparation: string;
+  };
+}
+
 export interface Config {
   audioVolume: number;
   audioOutputDevice: string;
@@ -270,6 +292,8 @@ export interface Config {
   autoFixMetadata: boolean;
   /** When enabled, imported tracks will have their initialKey converted to Camelot notation (e.g., Am → 8A) */
   useCamelotKeys: boolean;
+  /** User-defined keyboard shortcuts */
+  shortcuts: ShortcutsConfig;
   /** Traktor NML integration configuration */
   traktorConfig: {
     nmlPath: string;

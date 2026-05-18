@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 import Keybinding from 'react-keybinding-component';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useRouteLoaderData } from 'react-router-dom';
 
+import { parseKeyEvent } from '../../lib/utils-keyboard';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
-import { isCtrlKey } from '../../lib/utils-events';
+import type { RootLoaderData } from '../../views/Root';
 
 /**
  * Handle app-level IPC Navigation events
@@ -11,62 +12,57 @@ import { isCtrlKey } from '../../lib/utils-events';
 function GlobalKeyBindings() {
   const navigate = useNavigate();
   const playerAPI = usePlayerAPI();
+  const { appConfig } = useRouteLoaderData('root') as RootLoaderData;
+
+  // We need to handle cases where appConfig might not be fully loaded or missing shortcuts
+  const globalShortcuts = appConfig?.shortcuts?.global;
 
   // App shortcuts (not using Electron's global shortcuts API to avoid conflicts
   // with other applications)
   const onKey = useCallback(
     async (e: KeyboardEvent) => {
-      switch (e.key) {
-        case ' ':
+      if (!globalShortcuts) return;
+
+      const keyStr = parseKeyEvent(e);
+
+      // Map dynamic shortcut strings to actions
+      switch (keyStr) {
+        case globalShortcuts.playPause:
           e.preventDefault();
           e.stopPropagation();
           playerAPI.togglePlayPause();
           break;
-        case ',':
-          if (isCtrlKey(e)) {
-            e.preventDefault();
-            e.stopPropagation();
-            navigate('/settings');
+        case globalShortcuts.openSettings:
+          e.preventDefault();
+          e.stopPropagation();
+          navigate('/settings');
+          break;
+        case globalShortcuts.focusSearch: {
+          e.preventDefault();
+          e.stopPropagation();
+          const searchInput = document.querySelector<HTMLInputElement>('[data-search-input="true"]');
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
           }
           break;
-        case 'k':
-          // Ctrl+K focuses the search input in the Sidebar
-          if (isCtrlKey(e)) {
-            e.preventDefault();
-            e.stopPropagation();
-            const searchInput = document.querySelector<HTMLInputElement>('[data-search-input="true"]');
-            if (searchInput) {
-              searchInput.focus();
-              searchInput.select();
-            }
-          }
-          break;
-        case 'ArrowLeft':
+        }
+        case globalShortcuts.seekBackward:
           e.preventDefault();
           e.stopPropagation();
           playerAPI.jumpTo(-10);
           break;
-        case 'ArrowRight':
+        case globalShortcuts.seekForward:
           e.preventDefault();
           e.stopPropagation();
           playerAPI.jumpTo(10);
           break;
-        case 's':
-          e.preventDefault();
-          e.stopPropagation();
-          playerAPI.jumpTo(-10);
-          break;
-        case 'w':
-          e.preventDefault();
-          e.stopPropagation();
-          playerAPI.jumpTo(10);
-          break;
-        case 'a':
+        case globalShortcuts.previousTrack:
           e.preventDefault();
           e.stopPropagation();
           playerAPI.previous();
           break;
-        case 'd':
+        case globalShortcuts.nextTrack:
           e.preventDefault();
           e.stopPropagation();
           playerAPI.next();
@@ -75,7 +71,7 @@ function GlobalKeyBindings() {
           break;
       }
     },
-    [navigate, playerAPI],
+    [navigate, playerAPI, globalShortcuts],
   );
 
   return (

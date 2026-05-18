@@ -19,13 +19,13 @@ Implementar un sistema de health check que permita visualizar el estado de cada 
 
 ### Componentes a modificar
 
-| Componente | Localización | Responsabilidad |
-|------------|--------------|------------------|
-| `BeatportClient` | `src/main/lib/tagger/beatport/client/` | Método `healthCheck()` |
-| `Traxsource` | `src/main/lib/tagger/traxsource/` | Método `healthCheck()` |
-| `ipc-channels.ts` | `src/preload/lib/` | Nuevo channel |
-| `IPCTaggerModule.ts` | `src/main/modules/` | Handler del health check |
-| `SettingsTagger.tsx` | `src/renderer/src/views/Settings/` | UI del estado de providers |
+| Componente           | Localización                           | Responsabilidad            |
+| -------------------- | -------------------------------------- | -------------------------- |
+| `BeatportClient`     | `src/main/lib/tagger/beatport/client/` | Método `healthCheck()`     |
+| `Traxsource`         | `src/main/lib/tagger/traxsource/`      | Método `healthCheck()`     |
+| `ipc-channels.ts`    | `src/preload/lib/`                     | Nuevo channel              |
+| `IPCTaggerModule.ts` | `src/main/modules/`                    | Handler del health check   |
+| `SettingsTagger.tsx` | `src/renderer/src/views/Settings/`     | UI del estado de providers |
 
 ---
 
@@ -36,6 +36,7 @@ Implementar un sistema de health check que permita visualizar el estado de cada 
 Cada provider implementa un método `healthCheck()` que hace una request mínima para verificar conectividad.
 
 #### Beatport
+
 - **Estrategia**: Hacer request a la página principal `https://www.beatport.com` y verificar que responde
 - **Error posible**: Timeout, DNS, HTTP error
 - **Ubicación**: `src/main/lib/tagger/beatport/client/client.ts`
@@ -49,9 +50,9 @@ async healthCheck(): Promise<ProviderHealthStatus> {
     });
     return { status: 'healthy', provider: 'beatport' };
   } catch (error) {
-    return { 
-      status: 'unhealthy', 
-      provider: 'beatport', 
+    return {
+      status: 'unhealthy',
+      provider: 'beatport',
       error: error instanceof BeatportError ? error.message : String(error)
     };
   }
@@ -59,6 +60,7 @@ async healthCheck(): Promise<ProviderHealthStatus> {
 ```
 
 #### Traxsource
+
 - **Estrategia**: Hacer request a `https://www.traxsource.com` y verificar respuesta
 - **Error posible**: Timeout, DNS, HTTP error
 - **Ubicación**: `src/main/lib/tagger/traxsource/traxsource.ts`
@@ -69,9 +71,9 @@ async healthCheck(): Promise<ProviderHealthStatus> {
     await this.client.get('/');
     return { status: 'healthy', provider: 'traxsource' };
   } catch (error) {
-    return { 
-      status: 'unhealthy', 
-      provider: 'traxsource', 
+    return {
+      status: 'unhealthy',
+      provider: 'traxsource',
       error: String(error)
     };
   }
@@ -81,6 +83,7 @@ async healthCheck(): Promise<ProviderHealthStatus> {
 ### 2. Backend - Definir tipos
 
 #### Tipo ProviderHealthStatus
+
 Crear en `src/preload/types/tagger/index.ts`:
 
 ```typescript
@@ -203,14 +206,17 @@ interface Props {
 ## Notas técnicas
 
 ### Timeout
+
 - Usar timeout de 10 segundos para el health check
 - No bloquear la UI durante el check (usar estado `checking`)
 
 ### Caching
+
 - No guardar resultado en DB; mantener en memoria durante la sesión
 - Refrescar automáticamente cada 60 segundos o manualmente
 
 ### Rate limiting
+
 - El health check no cuenta para rate limiting de los providers
 - Usar requests mínimos (GET a página principal)
 

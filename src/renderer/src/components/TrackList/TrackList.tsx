@@ -1,12 +1,16 @@
-import {
-  AllCommunityModule,
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useRouteLoaderData } from 'react-router-dom';
+import { useMantineColorScheme } from '@mantine/core';
+
+import { AgGridReact } from 'ag-grid-react';
+import { AllCommunityModule, ModuleRegistry, iconSetMaterial, themeQuartz } from 'ag-grid-community';
+import type {
   CellContextMenuEvent,
   ColDef,
   GetRowIdParams,
   GridApi,
   GridReadyEvent,
   IRowDragItem,
-  ModuleRegistry,
   RowClassParams,
   RowDoubleClickedEvent,
   RowDragCancelEvent,
@@ -15,25 +19,27 @@ import {
   RowDragMoveEvent,
   SortChangedEvent,
 } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+
+import type { Playlist, Track, TrackId, TrackRating, TrklistCtxMenuPayload } from '../../../../preload/types/harmony';
+import channels from '../../../../preload/lib/ipc-channels';
+import { ParseDuration } from '../../../../preload/utils';
+
+import { useDetailsNavigationAPI } from '../../stores/useDetailsNavigationStore';
+import { useLibraryAPI } from '../../stores/useLibraryStore';
+import useLibraryUIStore from '../../stores/useLibraryUIStore';
+import { usePlayerAPI } from '../../stores/usePlayerStore';
+import { usePlaylistsAPI } from '../../stores/usePlaylistsStore';
+import useTaggerStore from '../../stores/useTaggerStore';
+
+import { GetParentFolderName, formatOpenKey, getOpenKeyColor, ratingComparator } from '../../lib/utils-library';
+import { parseKeyEvent } from '../../lib/utils-keyboard';
+import { perfLogger } from '../../lib/performance-logger';
+import type { RootLoaderData } from '../../views/Root';
+import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
+
+import styles from './TrackList.module.css';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
-
-import { TrklistCtxMenuPayload, Playlist, Track, TrackId, TrackRating } from '../../../../preload/types/harmony';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useMantineColorScheme } from '@mantine/core';
-import { usePlayerAPI } from '../../stores/usePlayerStore';
-import useLibraryUIStore from '../../stores/useLibraryUIStore';
-import useTaggerStore from '../../stores/useTaggerStore';
-import { useDetailsNavigationAPI } from '../../stores/useDetailsNavigationStore';
-import { ParseDuration } from '../../../../preload/utils';
-import TrackRatingComponent from '../TrackRatingComponent/TrackRatingComponent';
-import { GetParentFolderName, ratingComparator, formatOpenKey, getOpenKeyColor } from '../../lib/utils-library';
-import { usePlaylistsAPI } from '../../stores/usePlaylistsStore';
-import { perfLogger } from '../../lib/performance-logger';
-import { themeQuartz, iconSetMaterial } from 'ag-grid-community';
-import styles from './TrackList.module.css';
 
 // AG Grid theme configurations for light and dark modes
 // These themes use hardcoded color values because AG Grid's theming API doesn't support CSS variables
@@ -93,15 +99,15 @@ const TitleCellRenderer = (props: { value: string; data: Track }) => {
   const color = props.data.color !== undefined ? TRAKTOR_COLORS[props.data.color] : 'transparent';
   return (
     <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-      <div 
-        style={{ 
-          width: '4px', 
-          height: '24px', 
-          backgroundColor: color, 
+      <div
+        style={{
+          width: '4px',
+          height: '24px',
+          backgroundColor: color,
           marginRight: '8px',
           borderRadius: '2px',
-          flexShrink: 0
-        }} 
+          flexShrink: 0,
+        }}
       />
       <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{props.value}</span>
     </div>
@@ -122,7 +128,10 @@ const { menu, logger } = window.Main;
 const TrackList = (props: Props) => {
   const { tracks, trackPlayingID, playlists, currentPlaylist, type } = props;
   const location = useLocation();
+  const { appConfig } = useRouteLoaderData('root') as RootLoaderData;
+  const tracklistShortcuts = appConfig?.shortcuts?.tracklist;
   const playerAPI = usePlayerAPI();
+  const libraryAPI = useLibraryAPI();
   const playlistsAPI = usePlaylistsAPI();
   const detailsNavAPI = useDetailsNavigationAPI();
   const { search, deleting, tracklistSort } = useLibraryUIStore();
@@ -170,15 +179,17 @@ const TrackList = (props: Props) => {
         minWidth: 150,
         dndSource: true,
         cellRenderer: TitleCellRenderer,
-        dndSourceOnRowDrag: (params: any) => {
+        dndSourceOnRowDrag: (params: { api: GridApi; rowNode: { data: Track }; dragEvent: DragEvent }) => {
           const selected = params.api.getSelectedRows() as Track[];
-          const draggedTrack = params.rowNode.data as Track;
+          const draggedTrack = params.rowNode.data;
 
           const isSelected = selected.some((t: Track) => t.id === draggedTrack.id);
           const tracksToDrag = isSelected ? selected : [draggedTrack];
 
-          params.dragEvent.dataTransfer.setData('application/harmony-tracks', JSON.stringify(tracksToDrag));
-          params.dragEvent.dataTransfer.effectAllowed = 'copy';
+          if (params.dragEvent.dataTransfer) {
+            params.dragEvent.dataTransfer.setData('application/harmony-tracks', JSON.stringify(tracksToDrag));
+            params.dragEvent.dataTransfer.effectAllowed = 'copy';
+          }
         },
       },
       { field: 'artist', minWidth: 90 },
@@ -210,7 +221,7 @@ const TrackList = (props: Props) => {
       {
         field: 'bitrate',
         // Bitrate is stored in kbps, no conversion needed
-        valueFormatter: (p: { value: number }) => (p.value ? p.value + 'kbps' : ''),
+        valueFormatter: (p: { value: number }) => (p.value ? `${p.value}kbps` : ''),
         minWidth: 80,
         maxWidth: 90,
       },
@@ -255,12 +266,8 @@ const TrackList = (props: Props) => {
     };
   }, []);
 
-  const rowDragText = useCallback(function (params: IRowDragItem) {
-    // keep double equals here because data can be a string or number
-    // if (params.rowNode!.data.year == '2012') {
-    //   return params.defaultTextValue + ' (London Olympics)';
-    // }
-    const track = params.rowNode!.data;
+  const rowDragText = useCallback((params: IRowDragItem) => {
+    const track = params.rowNode?.data;
     if (!track) return 'Track';
 
     const title = track.title || 'Unknown Title';
@@ -300,8 +307,10 @@ const TrackList = (props: Props) => {
 
   useEffect(() => {
     if (deleting) {
-      const selectedRowData = gridRef.current!.api.getSelectedRows();
-      gridRef.current!.api.applyTransaction({ remove: selectedRowData });
+      const selectedRowData = gridRef.current?.api.getSelectedRows();
+      if (selectedRowData) {
+        gridRef.current?.api.applyTransaction({ remove: selectedRowData });
+      }
     }
   }, [deleting]);
 
@@ -323,7 +332,7 @@ const TrackList = (props: Props) => {
     setRowData(tracksWithOrder);
 
     // See docs/aidev-notes/tracklist-sorting.md for sort persistence details
-    if (tracklistSort && tracklistSort.colId && tracklistSort.mode) {
+    if (tracklistSort?.colId && tracklistSort?.mode) {
       params.api.applyColumnState({
         state: [{ colId: tracklistSort.colId, sort: tracklistSort.mode as 'asc' | 'desc' }],
         defaultState: { sort: null },
@@ -341,8 +350,10 @@ const TrackList = (props: Props) => {
     (event: RowDoubleClickedEvent) => {
       event.event?.preventDefault();
       const { rowIndex } = event;
-      const queue = event.node.parent!.childrenAfterSort!.map((node: any) => node.data.id as TrackId);
-      playerAPI.start(queue, rowIndex!);
+      const queue = event.node.parent?.childrenAfterSort?.map((node: { data: Track }) => node.data.id as TrackId);
+      if (queue && rowIndex !== null && rowIndex !== undefined) {
+        playerAPI.start(queue, rowIndex);
+      }
       event.node.setSelected(false);
     },
     [playerAPI],
@@ -381,15 +392,76 @@ const TrackList = (props: Props) => {
     [playlists, currentPlaylist, gridApi, detailsNavAPI, location.pathname],
   );
 
-  const onKeyPress = useCallback((event: { ctrlKey: boolean; key: string; preventDefault: () => void }) => {
-    event.preventDefault();
-    if (event.key === 'Escape') {
-      gridRef.current?.api.deselectAll();
-    }
-    if (event.ctrlKey && event.key === 'a') {
-      gridRef.current?.api.selectAll();
-    }
-  }, []);
+  const onKeyPress = useCallback(
+    async (event: React.KeyboardEvent<HTMLElement>) => {
+      // Don't prevent default initially so we don't break normal input if needed
+      if (!tracklistShortcuts) return;
+
+      const keyStr = parseKeyEvent(event);
+
+      switch (keyStr) {
+        case 'escape':
+          event.preventDefault();
+          gridRef.current?.api.deselectAll();
+          break;
+        case 'ctrl+a':
+          event.preventDefault();
+          gridRef.current?.api.selectAll();
+          break;
+        case tracklistShortcuts.showDetails: {
+          event.preventDefault();
+          const selected = gridRef.current?.api.getSelectedRows() as Track[];
+          if (selected && selected.length > 0) {
+            const trackIds: string[] = [];
+            gridRef.current?.api.forEachNodeAfterFilterAndSort(node => {
+              if (node.data) trackIds.push(node.data.id);
+            });
+            detailsNavAPI.setContext(trackIds, selected[0].id, location.pathname);
+            window.Main.menu.tracklist({ selected, playlists, currentPlaylist: currentPlaylist || null });
+            // Alternatively, direct IPC: window.ElectronAPI.ipcRenderer.send('some_event') but opening ctx menu or details view requires sending specific commands.
+            // Wait, we just want to open the details view. We can trigger CMD_TRACK_DETAIL? Actually, the details view opens from context menu via IPC. We can just use IPC.
+            window.ElectronAPI.ipcRenderer.send(channels.CMD_TRACK_DETAIL, selected[0].id);
+          }
+          break;
+        }
+        case tracklistShortcuts.addToPreparation: {
+          event.preventDefault();
+          const selected = gridRef.current?.api.getSelectedRows() as Track[];
+          if (selected && selected.length > 0) {
+            for (const track of selected) {
+              await window.Main.db.playlists.addTrackToPreparation(track.id);
+            }
+          }
+          break;
+        }
+        case tracklistShortcuts.rate0:
+        case tracklistShortcuts.rate1:
+        case tracklistShortcuts.rate2:
+        case tracklistShortcuts.rate3:
+        case tracklistShortcuts.rate4:
+        case tracklistShortcuts.rate5: {
+          event.preventDefault();
+          const selected = gridRef.current?.api.getSelectedRows() as Track[];
+          if (selected && selected.length > 0) {
+            let rating = 0;
+            if (keyStr === tracklistShortcuts.rate1) rating = 51; // 1 star
+            if (keyStr === tracklistShortcuts.rate2) rating = 102; // 2 star
+            if (keyStr === tracklistShortcuts.rate3) rating = 153; // 3 star
+            if (keyStr === tracklistShortcuts.rate4) rating = 204; // 4 star
+            if (keyStr === tracklistShortcuts.rate5) rating = 255; // 5 star
+
+            for (const track of selected) {
+              await libraryAPI.updateTrackRating(track.path, rating);
+            }
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    },
+    [tracklistShortcuts, detailsNavAPI, location.pathname, playlists, currentPlaylist, libraryAPI],
+  );
 
   // See docs/aidev-notes/tracklist-sorting.md for sort persistence details
   const onSortChanged = useCallback(
@@ -397,11 +469,13 @@ const TrackList = (props: Props) => {
       const sortedColumns = event.api.getColumnState().filter(col => col.sort !== null);
 
       if (sortedColumns.length > 0) {
-        const colId = sortedColumns[0].colId!;
-        const sortMode = sortedColumns[0].sort!;
+        const colId = sortedColumns[0].colId;
+        const sortMode = sortedColumns[0].sort;
 
-        logger.info(`[TracksTable] Sort changed: ${colId}, mode: ${sortMode}`);
-        useLibraryUIStore.getState().api.setTracklistSort(colId, sortMode);
+        if (colId && sortMode) {
+          logger.info(`[TracksTable] Sort changed: ${colId}, mode: ${sortMode}`);
+          useLibraryUIStore.getState().api.setTracklistSort(colId, sortMode);
+        }
       }
 
       // Update drag enabled state based on new sort
