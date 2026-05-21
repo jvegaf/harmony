@@ -122,3 +122,18 @@
   justify-content: center;
   color: var(--hm-text-muted);
 }
+
+/* Suppress default AG Grid cell focus borders/outlines for a cleaner, row-level look */
+:global(.ag-cell:focus),
+:global(.ag-cell-focus),
+:global(.ag-context-menu) {
+  outline: none !important;
+}
+
+:global(.ag-cell-focus::after) {
+  display: none !important;
+}
+
+:global(.ag-cell-focus) {
+  border: none !important;
+}

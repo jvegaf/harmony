@@ -11,6 +11,7 @@ import type {
   GridApi,
   GridReadyEvent,
   IRowDragItem,
+  NavigateToNextCellParams,
   RowClassParams,
   RowDoubleClickedEvent,
   RowDragCancelEvent,
@@ -262,7 +263,13 @@ const TrackList = (props: Props) => {
     return {
       resizable: true,
       sortable: true,
-      // Custom drag ghost text for entire row drag
+      suppressKeyboardEvent: params => {
+        const key = params.event.key;
+        if (key === ' ' || key === 'Enter') {
+          return true;
+        }
+        return false;
+      },
     };
   }, []);
 
@@ -325,6 +332,17 @@ const TrackList = (props: Props) => {
   useEffect(() => {
     setRowData(tracksWithOrder);
   }, [tracksWithOrder]);
+
+  const navigateToNextCell = useCallback((params: NavigateToNextCellParams) => {
+    const { nextCellPosition, previousCellPosition, api, event } = params;
+    if (nextCellPosition && (!previousCellPosition || nextCellPosition.rowIndex !== previousCellPosition.rowIndex)) {
+      const node = api.getDisplayedRowAtIndex(nextCellPosition.rowIndex);
+      if (node) {
+        node.setSelected(true, !event?.shiftKey);
+      }
+    }
+    return nextCellPosition;
+  }, []);
 
   const onGridReady = (params: GridReadyEvent) => {
     setGridApi(params.api);
@@ -400,6 +418,54 @@ const TrackList = (props: Props) => {
       const keyStr = parseKeyEvent(event);
 
       switch (keyStr) {
+        case 'arrowdown':
+        case 'arrowup': {
+          const focusedCell = gridRef.current?.api.getFocusedCell();
+          if (!focusedCell) {
+            const selectedNodes = gridRef.current?.api.getSelectedNodes();
+            let rowIndex = 0;
+            if (
+              selectedNodes &&
+              selectedNodes.length > 0 &&
+              selectedNodes[0].rowIndex !== null &&
+              selectedNodes[0].rowIndex !== undefined
+            ) {
+              rowIndex = selectedNodes[0].rowIndex;
+            } else if (trackPlayingID) {
+              const rowNode = gridRef.current?.api.getRowNode(trackPlayingID);
+              if (rowNode && rowNode.rowIndex !== null && rowNode.rowIndex !== undefined) {
+                rowIndex = rowNode.rowIndex;
+              }
+            }
+            event.preventDefault();
+            gridRef.current?.api.ensureIndexVisible(rowIndex);
+            gridRef.current?.api.setFocusedCell(rowIndex, 'title');
+            const node = gridRef.current?.api.getDisplayedRowAtIndex(rowIndex);
+            if (node) {
+              node.setSelected(true, true);
+            }
+          }
+          break;
+        }
+        case 'enter': {
+          event.preventDefault();
+          const selected = gridRef.current?.api.getSelectedRows() as Track[];
+          if (selected && selected.length > 0) {
+            const api = gridRef.current?.api;
+            if (api) {
+              const selectedNode = api.getSelectedNodes()[0];
+              if (selectedNode && selectedNode.rowIndex !== null && selectedNode.rowIndex !== undefined) {
+                const queue = selectedNode.parent?.childrenAfterSort?.map(
+                  (node: { data: Track }) => node.data.id as TrackId,
+                );
+                if (queue) {
+                  playerAPI.start(queue, selectedNode.rowIndex);
+                }
+              }
+            }
+          }
+          break;
+        }
         case 'escape':
           event.preventDefault();
           gridRef.current?.api.deselectAll();
@@ -444,11 +510,11 @@ const TrackList = (props: Props) => {
           const selected = gridRef.current?.api.getSelectedRows() as Track[];
           if (selected && selected.length > 0) {
             let rating = 0;
-            if (keyStr === tracklistShortcuts.rate1) rating = 51; // 1 star
-            if (keyStr === tracklistShortcuts.rate2) rating = 102; // 2 star
-            if (keyStr === tracklistShortcuts.rate3) rating = 153; // 3 star
-            if (keyStr === tracklistShortcuts.rate4) rating = 204; // 4 star
-            if (keyStr === tracklistShortcuts.rate5) rating = 255; // 5 star
+            if (keyStr === tracklistShortcuts.rate1) rating = 1; // 1 star
+            if (keyStr === tracklistShortcuts.rate2) rating = 2; // 2 star
+            if (keyStr === tracklistShortcuts.rate3) rating = 3; // 3 star
+            if (keyStr === tracklistShortcuts.rate4) rating = 4; // 4 star
+            if (keyStr === tracklistShortcuts.rate5) rating = 5; // 5 star
 
             for (const track of selected) {
               await libraryAPI.updateTrackRating(track.path, rating);
@@ -705,7 +771,7 @@ const TrackList = (props: Props) => {
             onSortChanged={onSortChanged}
             onRowDoubleClicked={e => onDoubleClick(e)}
             onCellContextMenu={e => onShowCtxtMenu(e)}
-            suppressCellFocus
+            navigateToNextCell={navigateToNextCell}
             quickFilterText={search}
             rowDragText={rowDragText}
             rowDragEntireRow={false}
