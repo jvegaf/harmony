@@ -10,6 +10,7 @@ import {
   UpdateRatingPayload,
   Config,
   LibraryImportProgress,
+  TracklistColumnsConfig,
 } from './types/harmony';
 import type {
   TraktorConfig,
@@ -153,6 +154,13 @@ const api = {
     tracklist: (payload: TrklistCtxMenuPayload) => ipcRenderer.send(channels.TRKLIST_MENU_SHOW, payload),
     common: () => ipcRenderer.send(channels.COMMON_MENU_SHOW),
     playlist: (playlistId: string) => ipcRenderer.send(channels.PLAYLIST_MENU_SHOW, playlistId),
+    headerColumns: (currentColumns: TracklistColumnsConfig) =>
+      ipcRenderer.send(channels.HEADER_COLUMNS_MENU_SHOW, currentColumns),
+    onColumnsUpdated: (callback: (columns: TracklistColumnsConfig) => void) => {
+      const listener = (_: any, columns: TracklistColumnsConfig) => callback(columns);
+      ipcRenderer.on(channels.CMD_COLUMNS_UPDATED, listener);
+      return () => ipcRenderer.removeListener(channels.CMD_COLUMNS_UPDATED, listener);
+    },
   },
   shell: {
     openExternal: shell.openExternal,

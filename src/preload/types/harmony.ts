@@ -267,7 +267,22 @@ export interface ShortcutsConfig {
   };
 }
 
+export interface TracklistColumnsConfig {
+  title: boolean;
+  artist: boolean;
+  duration: boolean;
+  path: boolean;
+  rating: boolean;
+  genre: boolean;
+  label: boolean;
+  year: boolean;
+  bpm: boolean;
+  bitrate: boolean;
+  initialKey: boolean;
+}
+
 export interface Config {
+  tracklistColumns: TracklistColumnsConfig;
   audioVolume: number;
   audioOutputDevice: string;
   audioMuted: boolean;

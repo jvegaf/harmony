@@ -21,7 +21,14 @@ import type {
   SortChangedEvent,
 } from 'ag-grid-community';
 
-import type { Playlist, Track, TrackId, TrackRating, TrklistCtxMenuPayload } from '../../../../preload/types/harmony';
+import type {
+  Playlist,
+  Track,
+  TrackId,
+  TrackRating,
+  TrklistCtxMenuPayload,
+  TracklistColumnsConfig,
+} from '../../../../preload/types/harmony';
 import channels from '../../../../preload/lib/ipc-channels';
 import { ParseDuration } from '../../../../preload/utils';
 
@@ -172,6 +179,57 @@ const TrackList = (props: Props) => {
     return false; // Sorted by other column
   }, [type, props.reorderable, gridApi]);
 
+  const [columnsConfig, setColumnsConfig] = useState<TracklistColumnsConfig>(
+    appConfig?.tracklistColumns ?? {
+      title: true,
+      artist: true,
+      duration: true,
+      path: true,
+      rating: true,
+      genre: true,
+      label: true,
+      year: true,
+      bpm: true,
+      bitrate: true,
+      initialKey: true,
+    },
+  );
+
+  useEffect(() => {
+    if (appConfig?.tracklistColumns) {
+      setColumnsConfig(appConfig.tracklistColumns);
+    }
+  }, [appConfig?.tracklistColumns]);
+
+  useEffect(() => {
+    const unsubscribe = window.Main.menu.onColumnsUpdated(updatedColumns => {
+      setColumnsConfig(updatedColumns);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    const gridWrapper = document.getElementById('grid-wrapper');
+    if (!gridWrapper) return;
+
+    const handleContextMenu = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const headerCell = target.closest('.ag-header');
+      if (headerCell) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.Main.menu.headerColumns(columnsConfig);
+      }
+    };
+
+    gridWrapper.addEventListener('contextmenu', handleContextMenu, true);
+    return () => {
+      gridWrapper.removeEventListener('contextmenu', handleContextMenu, true);
+    };
+  }, [columnsConfig]);
+
   // Column definitions with conditional order column for playlists
   const colDefs = useMemo(() => {
     const baseColumns: ColDef[] = [
@@ -239,7 +297,13 @@ const TrackList = (props: Props) => {
           return null;
         },
       },
-    ];
+    ].filter(col => {
+      const field = col.field as keyof typeof columnsConfig;
+      if (field && columnsConfig[field] !== undefined) {
+        return columnsConfig[field];
+      }
+      return true;
+    });
 
     // Add order column at the beginning for playlists with drag handle
     if (type === 'playlist') {
@@ -257,7 +321,7 @@ const TrackList = (props: Props) => {
     }
 
     return baseColumns;
-  }, [type, isDragEnabled]);
+  }, [type, isDragEnabled, columnsConfig]);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {

@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useMantineColorScheme } from '@mantine/core';
+import { useMantineColorScheme, SegmentedControl, ScrollArea, Stack } from '@mantine/core';
 import { IconSun, IconMoon, IconDeviceDesktop } from '@tabler/icons-react';
 
 import * as Setting from '../../components/Setting/Setting';
-import { SegmentedControl } from '@mantine/core';
 
 import styles from './Settings.module.css';
 
@@ -12,22 +11,21 @@ const { config } = window.Main;
 /**
  * Settings panel for UI appearance (theme selection).
  *
- * Theme preference is persisted via electron-store and applied on app startup.
- * The 'auto' option follows system color scheme preference via prefers-color-scheme media query.
+ * Preferences are persisted via electron-store and applied on app startup/navigation.
  */
 export default function SettingsUI() {
   const { setColorScheme } = useMantineColorScheme();
   const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('auto');
 
-  // Load theme from config on mount
+  // Load config on mount
   useEffect(() => {
-    const loadTheme = async () => {
+    const loadConfig = async () => {
       const savedTheme = await config.get('theme');
       if (savedTheme) {
         setTheme(savedTheme);
       }
     };
-    loadTheme();
+    loadConfig();
   }, []);
 
   // Handle theme change
@@ -45,45 +43,51 @@ export default function SettingsUI() {
   };
 
   return (
-    <div className={styles.settingsContainer}>
-      <Setting.Section>
-        <Setting.Description>Theme</Setting.Description>
-        <Setting.Action>
-          <SegmentedControl
-            value={theme}
-            onChange={handleThemeChange}
-            data={[
-              {
-                value: 'light',
-                label: (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <IconSun size={16} />
-                    <span>Light</span>
-                  </div>
-                ),
-              },
-              {
-                value: 'dark',
-                label: (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <IconMoon size={16} />
-                    <span>Dark</span>
-                  </div>
-                ),
-              },
-              {
-                value: 'auto',
-                label: (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <IconDeviceDesktop size={16} />
-                    <span>Auto</span>
-                  </div>
-                ),
-              },
-            ]}
-          />
-        </Setting.Action>
-      </Setting.Section>
-    </div>
+    <ScrollArea
+      h='100%'
+      offsetScrollbars
+      className={styles.settingsContainer}
+    >
+      <Stack gap='xl'>
+        <Setting.Section>
+          <Setting.Description>Theme</Setting.Description>
+          <Setting.Action>
+            <SegmentedControl
+              value={theme}
+              onChange={handleThemeChange}
+              data={[
+                {
+                  value: 'light',
+                  label: (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <IconSun size={16} />
+                      <span>Light</span>
+                    </div>
+                  ),
+                },
+                {
+                  value: 'dark',
+                  label: (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <IconMoon size={16} />
+                      <span>Dark</span>
+                    </div>
+                  ),
+                },
+                {
+                  value: 'auto',
+                  label: (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <IconDeviceDesktop size={16} />
+                      <span>Auto</span>
+                    </div>
+                  ),
+                },
+              ]}
+            />
+          </Setting.Action>
+        </Setting.Section>
+      </Stack>
+    </ScrollArea>
   );
 }

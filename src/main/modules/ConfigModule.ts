@@ -75,6 +75,13 @@ export default class ConfigModule extends Module {
       logger.info('[ConfigModule] Migrating config to add shortcuts property');
       this.config.set('shortcuts', defaults.shortcuts);
     }
+
+    // Migrate tracklistColumns if missing (added for configurable tracks table columns)
+    const tracklistColumns = this.config.get('tracklistColumns');
+    if (!tracklistColumns) {
+      logger.info('[ConfigModule] Migrating config to add tracklistColumns property');
+      this.config.set('tracklistColumns', defaults.tracklistColumns);
+    }
   }
 
   async load(): Promise<void> {
@@ -110,6 +117,19 @@ export default class ConfigModule extends Module {
 
   getDefaultConfig(): Config {
     const config: Config = {
+      tracklistColumns: {
+        title: true,
+        artist: true,
+        duration: true,
+        path: true,
+        rating: true,
+        genre: true,
+        label: true,
+        year: true,
+        bpm: true,
+        bitrate: true,
+        initialKey: true,
+      },
       audioVolume: 1,
       audioOutputDevice: 'default',
       audioMuted: false,

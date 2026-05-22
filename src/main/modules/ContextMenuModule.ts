@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain, IpcMainEvent, Menu, MenuItemConstructorOptions, PopupOptions, shell } from 'electron';
 
 import channels from '../../preload/lib/ipc-channels';
-import { SearchEngineConfig, TrklistCtxMenuPayload } from '../../preload/types/harmony';
+import { SearchEngineConfig, TrklistCtxMenuPayload, TracklistColumnsConfig } from '../../preload/types/harmony';
 
 import ModuleWindow from './BaseWindowModule';
 import ConfigModule from './ConfigModule';
@@ -239,6 +239,46 @@ class ContextMenuModule extends ModuleWindow {
       );
 
       const menu = Menu.buildFromTemplate(playListTemplate);
+      menu.popup(BrowserWindow.fromWebContents(event.sender) as PopupOptions);
+    });
+
+    ipcMain.on(channels.HEADER_COLUMNS_MENU_SHOW, (event: IpcMainEvent, currentColumns: TracklistColumnsConfig) => {
+      const columnsKeys: { key: keyof TracklistColumnsConfig; label: string }[] = [
+        { key: 'title', label: 'Title (Required)' },
+        { key: 'artist', label: 'Artist' },
+        { key: 'duration', label: 'Time (Duration)' },
+        { key: 'path', label: 'Crate' },
+        { key: 'rating', label: 'Rating' },
+        { key: 'genre', label: 'Genre' },
+        { key: 'label', label: 'Label' },
+        { key: 'year', label: 'Year' },
+        { key: 'bpm', label: 'BPM' },
+        { key: 'bitrate', label: 'Bitrate' },
+        { key: 'initialKey', label: 'Key' },
+      ];
+
+      const template: MenuItemConstructorOptions[] = columnsKeys.map(({ key, label }) => {
+        const isTitle = key === 'title';
+        return {
+          label,
+          type: 'checkbox',
+          checked: currentColumns[key] ?? true,
+          enabled: !isTitle,
+          click: () => {
+            if (isTitle) return;
+            const updatedColumns = {
+              ...currentColumns,
+              [key]: !currentColumns[key],
+            };
+            // Save to settings store
+            this.configModule.getConfig().set('tracklistColumns', updatedColumns);
+            // Notify the renderer
+            event.sender.send(channels.CMD_COLUMNS_UPDATED, updatedColumns);
+          },
+        };
+      });
+
+      const menu = Menu.buildFromTemplate(template);
       menu.popup(BrowserWindow.fromWebContents(event.sender) as PopupOptions);
     });
 

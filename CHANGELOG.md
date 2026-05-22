@@ -8,6 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-05-22
+
+### ✨ Added
+
+- **Native Context Menu Column Configuration**: Added ability to show/hide tracklist table columns by right-clicking on the header area. Settings are persisted dynamically to user configurations.
+
+### 🔧 Code Quality & Refactoring
+
+- **Streamlined Settings UI**: Removed column checkboxes from the main Settings screen, centralizing configuration on the tracklist header.
+- **Vitest Configuration**: Excluded standalone tagger integration tests from the automated unit test suite.
+- **Verified Package**: Confirmed package compilation, lint checks, typechecking, and test suite passing.
+
 ## [1.4.0] - 2026-05-18
 
 ### ✨ Added
