@@ -48,6 +48,7 @@ export default defineConfig({
           'music-metadata',
           'electron-store',
           'async-g-i-s',
+          'cloudscraper',
           // ESM packages safer to bundle:
           'fast-xml-parser',
           'date-fns',

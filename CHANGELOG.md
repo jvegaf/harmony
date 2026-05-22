@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-05-22
+
+### 🐛 Fixed
+
+- **App Launch Crash on Windows**: Bundled `cloudscraper` and its dependencies (like `request`) into the main process binary to prevent runtime `Cannot find module 'request'` errors in packaged environments.
+
 ## [1.5.0] - 2026-05-22
 
 ### ✨ Added
