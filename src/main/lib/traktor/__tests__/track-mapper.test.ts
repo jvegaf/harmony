@@ -11,6 +11,7 @@ import { resolve } from 'path';
 import { TraktorNMLParser } from '../nml-parser';
 import {
   mapTraktorEntryToTrack,
+  mapTrackToTraktorEntry,
   mapTraktorPathToSystem,
   mapSystemPathToTraktor,
   mapTraktorRating,
@@ -446,6 +447,61 @@ describe('Track Mapper', () => {
 
       expect(track.year).toBeUndefined();
       expect(track.releaseDate).toBeUndefined();
+    });
+  });
+
+  describe('color mapping', () => {
+    it('should map Traktor base-1 colors to Harmony base-0', () => {
+      const entry: TraktorEntry = {
+        TITLE: 'Test Color',
+        LOCATION: { DIR: '/:test/:', FILE: 'test.mp3', VOLUME: '' },
+        INFO: { COLOR: '3' } // Yellow in Traktor
+      };
+
+      const track = mapTraktorEntryToTrack(entry);
+      expect(track.color).toBe(2); // Yellow in Harmony
+    });
+
+    it('should ignore Traktor color 0 or out of bounds', () => {
+      const entryZero: TraktorEntry = {
+        TITLE: 'Test Color 0',
+        LOCATION: { DIR: '/:test/:', FILE: 'test.mp3', VOLUME: '' },
+        INFO: { COLOR: '0' }
+      };
+      const entryOutOfBounds: TraktorEntry = {
+        TITLE: 'Test Color 7',
+        LOCATION: { DIR: '/:test/:', FILE: 'test.mp3', VOLUME: '' },
+        INFO: { COLOR: '7' }
+      };
+
+      expect(mapTraktorEntryToTrack(entryZero).color).toBeUndefined();
+      expect(mapTraktorEntryToTrack(entryOutOfBounds).color).toBeUndefined();
+    });
+
+    it('should map Harmony base-0 colors to Traktor base-1', () => {
+      const track: Track = {
+        id: '123',
+        title: 'Test Color',
+        path: '/test/test.mp3',
+        duration: 120,
+        color: 2 // Yellow in Harmony
+      };
+
+      const entry = mapTrackToTraktorEntry(track);
+      expect(entry.INFO?.COLOR).toBe('3'); // Yellow in Traktor
+    });
+
+    it('should ignore Harmony invalid colors on export', () => {
+      const trackInvalid: Track = {
+        id: '123',
+        title: 'Test Color',
+        path: '/test/test.mp3',
+        duration: 120,
+        color: 6
+      };
+
+      const entry = mapTrackToTraktorEntry(trackInvalid);
+      expect(entry.INFO?.COLOR).toBeUndefined();
     });
   });
 });

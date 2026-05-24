@@ -32,6 +32,7 @@ import {
   TraktorNMLWriter,
   SyncEngine,
   mapTraktorEntryToTrack,
+  mapTraktorPathToSystem,
   mapTraktorCuesToHarmony,
   MergeStrategy,
   mapTraktorNodeToFolderTree,
@@ -618,7 +619,7 @@ export default class IPCTraktorModule extends ModuleWindow {
         let updatedNml = nml;
 
         for (const entry of nml.NML.COLLECTION.ENTRY) {
-          const entryPath = this.traktorPathToSystem(entry.LOCATION.DIR, entry.LOCATION.FILE);
+          const entryPath = mapTraktorPathToSystem(entry.LOCATION.DIR, entry.LOCATION.FILE, entry.LOCATION.VOLUME);
           const normalizedPath = this.normalizePath(entryPath);
           const harmonyTrack = harmonyTracksByPath.get(normalizedPath);
 
@@ -734,16 +735,7 @@ export default class IPCTraktorModule extends ModuleWindow {
     return path.toLowerCase();
   }
 
-  /**
-   * Convert Traktor path format to system path
-   * Traktor: /:Users/:josev/:Music/:BOX/:
-   * System: /Users/josev/Music/BOX/
-   */
-  private traktorPathToSystem(dir: string, file: string): string {
-    // Replace /: with / and remove trailing /:
-    const systemDir = dir.replace(/\/:/g, '/').replace(/:$/, '');
-    return `${systemDir}${file}`;
-  }
+
 
   // ---------------------------------------------------------------------------
   // Auto-Sync Integration

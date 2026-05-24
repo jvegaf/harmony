@@ -66,6 +66,7 @@ const MERGEABLE_FIELDS: (keyof Track)[] = [
   'rating',
   'comment',
   'bitrate',
+  'color',
 ];
 
 /**

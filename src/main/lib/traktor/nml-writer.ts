@@ -130,6 +130,9 @@ export function buildEntryXml(track: Track, cuePoints?: CuePoint[]): string {
   } else if (track.year) {
     infoAttrs.push(`RELEASE_DATE="${track.year}/1/1"`);
   }
+  if (track.color !== undefined && track.color >= 0 && track.color <= 5) {
+    infoAttrs.push(`COLOR="${track.color + 1}"`);
+  }
   if (infoAttrs.length > 0) {
     lines.push(`  <INFO ${infoAttrs.join(' ')}></INFO>`);
   }
@@ -244,8 +247,8 @@ export class TraktorNMLWriter {
     } else if (track.year) {
       entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
     }
-    if (track.color !== undefined) {
-      entry.INFO.COLOR = String(track.color);
+    if (track.color !== undefined && track.color >= 0 && track.color <= 5) {
+      entry.INFO.COLOR = String(track.color + 1);
     }
 
     // Build TEMPO - Use bpmPrecise for full precision when available
@@ -301,8 +304,8 @@ export class TraktorNMLWriter {
     } else if (track.year) {
       entry.INFO.RELEASE_DATE = `${track.year}/1/1`;
     }
-    if (track.color !== undefined) {
-      entry.INFO.COLOR = String(track.color);
+    if (track.color !== undefined && track.color >= 0 && track.color <= 5) {
+      entry.INFO.COLOR = String(track.color + 1);
     }
 
     // Update TEMPO - Use bpmPrecise for full precision when available

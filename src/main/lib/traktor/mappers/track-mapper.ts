@@ -226,7 +226,9 @@ export function mapTraktorEntryToTrack(entry: TraktorEntry): Track {
     rating,
     label: info?.LABEL,
     comment: info?.COMMENT,
-    color: info?.COLOR ? parseInt(info.COLOR, 10) : undefined,
+    color: (info?.COLOR && parseInt(info.COLOR, 10) >= 1 && parseInt(info.COLOR, 10) <= 6)
+      ? parseInt(info.COLOR, 10) - 1
+      : undefined,
   };
 }
 
@@ -266,7 +268,9 @@ export function mapTrackToTraktorEntry(track: Track): Partial<TraktorEntry> {
       RELEASE_DATE: releaseDate,
       PLAYTIME: track.duration ? String(track.duration) : undefined,
       BITRATE: track.bitrate ? String(track.bitrate * 1000) : undefined,
-      COLOR: track.color !== undefined ? String(track.color) : undefined,
+      COLOR: (track.color !== undefined && track.color >= 0 && track.color <= 5)
+        ? String(track.color + 1)
+        : undefined,
       // KEY: would need reverse key mapping
     },
     TEMPO: bpmValue

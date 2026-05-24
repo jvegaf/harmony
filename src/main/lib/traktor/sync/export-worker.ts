@@ -16,6 +16,7 @@ import type { Track, Playlist } from '../../../../preload/types/harmony';
 import type { CuePoint } from '../../../../preload/types/cue-point';
 import { TraktorNMLParser } from '../nml-parser';
 import { TraktorNMLWriter } from '../nml-writer';
+import { mapTraktorPathToSystem } from '../mappers/track-mapper';
 
 /**
  * Input message to start export
@@ -89,14 +90,7 @@ function normalizePath(path: string): string {
   return process.platform === 'linux' ? path : path.toLowerCase();
 }
 
-/**
- * Convert Traktor path format to system path
- */
-function traktorPathToSystem(dir: string, file: string): string {
-  // Replace /: with / and remove trailing /:
-  const systemDir = dir.replace(/\/:/g, '/').replace(/:$/, '');
-  return `${systemDir}${file}`;
-}
+
 
 /**
  * Main export execution
@@ -144,7 +138,7 @@ async function executeExport(input: ExportWorkerInput): Promise<void> {
     let tracksExported = 0;
 
     for (const entry of nml.NML.COLLECTION.ENTRY) {
-      const entryPath = traktorPathToSystem(entry.LOCATION.DIR, entry.LOCATION.FILE);
+      const entryPath = mapTraktorPathToSystem(entry.LOCATION.DIR, entry.LOCATION.FILE, entry.LOCATION.VOLUME);
       const normalizedPath = normalizePath(entryPath);
       const harmonyTrack = harmonyTracksByPath.get(normalizedPath);
 

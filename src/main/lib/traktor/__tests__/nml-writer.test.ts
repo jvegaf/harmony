@@ -229,6 +229,22 @@ describe('nml-writer', () => {
       expect(xml).toContain('ARTIST="Artist &quot;The Great&quot;"');
       expect(xml).toContain('COMMENT="It&apos;s &lt;amazing&gt;"');
     });
+
+    it('should include COLOR in INFO element when track has color', () => {
+      const track = createTrack({ color: 3 });
+
+      const xml = buildEntryXml(track);
+
+      expect(xml).toContain('COLOR="4"');
+    });
+
+    it('should not include COLOR in INFO element when track has no color', () => {
+      const track = createTrack({ color: undefined });
+
+      const xml = buildEntryXml(track);
+
+      expect(xml).not.toContain('COLOR=');
+    });
   });
 
   describe('TraktorNMLWriter', () => {

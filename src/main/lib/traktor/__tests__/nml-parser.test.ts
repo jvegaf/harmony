@@ -154,6 +154,18 @@ describe('TraktorNMLParser', () => {
       expect(entryWithCover).toBeDefined();
       expect(entryWithCover?.INFO?.COVERARTID).toBeDefined();
     });
+
+    it('should parse COLOR from INFO block', async () => {
+      const parser = new TraktorNMLParser();
+      const nml = await parser.parse(FIXTURE_PATH);
+
+      // Find entry with COLOR attribute (fixture has entries with COLOR="1" and COLOR="2")
+      const entryWithColor = nml.NML.COLLECTION.ENTRY.find(e => e.INFO?.COLOR);
+      expect(entryWithColor).toBeDefined();
+      expect(entryWithColor?.INFO?.COLOR).toBeDefined();
+      // COLOR values in fixture are "1", "2", "4", "5", "6"
+      expect(Number(entryWithColor?.INFO?.COLOR)).toBeGreaterThanOrEqual(0);
+    });
   });
 
   describe('parseEntry() - TEMPO', () => {

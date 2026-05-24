@@ -189,6 +189,7 @@ export class TraktorNMLParser {
       PLAYCOUNT: this.getAttr(raw, 'PLAYCOUNT'),
       FLAGS: this.getAttr(raw, 'FLAGS'),
       FILESIZE: this.getAttr(raw, 'FILESIZE'),
+      COLOR: this.getAttr(raw, 'COLOR'),
     };
   }
 

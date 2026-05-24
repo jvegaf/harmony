@@ -246,6 +246,26 @@ describe('conflict-resolver', () => {
 
         expect(result.merged.waveformPeaks).toEqual(peaks);
       });
+
+      it('should fill empty color from Traktor', () => {
+        const harmony: Track = createTrack({ color: undefined });
+        const traktor: Track = createTrack({ color: 3 });
+
+        const result = mergeTrack(harmony, traktor);
+
+        expect(result.merged.color).toBe(3);
+        expect(result.fieldsUpdated).toContain('color');
+      });
+
+      it('should not overwrite existing color', () => {
+        const harmony: Track = createTrack({ color: 2 });
+        const traktor: Track = createTrack({ color: 5 });
+
+        const result = mergeTrack(harmony, traktor);
+
+        expect(result.merged.color).toBe(2);
+        expect(result.fieldsUpdated).not.toContain('color');
+      });
     });
 
     describe('with TRAKTOR_WINS strategy', () => {
