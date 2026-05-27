@@ -179,6 +179,26 @@ describe('smartMergeTrack', () => {
     expect(result.track.label).toBe('Test Label');
     expect(result.hasChanges).toBe(true);
   });
+
+  it('should merge color when missing', () => {
+    const existing = createTrack({ color: undefined });
+    const incoming = createTrack({ color: 2 }); // Yellow
+
+    const result = smartMergeTrack(existing, incoming);
+
+    expect(result.track.color).toBe(2);
+    expect(result.hasChanges).toBe(true);
+  });
+
+  it('should NOT overwrite existing color', () => {
+    const existing = createTrack({ color: 0 }); // Red
+    const incoming = createTrack({ color: 3 }); // Green
+
+    const result = smartMergeTrack(existing, incoming);
+
+    expect(result.track.color).toBe(0);
+    expect(result.hasChanges).toBe(false);
+  });
 });
 
 describe('deduplicateAndMergeTracks', () => {

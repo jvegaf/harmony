@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-05-27
+
+### ✨ Added
+
+- **Player Double-Click to Scroll**: Double-clicking on the song title or artist in the top reproductor (`NowPlayingBar`) automatically scrolls the active track list to show and select the currently loaded song.
+- **Automatic Library View Fallback**: If the currently playing song is not in the active playlist/view, double-clicking it in the reproductor automatically navigates to the library view and scrolls/selects the track there.
+- **Accessibility & A11y Support**: The player details container is now a natively interactive `<button>` element with custom CSS resets, proper screen-reader roles, tab indexing, and keyboard action handlers (Enter/Space key support).
+
 ## [1.5.1] - 2026-05-22
 
 ### 🐛 Fixed
@@ -135,5 +143,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+[1.6.0]: https://github.com/jvegaf/Harmony/compare/v1.5.1...v1.6.0
 [0.17.0]: https://github.com/jvegaf/Harmony/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/jvegaf/Harmony/releases/tag/v0.16.0

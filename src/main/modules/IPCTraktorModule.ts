@@ -735,8 +735,6 @@ export default class IPCTraktorModule extends ModuleWindow {
     return path.toLowerCase();
   }
 
-
-
   // ---------------------------------------------------------------------------
   // Auto-Sync Integration
   // ---------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Track } from '../../../../preload/types/harmony';
+import useLibraryUIStore from '../../stores/useLibraryUIStore';
 import styles from './PlayerInfo.module.css';
 
 type Props = {
@@ -17,8 +18,18 @@ function PlayerInfo({ track }: Props) {
     }
   }, [track]);
 
+  const handleDoubleClick = () => {
+    if (track) {
+      useLibraryUIStore.getState().api.setScrollTargetTrackId(track.id);
+    }
+  };
+
   return (
-    <div className={styles.playerInfo}>
+    <div
+      className={styles.playerInfo}
+      onDoubleClick={handleDoubleClick}
+      style={{ cursor: track ? 'pointer' : 'default' }}
+    >
       <p className={styles.infoArtist}>{artist}</p>
       <p className={styles.infoTitle}>{title}</p>
     </div>

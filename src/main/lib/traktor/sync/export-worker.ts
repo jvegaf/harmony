@@ -90,8 +90,6 @@ function normalizePath(path: string): string {
   return process.platform === 'linux' ? path : path.toLowerCase();
 }
 
-
-
 /**
  * Main export execution
  */

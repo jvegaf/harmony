@@ -455,7 +455,7 @@ describe('Track Mapper', () => {
       const entry: TraktorEntry = {
         TITLE: 'Test Color',
         LOCATION: { DIR: '/:test/:', FILE: 'test.mp3', VOLUME: '' },
-        INFO: { COLOR: '3' } // Yellow in Traktor
+        INFO: { COLOR: '3' }, // Yellow in Traktor
       };
 
       const track = mapTraktorEntryToTrack(entry);
@@ -466,12 +466,12 @@ describe('Track Mapper', () => {
       const entryZero: TraktorEntry = {
         TITLE: 'Test Color 0',
         LOCATION: { DIR: '/:test/:', FILE: 'test.mp3', VOLUME: '' },
-        INFO: { COLOR: '0' }
+        INFO: { COLOR: '0' },
       };
       const entryOutOfBounds: TraktorEntry = {
         TITLE: 'Test Color 7',
         LOCATION: { DIR: '/:test/:', FILE: 'test.mp3', VOLUME: '' },
-        INFO: { COLOR: '7' }
+        INFO: { COLOR: '7' },
       };
 
       expect(mapTraktorEntryToTrack(entryZero).color).toBeUndefined();
@@ -484,7 +484,7 @@ describe('Track Mapper', () => {
         title: 'Test Color',
         path: '/test/test.mp3',
         duration: 120,
-        color: 2 // Yellow in Harmony
+        color: 2, // Yellow in Harmony
       };
 
       const entry = mapTrackToTraktorEntry(track);
@@ -497,7 +497,7 @@ describe('Track Mapper', () => {
         title: 'Test Color',
         path: '/test/test.mp3',
         duration: 120,
-        color: 6
+        color: 6,
       };
 
       const entry = mapTrackToTraktorEntry(trackInvalid);

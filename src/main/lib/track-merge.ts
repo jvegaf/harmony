@@ -64,6 +64,7 @@ export function smartMergeTrack(existing: Track, incoming: Track): SmartMergeRes
     'comment',
     'label',
     'rating',
+    'color',
   ];
 
   for (const field of fieldsToMerge) {

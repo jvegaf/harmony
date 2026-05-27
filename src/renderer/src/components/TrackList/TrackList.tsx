@@ -38,6 +38,7 @@ import useLibraryUIStore from '../../stores/useLibraryUIStore';
 import { usePlayerAPI } from '../../stores/usePlayerStore';
 import { usePlaylistsAPI } from '../../stores/usePlaylistsStore';
 import useTaggerStore from '../../stores/useTaggerStore';
+import router from '../../views/router';
 
 import { GetParentFolderName, formatOpenKey, getOpenKeyColor, ratingComparator } from '../../lib/utils-library';
 import { parseKeyEvent } from '../../lib/utils-keyboard';
@@ -142,7 +143,7 @@ const TrackList = (props: Props) => {
   const libraryAPI = useLibraryAPI();
   const playlistsAPI = usePlaylistsAPI();
   const detailsNavAPI = useDetailsNavigationAPI();
-  const { search, deleting, tracklistSort } = useLibraryUIStore();
+  const { search, deleting, tracklistSort, scrollTargetTrackId } = useLibraryUIStore();
   const { updated } = useTaggerStore();
   const { colorScheme } = useMantineColorScheme();
   const gridRef = useRef<AgGridReact>(null);
@@ -397,6 +398,32 @@ const TrackList = (props: Props) => {
     setRowData(tracksWithOrder);
   }, [tracksWithOrder]);
 
+  // Scroll to playing track when request is made from the player (on double-click)
+  useEffect(() => {
+    if (!gridApi || !scrollTargetTrackId) return;
+
+    // Check if rowData has been loaded or if the grid is populated
+    if (rowData.length === 0) return;
+
+    const rowNode = gridApi.getRowNode(scrollTargetTrackId);
+    if (rowNode) {
+      gridApi.ensureNodeVisible(rowNode);
+      rowNode.setSelected(true, true);
+      useLibraryUIStore.getState().api.setScrollTargetTrackId(null);
+    } else {
+      // Track not found in current tracklist
+      const currentPath = location.pathname;
+      if (currentPath !== '/library') {
+        logger.info(`Track ${scrollTargetTrackId} not in current view, navigating to /library`);
+        router.navigate('/library');
+      } else {
+        // We are already in library view, but track was not found. Clear to avoid stuck state.
+        logger.warn(`Track ${scrollTargetTrackId} not found in library view, clearing scroll request`);
+        useLibraryUIStore.getState().api.setScrollTargetTrackId(null);
+      }
+    }
+  }, [gridApi, rowData, scrollTargetTrackId, location.pathname]);
+
   const navigateToNextCell = useCallback((params: NavigateToNextCellParams) => {
     const { nextCellPosition, previousCellPosition, api, event } = params;
     if (nextCellPosition && (!previousCellPosition || nextCellPosition.rowIndex !== previousCellPosition.rowIndex)) {
@@ -590,7 +617,16 @@ const TrackList = (props: Props) => {
           break;
       }
     },
-    [tracklistShortcuts, detailsNavAPI, location.pathname, playlists, currentPlaylist, libraryAPI],
+    [
+      tracklistShortcuts,
+      detailsNavAPI,
+      location.pathname,
+      playlists,
+      currentPlaylist,
+      libraryAPI,
+      playerAPI,
+      trackPlayingID,
+    ],
   );
 
   // See docs/aidev-notes/tracklist-sorting.md for sort persistence details

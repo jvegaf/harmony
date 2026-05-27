@@ -70,6 +70,13 @@ const MERGEABLE_FIELDS: (keyof Track)[] = [
 ];
 
 /**
+ * Fields where Traktor is always the source of truth (even in SMART_MERGE).
+ * These fields should use Traktor's value whenever it exists, regardless of
+ * whether Harmony already has a value.
+ */
+const TRAKTOR_AUTHORITATIVE_FIELDS: (keyof Track)[] = ['color'];
+
+/**
  * Check if a value is considered "empty" (null, undefined, empty string, whitespace-only)
  */
 function isEmpty(value: unknown): boolean {
@@ -118,10 +125,21 @@ export function mergeTrack(
         }
       }
     } else {
-      // SMART_MERGE: Only fill empty Harmony fields
-      if (isEmpty(harmonyValue) && !isEmpty(traktorValue)) {
-        (merged as any)[field] = traktorValue;
-        fieldsUpdated.push(field);
+      // SMART_MERGE: Check if this field is Traktor-authoritative
+      if (TRAKTOR_AUTHORITATIVE_FIELDS.includes(field)) {
+        // For authoritative fields (like color), always use Traktor value if present
+        if (!isEmpty(traktorValue)) {
+          (merged as any)[field] = traktorValue;
+          if (harmonyValue !== traktorValue) {
+            fieldsUpdated.push(field);
+          }
+        }
+      } else {
+        // For regular fields, only fill empty Harmony fields
+        if (isEmpty(harmonyValue) && !isEmpty(traktorValue)) {
+          (merged as any)[field] = traktorValue;
+          fieldsUpdated.push(field);
+        }
       }
     }
   }

@@ -257,12 +257,34 @@ describe('conflict-resolver', () => {
         expect(result.fieldsUpdated).toContain('color');
       });
 
-      it('should not overwrite existing color', () => {
-        const harmony: Track = createTrack({ color: 2 });
-        const traktor: Track = createTrack({ color: 5 });
+      it('should overwrite existing color with Traktor color (Traktor is authoritative)', () => {
+        const harmony: Track = createTrack({ color: 2 }); // Yellow
+        const traktor: Track = createTrack({ color: 5 }); // Violet
 
         const result = mergeTrack(harmony, traktor);
 
+        // Color is Traktor-authoritative: always use Traktor's value
+        expect(result.merged.color).toBe(5);
+        expect(result.fieldsUpdated).toContain('color');
+      });
+
+      it('should not report color change when values are the same', () => {
+        const harmony: Track = createTrack({ color: 3 });
+        const traktor: Track = createTrack({ color: 3 });
+
+        const result = mergeTrack(harmony, traktor);
+
+        expect(result.merged.color).toBe(3);
+        expect(result.fieldsUpdated).not.toContain('color');
+      });
+
+      it('should clear Harmony color when Traktor has no color', () => {
+        const harmony: Track = createTrack({ color: 2 });
+        const traktor: Track = createTrack({ color: undefined });
+
+        const result = mergeTrack(harmony, traktor);
+
+        // Traktor has no color, keep Harmony's
         expect(result.merged.color).toBe(2);
         expect(result.fieldsUpdated).not.toContain('color');
       });

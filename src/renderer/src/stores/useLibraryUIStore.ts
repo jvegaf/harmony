@@ -6,6 +6,7 @@ const { config, logger } = window.Main;
 type LibraryUIState = {
   search: string;
   searched: Track | null;
+  scrollTargetTrackId: string | null;
   renamingPlaylist: string | null;
   tracklistSort: {
     colId: string;
@@ -32,6 +33,7 @@ type LibraryUIState = {
   api: {
     setSearch: (value: string) => void;
     setSearched: (trackSearched: Track | null) => void;
+    setScrollTargetTrackId: (trackId: string | null) => void;
     setRenamingPlaylist: (playlistID: string | null) => void;
     setTracklistSort: (colId: string, mode: string) => Promise<void>;
     setRefreshing: (value: boolean) => void;
@@ -52,6 +54,7 @@ const initialTracklistSort = config.__initialConfig.tracklistSort || { colId: 'p
 const useLibraryUIStore = createStore<LibraryUIState>(set => ({
   search: '',
   searched: null,
+  scrollTargetTrackId: null,
   renamingPlaylist: null,
   tracklistSort: initialTracklistSort,
   refreshing: false,
@@ -77,6 +80,7 @@ const useLibraryUIStore = createStore<LibraryUIState>(set => ({
       set({ search });
     },
     setSearched: (trackSearched: Track | null) => set({ searched: trackSearched }),
+    setScrollTargetTrackId: (scrollTargetTrackId: string | null) => set({ scrollTargetTrackId }),
     setRenamingPlaylist: (playlistID: string | null): void => {
       set({ renamingPlaylist: playlistID });
     },
