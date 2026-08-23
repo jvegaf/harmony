@@ -1,6 +1,6 @@
 {
   "name": "harmony",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "Music manager for old-school DJs",
   "main": "./out/main/index.js",
   "author": "Jose Vega",
