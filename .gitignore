@@ -11,3 +11,5 @@ tsconfig.web.tsbuildinfo
 /drizzle/meta/*.json
 /coverage
 .astro
+/.atl
+/.gga
