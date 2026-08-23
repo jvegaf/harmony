@@ -17,9 +17,11 @@ Harmony is a music manager designed specifically for old-school DJs. It allows y
 - 🎧 Intuitive interface designed for DJs
 - 🎹 **OpenKey Harmonic Mixing** - Track keys are automatically formatted and visually color-coded according to the OpenKey standard for seamless harmonic mixing
 
-## Recent Updates (v0.32.1)
+## Recent Updates
 
-- 🐛 **Pre-Cue Playback Fix** - Resolved an issue where playback would skip incorrectly by properly applying the pre-cue position dynamically and cleaning up event listeners to prevent memory leaks.
+- 🧹 **Duplicate Finder improvements** - Identify and manage duplicate tracks with advanced comparison tools
+- 🔄 **Traktor integration** - Background sync, NML import/export, and playlist synchronization
+- ⚙️ **Toolchain modernization** - Migrated to TypeScript 6, React 19 types, Mantine 9, and Vite 7 with clean peer dependencies (`pnpm peers check`)
 
 ## Screenshots
 
@@ -55,10 +57,10 @@ Get track recommendations from Beatport
 ## Tech Stack
 
 - **Desktop Framework**: Electron with TypeScript
-- **Frontend**: React 18 + Vite + Mantine UI
+- **Frontend**: React 19 + Vite + Mantine UI v9
 - **State Management**: Zustand
 - **Database**: Drizzle ORM + SQLite (better-sqlite3)
-- **Build Tools**: electron-vite, electron-builder
+- **Build Tools**: electron-vite (stable) + Vite 7, electron-builder
 - **Package Manager**: pnpm
 
 ## Recommended IDE Setup
@@ -105,6 +107,7 @@ pnpm run release
 pnpm run lint            # ESLint with auto-fix
 pnpm run format          # Prettier auto-format all files
 pnpm run typecheck       # Run both node + web type checks
+pnpm peers check         # Verify no peer dependency conflicts (run after any dependency change)
 ```
 
 ### Testing
@@ -119,7 +122,8 @@ pnpm run test:coverage   # Run tests with coverage report
 ## Documentation
 
 - **[AGENTS.md](AGENTS.md)** - Complete project documentation, code style, architecture, available skills
-- **[.agents/skills/](,agents/skills/)** - Specialized AI skills for Electron, React, Mantine, Zustand, code review, and more
+- **[.agents/skills/](.agents/skills/)** - Specialized AI skills for Electron, React, Mantine, Zustand, code review, and more
+- **[docs/](docs/)** - Technical notes, fix reports, and the toolchain modernization guide (`docs/toolchain-modernization.md`)
 
 ## Contributing
 

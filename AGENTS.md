@@ -4,9 +4,10 @@
 
 **Harmony** is an Electron-based music manager for old-school DJs, built with TypeScript, React, and Vite. The project uses:
 
-- **Frontend**: React 18 with Mantine UI components and React Router
+- **Frontend**: React 19 with Mantine UI v9 components and React Router
 - **Backend**: Electron with TypeScript, Drizzle ORM (SQLite), and IPC-based architecture
-- **Build**: electron-vite, Vite, electron-builder
+- **Build**: electron-vite (stable) + Vite 7, electron-builder
+- **Toolchain constraints**: TypeScript 6.x (typescript-eslint requires `<6.1.0`), ESLint 9.x (`eslint-plugin-react` has no v10 support yet)
 - **Package Manager**: pnpm
 
 ---
@@ -37,6 +38,7 @@ pnpm run format          # Prettier auto-format all files
 pnpm run typecheck       # Run both node + web type checks
 pnpm run typecheck:node  # TypeCheck main/preload (tsconfig.node.json)
 pnpm run typecheck:web   # TypeCheck renderer (tsconfig.web.json)
+pnpm peers check         # Verify no peer dependency conflicts (run after any dependency change)
 ```
 
 ### Testing
@@ -138,6 +140,14 @@ import icon from '../../resources/icon.png?asset';
 - Use `unknown` and narrow with type guards when uncertain
 - Explicitly type function returns for public APIs (optional for internal/simple functions)
 - Enable `strict` mode in all tsconfig files
+
+#### Toolchain Type Rules (TypeScript 6 + React 19)
+
+- **tsconfig**: no `baseUrl` (deprecated in TS 6); `paths` values must be relative (`"./src/main/*"`)
+- **No global `JSX` namespace** in React 19 types—use `ComponentPropsWithoutRef<'tag'>` instead of `JSX.IntrinsicElements['tag']`
+- **`useRef<T>(null)` returns `RefObject<T | null>`**—hook signatures receiving refs must accept the nullable variant, and refs must match the real element type (`HTMLDivElement` for divs)
+- **Worker `'error'` handlers give `unknown`**—normalize with `error instanceof Error ? error : new Error(String(error))`
+- **music-metadata v11**: `picture.data` is a plain `Uint8Array`; base64 via `Buffer.from(data).toString('base64')`
 
 #### Async/Await
 
@@ -241,12 +251,18 @@ import icon from '../../resources/icon.png?asset';
 5. **Don't use `any` as a crutch**—ESLint allows it but prefer proper typing
 6. **Don't hardcode paths**—use Electron's `app.getPath()` for user data
 7. **Don't commit without running `pnpm run lint`**—auto-fix is enabled
+8. **Run `pnpm peers check` after any dependency change**—TS/vite/eslint majors are constrained by peer ranges (see Project Overview)
+9. **"Error: Electron uninstall" on dev** means the binary was never downloaded—fix with `node node_modules/electron/install.js`; `pnpm rebuild electron` may silently no-op (see `docs/toolchain-modernization.md`)
 
 ---
 
 ## Documentation
 
 **Don't add AI-DEV notes in source code. If needed create a document in docs/ folder.**
+
+Relevant docs for this codebase:
+
+- `docs/toolchain-modernization.md` — dependency constraints, TypeScript 6 migration, React 19/Mantine 9 typing rules, Electron binary troubleshooting
 
 ---
 
@@ -274,7 +290,7 @@ Harmony includes specialized AI skills in `.agents/skills/` that provide deep ex
 
 - **Activation**: When working with Mantine components, theming, forms, or styling
 - **Coverage**: 100+ components, hooks library, forms with validation, dark mode, CSS modules, TypeScript setup
-- **Version**: 8.3.14 (updated Feb 2026)
+- **Version**: project uses Mantine v9 (note: `Collapse` uses `expanded`, not `in`)
 - **Critical**: Always use `MantineProvider`, import `@mantine/core/styles.css`, configure PostCSS with `postcss-preset-mantine`
 - **References**: `getting-started.md`, `components.md`, `hooks.md`, `forms.md`, `styling.md`, `testing.md`
 
@@ -356,4 +372,4 @@ Skills are **automatically activated** based on context:
 
 ---
 
-**Last Updated**: 2026-02-13
+**Last Updated**: 2026-08-23

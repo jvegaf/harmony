@@ -1,0 +1,52 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Tech stack: Electron 33 + TypeScript 5.3 + React 18 + Vite 7 via electron-vite; package manager pnpm
+  Architecture: Three-process Electron model (main / preload / renderer); module system in src/main/modules extending BaseWindowModule; IPC channels in src/preload/lib/ipc-channels.ts; Drizzle ORM + better-sqlite3 at src/main/lib/db/
+  Testing: Vitest 4 with happy-dom; unit + component layers; no E2E framework
+  Style: Prettier (single quotes, semicolons, 120 cols) + ESLint 9 flat config; electron-log in main process
+
+strict_tdd: true
+
+testing:
+  test_command: pnpm run test:run
+  watch_command: pnpm test
+  coverage_command: pnpm run test:coverage
+  typecheck_command: pnpm run typecheck
+  lint_command: pnpm run lint
+  format_command: pnpm run format
+  framework: vitest
+  environment: happy-dom
+  layers:
+    unit: true
+    integration: true
+    e2e: false
+  coverage_provider: v8
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Respect the IPC boundary - renderer must never gain direct Node access
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+    - New IPC surface requires channel definition in src/preload/lib/ipc-channels.ts and preload typing in preload/index.d.ts
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    guidelines:
+      - Follow existing code patterns
+      - Use electron-log (never console.*) in main/preload processes
+    tdd: true
+    test_command: pnpm run test:run
+  verify:
+    test_command: pnpm run typecheck && pnpm run test:run
+    build_command: pnpm run build
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
