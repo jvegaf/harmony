@@ -89,7 +89,9 @@ export default class DockMenuDarwinModule extends ModuleWindow {
   setDockMenu(state: PlayerStatus): void {
     const playPauseItem = state === 'play' ? this.pauseToggle : this.playToggle;
     const menuTemplate = [...this.songDetails, ...playPauseItem, ...this.menu];
-    app.dock.setMenu(Menu.buildFromTemplate(menuTemplate));
+    if (app.dock) {
+      app.dock.setMenu(Menu.buildFromTemplate(menuTemplate));
+    }
   }
 
   updateDockMenu(metadata: Track): void {

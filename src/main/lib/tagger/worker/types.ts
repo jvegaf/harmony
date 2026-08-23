@@ -95,10 +95,7 @@ export interface TaggerWorkerLogResult {
  * Union type for all worker results
  */
 export type TaggerWorkerResult =
-  | TaggerWorkerSuccessResult
-  | TaggerWorkerErrorResult
-  | TaggerWorkerReadyResult
-  | TaggerWorkerLogResult;
+  TaggerWorkerSuccessResult | TaggerWorkerErrorResult | TaggerWorkerReadyResult | TaggerWorkerLogResult;
 
 /**
  * Worker data passed when spawning the worker

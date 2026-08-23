@@ -42,7 +42,7 @@ export const fetchCover = async (trackPath: string, ignoreID3 = false, base64 = 
 
     if (picture) {
       // If cover in id3
-      return parseBase64(picture.format, picture.data.toString('base64'));
+      return parseBase64(picture.format, Buffer.from(picture.data).toString('base64'));
     }
   }
 

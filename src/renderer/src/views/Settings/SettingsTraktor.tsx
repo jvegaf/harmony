@@ -548,7 +548,7 @@ export default function SettingsTraktor() {
                 label='Enable automatic synchronization with Traktor'
               />
 
-              <Collapse in={config?.autoSync?.enabled ?? false}>
+              <Collapse expanded={config?.autoSync?.enabled ?? false}>
                 <Stack
                   gap='sm'
                   mt='xs'

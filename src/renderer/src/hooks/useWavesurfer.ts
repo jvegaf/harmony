@@ -10,7 +10,7 @@ import { Track } from '../../../preload/types/harmony';
  */
 
 export const useWavesurfer = (
-  containerRef: React.RefObject<HTMLDivElement>,
+  containerRef: React.RefObject<HTMLDivElement | null>,
   options: Omit<WaveSurferOptions, 'container'>,
   track?: Track | null,
 ) => {

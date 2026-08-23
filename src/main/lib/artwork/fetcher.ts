@@ -9,7 +9,7 @@ export default async function FetchArtwork(url: string): Promise<Artwork | null>
   try {
     const response = await axios.get(url, { responseType: 'arraybuffer' });
     artwork = {
-      mime: response.headers['content-type'] || '',
+      mime: String(response.headers['content-type'] ?? ''),
       type: { id: 3 },
       description: 'Front Cover',
       imageBuffer: response.data,

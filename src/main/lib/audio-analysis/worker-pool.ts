@@ -202,7 +202,7 @@ export class AudioAnalysisWorkerPool {
         if (workerInstance.currentTaskId) {
           const task = this.pendingTasks.get(workerInstance.currentTaskId);
           if (task) {
-            task.reject(error);
+            task.reject(error instanceof Error ? error : new Error(String(error)));
             this.pendingTasks.delete(workerInstance.currentTaskId);
           }
         }

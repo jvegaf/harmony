@@ -170,15 +170,7 @@ export interface AutoSyncStatus {
   isRunning: boolean;
   /** Current phase of sync (if running) - includes phases from both sync and export workers */
   phase?:
-    | 'parsing'
-    | 'loading'
-    | 'analyzing'
-    | 'syncing'
-    | 'validating'
-    | 'saving'
-    | 'writing'
-    | 'building'
-    | 'complete';
+    'parsing' | 'loading' | 'analyzing' | 'syncing' | 'validating' | 'saving' | 'writing' | 'building' | 'complete';
   /** Progress percentage 0-100 */
   progress: number;
   /** Human-readable message */

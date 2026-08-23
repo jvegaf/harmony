@@ -65,7 +65,7 @@ function LibraryChangesModal({ changes, onConfirm, onCancel }: LibraryChangesMod
                   <span className={styles.expandIcon}>{showAdded ? '▼' : '▶'}</span>
                 </button>
 
-                <Collapse in={showAdded}>
+                <Collapse expanded={showAdded}>
                   <div className={styles.list}>
                     {changes.added.map((path, index) => (
                       <div
@@ -95,7 +95,7 @@ function LibraryChangesModal({ changes, onConfirm, onCancel }: LibraryChangesMod
                   <span className={styles.expandIcon}>{showRemoved ? '▼' : '▶'}</span>
                 </button>
 
-                <Collapse in={showRemoved}>
+                <Collapse expanded={showRemoved}>
                   <div className={styles.list}>
                     {changes.removed.map(track => (
                       <div

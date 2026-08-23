@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { ComponentPropsWithoutRef, useRef } from 'react';
 import styles from './Setting.module.css';
 import { Group, Text } from '@mantine/core';
 
@@ -37,7 +37,7 @@ export function Action(props: Props) {
   return <div className={styles.settingAction}>{props.children}</div>;
 }
 
-export function Label(props: JSX.IntrinsicElements['label']) {
+export function Label(props: ComponentPropsWithoutRef<'label'>) {
   const { children, ...restProps } = props;
 
   return (
@@ -54,7 +54,7 @@ export function Title(props: Props) {
   return <p className={styles.settingTitle}>{props.children}</p>;
 }
 
-export function TextArea(props: JSX.IntrinsicElements['textarea']) {
+export function TextArea(props: ComponentPropsWithoutRef<'textarea'>) {
   const ref = useRef<HTMLTextAreaElement>(null);
   return (
     <textarea
@@ -65,7 +65,7 @@ export function TextArea(props: JSX.IntrinsicElements['textarea']) {
   );
 }
 
-export function Input(props: JSX.IntrinsicElements['input']) {
+export function Input(props: ComponentPropsWithoutRef<'input'>) {
   const ref = useRef<HTMLInputElement>(null);
   return (
     <input
@@ -80,7 +80,7 @@ export function Error(props: Props) {
   return <p className={styles.settingError}>{props.children}</p>;
 }
 
-export function Select(props: Props & JSX.IntrinsicElements['select']) {
+export function Select(props: Props & ComponentPropsWithoutRef<'select'>) {
   return (
     <select
       className={styles.settingSelect}

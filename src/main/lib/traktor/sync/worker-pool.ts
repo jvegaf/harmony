@@ -86,7 +86,7 @@ export class WorkerPool<TInput = unknown, TOutput = unknown> extends EventEmitte
 
     worker.on('error', error => {
       log.error('[WorkerPool] Worker error:', error);
-      this.handleWorkerError(poolWorker, error);
+      this.handleWorkerError(poolWorker, error instanceof Error ? error : new Error(String(error)));
     });
 
     worker.on('exit', code => {

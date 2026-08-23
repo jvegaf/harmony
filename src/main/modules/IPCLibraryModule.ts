@@ -408,7 +408,7 @@ class IPCLibraryModule extends ModuleWindow {
 
     const title: string = common.title || path.parse(trackPath).base.split('.').slice(0, -1).join('.'); // Remove extension from filename if title tag is not present
     const rating = common.rating ? common.rating[0] : undefined;
-    const rate = rating ? { ...rating, rating: Math.round(rating.rating * 5) } : undefined;
+    const rate = rating?.rating !== undefined ? { ...rating, rating: Math.round(rating.rating * 5) } : undefined;
 
     // AIDEV-NOTE: If useCamelotKeys is enabled, convert the raw key from the file
     // to Camelot notation before storing. isCamelotKey() prevents double-conversion

@@ -14,16 +14,14 @@
     "**/__tests__/**"
   ],
   "compilerOptions": {
-    "ignoreDeprecations": "5.0",
     "composite": true,
     "types": [
       "electron-vite/node"
     ],
-    "baseUrl": ".",
     "paths": {
-      "@main/*": ["src/main/*"],
-      "@preload/*": ["src/preload/*"],
-      "@renderer/*": ["src/renderer/src/*"]
+      "@main/*": ["./src/main/*"],
+      "@preload/*": ["./src/preload/*"],
+      "@renderer/*": ["./src/renderer/src/*"]
     }
   }
 }

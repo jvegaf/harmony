@@ -1,6 +1,8 @@
+import type { ComponentPropsWithoutRef } from 'react';
+
 import styles from './ControlButton.module.css';
 
-function ControlButton(props: JSX.IntrinsicElements['button']) {
+function ControlButton(props: ComponentPropsWithoutRef<'button'>) {
   const { children, ...restProps } = props;
   return (
     <div>
