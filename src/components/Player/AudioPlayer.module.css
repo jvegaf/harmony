@@ -1,0 +1,32 @@
+.player {
+  width: 100%;
+  min-width: 0;
+}
+
+.timeline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--hm-text-muted);
+  font-size: 0.75rem;
+}
+
+.timeline span {
+  min-width: 2.25rem;
+  text-align: center;
+}
+
+.slider {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--hm-primary);
+  cursor: pointer;
+}
+
+.status {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--hm-text-muted);
+  font-size: 0.7rem;
+  text-align: center;
+}

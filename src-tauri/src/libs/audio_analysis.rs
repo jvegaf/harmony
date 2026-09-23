@@ -40,7 +40,8 @@ pub struct AudioAnalysisOptions {
   pub detect_bpm: bool,
   #[serde(default = "default_true")]
   pub detect_key: bool,
-  #[serde(default = "default_true")]
+  /// Temporarily disabled while the standard audio player is being validated.
+  #[serde(default)]
   pub generate_waveform: bool,
   #[serde(default = "default_waveform_bins")]
   pub waveform_bins: usize,
@@ -63,7 +64,7 @@ impl Default for AudioAnalysisOptions {
     Self {
       detect_bpm: true,
       detect_key: true,
-      generate_waveform: true,
+      generate_waveform: false,
       waveform_bins: 300,
       sample_rate: 44100,
     }
@@ -77,7 +78,7 @@ fn decode_audio_file(file_path: &str, target_sample_rate: u32) -> Result<Vec<f32
 
   // Use ffmpeg to decode to raw f32 samples
   let output = std::process::Command::new("ffmpeg")
-    .args(&[
+    .args([
       "-i",
       file_path,
       "-ac",
@@ -520,7 +521,7 @@ mod tests {
     let opts = AudioAnalysisOptions::default();
     assert!(opts.detect_bpm);
     assert!(opts.detect_key);
-    assert!(opts.generate_waveform);
+    assert!(!opts.generate_waveform);
     assert_eq!(opts.waveform_bins, 300);
     assert_eq!(opts.sample_rate, 44100);
   }

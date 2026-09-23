@@ -144,7 +144,7 @@ fn parse_track_row(row: &scraper::ElementRef) -> Result<RawTrackData, BandcampEr
   let genre = row
     .select(&tags_selector)
     .next()
-    .map(|e| {
+    .and_then(|e| {
       e.text()
         .collect::<Vec<_>>()
         .join(" ")
@@ -154,8 +154,7 @@ fn parse_track_row(row: &scraper::ElementRef) -> Result<RawTrackData, BandcampEr
         .split(',')
         .next()
         .map(|s| s.trim().to_string())
-    })
-    .flatten();
+    });
 
   Ok(RawTrackData {
     id: track_id,

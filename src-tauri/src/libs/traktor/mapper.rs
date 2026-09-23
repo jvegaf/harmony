@@ -135,7 +135,7 @@ pub fn map_traktor_entry_to_track(entry: &TraktorEntry) -> Track {
     // Build rating object if present
     let rating = info
         .and_then(|i| i.ranking.as_deref())
-        .map(|r| {
+        .and_then(|r| {
             let rating_value = map_traktor_rating(Some(r));
             if rating_value > 0 {
                 Some(TrackRating {
@@ -145,8 +145,7 @@ pub fn map_traktor_entry_to_track(entry: &TraktorEntry) -> Track {
             } else {
                 None
             }
-        })
-        .flatten();
+        });
 
     // Extract year from RELEASE_DATE
     let year = info

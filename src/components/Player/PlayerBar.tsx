@@ -2,7 +2,7 @@ import Cover from '../Cover/Cover';
 import usePlayingTrack from '../../hooks/usePlayingTrack';
 import classes from './PlayerBar.module.css';
 import PlayerControls from '../PlayerControls/PlayerControls';
-import WavePlayer from './WavePlayer';
+import AudioPlayer from './AudioPlayer';
 import { useRouteLoaderData } from 'react-router-dom';
 import { RootLoaderData } from '../../views/Root';
 
@@ -18,8 +18,8 @@ export function PlayerBar() {
       <div className={classes.playerControls}>
         <PlayerControls />
       </div>
-      <div className={classes.playerWaveform}>
-        <WavePlayer config={appConfig} />
+      <div className={classes.playerProgress}>
+        <AudioPlayer config={appConfig} />
       </div>
     </div>
   );

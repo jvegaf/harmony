@@ -11,7 +11,7 @@ import { Track, PlayerStatus, Config } from '@/types/harmony';
 import Cover from '../Cover/Cover';
 import usePlayerStore, { usePlayerAPI } from '../../stores/usePlayerStore';
 import styles from './NowPlayingBar.module.css';
-import WavePlayer from '../Player/WavePlayer';
+import AudioPlayer from '../Player/AudioPlayer';
 
 type NowPlayingBarProps = {
   track: Track | null;
@@ -118,19 +118,28 @@ export default function NowPlayingBar({ track, config }: NowPlayingBarProps) {
         </div>
       </div>
 
-      {/* Waveform Section */}
-      <div className={styles.waveformSection}>
+      {/* Standard audio player */}
+      <div className={styles.progressSection}>
         <button
           type='button'
           className={styles.playIndicator}
+          aria-label={playerStatus === PlayerStatus.PLAY ? 'Pause' : 'Play'}
+          onClick={() => playerAPI.togglePlayPause()}
         >
-          <IconPlayerPlayFilled
-            size={24}
-            className={styles.playIcon}
-          />
+          {playerStatus === PlayerStatus.PLAY ? (
+            <IconPlayerPauseFilled
+              size={24}
+              className={styles.playIcon}
+            />
+          ) : (
+            <IconPlayerPlayFilled
+              size={24}
+              className={styles.playIcon}
+            />
+          )}
         </button>
-        <div className={styles.waveformContainer}>
-          <WavePlayer config={config} />
+        <div className={styles.progressContainer}>
+          <AudioPlayer config={config} />
         </div>
       </div>
     </div>

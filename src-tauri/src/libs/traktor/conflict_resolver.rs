@@ -20,8 +20,10 @@ use crate::libs::track::Track;
 /// Available merge strategies for track data
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[derive(Default)]
 pub enum MergeStrategy {
   /// Default: Traktor data fills empty Harmony fields
+  #[default]
   SmartMerge,
   /// Traktor data overwrites Harmony data (except id/path)
   TraktorWins,
@@ -29,11 +31,6 @@ pub enum MergeStrategy {
   HarmonyWins,
 }
 
-impl Default for MergeStrategy {
-  fn default() -> Self {
-    MergeStrategy::SmartMerge
-  }
-}
 
 /// Result of a track merge operation
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -50,18 +47,15 @@ pub struct MergeResult {
 /// Available merge strategies for cue points
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[derive(Default)]
 pub enum CueMergeStrategy {
   /// If Harmony has cues, keep them; otherwise use Traktor's
+  #[default]
   SmartMerge,
   /// Always replace Harmony cue points with Traktor's
   Replace,
 }
 
-impl Default for CueMergeStrategy {
-  fn default() -> Self {
-    CueMergeStrategy::SmartMerge
-  }
-}
 
 /// Result of a cue point merge operation
 #[derive(Debug, Clone, Serialize, Deserialize)]

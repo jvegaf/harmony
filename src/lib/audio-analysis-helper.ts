@@ -43,7 +43,7 @@ export function analyzeAudioTracks(selectedTracks: Track[]): void {
   // Fire-and-forget pattern - don't await the batch analysis
   // This prevents UI blocking while analysis runs in the background
   audioAnalysis
-    .analyzeBatch(filePaths)
+    .analyzeBatch(filePaths, { generateWaveform: false })
     .then(() => {
       // Cleanup listeners
       unsubscribeProgress();

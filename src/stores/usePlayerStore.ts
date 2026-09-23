@@ -2,6 +2,7 @@ import { PlayerStatus, Track, TrackId } from '@/types/harmony';
 import { debounce } from 'lodash';
 import { createStore } from './store-helpers';
 import createSelectors from './selectors';
+import player from '@/lib/player';
 import { db, config, logger } from '@/lib/tauri-api';
 
 type PlayerState = {
@@ -15,13 +16,13 @@ type PlayerState = {
   isMuted: boolean;
   volume: number;
   api: {
-    setAudioPreCuePosition(value: number): unknown;
+    setAudioPreCuePosition(value: number): Promise<void>;
     start: (queue: TrackId[], index: number) => Promise<void>;
     play: () => Promise<void>;
     pause: () => void;
     togglePlayPause: () => Promise<void>;
-    previous: () => void;
-    next: () => void;
+    previous: () => Promise<void>;
+    next: () => Promise<void>;
     stop: () => void;
     setVolume: (volume: number) => void;
     setMuted: (muted: boolean) => void;
@@ -54,33 +55,53 @@ const playerStore = createStore<PlayerState>((set, get) => ({
 
       if (state.playingTrack?.id !== id) {
         const track = await db.tracks.findOnlyByID(id);
+        if (!track) {
+          logger.warn(`Track not found: ${id}`);
+          return;
+        }
 
-        // player.setTrack(track);
-        // await player.play();
-
+        player.setTrack(track);
         set({
           playingTrack: track,
           playerStatus: PlayerStatus.PLAY,
           queue,
           queueCursor: index,
         });
+
+        try {
+          await player.play();
+        } catch (error) {
+          logger.error('Failed to play track:', error);
+          set({ playerStatus: PlayerStatus.PAUSE });
+        }
         return;
       }
       set({
         queue,
         queueCursor: index,
       });
+      await get().api.play();
     },
 
     play: async () => {
-      // await player.play();
+      const track = get().playingTrack;
+      if (!track) return;
 
-      set({ playerStatus: PlayerStatus.PLAY });
+      if (player.getTrack()?.id !== track.id) {
+        player.setTrack(track);
+      }
+
+      try {
+        await player.play();
+        set({ playerStatus: PlayerStatus.PLAY });
+      } catch (error) {
+        logger.error('Failed to resume playback:', error);
+        set({ playerStatus: PlayerStatus.PAUSE });
+      }
     },
 
     pause: (): void => {
-      // player.pause();
-
+      player.pause();
       set({ playerStatus: PlayerStatus.PAUSE });
     },
 
@@ -109,13 +130,18 @@ const playerStore = createStore<PlayerState>((set, get) => ({
       if (queueCursor > 0) {
         const cursor = queueCursor - 1;
         const track = await db.tracks.findOnlyByID(queue[cursor]);
-        // player.setTrack(track);
-        // await player.play();
+        if (!track) {
+          logger.warn(`Track not found: ${queue[cursor]}`);
+          return;
+        }
+
+        player.setTrack(track);
         set({
           playingTrack: track,
           playerStatus: PlayerStatus.PLAY,
           queueCursor: cursor,
         });
+        await get().api.play();
       }
     },
 
@@ -124,45 +150,56 @@ const playerStore = createStore<PlayerState>((set, get) => ({
       if (queueCursor < queue.length - 1) {
         const cursor = queueCursor + 1;
         const track = await db.tracks.findOnlyByID(queue[cursor]);
-        // player.setTrack(track);
-        // await player.play();
+        if (!track) {
+          logger.warn(`Track not found: ${queue[cursor]}`);
+          return;
+        }
+
+        player.setTrack(track);
         set({
           playingTrack: track,
           playerStatus: PlayerStatus.PLAY,
           queueCursor: cursor,
         });
+        await get().api.play();
       }
     },
 
     stop: (): void => {
-      // player.stop();
-
+      player.stop();
       set({
         playerStatus: PlayerStatus.STOP,
       });
     },
 
     setVolume: volume => {
-      // player.setVolume(volume);
+      player.setVolume(volume);
       set({ volume });
       saveVolume(volume);
     },
 
     setMuted: async (muted = false) => {
-      // if (muted) player.mute();
-      // else player.unmute();
+      if (muted) {
+        player.mute();
+      } else {
+        player.unmute();
+      }
       set({ isMuted: muted });
       await config.set('audioMuted', muted);
     },
 
     jumpTo: to => {
-      set({ position: to });
+      const audio = player.getAudio();
+      const duration = Number.isFinite(audio.duration) ? audio.duration : Infinity;
+      const nextTime = Math.max(0, Math.min(duration, audio.currentTime + to));
+      player.setCurrentTime(nextTime);
+      set({ position: 0 });
     },
 
     setOutputDevice: async (deviceId = 'default') => {
       if (deviceId) {
         try {
-          // await player.setOutputDevice(deviceId);
+          await player.setOutputDevice(deviceId);
           await config.set('audioOutputDevice', deviceId);
         } catch (err) {
           logger.warn(err);

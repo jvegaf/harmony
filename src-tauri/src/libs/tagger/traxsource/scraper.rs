@@ -126,8 +126,7 @@ fn parse_track_row(row: &scraper::ElementRef) -> Result<RawTrackData, Traxsource
     // Clean up control chars and non-breaking spaces
     let cleaned = second_part
       .replace(char::is_control, "")
-      .replace('\u{00A0}', " ")
-      .replace('\n', " ")
+      .replace(['\u{00A0}', '\n'], " ")
       .trim()
       .to_string();
 

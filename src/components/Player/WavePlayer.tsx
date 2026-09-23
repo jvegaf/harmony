@@ -62,6 +62,10 @@ function WavePlayer({ config }: WavePlayerProps) {
     return {
       waveColor: gradient,
       progressColor: progressGradient,
+      // Use the browser's native media element for playback. WebAudio makes
+      // WaveSurfer decode the complete local file before playing, which can
+      // starve the UI/audio thread and cause audible dropouts on large tracks.
+      backend: 'MediaElement',
       autoplay: true,
       height: 64,
       barWidth: 2,
